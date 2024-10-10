@@ -38,7 +38,7 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
     const healthStatus = await r.json();
     res.send(healthStatus);
   } catch (error) {
-    // TODO how to catch a connection failure
+    // TODO how to catch a TCP connection failure
     res.status(500).send({error: 'Health check failed'});
   }
 });
