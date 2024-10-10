@@ -1,6 +1,7 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
-import express, {Request, Response} from 'express';
+import express from 'express';
+import {Request, Response} from 'express';
 import {OpenAI} from 'openai';
 import {Voice} from './Voice';
 
