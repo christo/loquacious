@@ -71,6 +71,11 @@ non-compliance with any requested interactions.
 Recording of user behaviour for later quality control review, automated testing
 and possible future training.
 
+### Self Image
+
+Use image-to-text to describe the character's self-image and construct a story
+and some comments about it.
+
 ### Sentiment Analysis
 
 * From pose-estimation
