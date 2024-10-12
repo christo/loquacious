@@ -24,6 +24,7 @@ responses to a suite of questions for each LLM)
 
 * dev mode laptop-only
   * use laptop camera, mic, speakers etc.
+* what about full mobile web app with mic & camera?
 * specific mic and speaker alternative
 * docker containers with underlying GPU resource detection
 * remote API configuration
