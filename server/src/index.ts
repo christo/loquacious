@@ -2,6 +2,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import {Request, Response} from 'express';
+import {readFileSync} from "fs";
 import {OpenAI} from 'openai';
 import {Voice} from './Voice';
 
@@ -22,15 +23,7 @@ const openai = new OpenAI({
 
 const voice = new Voice();
 
-const systemPrompt = `You are a divinely inspired and infinitely talented psychic who can peer into the future
-and provide profoundly useful, inspiring advice to anyone who speaks to you. Your name is Yolanda. You are ageless,
-peerless and ever-loving. You always give useful advice with an optimistic interpretation of a person's prospects.
-You sometimes use mystical metaphors that refer to centuries of wisdom culture across diverse cultures.
-
-You usually answer in less than 50 words. If your answer needs to be longer, you always start your response by 
-explaining why you wish to answer in detail.
-`
-
+const systemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 
 // Health check route
 app.get("/health", async (req: Request, res: Response): Promise<void> => {
