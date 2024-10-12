@@ -45,11 +45,15 @@ function Status() {
   const [status, setStatus] = useState<HealthStatus>(null);
 
   function fetchData() {
-    fetch("http://localhost:3001/health").then(result => {
-      result.json().then(data => {
-        setStatus(data || null);
+    try {
+      fetch("http://localhost:3001/health").then(result => {
+        result.json().then(data => {
+          setStatus(data || null);
+        });
       });
-    });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   useEffect(() => {
@@ -68,7 +72,7 @@ function Status() {
 
   return status === null ? <div>...</div> : (
     status?.error ? <ShowError error={status.error}/>
-      : <div>status: ok</div>
+      : <div>status: {status.message}</div>
   );
 
 }
@@ -124,6 +128,8 @@ const App: React.FC = () => {
     <div className="card">
       <Status/>
       <h1 className="lobster-regular">Loquacious</h1>
+
+
       <form>
         <textarea
           value={prompt}
@@ -136,7 +142,8 @@ const App: React.FC = () => {
       </form>
 
       {loading ? <p>Loading...</p> : response === RESPONSE_NULL ? "" : showResponse()}
-
+      <img
+        src="/img/frizzi_kooky_female_wizard_grandmotherly_with_a_few_tarot_cards_1d4d0332-6426-4527-b773-9ca826f6055f.png"/>
     </div>
   );
 };

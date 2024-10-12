@@ -1,15 +1,16 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
-import express from 'express';
-import {Request, Response} from 'express';
+import express, {Request, Response} from 'express';
 import {readFileSync} from "fs";
 import {OpenAI} from 'openai';
 import {Voice} from './Voice';
+import {type BackEnd, LmStudio, LlamaCpp, OpenAi} from './BackEnd';
 
 // Load environment variables
 dotenv.config();
 
-const ENABLE_HEALTH=true;
+
+const BACKEND: BackEnd = new LmStudio();
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -19,7 +20,7 @@ app.use(express.json());
 
 // Initialize OpenAI with the API key
 const openai = new OpenAI({
-  baseURL: "http://localhost:8080",
+  baseURL: BACKEND.baseUrl,
   apiKey: process.env.OPENAI_API_KEY as string,
 });
 
@@ -29,11 +30,11 @@ const systemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").t
 
 // Health check route
 app.get("/health", async (req: Request, res: Response): Promise<void> => {
-  if (!ENABLE_HEALTH) {
-    res.send(JSON.stringify({message: "ok"}));
+  if (!BACKEND.enableHealth) {
+    res.send(JSON.stringify({message: "health disabled"}));
   } else {
     try {
-      const r = await fetch("http://localhost:8080/health", {});
+      const r = await fetch(`${(BACKEND.baseUrl)}/health`, {});
       const healthStatus = await r.json();
       res.send(healthStatus);
     } catch (error) {
@@ -51,6 +52,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({error: 'No prompt provided'});
   } else {
     try {
+      // TODO fix model specification, back ends may not support, handle model selection failure
+      //    and implement model listing for admin client
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
@@ -59,17 +62,17 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         ]
       });
 
-      const message: string | null = response.choices[0].message?.content;
+      const message: string | null = response.choices[0]?.message?.content;
 
       if (message) {
-        res.json({response: {message}});
+        res.json({response: {message}, backend: BACKEND, model: "todo"});
         await voice.speak(message);
       } else {
         res.status(500).json({error: 'No message in response'});
       }
     } catch (error) {
       console.error('Error fetching response from OpenAI:', error);
-      res.status(500).json({error: 'Failed to fetch response from GPT'});
+      res.status(500);
     }
   }
 });
@@ -77,4 +80,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Health check ${BACKEND.enableHealth ? "enabled" : "disabled"}`);
+  console.log(`LLM back end ${BACKEND.name} at URL: ${(BACKEND.baseUrl)}`);
 });
