@@ -4,13 +4,28 @@ LLM chat application experiment.
 
 ## TODO
 
-## Test Suite
+* [ ] dynamic configuration from admin panel
+  * response length
+  * system prompt builder
+  * back-ends
+    * LLM service, model
+    * image-to-text
+    * text-to-speech
+    * speech-to-text
+  * speaking
+  * listening
+* [ ] aggregated system logs
+
+### Test Suite
 
 * Component tests
 * Full session log (replayable interactions)
 * integration tests
 * metrics and comparisons to alternate components (i.e. evaluating text form of
 responses to a suite of questions for each LLM)
+* abuse cases
+* LLM evaluation of response to test inputs looking for specific features or to
+  ensure certain absences (manually review these assessments)
 
 ### Scene Ideas
 
