@@ -9,6 +9,8 @@ import {Voice} from './Voice';
 // Load environment variables
 dotenv.config();
 
+const ENABLE_HEALTH=true;
+
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -27,13 +29,17 @@ const systemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").t
 
 // Health check route
 app.get("/health", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const r = await fetch("http://localhost:8080/health", {});
-    const healthStatus = await r.json();
-    res.send(healthStatus);
-  } catch (error) {
-    // TODO how to catch a TCP connection failure
-    res.status(500).send({error: 'Health check failed'});
+  if (!ENABLE_HEALTH) {
+    res.send(JSON.stringify({message: "ok"}));
+  } else {
+    try {
+      const r = await fetch("http://localhost:8080/health", {});
+      const healthStatus = await r.json();
+      res.send(healthStatus);
+    } catch (error) {
+      // TODO how to catch a TCP connection failure
+      res.status(500).send({error: 'Health check failed'});
+    }
   }
 });
 
