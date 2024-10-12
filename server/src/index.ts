@@ -20,7 +20,7 @@ app.use(express.json());
 // Initialize OpenAI with the API key
 const openai = new OpenAI({
   baseURL: "http://localhost:8080",
-  apiKey: process.env.OPENAI_API_KEY as string, // Ensure this is a string
+  apiKey: process.env.OPENAI_API_KEY as string,
 });
 
 const voice = new Voice();
