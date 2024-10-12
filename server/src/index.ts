@@ -45,33 +45,32 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
-  const prompt: string = req.body; // Adding type to req.body
+  const prompt = req.body;
 
   if (!prompt) {
     res.status(400).json({error: 'No prompt provided'});
-    return;
-  }
+  } else {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {role: 'system', content: systemPrompt},
+          {role: 'user', content: prompt["prompt"]}
+        ]
+      });
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {role: 'system', content: systemPrompt},
-        {role: 'user', content: prompt}
-      ]
-    });
+      const message: string | null = response.choices[0].message?.content;
 
-    const message: string | null = response.choices[0].message?.content;
-
-    if (message) {
-      res.json({response: {message}});
-      await voice.speak(message);
-    } else {
-      res.status(500).json({error: 'No message in response'});
+      if (message) {
+        res.json({response: {message}});
+        await voice.speak(message);
+      } else {
+        res.status(500).json({error: 'No message in response'});
+      }
+    } catch (error) {
+      console.error('Error fetching response from OpenAI:', error);
+      res.status(500).json({error: 'Failed to fetch response from GPT'});
     }
-  } catch (error) {
-    console.error('Error fetching response from OpenAI:', error);
-    res.status(500).json({error: 'Failed to fetch response from GPT'});
   }
 });
 

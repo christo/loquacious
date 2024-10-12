@@ -90,7 +90,7 @@ const App: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({prompt}),
+        body: JSON.stringify({"prompt": prompt}),
       });
 
       const data = await result.json();
