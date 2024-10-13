@@ -61,6 +61,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     try {
       // TODO fix model specification, back ends may not support, handle model selection failure
       //    and implement model listing for admin client
+      console.log("starting text generation");
+      let start = new Date();
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
@@ -68,7 +70,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           {role: 'user', content: prompt["prompt"]}
         ]
       });
-
+      console.log(`text generation finished in ${new Date().getTime() - start.getTime()} ms`);
       const message: string | null = response.choices[0]?.message?.content;
 
       if (message) {
