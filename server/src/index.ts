@@ -52,7 +52,6 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
       const healthStatus = await r.json();
       res.send(healthStatus);
     } catch (error) {
-      // TODO how to catch a TCP connection failure
       res.status(500).send({error: 'Health check failed'});
     }
   }
@@ -60,11 +59,15 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 
 app.get("/settings", async (req: Request, res: Response) => {
   res.json({
-    backend: BACKEND.name,
-    backendModels: await BACKEND.models(),
+    backend: {
+      name: BACKEND.name,
+      models: await BACKEND.models(),
+    },
     speechEnabled: SPEECH_ENABLED,
-    voice: VOICES[voiceIndex].name,
-    voices: VOICES.map((voice: Voice) => voice.name)
+    voice: {
+      name: VOICES[voiceIndex].name,
+      voices: VOICES.map((voice: Voice) => voice.name)
+    },
   });
 })
 
@@ -76,8 +79,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({error: 'No prompt provided'});
   } else {
     try {
-      // TODO fix model specification, back ends may not support, handle model selection failure
-      //    and implement model listing for admin client
       console.log("starting text generation");
       let start = new Date();
       const response = await openai.chat.completions.create({
