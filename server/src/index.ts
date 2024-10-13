@@ -1,5 +1,6 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
+import type {Voice} from "Voice";
 import {ElevenLabsVoice} from "./ElevenLabsVoice";
 import express, {Request, Response} from 'express';
 import {readFileSync} from "fs";
@@ -60,8 +61,10 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 app.get("/settings", async (req: Request, res: Response) => {
   res.json({
     backend: BACKEND.name,
+    backendModels: await BACKEND.models(),
     speechEnabled: SPEECH_ENABLED,
-    voice: VOICES[voiceIndex].name
+    voice: VOICES[voiceIndex].name,
+    voices: VOICES.map((voice: Voice) => voice.name)
   });
 })
 
