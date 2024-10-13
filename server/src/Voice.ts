@@ -1,24 +1,12 @@
-import {ElevenLabsClient, stream} from "elevenlabs";
+type Voice = {
+  name: string;
+  speak: (message: string) => void;
+}
 
-
-class Voice {
-  elevenlabs;
-
-  constructor() {
-    this.elevenlabs = new ElevenLabsClient({});
-  }
-
-  async speak(message: string) {
-    const audio = await this.elevenlabs.generate({
-      voice: "Charlotte",
-      stream: true,
-
-      text: message,
-      model_id: "eleven_multilingual_v2"
-    });
-
-    await stream(audio);
+class NoVoice implements Voice {
+  name = "no voice";
+  speak(message: string): void {
   }
 }
 
-export {Voice};
+export type {Voice}
