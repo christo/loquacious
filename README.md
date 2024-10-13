@@ -2,6 +2,14 @@
 
 LLM chat application experiment.
 
+## Dependencies
+
+* LM-Studio for the LM-Studio back end
+* OpenAI account for the ChatGPT back end
+* ElevenLabs account for the ElevenLabsVoice, and `brew install mpv`
+* For SystemVoice on `macos`, system command `say` is used.
+
+
 ## TODO
 
 * [ ] dynamic configuration from admin panel
