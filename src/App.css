@@ -1,5 +1,27 @@
 
-div.card {
-    padding: 1em 3em;
+div.primary {
+    padding: 0;
+    display: flex;
+    flex-direction: row;
 }
 
+form#prompt {
+    position: absolute;
+    top: 650px;
+    left: 50px;
+}
+
+form#prompt textarea {
+    background-color: #39393988;
+    color: white;
+    padding: 10px;
+    border: none;
+}
+
+img.seer {
+    max-height: 100%;
+}
+
+aside.controls {
+    padding: 1em;
+}

@@ -1,6 +1,9 @@
+import {Box, IconButton, Typography} from "@mui/material";
 import {marked} from 'marked';
 import React, {useEffect, useState} from 'react';
 import "./App.css";
+import SkipNextIcon from '@mui/icons-material/SkipNext';
+import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 
 interface ChatResponse {
   message: string;
@@ -68,8 +71,6 @@ function Status() {
   }, []);
 
 
-
-
   return status === null ? <div>...</div> : (
     status?.error ? <ShowError error={status.error}/>
       : <div>status: {status.message}</div>
@@ -77,11 +78,51 @@ function Status() {
 
 }
 
+const SEERS = [
+  "frizzi_kooky_female_wizard_grandmotherly_with_a_few_tarot_cards_1d4d0332-6426-4527-b773-9ca826f6055f.png",
+  "aija_vu_1800s_highly_detailed_full-color_hyper_realistic_illust_77daf823-b958-471f-af1f-b331b8d39494.png",
+  "anvilnw_91716_vintage_circus_poster_of_a_female_fortune_teller__beedb90a-a91d-4a41-be96-02d0c5cdc42d.png",
+  "badbadbabsybrown_Alphonse_mucha_style_portrait_of_An_ethnically_2acbcd6a-c339-42e0-9822-421627c4e708.png",
+  "basthongthos_A_fortune_teller_with_an_illuminated_crystal_ball__1d9d6ea6-200c-4f53-ab29-a3af9052fc45.png",
+  "biankav_a_cute_kitten_dressed_as_a_fortune_teller_with_a_big_or_c73d156e-e410-4fd2-a6cd-8af759addc06.png",
+  "billyburns0311_An_older_female_human_fortune_teller_in_a_DD_cir_ef167d99-bba4-46bf-9373-8c0c3cc6a3a8.png",
+  "bobbyp9577_Madam_Eva_is_an_elderly_woman_with_a_commanding_pres_864e6567-fa48-4f60-863e-a4720a05303c.png",
+  "dntkillspiders_ancient_hekate_accurate_--v_6.1_4390f3fe-7e66-4761-a1bb-38034d0eb06f.png",
+  "geesloper_a_female_witch_doctor_from_a_Dungeons__Dragons_advent_699f37ae-3205-4548-80b6-1af24fed31c7.png",
+  "gsingh7064_A_photograph_of_an_elderly_woman_fortune_teller_with_d2043900-bb30-4eea-aace-a793ced1c0d5.png",
+  "gyrhound_bcg_Fantasy_art_portrait_of_a_dark_skinned_female_fort_5d312690-c91e-47c1-a839-7d7483078517.png",
+  "hamham1215_You_can_choose_the_best_one_from_several_fortune_tel_5217d6be-a34d-4914-83d6-7558e0737f23.png",
+  "hekalitha11_trickster_fortuneteller_woman_offering_a_deal_vinta_4497d656-a819-4196-8fe7-968187813f7b.png",
+  "inclakss_An_elderly_200s_shawl_on_her_Head_crystal_ball_in_hand_bde3d5f8-6646-4ab0-b8c8-327f1869a631.png",
+  "innokha_An_ancient_woman_seer_sits_at_a_worn_wearing_a_purple_t_ae5bf5c0-ef12-45ab-a74c-9543ec151a17.png",
+  "ivansenko_baldurs_gate_portrait_male_character_conjurer_curious_1633802c-0a8e-42fb-9b33-e98d75cb846d.png",
+  "johnk118_A_crazt_cat_lady_who_looks_like_this._Sheis_wearing_st_a6555474-975c-4bbb-8524-aa28997e5fd4.png",
+  "kcollins2991_black_woman_fortune_teller_at_a_table_with_a_glowi_5fbe3040-b01f-46a1-87cb-f8f5dc2d5dd3.png",
+  "lottolotto_documentary_photo_anchient_spiritual_healer_--v_6.1_8e08f3af-c43f-4129-88c9-18a740496ee0.png",
+  "louis_92293_A_woman_50_years_old_A_clairvoyant_in_front_of_a_cr_88895190-68bf-4b7d-ac46-ad89cd1abbb6.png",
+  "maebh__a_carnival_fortune_teller_machine_with_an_older_woman_fr_1b421e68-c00b-4cda-82fd-968782bac4cf.png",
+  "mamuschka23_grey_black_and_masculine_male_mainecoon_cat_in_a_sa_1407c107-678c-4aff-bc23-bb0a14513e11.png",
+  "tanaka0813_photo_of_an_older_woman_sitting_in_the_center_wearin_3ebe835b-c47c-40b0-83db-13f05a4deee0.png",
+  "tashabylazanjata_arabic_fortune_teller_sitting_at_table_over_pl_54500814-fde2-4528-afae-76ffc115c47f.png",
+  "vacremon_silk_purple_gold_fantasy_magic_arabian_merchant_lord_-_feeb3490-c1f7-42cb-8171-202dbf92718f.png",
+  "vicki_05522_The_eyes_are_large_and_round_a_pale_yellow_filled_w_825046c6-6c7a-40a6-ad0e-08aa56e9adcd.png",
+  "wholahay_fantasy_art_portrait_of_a_pale-skinned_woman_sorceress_4c3dd0a8-3781-4757-b4b2-aca37e7e78bc.png",
+]
+
 const App: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState<ChatResponse>(RESPONSE_NULL);
   const [loading, setLoading] = useState(false);
 
+  const [seerIdx, setSeerIdx] = useState(0);
+  const prevSeer = () => {
+    let newValue = (seerIdx - 1 + SEERS.length) % SEERS.length;
+    setSeerIdx(newValue);
+  };
+  const nextSeer = () => {
+    let newValue = (seerIdx + 1 + SEERS.length) % SEERS.length;
+    setSeerIdx(newValue % SEERS.length);
+  };
   const handleSubmit = async () => {
     if (!prompt.trim()) {
       return;
@@ -110,7 +151,6 @@ const App: React.FC = () => {
   function showResponse() {
     return (<>
       <div>
-        <h2 className='lobster-regular'>Response</h2>
         <div dangerouslySetInnerHTML={{__html: markdownResponse(response)}}></div>
       </div>
     </>)
@@ -124,26 +164,42 @@ const App: React.FC = () => {
       await handleSubmit(); // Submit the form
     }
   };
+
   return (
-    <div className="card">
-      <Status/>
-      <h1 className="lobster-regular">Loquacious</h1>
+    <div className="primary">
+      <Box sx={{p: 2, position: "absolute", top: 0, left: 0}}>
+        <Typography sx={{fontSize: 48}}>{seerIdx + 1} of {SEERS.length}</Typography>
+        <Typography sx={{fontSize: 10}}>{SEERS[seerIdx]}</Typography>
+        <Box sx={{display: "flex", gap: 2, mt: 2}}>
+          <IconButton aria-label="previous" size="large" onClick={prevSeer}>
+            <SkipPreviousIcon fontSize="inherit"/>
+          </IconButton>
+          <IconButton aria-label="next" size="large" onClick={nextSeer}>
+            <SkipNextIcon fontSize="inherit"/>
+          </IconButton>
+        </Box>
+      </Box>
+      <img alt="fortune teller" className="seer" src={`/img/${SEERS[seerIdx]}`}/>
 
-
-      <form>
+      {loading ? <p>Loading...</p> : response === RESPONSE_NULL ? "" : showResponse()}
+      <form id="prompt">
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
-          rows={20}
+          rows={10}
           cols={80}
           placeholder="talk to me"
         />
+        <aside className="controls">
+
+          <Status/>
+
+          <Typography align="center" sx={{background: "green", borderRadius: "15px", p: 1}}>The greatest way to live with honour in this world is to be what we pretend to be.</Typography>
+        </aside>
       </form>
 
-      {loading ? <p>Loading...</p> : response === RESPONSE_NULL ? "" : showResponse()}
-      <img
-        src="/img/frizzi_kooky_female_wizard_grandmotherly_with_a_few_tarot_cards_1d4d0332-6426-4527-b773-9ca826f6055f.png"/>
+
     </div>
   );
 };
