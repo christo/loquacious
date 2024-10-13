@@ -37,6 +37,7 @@ const voice = 'Serena'; // Optional
 const speed = 120; // Optional. Default macOS rate is 175 wpm
 
 class SystemVoice implements Voice {
+  name = "System Voice";
   async speak(message: string) {
     speak(message, voice, speed)
       .catch((error) => {
