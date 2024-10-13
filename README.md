@@ -12,17 +12,24 @@ LLM chat application experiment.
 
 ## TODO
 
-* [ ] dynamic configuration from admin panel
+* [ ] basic admin page
+* [ ] settings panel
+* [ ] dynamic configuration from settings panel
   * response length
   * system prompt builder
   * back-ends
     * LLM service, model
     * image-to-text
+    * lip sync
     * text-to-speech
     * speech-to-text
+      * character voice
   * speaking
   * listening
 * [ ] aggregated system logs
+* [ ] usage stats
+* [ ] performance log
+  * [ ] recent performance, best, worst, 80th percentile 
 
 ### Test Suite
 
