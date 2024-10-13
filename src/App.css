@@ -1,8 +1,10 @@
 
-div.primary {
+.primary {
     padding: 0;
     display: flex;
     flex-direction: row;
+    width: 100dvw;
+    height: 100dvh;
 }
 
 form#prompt {
@@ -12,16 +14,22 @@ form#prompt {
 }
 
 form#prompt textarea {
-    background-color: #39393988;
+    background-color: #22222288;
     color: white;
     padding: 10px;
     border: none;
 }
 
 img.seer {
-    max-height: 100%;
+    max-width: 100%;
+    margin-top: 0;
+    margin-left: auto;
+    object-fit: cover;
 }
 
-aside.controls {
+.controls {
+    position: absolute;
+    bottom: 20px;
+    right: 70px;
     padding: 1em;
 }

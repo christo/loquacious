@@ -11,7 +11,8 @@ import {type BackEnd, LmStudio, LlamaCpp, OpenAi} from './BackEnd';
 dotenv.config();
 
 
-const BACKEND: BackEnd = new LmStudio();
+// const BACKEND: BackEnd = new LmStudio();
+const BACKEND: BackEnd = new LlamaCpp();
 let SPEECH_ENABLED = true;
 // TODO config for voice
 const voice = new ElevenLabsVoice();

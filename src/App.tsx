@@ -1,9 +1,8 @@
+import {ArrowCircleLeft, ArrowCircleRight, Error} from "@mui/icons-material";
 import {Box, IconButton, Typography} from "@mui/material";
 import {marked} from 'marked';
 import React, {useEffect, useState} from 'react';
 import "./App.css";
-import SkipNextIcon from '@mui/icons-material/SkipNext';
-import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 
 interface ChatResponse {
   message: string;
@@ -41,7 +40,7 @@ type HealthStatus = {
 } | null;
 
 function ShowError({error}: { error: HealthError }) {
-  return <div>error: {error.message}</div>;
+  return (<Typography color="error"><Error fontSize="large"/> {error.message}</Typography>);
 }
 
 function Status() {
@@ -73,7 +72,7 @@ function Status() {
 
   return status === null ? <div>...</div> : (
     status?.error ? <ShowError error={status.error}/>
-      : <div>status: {status.message}</div>
+      : <div>{status.message}</div>
   );
 
 }
@@ -111,7 +110,7 @@ const App: React.FC = () => {
   const [response, setResponse] = useState<ChatResponse>(RESPONSE_NULL);
   const [loading, setLoading] = useState(false);
 
-  const [seerIdx, setSeerIdx] = useState(0);
+  const [seerIdx, setSeerIdx] = useState(18);
   const prevSeer = () => {
     let newValue = (seerIdx - 1 + SEERS.length) % SEERS.length;
     setSeerIdx(newValue);
@@ -163,23 +162,22 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="primary">
-      <Box sx={{p: 2, position: "absolute", top: 0, left: 0}}>
-        <Typography sx={{fontSize: 48}}>{seerIdx + 1} of {SEERS.length}</Typography>
-        <Typography sx={{fontSize: 10}}>{SEERS[seerIdx]}</Typography>
-        <Box sx={{display: "flex", gap: 2, mt: 2}}>
+    <Box className="primary">
+      <Box sx={{m: 2, position: "absolute", bottom: 0, left: 0, p: 0}}>
+        <Box sx={{display: "flex", gap: 2, mt: 2, alignItems: "center"}}>
           <IconButton aria-label="previous" size="large" onClick={prevSeer}>
-            <SkipPreviousIcon fontSize="inherit"/>
+            <ArrowCircleLeft fontSize="inherit"/>
           </IconButton>
+          <Typography fontWeight="700">{seerIdx + 1} of {SEERS.length}</Typography>
           <IconButton aria-label="next" size="large" onClick={nextSeer}>
-            <SkipNextIcon fontSize="inherit"/>
+            <ArrowCircleRight fontSize="inherit"/>
           </IconButton>
         </Box>
       </Box>
-      <img alt="fortune teller" className="seer" src={`/img/${SEERS[seerIdx]}`}/>
+      <img alt="fortune teller" width="100%" className="seer" src={`/img/${SEERS[seerIdx]}`}/>
 
-      {loading ? <p>Loading...</p> : response === RESPONSE_NULL ? "" : showResponse()}
-      <form id="prompt">
+      <Box>
+        <form id="prompt">
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -188,16 +186,19 @@ const App: React.FC = () => {
           cols={80}
           placeholder="talk to me"
         />
-        <aside className="controls">
 
+        </form>
+        <Box className="controls">
+          <Typography>{loading ? <p>Loading...</p> : response === RESPONSE_NULL ? "" : showResponse()}</Typography>
           <Status/>
+          <Typography sx={{background: "#333", borderRadius: "15px", p: 1}}>
+            The greatest way to live with honour in this world is to be what we pretend to be.
+          </Typography>
+        </Box>
+      </Box>
 
-          <Typography align="center" sx={{background: "green", borderRadius: "15px", p: 1}}>The greatest way to live with honour in this world is to be what we pretend to be.</Typography>
-        </aside>
-      </form>
 
-
-    </div>
+    </Box>
   );
 };
 
