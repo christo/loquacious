@@ -201,9 +201,6 @@ const App: React.FC = () => {
         <Box className="controls">
           <Typography>{loading ? <p>Loading...</p> : response === RESPONSE_NULL ? "" : showResponse()}</Typography>
           <Status/>
-          <Typography sx={{background: "#333", borderRadius: "15px", p: 1}}>
-            The greatest way to live with honour in this world is to be what we pretend to be.
-          </Typography>
         </Box>
       </Box>
 
