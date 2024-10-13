@@ -12,12 +12,18 @@ dotenv.config();
 
 
 // const BACKEND: BackEnd = new LmStudio();
-const BACKEND: BackEnd = new LlamaCpp();
+// const BACKEND: BackEnd = new LlamaCpp();
+const BACKEND: BackEnd = new OpenAi();
 let SPEECH_ENABLED = true;
-// TODO config for voice
-const voice = new ElevenLabsVoice();
-// const voice = new SystemVoice();
 
+// const voice = new ElevenLabsVoice();
+const voice = new SystemVoice();
+
+let voiceIndex = 0;
+const VOICES = [
+  new SystemVoice(),
+  new ElevenLabsVoice()
+]
 
 const app = express();
 const port = process.env.PORT || 3001;
