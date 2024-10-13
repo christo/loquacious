@@ -105,6 +105,24 @@ const SEERS = [
   "wholahay_fantasy_art_portrait_of_a_pale-skinned_woman_sorceress_4c3dd0a8-3781-4757-b4b2-aca37e7e78bc.png",
 ]
 
+interface ImageChooserProps {
+  seerIdx: number;
+  nextSeer: () => void;
+  prevSeer: () => void;
+}
+
+function ImageChooser({seerIdx, nextSeer, prevSeer}: ImageChooserProps) {
+  return <Box sx={{display: "flex", gap: 2, mt: 2, alignItems: "center"}}>
+    <IconButton aria-label="previous" size="large" onClick={prevSeer}>
+      <ArrowCircleLeft fontSize="inherit"/>
+    </IconButton>
+    <Typography fontWeight="700">{seerIdx + 1} of {SEERS.length}</Typography>
+    <IconButton aria-label="next" size="large" onClick={nextSeer}>
+      <ArrowCircleRight fontSize="inherit"/>
+    </IconButton>
+  </Box>
+}
+
 const App: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState<ChatResponse>(RESPONSE_NULL);
@@ -164,15 +182,7 @@ const App: React.FC = () => {
   return (
     <Box className="primary">
       <Box sx={{m: 2, position: "absolute", bottom: 0, left: 0, p: 0}}>
-        <Box sx={{display: "flex", gap: 2, mt: 2, alignItems: "center"}}>
-          <IconButton aria-label="previous" size="large" onClick={prevSeer}>
-            <ArrowCircleLeft fontSize="inherit"/>
-          </IconButton>
-          <Typography fontWeight="700">{seerIdx + 1} of {SEERS.length}</Typography>
-          <IconButton aria-label="next" size="large" onClick={nextSeer}>
-            <ArrowCircleRight fontSize="inherit"/>
-          </IconButton>
-        </Box>
+        <ImageChooser seerIdx={seerIdx} nextSeer={nextSeer} prevSeer={prevSeer} />
       </Box>
       <img alt="fortune teller" width="100%" className="seer" src={`/img/${SEERS[seerIdx]}`}/>
 
