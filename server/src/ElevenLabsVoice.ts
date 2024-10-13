@@ -29,7 +29,13 @@ class ElevenLabsVoice implements Voice {
         stream: true,
 
         text: message,
-        model_id: "eleven_multilingual_v2"
+        model_id: "eleven_multilingual_v2",
+        voice_settings: {
+          stability: 0.1,
+          similarity_boost: 0.3,
+          style: 0.8,
+          use_speaker_boost: true
+        }
       });
       console.log("about to stream voice");
 
