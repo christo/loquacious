@@ -2,7 +2,8 @@
   "name": "loquacious-server",
   "version": "1.0.0",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon --watch src src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,10 +17,13 @@
     "openai": "^4.67.0"
   },
   "devDependencies": {
+    "@swc/core": "^1.7.35",
+    "@swc/helpers": "^0.5.13",
     "@types/cors": "^2.8.17",
+    "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.21",
     "@types/node": "^20.16.11",
-    "@types/dotenv": "^8.2.0",
+    "regenerator-runtime": "^0.14.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   }

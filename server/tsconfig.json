@@ -6,7 +6,7 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "target": "ES2021",
-    "moduleResolution": "Node",
+    "moduleResolution": "NodeNext",
     "outDir": "./dist",
     "baseUrl": "./src",
     "esModuleInterop": true,
@@ -15,5 +15,8 @@
     "strict": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "swc": true
+  }
 }

@@ -1,9 +1,10 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
+import {ElevenLabsVoice} from "./ElevenLabsVoice";
 import express, {Request, Response} from 'express';
 import {readFileSync} from "fs";
 import {OpenAI} from 'openai';
-import {Voice} from './Voice';
+import {SystemVoice} from './SystemVoice';
 import {type BackEnd, LmStudio, LlamaCpp, OpenAi} from './BackEnd';
 
 // Load environment variables
@@ -11,6 +12,11 @@ dotenv.config();
 
 
 const BACKEND: BackEnd = new LmStudio();
+let SPEECH_ENABLED = true;
+// TODO config for voice
+const voice = new ElevenLabsVoice();
+// const voice = new SystemVoice();
+
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -24,7 +30,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY as string,
 });
 
-const voice = new Voice();
+
 
 const systemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 
@@ -66,7 +72,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
       if (message) {
         res.json({response: {message}, backend: BACKEND, model: "todo"});
-        await voice.speak(message);
+        if (SPEECH_ENABLED) {
+          await voice.speak(message);
+        }
       } else {
         res.status(500).json({error: 'No message in response'});
       }
@@ -82,4 +90,5 @@ app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
   console.log(`Health check ${BACKEND.enableHealth ? "enabled" : "disabled"}`);
   console.log(`LLM back end ${BACKEND.name} at URL: ${(BACKEND.baseUrl)}`);
+  console.log(`Voice: ${voice.name}`);
 });
