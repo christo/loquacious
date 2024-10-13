@@ -57,6 +57,14 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+app.get("/settings", async (req: Request, res: Response) => {
+  res.json({
+    backend: BACKEND.name,
+    speechEnabled: SPEECH_ENABLED,
+    voice: VOICES[voiceIndex].name
+  });
+})
+
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const prompt = req.body;
@@ -82,7 +90,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       if (message) {
         res.json({response: {message}, backend: BACKEND, model: "todo"});
         if (SPEECH_ENABLED) {
-          await voice.speak(message);
+          await VOICES[voiceIndex].speak(message);
         }
       } else {
         res.status(500).json({error: 'No message in response'});
