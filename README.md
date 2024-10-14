@@ -13,7 +13,7 @@ LLM chat application experiment.
 ## TODO
 
 * [x] rename `server/index.ts` to `server/server.ts`
-* [ ] enumerate tts backends
+* [ ] enumerate LLM backends
 * [ ] plan to evaluate local system speech recognition option
 * [ ] plan to evaluate local whisper speech recognition option
 * [ ] evaluate elevenlabs websocket "realtime" streaming:
