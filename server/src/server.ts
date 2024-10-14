@@ -51,7 +51,10 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 app.get("/settings", async (req: Request, res: Response) => {
   const current = speechSystems.current();
   res.json({
-    currentMode: currentMode,
+    mode: {
+      current: currentMode,
+      options: Object.keys(MODES)
+    },
     llmMain: {
       name: BACKEND.name,
       models: await BACKEND.models(),

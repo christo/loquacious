@@ -49,7 +49,8 @@ function SpeechSettings({speechSettings}: any) {
 
 function SettingsDetail({settings}: {settings: any}) {
   return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start"}}>
-    <Typography>Mode: {settings.currentMode}</Typography>
+    <Typography>Mode: {settings.mode.current}</Typography>
+    {settings.mode.options.map((m: string) => (<Typography key={`mode_${m}`}>{m}</Typography>))}
     <Typography>Main LLM: {settings.llmMain.name} (models: {settings.llmMain.models.length})</Typography>
     <Typography>Model: {settings.llmMain.models[0]}</Typography>
     <SpeechSettings speechSettings={settings.speech}/>

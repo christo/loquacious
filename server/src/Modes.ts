@@ -25,4 +25,4 @@ const MODES: ModeType = {
   "chat": chatModeMessages
 };
 
-export {MODES};
+export {type ModeType, MODES};
