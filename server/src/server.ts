@@ -1,10 +1,12 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {readFileSync} from "fs";
+import {LlamaCpp} from "llm/LlamaCpp";
+import {LmStudio} from "llm/LmStudio";
 import {MODES} from "Modes";
-import {OpenAI} from 'openai';
-import {type BackEnd, OpenAi} from 'BackEnd';
+import {OpenAi} from 'llm/OpenAi';
+import {type BackEnd} from 'llm/BackEnd';
+import OpenAI from "openai";
 import type {SpeechSystem} from "SpeechSystem";
 import {SpeechSystems} from "SpeechSystems";
 
@@ -12,9 +14,17 @@ import {SpeechSystems} from "SpeechSystems";
 dotenv.config();
 
 
-// const BACKEND: BackEnd = new LmStudio();
-// const BACKEND: BackEnd = new LlamaCpp();
-const BACKEND: BackEnd = new OpenAi();
+const LM_STUDIO_BACKEND: BackEnd = new LmStudio();
+const OPEN_AI_BACKEND: BackEnd = new OpenAi();
+const LLAMA_CPP_BACKEND: BackEnd = new LlamaCpp();
+
+const BACKENDS = [
+  LLAMA_CPP_BACKEND,
+  OPEN_AI_BACKEND,
+  LM_STUDIO_BACKEND,
+]
+
+const BACKEND = BACKENDS[0];
 
 const speechSystems = new SpeechSystems();
 const app = express();
@@ -69,8 +79,6 @@ app.get("/settings", async (req: Request, res: Response) => {
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const prompt = req.body;
-
-
 
   if (!prompt) {
     res.status(400).json({error: 'No prompt provided'});
