@@ -12,6 +12,51 @@ LLM chat application experiment.
 
 ## TODO
 
+* [ ] generalise backend config options:
+  * type: e.g. text-to-text
+  * role: e.g. deciding what to say. future features like interpreting
+    image-to-text output to build a system prompt which includes self-image
+    might be best done by running a smaller/faster model that isn't good enough
+    to define fortune-teller responses
+  * workflow graph: network of each model in a role as nodes with edges
+    indicating flow of input and output to another model or audio/video output
+* [ ] identify terminal input and output nodes for whole system workflow graph:
+  * audio out
+  * reference self image(s)
+  * reference motion video to drive animated video out
+  * audio in, text in
+* use cached openings for quick-start.
+  * many starting inputs could be simply "hello" or other variants
+  * after speech-to-text recognises this as a hello input;
+  * the greeting is normalised ("hello there" is the same as "well hello" etc.)
+  * possibly split off from subsequent speech, such as "hello ... what is your
+    name?", each could be separately cached, maybe recognition and normalisation
+    could be done with a LLM?
+  * response text can be randomly selected from cached set
+  * response text tts should be cached (need many versions of small responses
+    like "yes!" "yes of course!" etc.)
+  * need a mechanism to decide if a short response is warranted
+  * need some stalling responses to hide latency (distractions, pondering and
+    thinking signals, explicit "excuse me a moment while I contemplate your
+    words)
+* asking name flow
+  * flexible level of persistance about wanting to know a person's name
+  * calling by name if available
+  * calling by pet names "sweetheart", "darling" etc. - add to system prompt
+* fault detection
+* individual person recognition (using only recent interactions)
+* functions to know what is happening, what has happened before, state of 
+system, configuration etc.
+* attract mode
+  * before fortune-teller sees an approaching person
+  * detect when a person tentatively appraoches but does not trigger start
+  * detect when multiple people stand gingerly nearby
+  * consider second camera trained on entrance
+* using pose-estimation, detect when a person approaches, describe what they
+* file save disk cache
+  * model-specific text in, text out
+  * 
+* db logging
 * [ ] basic admin page
 * [ ] settings panel
 * [ ] dynamic configuration from settings panel
@@ -63,6 +108,12 @@ responses to a suite of questions for each LLM)
   * fully hosted online variant
 * external effect control additions - physical lighting in theatrical scene for
   extra drama (e.g. flickering lamps)
+* full production deployment design:
+  * needs to be described in system prompt
+  * could it be a zoltar like booth, hamming up the artificiality of the
+    fortune teller?
+  * vertical TV?
+  * could it be a traditional fortune-teller table setting?
 
 ### Character Definition Workflow
 
