@@ -17,7 +17,7 @@ const RESPONSE_NULL: ChatResponse = {
 }
 
 const RESPONSE_NONE: ChatResponse = {
-  message: "No response from GPT",
+  message: "No response from LLM",
 }
 
 function markdownResponse(response: ChatResponse) {
