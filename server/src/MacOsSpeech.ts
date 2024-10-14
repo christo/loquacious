@@ -34,10 +34,9 @@ function speak(text: string, voice?: string, speed?: number): Promise<void> {
 }
 
 const VOICES = [
-  "Serena",
-  "Alex"
+  ["Serena", "English woman"],
+  ["Alex", "man"]
 ]
-const voice = VOICES[0];
 const speed = 120;
 
 class MacOsSpeech implements SpeechSystem {
@@ -46,21 +45,20 @@ class MacOsSpeech implements SpeechSystem {
   currentIndex = 0;
 
   current(): SpeechSystemOption {
-    return new SpeechSystemOption(this, VOICES[this.currentIndex]);
+    return new SpeechSystemOption(this, VOICES[this.currentIndex][0], VOICES[this.currentIndex][1]);
   }
 
 
   options(): Array<string> {
-    return VOICES;
+    return VOICES.map(v => v[0]);
   }
 
   async speak(message: string) {
-    speak(message, voice, speed)
+    speak(message, VOICES[this.currentIndex][0], speed)
       .catch((error) => {
         console.error('An error occurred during speech synthesis:', error);
       });
   }
-
 }
 
 export {MacOsSpeech};

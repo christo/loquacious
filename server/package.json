@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/index.ts",
-    "dev": "nodemon --watch src src/index.ts"
+    "dev": "nodemon -r tsconfig-paths/register --watch src src/index.ts"
   },
   "keywords": [],
   "author": "",
