@@ -1,5 +1,5 @@
 import {ArrowCircleLeft, ArrowCircleRight, Error, Settings} from "@mui/icons-material";
-import {Box, IconButton, Typography} from "@mui/material";
+import {Box, Drawer, IconButton, Typography} from "@mui/material";
 import {marked} from 'marked';
 import React, {useEffect, useState} from 'react';
 import "./App.css";
@@ -123,6 +123,21 @@ function ImageChooser({seerIdx, nextSeer, prevSeer}: ImageChooserProps) {
   </Box>
 }
 
+interface SettingsProps {
+  seerIdx: number;
+  nextSeer: () => void;
+  prevSeer: () => void;
+}
+
+function SettingsPanel({seerIdx, nextSeer, prevSeer}: SettingsProps ) {
+
+  return <Box sx={{p: 2}}>
+    <Status/>
+    <Typography variant="h4">Settings</Typography>
+    <ImageChooser seerIdx={seerIdx} nextSeer={nextSeer} prevSeer={prevSeer} />
+  </Box>
+}
+
 const App: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState<ChatResponse>(RESPONSE_NULL);
@@ -162,13 +177,12 @@ const App: React.FC = () => {
     }
   };
 
-  function showResponse() {
+  function showResponseText() {
     return (<>
       <div>
         <div dangerouslySetInnerHTML={{__html: markdownResponse(response)}}></div>
       </div>
     </>)
-
   }
 
   // submit on enter
@@ -179,13 +193,22 @@ const App: React.FC = () => {
     }
   };
 
+  const [open, setOpen] = React.useState(false);
+
+  const toggleDrawer = (newOpen: boolean) => () => {
+    setOpen(newOpen);
+  };
+
   return (
     <Box className="primary">
       <Box sx={{m: 2, position: "absolute", bottom: 0, left: 0, p: 0}}>
-        <IconButton aria-label="delete" size="large">
+        <IconButton aria-label="delete" size="large" onClick={toggleDrawer(true)}>
           <Settings fontSize="inherit" />
         </IconButton>
-        <ImageChooser seerIdx={seerIdx} nextSeer={nextSeer} prevSeer={prevSeer} />
+        <Drawer open={open} onClose={toggleDrawer(false)}>
+          <SettingsPanel seerIdx={seerIdx} prevSeer={prevSeer} nextSeer={nextSeer} />
+        </Drawer>
+
       </Box>
       <img alt="portrait of a fortune teller" width="100%" className="seer" src={`/img/${SEERS[seerIdx]}`}/>
 
@@ -202,8 +225,8 @@ const App: React.FC = () => {
 
         </form>
         <Box className="controls">
-          <Typography>{loading ? <p>Loading...</p> : response === RESPONSE_NULL ? "" : showResponse()}</Typography>
-          <Status/>
+          <Typography>{loading ? <p>Loading...</p> : response === RESPONSE_NULL ? "" : showResponseText()}</Typography>
+
         </Box>
       </Box>
 
