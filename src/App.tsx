@@ -187,7 +187,7 @@ const App: React.FC = () => {
         </IconButton>
         <ImageChooser seerIdx={seerIdx} nextSeer={nextSeer} prevSeer={prevSeer} />
       </Box>
-      <img alt="fortune teller" width="100%" className="seer" src={`/img/${SEERS[seerIdx]}`}/>
+      <img alt="portrait of a fortune teller" width="100%" className="seer" src={`/img/${SEERS[seerIdx]}`}/>
 
       <Box>
         <form id="prompt">
