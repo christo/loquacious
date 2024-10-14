@@ -33,8 +33,8 @@ LLM chat application experiment.
     probably streaming to web client is the best idea
       * how to handle interruptive transitions?
   * reference self image(s)
-  * (option) reference motion video to drive animated video out
-  * audio in, text in
+  * (optional) reference motion video to drive animated video out
+  * user audio in, direct user text in
 * use cached openings for quick-start.
   * many starting inputs could be simply "hello" or other variants
   * after speech-to-text recognises this as a hello input;
