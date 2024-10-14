@@ -3,7 +3,11 @@ import {MacOsSpeech} from "MacOsSpeech";
 import {NoSpeech} from "NoSpeech";
 import {type SpeechSystem} from "SpeechSystem";
 
-
+/**
+ * Represents a choosable option within a specific speech system. Options are represented by unique strings that
+ * are SpeechSystem specific identifiers, typically for a specific voice. Future expansion here may include
+ * audio post-processing, speaking rate etc.
+ */
 class SpeechSystemOption {
   system: SpeechSystem;
   option: string;
@@ -25,7 +29,6 @@ class SpeechSystemOption {
   }
 }
 
-
 /**
  * Aggregates every {@link SpeechSystem}.
  */
@@ -37,10 +40,6 @@ class SpeechSystems {
     new NoSpeech(),
     new ElevenLabsSpeech()
   ]
-
-  voiceOptions() {
-    return this.systems.flatMap(s => s.options().map(o => new SpeechSystemOption(s, o).safeObject()))
-  }
 
   current() {
     return this.systems[this.currentSystemIndex].current();
