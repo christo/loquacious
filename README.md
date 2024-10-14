@@ -109,7 +109,11 @@ system, configuration etc.
 * [ ] aggregated system logs
 * [ ] usage stats
 * [ ] performance log
-  * [ ] recent performance, best, worst, 80th percentile 
+  * [ ] recent performance, best, worst, 80th percentile
+* [ ] attempt to read body language and facial expressions
+  * stands as if to leave
+  * expresses emotion
+    * evaluate if it may have been in response to something that was said
 
 ### Test Suite
 
