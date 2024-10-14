@@ -1,12 +1,10 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
-import type {Voice} from "Voice";
-import {ElevenLabsVoice} from "./ElevenLabsVoice";
 import express, {Request, Response} from 'express';
 import {readFileSync} from "fs";
 import {OpenAI} from 'openai';
-import {SystemVoice} from './SystemVoice';
-import {type BackEnd, LmStudio, LlamaCpp, OpenAi} from './BackEnd';
+import {type BackEnd, OpenAi} from 'BackEnd';
+import {SpeechSystems} from "SpeechSystems";
 
 // Load environment variables
 dotenv.config();
@@ -15,16 +13,8 @@ dotenv.config();
 // const BACKEND: BackEnd = new LmStudio();
 // const BACKEND: BackEnd = new LlamaCpp();
 const BACKEND: BackEnd = new OpenAi();
-let SPEECH_ENABLED = true;
 
-// const voice = new ElevenLabsVoice();
-const voice = new SystemVoice();
-
-let voiceIndex = 0;
-const VOICES = [
-  new SystemVoice(),
-  new ElevenLabsVoice()
-]
+const speechSystems = new SpeechSystems();
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -37,7 +27,6 @@ const openai = new OpenAI({
   baseURL: BACKEND.baseUrl,
   apiKey: process.env.OPENAI_API_KEY as string,
 });
-
 
 
 const systemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
@@ -58,16 +47,17 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.get("/settings", async (req: Request, res: Response) => {
+  const current = speechSystems.current();
   res.json({
     backend: {
       name: BACKEND.name,
       models: await BACKEND.models(),
     },
-    speechEnabled: SPEECH_ENABLED,
-    voice: {
-      name: VOICES[voiceIndex].name,
-      voices: VOICES.map((voice: Voice) => voice.name)
-    },
+    speech: {
+      systems: speechSystems.voiceOptions(),
+      current: current,
+      currentDescriptor: current.descriptor(),
+    }
   });
 })
 
@@ -93,9 +83,10 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
       if (message) {
         res.json({response: {message}, backend: BACKEND, model: "todo"});
-        if (SPEECH_ENABLED) {
-          await VOICES[voiceIndex].speak(message);
-        }
+        speechSystems.current().system.speak(message).then((speech) => {
+          console.log("finished speaking");
+        });
+
       } else {
         res.status(500).json({error: 'No message in response'});
       }
@@ -111,5 +102,5 @@ app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
   console.log(`Health check ${BACKEND.enableHealth ? "enabled" : "disabled"}`);
   console.log(`LLM back end ${BACKEND.name} at URL: ${(BACKEND.baseUrl)}`);
-  console.log(`Voice: ${voice.name}`);
+  console.log(`Current Speech System: ${speechSystems.current().descriptor()}`);
 });

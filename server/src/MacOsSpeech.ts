@@ -1,6 +1,6 @@
-import type {Voice} from "Voice";
-
-import { exec } from 'child_process';
+import {exec} from 'child_process';
+import type {SpeechSystem} from "SpeechSystem";
+import {SpeechSystemOption} from "SpeechSystems";
 
 /**
  * Speaks the given text using macOS's say command.
@@ -33,11 +33,27 @@ function speak(text: string, voice?: string, speed?: number): Promise<void> {
   });
 }
 
-const voice = 'Serena'; // Optional
-const speed = 120; // Optional. Default macOS rate is 175 wpm
+const VOICES = [
+  "Serena",
+  "Alex"
+]
+const voice = VOICES[0];
+const speed = 120;
 
-class SystemVoice implements Voice {
-  name = "System Voice";
+class MacOsSpeech implements SpeechSystem {
+  name = "MacOs Speech";
+
+  currentIndex = 0;
+
+  current(): SpeechSystemOption {
+    return new SpeechSystemOption(this, VOICES[this.currentIndex]);
+  }
+
+
+  options(): Array<string> {
+    return VOICES;
+  }
+
   async speak(message: string) {
     speak(message, voice, speed)
       .catch((error) => {
@@ -47,4 +63,4 @@ class SystemVoice implements Voice {
 
 }
 
-export {SystemVoice};
+export {MacOsSpeech};

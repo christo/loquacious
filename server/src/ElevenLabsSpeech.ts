@@ -1,5 +1,6 @@
 import {ElevenLabsClient, stream} from "elevenlabs";
-import type {Voice} from "./Voice";
+import type {SpeechSystem} from "SpeechSystem";
+import {SpeechSystemOption} from "SpeechSystems";
 
 class CharacterVoice {
   voiceId: string;
@@ -27,21 +28,29 @@ const VOICES = [
   VOICE_NICOLE,
 ];
 
-class ElevenLabsVoice implements Voice {
+class ElevenLabsSpeech implements SpeechSystem {
   currentVoice = 0;
   characterVoice = VOICES[this.currentVoice];
   name = `ElevenLabs ${this.characterVoice.voiceId}`;
-  elevenlabs;
+  client: ElevenLabsClient;
 
   constructor() {
-    this.elevenlabs = new ElevenLabsClient({});
+    this.client = new ElevenLabsClient({});
+  }
+
+  options(): Array<string> {
+    return VOICES.map(v => v.voiceId);
+  }
+
+  current(): SpeechSystemOption {
+    return new SpeechSystemOption(this, this.options()[this.currentVoice]);
   }
 
   async speak(message: string) {
     try {
       console.log("about to generate voice");
       let start = new Date();
-      const audio = await this.elevenlabs.generate({
+      const audio = await this.client.generate({
         voice: this.characterVoice.voiceId,
         stream: true,
 
@@ -68,4 +77,4 @@ class ElevenLabsVoice implements Voice {
   }
 }
 
-export {ElevenLabsVoice};
+export {ElevenLabsSpeech};
