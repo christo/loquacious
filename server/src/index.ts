@@ -4,6 +4,7 @@ import express, {Request, Response} from 'express';
 import {readFileSync} from "fs";
 import {OpenAI} from 'openai';
 import {type BackEnd, OpenAi} from 'BackEnd';
+import type {SpeechSystem} from "SpeechSystem";
 import {SpeechSystems} from "SpeechSystems";
 
 // Load environment variables
@@ -48,15 +49,15 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 
 app.get("/settings", async (req: Request, res: Response) => {
   const current = speechSystems.current();
+  // TODO enumerate backends
   res.json({
-    backend: {
+    ttsResponse: {
       name: BACKEND.name,
       models: await BACKEND.models(),
     },
     speech: {
-      systems: speechSystems.voiceOptions(),
-      current: current,
-      currentDescriptor: current.descriptor(),
+      systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
+      current: current.safeObject(),
     }
   });
 })

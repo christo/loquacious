@@ -1,16 +1,7 @@
+import {CharacterVoice} from "CharacterVoice";
 import {ElevenLabsClient, stream} from "elevenlabs";
-import type {SpeechSystem} from "SpeechSystem";
+import {DisplaySpeechSystem, type SpeechSystem} from "SpeechSystem";
 import {SpeechSystemOption} from "SpeechSystems";
-
-class CharacterVoice {
-  voiceId: string;
-  description: string;
-
-  constructor(voiceId: string, description: string) {
-    this.voiceId = voiceId;
-    this.description = description;
-  }
-}
 
 const VOICE_CHARLOTTE = new CharacterVoice("Charlotte", "Slight Swedish accent");
 const VOICE_EMILY = new CharacterVoice("Emily", "Meditative");
@@ -31,11 +22,13 @@ const VOICES = [
 class ElevenLabsSpeech implements SpeechSystem {
   currentVoice = 0;
   characterVoice = VOICES[this.currentVoice];
-  name = `ElevenLabs ${this.characterVoice.voiceId}`;
+  name = `ElevenLabs`;
   client: ElevenLabsClient;
+  display: DisplaySpeechSystem;
 
   constructor() {
     this.client = new ElevenLabsClient({});
+    this.display = new DisplaySpeechSystem(this.name, VOICES)
   }
 
   options(): Array<string> {

@@ -19,6 +19,10 @@ class SpeechSystemOption {
     const desc = this.description ? ` (${this.description})` : "";
     return `${this.system.name}/${this.option}${desc}`;
   }
+
+  safeObject() {
+    return { system: this.system.name, option: this.option}
+  }
 }
 
 
@@ -35,7 +39,7 @@ class SpeechSystems {
   ]
 
   voiceOptions() {
-    return this.systems.flatMap(s => s.options().map(o => new SpeechSystemOption(s, o)))
+    return this.systems.flatMap(s => s.options().map(o => new SpeechSystemOption(s, o).safeObject()))
   }
 
   current() {
