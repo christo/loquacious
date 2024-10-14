@@ -43,6 +43,51 @@ function ShowError({error}: { error: HealthError }) {
   return (<Typography color="error"><Error fontSize="large"/>{error.message}</Typography>);
 }
 
+function SpeechSettings({speechSettings}: any) {
+  return <Box>SPEECH: {speechSettings.current.system}/{speechSettings.current.option}</Box>;
+}
+
+function SettingsDetail({settings}: {settings: any}) {
+  return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start"}}>
+    <Typography>Main LLM: {settings.llmMain.name} (models: {settings.llmMain.models.length})</Typography>
+    <Typography>Model: {settings.llmMain.models[0]}</Typography>
+    <SpeechSettings speechSettings={settings.speech}/>
+  </Box>
+}
+
+function FetchSettings() {
+  const [settings, setSettings] = useState<HealthStatus>(null);
+
+  function fetchData() {
+    try {
+      fetch("http://localhost:3001/settings").then(result => {
+        result.json().then(data => {
+          setSettings(data || null);
+        });
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 60000);
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
+
+
+  return settings === null ? "" : (
+     <SettingsDetail settings={settings}/>
+  );
+
+}
+
 function Status() {
   const [status, setStatus] = useState<HealthStatus>(null);
 
@@ -135,6 +180,7 @@ function SettingsPanel({seerIdx, nextSeer, prevSeer}: SettingsProps ) {
     <Status/>
     <Typography variant="h4">Settings</Typography>
     <ImageChooser seerIdx={seerIdx} nextSeer={nextSeer} prevSeer={prevSeer} />
+    <FetchSettings/>
   </Box>
 }
 
@@ -185,10 +231,10 @@ const App: React.FC = () => {
     }
   };
 
-  const [open, setOpen] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   const toggleDrawer = (newOpen: boolean) => () => {
-    setOpen(newOpen);
+    setDrawerOpen(newOpen);
   };
 
   const respText = (
@@ -204,7 +250,7 @@ const App: React.FC = () => {
         <IconButton aria-label="delete" size="large" onClick={toggleDrawer(true)}>
           <Settings fontSize="inherit" />
         </IconButton>
-        <Drawer open={open} onClose={toggleDrawer(false)}>
+        <Drawer open={drawerOpen} onClose={toggleDrawer(false)}>
           <SettingsPanel seerIdx={seerIdx} prevSeer={prevSeer} nextSeer={nextSeer} />
         </Drawer>
 

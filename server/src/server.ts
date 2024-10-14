@@ -50,7 +50,7 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 app.get("/settings", async (req: Request, res: Response) => {
   const current = speechSystems.current();
   res.json({
-    ttsResponse: {
+    llmMain: {
       name: BACKEND.name,
       models: await BACKEND.models(),
     },
