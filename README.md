@@ -28,7 +28,8 @@ LLM chat application experiment.
   * [x] show current speech system and voice option
   * [ ] show other main llm/model options
   * [ ] show other speech/voice options
-* basic database schema
+* [ ] basic database schema
+* [ ] check out multimodal models like LLaVA 1.5 and LLaVA 1.6
 * store interactions in database
 * usable cached generated output
 * [ ] dynamic configuration from settings panel
