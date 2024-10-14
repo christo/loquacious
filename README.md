@@ -10,13 +10,27 @@ LLM chat application experiment.
 * For SystemVoice on `macos`, system command `say` is used. Various voices
   are assumed to exist
 
+## Features
+
+* shows image of character
+* can choose a different character image
+* text input
+* text output
+* speech output
+* basic settings panel
+
 ## TODO
 
+* [ ] save generated voice to file
+* [ ] spike local sadtalker to generate video from picture and speech file
 * [ ] settings panel
   * [ ] show current main llm/model
   * [x] show current speech system and voice option
   * [ ] show other main llm/model options
   * [ ] show other speech/voice options
+* basic database schema
+* store interactions in database
+* usable cached generated output
 * [ ] dynamic configuration from settings panel
   * response length
   * system prompt builder
