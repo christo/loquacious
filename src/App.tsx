@@ -1,4 +1,4 @@
-import {ArrowCircleLeft, ArrowCircleRight, Error, Settings} from "@mui/icons-material";
+import {ArrowCircleLeft, ArrowCircleRight, Error, QuestionAnswer, School, Settings} from "@mui/icons-material";
 import {Box, Drawer, IconButton, Typography} from "@mui/material";
 import {marked} from 'marked';
 import React, {useEffect, useState} from 'react';
@@ -51,8 +51,8 @@ function SettingsDetail({settings}: {settings: any}) {
   return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start"}}>
     <Typography>Mode: {settings.mode.current}</Typography>
     {settings.mode.options.map((m: string) => (<Typography key={`mode_${m}`}>{m}</Typography>))}
-    <Typography>Main LLM: {settings.llmMain.name} (models: {settings.llmMain.models.length})</Typography>
-    <Typography>Model: {settings.llmMain.models[0]}</Typography>
+    <Typography><QuestionAnswer fontSize="small"/> {settings.llmMain.name} (models: {settings.llmMain.models.length})</Typography>
+    <Typography><School fontSize="small"/> {settings.llmMain.models[0]}</Typography>
     <SpeechSettings speechSettings={settings.speech}/>
   </Box>
 }
