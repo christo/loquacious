@@ -13,6 +13,10 @@ LLM chat application experiment.
 ## TODO
 
 * [ ] settings panel
+  * [ ] show current main llm/model
+  * [x] show current speech system and voice option
+  * [ ] show other main llm/model options
+  * [ ] show other speech/voice options
 * [ ] dynamic configuration from settings panel
   * response length
   * system prompt builder
