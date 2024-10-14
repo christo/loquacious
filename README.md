@@ -14,6 +14,10 @@ LLM chat application experiment.
 
 * [ ] rename `server/index.ts` to `server/server.ts`
 * [ ] enumerate tts backends
+* [ ] plan to evaluate local system speech recognition option
+* [ ] plan to evaluate local whisper speech recognition option
+* [ ] evaluate elevenlabs websocket "realtime" streaming:
+  https://elevenlabs.io/docs/api-reference/websockets
 * [ ] generalise backend config options:
   * type: e.g. text-to-text
   * role: e.g. deciding what to say. future features like interpreting
