@@ -1,7 +1,6 @@
-// tsconfig.json
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "NodeNext",
     "pretty": true,
     "resolveJsonModule": true,
     "sourceMap": true,
@@ -12,9 +11,9 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "strict": true
+    "strict": true,
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/*"],
   "exclude": ["node_modules"],
   "ts-node": {
     "swc": true
