@@ -12,6 +12,7 @@ LLM chat application experiment.
 
 ## TODO
 
+* [ ] rename `server/index.ts` to `server/server.ts`
 * [ ] generalise backend config options:
   * type: e.g. text-to-text
   * role: e.g. deciding what to say. future features like interpreting
@@ -22,8 +23,12 @@ LLM chat application experiment.
     indicating flow of input and output to another model or audio/video output
 * [ ] identify terminal input and output nodes for whole system workflow graph:
   * audio out
+  * video out (should have embedded video)
+  * stitched together multiple video outs depending on behaviour graph,
+    probably streaming to web client is the best idea
+      * how to handle interruptive transitions?
   * reference self image(s)
-  * reference motion video to drive animated video out
+  * (option) reference motion video to drive animated video out
   * audio in, text in
 * use cached openings for quick-start.
   * many starting inputs could be simply "hello" or other variants
@@ -114,6 +119,7 @@ responses to a suite of questions for each LLM)
     fortune teller?
   * vertical TV?
   * could it be a traditional fortune-teller table setting?
+* maybe make it like it's a video call to a real person?
 
 ### Character Definition Workflow
 
