@@ -2,6 +2,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
 import {readFileSync} from "fs";
+import {MODES} from "Modes";
 import {OpenAI} from 'openai';
 import {type BackEnd, OpenAi} from 'BackEnd';
 import type {SpeechSystem} from "SpeechSystem";
@@ -16,9 +17,10 @@ dotenv.config();
 const BACKEND: BackEnd = new OpenAi();
 
 const speechSystems = new SpeechSystems();
-
 const app = express();
 const port = process.env.PORT || 3001;
+
+let currentMode = "invite";
 
 app.use(cors());
 app.use(express.json());
@@ -30,7 +32,6 @@ const openai = new OpenAI({
 });
 
 
-const systemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 
 // Health check route
 app.get("/health", async (req: Request, res: Response): Promise<void> => {
@@ -50,6 +51,7 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 app.get("/settings", async (req: Request, res: Response) => {
   const current = speechSystems.current();
   res.json({
+    currentMode: currentMode,
     llmMain: {
       name: BACKEND.name,
       models: await BACKEND.models(),
@@ -59,11 +61,13 @@ app.get("/settings", async (req: Request, res: Response) => {
       current: current.safeObject(),
     }
   });
-})
+});
 
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const prompt = req.body;
+
+
 
   if (!prompt) {
     res.status(400).json({error: 'No prompt provided'});
@@ -73,10 +77,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       let start = new Date();
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
-        messages: [
-          {role: 'system', content: systemPrompt},
-          {role: 'user', content: prompt["prompt"]}
-        ]
+        messages: MODES.invite(prompt["prompt"])
       });
       console.log(`text generation finished in ${new Date().getTime() - start.getTime()} ms`);
       const message: string | null = response.choices[0]?.message?.content;
