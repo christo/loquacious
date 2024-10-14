@@ -49,7 +49,6 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 
 app.get("/settings", async (req: Request, res: Response) => {
   const current = speechSystems.current();
-  // TODO enumerate backends
   res.json({
     ttsResponse: {
       name: BACKEND.name,

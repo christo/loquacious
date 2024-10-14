@@ -13,6 +13,7 @@ LLM chat application experiment.
 ## TODO
 
 * [ ] rename `server/index.ts` to `server/server.ts`
+* [ ] enumerate tts backends
 * [ ] generalise backend config options:
   * type: e.g. text-to-text
   * role: e.g. deciding what to say. future features like interpreting
