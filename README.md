@@ -7,8 +7,8 @@ LLM chat application experiment.
 * LM-Studio for the LM-Studio back end
 * OpenAI account for the ChatGPT back end
 * ElevenLabs account for the ElevenLabsVoice, and `brew install mpv`
-* For SystemVoice on `macos`, system command `say` is used.
-
+* For SystemVoice on `macos`, system command `say` is used. Various voices
+  are assumed to exist
 
 ## TODO
 
@@ -24,9 +24,14 @@ LLM chat application experiment.
     * speech-to-text
       * character voice
   * speaking
+    * installed MacOS voice list
   * listening
+  * server-side image configuration
 * [x] rename `server/index.ts` to `server/server.ts`
+* [ ] ping-pong chat sequence
+* [ ] check how it works on mobile web
 * [ ] enumerate LLM backends
+* [ ] show chat history (including cached audio)
 * [ ] plan to evaluate local system speech recognition option
 * [ ] plan to evaluate local whisper speech recognition option
 * [ ] evaluate elevenlabs websocket "realtime" streaming:
@@ -76,9 +81,12 @@ system, configuration etc.
   * detect when multiple people stand gingerly nearby
   * consider second camera trained on entrance
 * using pose-estimation, detect when a person approaches, describe what they
+  look like etc.
+  * detect if they are in an engaged mode or just looking
+  * invite them to sit down and chat
+  * enter introductory mode
 * file save disk cache
   * model-specific text in, text out
-  * 
 * db logging
 * [ ] aggregated system logs
 * [ ] usage stats
@@ -96,13 +104,44 @@ responses to a suite of questions for each LLM)
 * LLM evaluation of response to test inputs looking for specific features or to
   ensure certain absences (manually review these assessments)
 
+### Modes
+
+* Attract Mode - Nobody is engaged, but someone might see us before we see them
+* Invite Mode - Somebody is detected but they have not engaged. They can
+  probably see and hear but no fortune-telling session has started. They should
+  be encouraged and invited to engage.
+* Introduction Mode - A person has initiated a session but we don't know their
+  name and we haven't established the pretext for the interaction
+* Chat Mode - we are now engaged in a conversation
+* Chat Completion - we have finished a chat
+* Pause Mode - something necessitates a short pause shortly. Not considered an
+  unresponsive interlocutor. Polite waiting behaviour is expected.
+* Interruption Mode - user wants to interject for correction or to skip. Handle
+  interaction by giving control to user to set corrective context.
+* Recover Mode - one of the above modes was interrupted or did not end cleanly,
+  behaviour might include some talking to self, musing or other.
+* Identify Return mode - detect that a person is one we have talked to before.
+  If the person was detected very recently, recover workflow to pick up any
+  unfinished interaction. Or if the person completed a chat, ask about having
+  another chat.
+* Admin Mode - various system changes can be made
+* Reset - manual user-directed request to reset to some other mode (i.e. to
+  show others - it should be smooth to chat as if it were fresh without past 
+  interactions informing current one (though next time they could be
+  aggregated))
+
 ### Scene Ideas
 
 * fortune teller
   * crystal ball, scrying bowl, casting bones, tarot cards
   * circus variant
-* ancient mythology
-* philosopher
+* character from ancient mythology
+* philosopher child
+* buddha
+* creator clone - self description and explanation of how it works
+  * expert on self and how it works
+  * can converse in this mode as a general assistant but with identity stuff
+    in system prompt
 
 ### Deployment Targets
 
