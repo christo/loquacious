@@ -2,8 +2,8 @@
   "name": "loquacious-server",
   "version": "1.0.0",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register src/index.ts",
-    "dev": "nodemon -r tsconfig-paths/register --watch src src/index.ts"
+    "start": "ts-node -r tsconfig-paths/register src/server.ts",
+    "dev": "nodemon -r tsconfig-paths/register --watch src src/server.ts"
   },
   "keywords": [],
   "author": "",
