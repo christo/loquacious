@@ -70,9 +70,9 @@ function Status() {
   }, []);
 
 
-  return status === null ? <div>...</div> : (
+  return status === null ? <p>...</p> : (
     status?.error ? <ShowError error={status.error}/>
-      : <div>{status.message}</div>
+      : <p>{status.message}</p>
   );
 
 }
@@ -177,10 +177,6 @@ const App: React.FC = () => {
     }
   };
 
-  function showResponseText() {
-    return <Typography dangerouslySetInnerHTML={{__html: markdownResponse(response)}}></Typography>
-  }
-
   // submit on enter
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -195,6 +191,13 @@ const App: React.FC = () => {
     setOpen(newOpen);
   };
 
+  const respText = (
+    loading ?
+      <Typography>Loading...</Typography>
+      : response === RESPONSE_NULL
+        ? ""
+        : <Typography dangerouslySetInnerHTML={{__html: markdownResponse(response)}}/>
+  );
   return (
     <Box className="primary">
       <Box sx={{m: 2, position: "absolute", bottom: 0, left: 0, p: 0}}>
@@ -220,7 +223,7 @@ const App: React.FC = () => {
         />
         </form>
         <Box className="controls">
-          <Typography>{loading ? <p>Loading...</p> : response === RESPONSE_NULL ? "" : showResponseText()}</Typography>
+          {respText}
         </Box>
       </Box>
 
