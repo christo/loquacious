@@ -40,7 +40,7 @@ type HealthStatus = {
 } | null;
 
 function ShowError({error}: { error: HealthError }) {
-  return (<Typography color="error"><Error fontSize="large"/> {error.message}</Typography>);
+  return (<Typography color="error"><Error fontSize="large"/>{error.message}</Typography>);
 }
 
 function Status() {
@@ -178,11 +178,7 @@ const App: React.FC = () => {
   };
 
   function showResponseText() {
-    return (<>
-      <div>
-        <div dangerouslySetInnerHTML={{__html: markdownResponse(response)}}></div>
-      </div>
-    </>)
+    return <Typography dangerouslySetInnerHTML={{__html: markdownResponse(response)}}></Typography>
   }
 
   // submit on enter
@@ -222,11 +218,9 @@ const App: React.FC = () => {
           cols={80}
           placeholder="talk to me"
         />
-
         </form>
         <Box className="controls">
           <Typography>{loading ? <p>Loading...</p> : response === RESPONSE_NULL ? "" : showResponseText()}</Typography>
-
         </Box>
       </Box>
 
