@@ -1,4 +1,4 @@
-import {ArrowCircleLeft, ArrowCircleRight, Error} from "@mui/icons-material";
+import {ArrowCircleLeft, ArrowCircleRight, Error, Settings} from "@mui/icons-material";
 import {Box, IconButton, Typography} from "@mui/material";
 import {marked} from 'marked';
 import React, {useEffect, useState} from 'react';
@@ -182,6 +182,9 @@ const App: React.FC = () => {
   return (
     <Box className="primary">
       <Box sx={{m: 2, position: "absolute", bottom: 0, left: 0, p: 0}}>
+        <IconButton aria-label="delete" size="large">
+          <Settings fontSize="inherit" />
+        </IconButton>
         <ImageChooser seerIdx={seerIdx} nextSeer={nextSeer} prevSeer={prevSeer} />
       </Box>
       <img alt="fortune teller" width="100%" className="seer" src={`/img/${SEERS[seerIdx]}`}/>
@@ -203,7 +206,6 @@ const App: React.FC = () => {
           <Status/>
         </Box>
       </Box>
-
 
     </Box>
   );
