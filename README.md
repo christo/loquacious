@@ -23,6 +23,9 @@ LLM chat application experiment.
 
 * [ ] spike fal sadtalker to generate video from picture and speech file
   https://fal.ai/models/fal-ai/sadtalker/api
+* [ ] Q: does it make sense to inform llm in system prompt that output is
+      spoken with a specific system and all formatting should be appropriate
+      for input into that speech system? i.e. no emojis, stage direction etc.
 * [ ] get local sadtalker running with conda per github
 * [ ] save generated voice to file
 * [ ] settings panel
