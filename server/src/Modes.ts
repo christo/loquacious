@@ -1,38 +1,60 @@
 import {readFileSync} from "fs";
 import {OpenAI} from "openai";
+import type {SpeechSystem} from "SpeechSystem";
 
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 const inviteModeSystemPrompt: string = readFileSync("prompts/invite-mode.prompt.txt").toString();
+const universalSystemPrompt: string = readFileSync("prompts/universal-system.prompt.txt").toString();
 
-function chatModeMessages(prompt: string): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
-  return [
-    {role: 'system', content: `The current date and time is ${new Date()}`},
-    {role: 'system', content: chatModeSystemPrompt},
-    {
-      role: 'system',
-      content: "Never offer anything that would require you to move or perform any physical task yourself. Never offer tea, assume your visitor will bring something to drink if they want it."
-    },
-    {role: 'user', content: prompt}
-  ];
-}
-
-function inviteModeMessages(prompt: string): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
-  return [
-    {role: 'system', content: `The current date and time is ${new Date()}`},
-    {
-      role: 'system',
-      content: "Never offer anything that would require you to move or perform any physical task yourself. Never offer tea, assume your visitor will bring something to drink if they want it."
-    },
-    {role: 'system', content: inviteModeSystemPrompt}
-  ];
-}
 interface ModeType {
-  [key: string]: (prompt: string) => OpenAI.Chat.Completions.ChatCompletionMessageParam[] ;
+  [key: string]: (prompt: string, ss: SpeechSystem) => OpenAI.Chat.Completions.ChatCompletionMessageParam[];
 }
 
-const MODES: ModeType = {
-  "invite": inviteModeMessages,
-  "chat": chatModeMessages
-};
+function dateTimePrompt() {
+  return `The current date and time is ${new Date()}`;
+}
 
-export {type ModeType, MODES};
+class Modes {
+  pauseInstructions(ss: SpeechSystem) {
+    const cmd = ss.pauseCommand(1000);
+    if (cmd == null) {
+      // no explicit pause command
+      return "You frequently pause for dramatic effect. To do so, include elipsis and/or literally this: `\\n\\n`"
+    } else {
+      return `You frequently pause for dramatic effect. To do so you always use precise syntax specifying the length of
+  pause. A one second (1000 millisecond) pause must be specified exactly like this: \`${cmd}\``;
+    }
+  }
+
+  chatModeMessages(prompt: string, ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
+    return [
+      {role: 'system', content: `${dateTimePrompt()}
+      
+      ${chatModeSystemPrompt}
+      
+      ${universalSystemPrompt}
+      
+      ${this.pauseInstructions(ss)}`},
+      {role: 'user', content: prompt}
+    ];
+  }
+
+  inviteModeMessages(prompt: string, ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
+    return [{
+      role: 'system',
+      content: `${dateTimePrompt()}
+      
+      ${chatModeSystemPrompt}
+      
+      ${universalSystemPrompt}
+      
+      ${this.pauseInstructions(ss)}`
+    }];
+  }
+
+  constructor() {
+  }
+}
+
+
+export {type ModeType, Modes};

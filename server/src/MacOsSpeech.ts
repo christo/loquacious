@@ -1,7 +1,9 @@
 import {CharacterVoice} from "CharacterVoice";
 import {exec} from 'child_process';
+import {Simulate} from "react-dom/test-utils";
 import {DisplaySpeechSystem, type SpeechSystem} from "SpeechSystem";
 import {SpeechSystemOption} from "SpeechSystems";
+import error = Simulate.error;
 
 /**
  * Speaks the given text using macOS's say command.
@@ -57,7 +59,7 @@ class MacOsSpeech implements SpeechSystem {
   currentIndex = 0;
   display = new DisplaySpeechSystem(this.name, VOICES);
 
-  current(): SpeechSystemOption {
+  currentOption(): SpeechSystemOption {
     return new SpeechSystemOption(this, VOICES[this.currentIndex].voiceId, VOICES[this.currentIndex].description);
   }
 
@@ -71,6 +73,11 @@ class MacOsSpeech implements SpeechSystem {
         console.error('An error occurred during speech synthesis:', error);
       });
   }
+
+  pauseCommand(msDuration: number): string {
+    return `[[slnc ${msDuration}]]`;
+  }
+
 }
 
 export {MacOsSpeech};

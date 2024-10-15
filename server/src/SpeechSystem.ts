@@ -11,11 +11,15 @@ class DisplaySpeechSystem {
   }
 }
 
+// may need to add a method to clean text of speech system directives for display
+
 type SpeechSystem = {
   name: string;
   speak: (message: string) => Promise<void>;
   options: () => Array<string>;
-  current(): SpeechSystemOption;
+  /** Command for inserting a speech of this duration or null if no such command exists */
+  pauseCommand: (msDuration: number) => string | null;
+  currentOption(): SpeechSystemOption;
   display: DisplaySpeechSystem;
 }
 

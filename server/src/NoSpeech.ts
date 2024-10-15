@@ -11,7 +11,7 @@ class NoSpeech implements SpeechSystem {
     return this.onlyOptions.map(x => x.voiceId);
   }
 
-  current(): SpeechSystemOption {
+  currentOption(): SpeechSystemOption {
     return new SpeechSystemOption(this, this.onlyOptions[0].voiceId, this.onlyOptions[0].description);
   }
 
@@ -19,6 +19,12 @@ class NoSpeech implements SpeechSystem {
     console.log(`Silently speaking message of length ${message.length}`);
     return Promise.resolve();
   }
+
+  pauseCommand(msDuration: number): string | null {
+    return null;
+  }
+
+
 }
 
 export {NoSpeech};

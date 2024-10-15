@@ -5,7 +5,7 @@ import {type BackEnd} from 'llm/BackEnd';
 import {LlamaCppBackEnd} from "llm/LlamaCppBackEnd";
 import {LmStudioBackEnd} from "llm/LmStudioBackEnd";
 import {OpenAiBackEnd} from 'llm/OpenAiBackEnd';
-import {MODES} from "Modes";
+import {Modes} from "Modes";
 import {timed} from "performance";
 import type {SpeechSystem} from "SpeechSystem";
 import {SpeechSystems} from "SpeechSystems";
@@ -28,6 +28,9 @@ const BACKENDS = [
 let backendIndex = 2;
 
 const speechSystems = new SpeechSystems();
+
+const modes = new Modes();
+
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -42,11 +45,11 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.get("/settings", async (req: Request, res: Response) => {
-  const current = speechSystems.current();
+  const current = speechSystems.currentSpeechSystem().currentOption();
   res.json({
     mode: {
       current: currentMode,
-      options: Object.keys(MODES)
+      options: ["invite", "chat"]
     },
     llmMain: {
       name: BACKENDS[backendIndex].name,
@@ -69,7 +72,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     try {
       let message: string | null = await timed("text generation", async () => {
-        let messages = MODES.invite(prompt["prompt"]);
+        let messages = modes.inviteModeMessages(prompt["prompt"], speechSystems.currentSpeechSystem());
+        // console.dir(messages);
         const response = await BACKENDS[backendIndex].chat(messages);
         return response.message
       });
@@ -80,7 +84,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           backend: BACKENDS[backendIndex].name,
           model: (await BACKENDS[backendIndex].models())[0]
         });
-        await timed("speech", () => speechSystems.current().system.speak(message));
+        await timed("speech", () => speechSystems.currentSpeechSystem().speak(message));
       } else {
         res.status(500).json({error: 'No message in response'});
       }
@@ -96,5 +100,5 @@ app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
   console.log(`Health check ${BACKENDS[backendIndex].enableHealth ? "enabled" : "disabled"}`);
   console.log(`LLM back end ${BACKENDS[backendIndex].name} at URL: ${(BACKENDS[backendIndex].baseUrl)}`);
-  console.log(`Current Speech System: ${speechSystems.current().descriptor()}`);
+  console.log(`Current Speech System: ${speechSystems.currentSpeechSystem().currentOption().descriptor()}`);
 });
