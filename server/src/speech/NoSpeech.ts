@@ -4,7 +4,7 @@ import {SpeechSystemOption} from "speech/SpeechSystems";
 
 class NoSpeech implements SpeechSystem {
   name = "No Speech";
-  onlyOptions = [new CharacterVoice("silence", "is golden")];
+  onlyOptions = [new CharacterVoice("silence", "silence", "is golden")];
   display = new DisplaySpeechSystem(this.name, this.onlyOptions)
 
   options(): Array<string> {

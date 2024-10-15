@@ -40,18 +40,18 @@ function speak(text: string, voice?: string, wpm?: number): Promise<void> {
 }
 
 const VOICES: Array<CharacterVoice> = [
-  new CharacterVoice("Serena (Premium)", "Mature English woman, slightly posh"),
-  new CharacterVoice("Karen (Premium)", "Australian woman with a touch of boganity"),
-  new CharacterVoice("Matilda (Premium)", "Australian woman no boganity"),
-  new CharacterVoice("Zoe (Premium)", "American woman"),
-  new CharacterVoice("Isha (Premium)", "Indian woman"),
-  new CharacterVoice("Veena (Enhanced)", "Indian woman"),
-  new CharacterVoice("Moira (Enhanced)", "Irish woman"),
-  new CharacterVoice("Fiona (Enhanced)", "Scottish woman"),
-  new CharacterVoice("Kate (Enhanced)", "English woman"),
+  new CharacterVoice("Serena (Premium)", "Serena", "Mature English woman, slightly posh"),
+  new CharacterVoice("Matilda (Premium)", "Matilda","Australian woman no boganity"),
+  new CharacterVoice("Veena (Enhanced)", "Veena","Indian woman"),
+  new CharacterVoice("Karen (Premium)", "Karen", "Australian woman with a touch of boganity"),
+  new CharacterVoice("Zoe (Premium)", "Zoe", "American woman"),
+  new CharacterVoice("Isha (Premium)", "Isha", "Indian woman"),
+  new CharacterVoice("Moira (Enhanced)", "Moira", "Irish woman"),
+  new CharacterVoice("Fiona (Enhanced)", "Fiona", "Scottish woman"),
+  new CharacterVoice("Kate (Enhanced)", "Kate", "English woman"),
 ]
 
-const speed = 190; // fast, for debugging
+const speed = 130; // fast, for debugging
 // const speed = 120; // good fortune-teller speaking speed
 
 class MacOsSpeech implements SpeechSystem {

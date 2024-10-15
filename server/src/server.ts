@@ -96,9 +96,14 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 });
 
 // Start the server
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`Server is running on http://localhost:${port}`);
-  console.log(`Health check ${BACKENDS[backendIndex].enableHealth ? "enabled" : "disabled"}`);
-  console.log(`LLM back end ${BACKENDS[backendIndex].name} at URL: ${(BACKENDS[backendIndex].baseUrl)}`);
+
+  const llm = BACKENDS[backendIndex];
+  console.log(`LLM Health check: ${llm.enableHealth ? "enabled" : "disabled"}`);
+  console.log(`LLM back end: ${llm.name} at URL: ${(llm.baseUrl)}`);
+  console.log(`LLM current model: ${await llm.currentModel()}`);
+  console.log("LLM available models:");
+  (await llm.models()).forEach(m => console.log(`   ${m.id}`));
   console.log(`Current Speech System: ${speechSystems.currentSpeechSystem().currentOption().descriptor()}`);
 });

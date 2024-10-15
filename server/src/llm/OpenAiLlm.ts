@@ -1,6 +1,7 @@
 import type {Llm, ChatResult} from "./Llm";
 import OpenAI from "openai";
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
+import Model = OpenAI.Model;
 
 /**
  * OpenAI LLM Backend
@@ -10,7 +11,7 @@ class OpenAiLlm implements Llm {
   enableHealth = false;
   name = "ChatGPT";
   private openai;
-  private readonly model;
+  private model;
 
   constructor(model = "gpt-4o-mini") {
     this.model = model;
@@ -19,9 +20,13 @@ class OpenAiLlm implements Llm {
     });
   }
 
-  async models(): Promise<Array<string>> {
+  async currentModel(): Promise<string> {
+    return this.model;
+  }
+
+  async models(): Promise<Array<Model>> {
     let modelsPage = await this.openai.models.list();
-    return modelsPage.data.map(m => m.id);
+    return modelsPage.data as Array<Model>;
   }
 
   async chat(messages: Array<ChatCompletionMessageParam>): Promise<ChatResult> {

@@ -1,6 +1,6 @@
-import {response} from "express";
 import type {Llm, ChatResult} from "llm/Llm";
 import OpenAI from "openai";
+import Model = OpenAI.Model;
 
 class LlamaCppLlm implements Llm {
   baseUrl: string | undefined;
@@ -16,8 +16,14 @@ class LlamaCppLlm implements Llm {
     });
   }
 
-  async models(): Promise<Array<string>> {
-    return Promise.resolve(["TODO"]);
+  async currentModel(): Promise<string> {
+    return "whatevs";
+  }
+
+  async models(): Promise<Array<Model>> {
+    const response = await fetch(`${this.baseUrl}/models`);
+    const j = await response.json();
+    return j.data;
   }
 
   async chat(messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): Promise<ChatResult> {

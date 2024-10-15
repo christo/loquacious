@@ -35,6 +35,14 @@ type HealthError = {
 }
 
 type HealthStatus = {
+  freeMem: {
+    bytes: number,
+    formatted: string,
+  },
+  totalMem: {
+    bytes: number,
+    formatted: string,
+  },
   error: HealthError | null;
   message: string | null;
 } | null;
@@ -52,7 +60,7 @@ function SettingsDetail({settings}: {settings: any}) {
     <Typography>Mode: {settings.mode.current}</Typography>
     {settings.mode.options.map((m: string) => (<Typography key={`mode_${m}`}>{m}</Typography>))}
     <Typography><QuestionAnswer fontSize="small"/> {settings.llmMain.name} (models: {settings.llmMain.models.length})</Typography>
-    <Typography><School fontSize="small"/> {settings.llmMain.models[0]}</Typography>
+    <Typography><School fontSize="small"/> {settings.llmMain.models[0].id}</Typography>
     <SpeechSettings speechSettings={settings.speech}/>
   </Box>
 }
@@ -119,7 +127,12 @@ function Status() {
 
   return status === null ? <p>...</p> : (
     status?.error ? <ShowError error={status.error}/>
-      : <p>{status.message}</p>
+      : (
+        <Box><p>{status.message}</p>
+        <p>{status.freeMem.formatted} RAM unused</p>
+        <p>{status.totalMem.formatted} total</p>
+        </Box>
+      )
   );
 
 }

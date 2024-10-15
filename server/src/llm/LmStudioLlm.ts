@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type {ChatResult, Llm} from "./Llm";
+import Model = OpenAI.Model;
 
 class LmStudioLlm implements Llm {
   baseUrl: string | undefined;
@@ -15,15 +16,25 @@ class LmStudioLlm implements Llm {
     });
   }
 
-  async models(): Promise<Array<string>> {
+  async currentModel(): Promise<string> {
+    const allModels = await this.models();
+    if (allModels.length === 1) {
+      return allModels[0].id;
+    } else {
+      return "I do not know";
+    }
+  }
+
+  async models(): Promise<Array<Model>> {
     const response = await fetch(`${this.baseUrl}/models`);
     const j = await response.json();
-    return j.data.filter((o: any) => o.object === "model").map((o: any) => o.id);
+    return j.data;
   }
 
   async chat(messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): Promise<ChatResult> {
+    const model = (await this.models())[0].id;
     const response = await this.openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: model,
       messages: messages
     });
     return {message: response.choices[0]?.message?.content as (string | null)} as ChatResult;

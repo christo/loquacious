@@ -34,7 +34,7 @@ class SpeechSystemOption {
  */
 class SpeechSystems {
 
-  currentSystemIndex = 2;
+  currentSystemIndex = 0;
   systems: Array<SpeechSystem> = [
     new MacOsSpeech(),
     new NoSpeech(),
