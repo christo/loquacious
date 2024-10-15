@@ -41,9 +41,9 @@ function speak(text: string, voice?: string, wpm?: number): Promise<void> {
 
 const VOICES: Array<CharacterVoice> = [
   new CharacterVoice("Serena (Premium)", "Serena", "Mature English woman, slightly posh"),
-  new CharacterVoice("Matilda (Premium)", "Matilda","Australian woman no boganity"),
+  new CharacterVoice("Matilda (Premium)", "Matilda","Australian woman"),
   new CharacterVoice("Veena (Enhanced)", "Veena","Indian woman"),
-  new CharacterVoice("Karen (Premium)", "Karen", "Australian woman with a touch of boganity"),
+  new CharacterVoice("Karen (Premium)", "Karen", "Australian woman, upper middle bogan"),
   new CharacterVoice("Zoe (Premium)", "Zoe", "American woman"),
   new CharacterVoice("Isha (Premium)", "Isha", "Indian woman"),
   new CharacterVoice("Moira (Enhanced)", "Moira", "Irish woman"),
