@@ -1,4 +1,4 @@
-import type {BackEnd} from "llm/BackEnd";
+import type {Llm} from "llm/Llm";
 import os from "os";
 
 const formatBytes = (bytes: number) => {
@@ -8,7 +8,7 @@ const formatBytes = (bytes: number) => {
   return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
 };
 
-async function systemHealth(backends: Array<BackEnd>, backendIndex: number) {
+async function systemHealth(backends: Array<Llm>, backendIndex: number) {
   const totalMem = os.totalmem();
   const freeMem = os.freemem();
   let tttHealth: any = {message: "disabled"};

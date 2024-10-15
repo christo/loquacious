@@ -1,6 +1,6 @@
 import {readFileSync} from "fs";
 import {OpenAI} from "openai";
-import type {SpeechSystem} from "SpeechSystem";
+import type {SpeechSystem} from "speech/SpeechSystem";
 
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 const inviteModeSystemPrompt: string = readFileSync("prompts/invite-mode.prompt.txt").toString();

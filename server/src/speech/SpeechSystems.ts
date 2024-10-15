@@ -1,7 +1,7 @@
-import {ElevenLabsSpeech} from "ElevenLabsSpeech";
-import {MacOsSpeech} from "MacOsSpeech";
-import {NoSpeech} from "NoSpeech";
-import {type SpeechSystem} from "SpeechSystem";
+import {ElevenLabsSpeech} from "speech/ElevenLabsSpeech";
+import {MacOsSpeech} from "speech/MacOsSpeech";
+import {NoSpeech} from "speech/NoSpeech";
+import {type SpeechSystem} from "speech/SpeechSystem";
 
 /**
  * Represents a choosable option within a specific speech system. Options are represented by unique strings that

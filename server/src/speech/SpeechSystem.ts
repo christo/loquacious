@@ -1,5 +1,5 @@
-import type {CharacterVoice} from "CharacterVoice";
-import {SpeechSystemOption} from "SpeechSystems";
+import type {CharacterVoice} from "speech/CharacterVoice";
+import {SpeechSystemOption} from "speech/SpeechSystems";
 
 class DisplaySpeechSystem {
   name: string;

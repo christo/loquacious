@@ -1,8 +1,7 @@
-import {response} from "express";
-import type {BackEnd, ChatResult} from "llm/BackEnd";
 import OpenAI from "openai";
+import type {ChatResult, Llm} from "./Llm";
 
-class LmStudioBackEnd implements BackEnd {
+class LmStudioLlm implements Llm {
   baseUrl: string | undefined;
   enableHealth = false;
   name = "LM-Studio";
@@ -17,7 +16,9 @@ class LmStudioBackEnd implements BackEnd {
   }
 
   async models(): Promise<Array<string>> {
-    return Promise.resolve(["TODO"]);
+    const response = await fetch(`${this.baseUrl}/models`);
+    const j = await response.json();
+    return j.data.filter((o: any) => o.object === "model").map((o: any) => o.id);
   }
 
   async chat(messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): Promise<ChatResult> {
@@ -31,4 +32,4 @@ class LmStudioBackEnd implements BackEnd {
 
 }
 
-export {LmStudioBackEnd};
+export {LmStudioLlm};

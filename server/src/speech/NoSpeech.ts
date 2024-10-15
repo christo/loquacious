@@ -1,6 +1,6 @@
-import {CharacterVoice} from "CharacterVoice";
-import {DisplaySpeechSystem, type SpeechSystem} from "SpeechSystem";
-import {SpeechSystemOption} from "SpeechSystems";
+import {CharacterVoice} from "speech/CharacterVoice";
+import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
+import {SpeechSystemOption} from "speech/SpeechSystems";
 
 class NoSpeech implements SpeechSystem {
   name = "No Speech";

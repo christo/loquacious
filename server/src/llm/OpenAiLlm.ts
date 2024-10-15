@@ -1,11 +1,11 @@
-import type {BackEnd, ChatResult} from "llm/BackEnd";
+import type {Llm, ChatResult} from "./Llm";
 import OpenAI from "openai";
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 
 /**
  * OpenAI LLM Backend
  */
-class OpenAiBackEnd implements BackEnd {
+class OpenAiLlm implements Llm {
   baseUrl = undefined;
   enableHealth = false;
   name = "ChatGPT";
@@ -34,4 +34,4 @@ class OpenAiBackEnd implements BackEnd {
 
 }
 
-export {OpenAiBackEnd};
+export {OpenAiLlm};

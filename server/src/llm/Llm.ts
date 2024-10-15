@@ -4,7 +4,7 @@ type ChatResult = {
   message: string | null;
 }
 
-type BackEnd = {
+type Llm = {
   name: string,
   baseUrl: string | undefined,
   enableHealth: boolean,
@@ -12,4 +12,4 @@ type BackEnd = {
   chat: (params: OpenAI.Chat.Completions.ChatCompletionMessageParam[]) => Promise<ChatResult>;
 }
 
-export type {BackEnd, ChatResult};
+export type {Llm, ChatResult};

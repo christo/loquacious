@@ -1,8 +1,8 @@
-import {CharacterVoice} from "CharacterVoice";
+import {CharacterVoice} from "speech/CharacterVoice";
 import {exec} from 'child_process';
 import {Simulate} from "react-dom/test-utils";
-import {DisplaySpeechSystem, type SpeechSystem} from "SpeechSystem";
-import {SpeechSystemOption} from "SpeechSystems";
+import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
+import {SpeechSystemOption} from "speech/SpeechSystems";
 import error = Simulate.error;
 
 /**

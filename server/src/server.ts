@@ -1,23 +1,23 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {type BackEnd} from 'llm/BackEnd';
-import {LlamaCppBackEnd} from "llm/LlamaCppBackEnd";
-import {LmStudioBackEnd} from "llm/LmStudioBackEnd";
-import {OpenAiBackEnd} from 'llm/OpenAiBackEnd';
+import {type Llm} from 'llm/Llm';
+import {LlamaCppLlm} from "llm/LlamaCppLlm";
+import {LmStudioLlm} from "llm/LmStudioLlm";
+import {OpenAiLlm} from 'llm/OpenAiLlm';
 import {Modes} from "Modes";
 import {timed} from "performance";
-import type {SpeechSystem} from "SpeechSystem";
-import {SpeechSystems} from "SpeechSystems";
+import type {SpeechSystem} from "speech/SpeechSystem";
+import {SpeechSystems} from "speech/SpeechSystems";
 import {systemHealth} from "SystemStatus";
 
 // Load environment variables
 dotenv.config();
 
 
-const LM_STUDIO_BACKEND: BackEnd = new LmStudioBackEnd();
-const OPEN_AI_BACKEND: BackEnd = new OpenAiBackEnd();
-const LLAMA_CPP_BACKEND: BackEnd = new LlamaCppBackEnd();
+const LM_STUDIO_BACKEND: Llm = new LmStudioLlm();
+const OPEN_AI_BACKEND: Llm = new OpenAiLlm();
+const LLAMA_CPP_BACKEND: Llm = new LlamaCppLlm();
 
 const BACKENDS = [
   LLAMA_CPP_BACKEND,

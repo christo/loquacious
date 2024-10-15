@@ -1,8 +1,8 @@
 import {response} from "express";
-import type {BackEnd, ChatResult} from "llm/BackEnd";
+import type {Llm, ChatResult} from "llm/Llm";
 import OpenAI from "openai";
 
-class LlamaCppBackEnd implements BackEnd {
+class LlamaCppLlm implements Llm {
   baseUrl: string | undefined;
   enableHealth = true;
   name = "Llama.cpp";
@@ -30,4 +30,4 @@ class LlamaCppBackEnd implements BackEnd {
 
 }
 
-export {LlamaCppBackEnd};
+export {LlamaCppLlm};
