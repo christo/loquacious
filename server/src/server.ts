@@ -1,16 +1,17 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {type Llm} from 'llm/Llm';
+import {promises as fs} from 'fs';
 import {LlamaCppLlm} from "llm/LlamaCppLlm";
+import {type Llm} from 'llm/Llm';
 import {LmStudioLlm} from "llm/LmStudioLlm";
 import {OpenAiLlm} from 'llm/OpenAiLlm';
 import {Modes} from "Modes";
+import * as path from 'path';
 import {timed} from "performance";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
 import {systemHealth} from "SystemStatus";
-
 // Load environment variables
 dotenv.config();
 
@@ -41,7 +42,15 @@ app.use(express.json());
 
 // Health check route
 app.get("/health", async (req: Request, res: Response): Promise<void> => {
-  res.send(JSON.stringify(await systemHealth(BACKENDS, backendIndex)));
+  res.json(await systemHealth(BACKENDS, backendIndex));
+});
+
+app.get("/portraits", async (req: Request, res: Response) => {
+  const files = await fs.readdir("../public/img", { withFileTypes: true });
+  res.json(
+    files
+      .filter(f => f.isFile() && path.extname(f.name).toLowerCase() === '.png')
+      .map(x => x.name));
 });
 
 app.get("/settings", async (req: Request, res: Response) => {
