@@ -1,22 +1,23 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {LlamaCpp} from "llm/LlamaCpp";
-import {LmStudio} from "llm/LmStudio";
-import {MODES} from "Modes";
-import {OpenAi} from 'llm/OpenAi';
 import {type BackEnd} from 'llm/BackEnd';
-import OpenAI from "openai";
+import {LlamaCppBackEnd} from "llm/LlamaCppBackEnd";
+import {LmStudioBackEnd} from "llm/LmStudioBackEnd";
+import {OpenAiBackEnd} from 'llm/OpenAiBackEnd';
+import {MODES} from "Modes";
+import {timed} from "performance";
 import type {SpeechSystem} from "SpeechSystem";
 import {SpeechSystems} from "SpeechSystems";
+import {systemHealth} from "SystemStatus";
 
 // Load environment variables
 dotenv.config();
 
 
-const LM_STUDIO_BACKEND: BackEnd = new LmStudio();
-const OPEN_AI_BACKEND: BackEnd = new OpenAi();
-const LLAMA_CPP_BACKEND: BackEnd = new LlamaCpp();
+const LM_STUDIO_BACKEND: BackEnd = new LmStudioBackEnd();
+const OPEN_AI_BACKEND: BackEnd = new OpenAiBackEnd();
+const LLAMA_CPP_BACKEND: BackEnd = new LlamaCppBackEnd();
 
 const BACKENDS = [
   LLAMA_CPP_BACKEND,
@@ -24,7 +25,7 @@ const BACKENDS = [
   LM_STUDIO_BACKEND,
 ]
 
-const BACKEND = BACKENDS[0];
+let backendIndex = 2;
 
 const speechSystems = new SpeechSystems();
 const app = express();
@@ -35,27 +36,9 @@ let currentMode = "invite";
 app.use(cors());
 app.use(express.json());
 
-// Initialize OpenAI with the API key
-const openai = new OpenAI({
-  baseURL: BACKEND.baseUrl,
-  apiKey: process.env.OPENAI_API_KEY as string,
-});
-
-
-
 // Health check route
 app.get("/health", async (req: Request, res: Response): Promise<void> => {
-  if (!BACKEND.enableHealth) {
-    res.send(JSON.stringify({message: "health disabled"}));
-  } else {
-    try {
-      const r = await fetch(`${(BACKEND.baseUrl)}/health`, {});
-      const healthStatus = await r.json();
-      res.send(healthStatus);
-    } catch (error) {
-      res.status(500).send({error: 'Health check failed'});
-    }
-  }
+  res.send(JSON.stringify(await systemHealth(BACKENDS, backendIndex)));
 });
 
 app.get("/settings", async (req: Request, res: Response) => {
@@ -66,8 +49,8 @@ app.get("/settings", async (req: Request, res: Response) => {
       options: Object.keys(MODES)
     },
     llmMain: {
-      name: BACKEND.name,
-      models: await BACKEND.models(),
+      name: BACKENDS[backendIndex].name,
+      models: await BACKENDS[backendIndex].models(),
     },
     speech: {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
@@ -75,6 +58,7 @@ app.get("/settings", async (req: Request, res: Response) => {
     }
   });
 });
+
 
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
@@ -84,21 +68,19 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({error: 'No prompt provided'});
   } else {
     try {
-      console.log("starting text generation");
-      let start = new Date();
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: MODES.invite(prompt["prompt"])
+      let message: string | null = await timed("text generation", async () => {
+        let messages = MODES.invite(prompt["prompt"]);
+        const response = await BACKENDS[backendIndex].chat(messages);
+        return response.message
       });
-      console.log(`text generation finished in ${new Date().getTime() - start.getTime()} ms`);
-      const message: string | null = response.choices[0]?.message?.content;
 
       if (message) {
-        res.json({response: {message}, backend: BACKEND, model: "todo"});
-        speechSystems.current().system.speak(message).then((speech) => {
-          console.log("finished speaking");
+        res.json({
+          response: {message},
+          backend: BACKENDS[backendIndex].name,
+          model: (await BACKENDS[backendIndex].models())[0]
         });
-
+        await timed("speech", () => speechSystems.current().system.speak(message));
       } else {
         res.status(500).json({error: 'No message in response'});
       }
@@ -112,7 +94,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
-  console.log(`Health check ${BACKEND.enableHealth ? "enabled" : "disabled"}`);
-  console.log(`LLM back end ${BACKEND.name} at URL: ${(BACKEND.baseUrl)}`);
+  console.log(`Health check ${BACKENDS[backendIndex].enableHealth ? "enabled" : "disabled"}`);
+  console.log(`LLM back end ${BACKENDS[backendIndex].name} at URL: ${(BACKENDS[backendIndex].baseUrl)}`);
   console.log(`Current Speech System: ${speechSystems.current().descriptor()}`);
 });

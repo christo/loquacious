@@ -21,8 +21,10 @@ LLM chat application experiment.
 
 ## TODO
 
+* [ ] spike fal sadtalker to generate video from picture and speech file
+  https://fal.ai/models/fal-ai/sadtalker/api
+* [ ] get local sadtalker running with conda per github
 * [ ] save generated voice to file
-* [ ] spike local sadtalker to generate video from picture and speech file
 * [ ] settings panel
   * [ ] show current main llm/model
   * [x] show current speech system and voice option

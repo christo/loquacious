@@ -66,7 +66,7 @@ class MacOsSpeech implements SpeechSystem {
   }
 
   async speak(message: string) {
-    speak(message, VOICES[this.currentIndex].voiceId, speed)
+    await speak(message, VOICES[this.currentIndex].voiceId, speed)
       .catch((error) => {
         console.error('An error occurred during speech synthesis:', error);
       });
