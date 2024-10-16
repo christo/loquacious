@@ -21,9 +21,23 @@ LLM chat application experiment.
 
 ## TODO
 
-* [ ] identify which model was used for the text
-* [ ] save generated text to a file 
 * [ ] save generated voice to file
+* [ ] db schema
+  * system prompt versions
+  * modestates
+  * text-to-text: prompts, output, modestate, system, model, datetime, system-parameters
+  * text-to-speech: input, system, options
+  * speech-to-video: input speech, input video (optional), system, options
+  * performance stats
+  * image-to-text: image-ref, image-hash, system, text, system-prompt?, timestamp,
+* [ ] test reference data filetree (better for version control not to require
+      database so it can be version controlled)
+* [ ] save generated text to db
+* [ ] identify which model was used for the text
+* [ ] decide data file tree, maybe this:
+  * `<base>/<category>/<system>/<option>/<tag>_<db-id>.<format>`
+  * category: tts, ttt, stv (speech to video), etc.
+  * db-id: the record that connects the input, system and parameters to other records 
 * [ ] spike fal sadtalker to generate video from picture and speech file
   https://fal.ai/models/fal-ai/sadtalker/api
 * [ ] Q: does it make sense to inform llm in system prompt that output is
@@ -54,6 +68,7 @@ LLM chat application experiment.
   * listening
   * server-side image configuration
 * [x] rename `server/index.ts` to `server/server.ts`
+* [ ] pose estimation plan
 * [ ] ping-pong chat sequence
 * [ ] check how it works on mobile web
 * [ ] enumerate LLM backends
@@ -111,6 +126,26 @@ system, configuration etc.
   * detect if they are in an engaged mode or just looking
   * invite them to sit down and chat
   * enter introductory mode
+  * on-demand camera contents description
+    * how many fingers am I holding up?
+    * this is my friend jane
+    * does my ass look big in this
+  * periodic pose estimation to detect mode state transitions
+  * pose estimation calibration
+    * if camera moves or scene changes, need to mark engagement zone in camera
+      field
+    * lighting
+    * pose estimation and video frame grab integration
+  * possible whole-scene photo input
+    * it may help the LLM if it can see not only what it looks like but what the
+      actual current deployment scene looks like?
+* Per-deployment configuration needs to know:
+  * event details, maybe including whole schedule of events
+  * VIPs
+  * permanent physical layout and scene design details (red tablecloth, crystal
+    ball, vase of flowers etc.)
+  * if a person asks about an event coming up, we could quip about telling their
+    future: that they will go to that event
 * file save disk cache
   * model-specific text in, text out
 * db logging
