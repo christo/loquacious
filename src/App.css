@@ -7,10 +7,10 @@
     height: 100dvh;
 }
 
-form#prompt {
+#promptInput {
     position: absolute;
-    top: 650px;
-    left: 50px;
+    bottom: 250px;
+    right: 50px;
 }
 
 form#prompt textarea {

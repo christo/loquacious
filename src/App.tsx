@@ -121,8 +121,6 @@ function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
     } catch (e) {
       console.error(e);
     }
-
-
   }, []);
 
   return <Box sx={{p: 2, display: "flex", flexDirection: "column", gap: 2, mt: 2, alignItems: "center"}}>
@@ -197,7 +195,7 @@ const App: React.FC = () => {
 
   }, []);
 
-  const [imageIndex, setImageIndex] = useState(37);
+  const [imageIndex, setImageIndex] = useState(34);
 
   const handleSubmit = async () => {
     if (!prompt.trim()) {
@@ -257,9 +255,9 @@ const App: React.FC = () => {
 
   return (
     <Box className="primary" component="div">
-      <Box sx={{m: 2, position: "absolute", bottom: 0, left: 0, p: 0}}>
+      <Box sx={{m: 2, position: "absolute", top: 0, left: 0, p: 0}}>
         <IconButton aria-label="delete" size="large" onClick={toggleDrawer(true)}>
-          <Settings fontSize="inherit"/>
+          <Settings fontSize="inherit" sx={{opacity: 0.2}}/>
         </IconButton>
         <Drawer sx={{opacity: 0.9}} open={drawerOpen} onClose={toggleDrawer(false)}>
           <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>
@@ -267,7 +265,7 @@ const App: React.FC = () => {
 
       </Box>
       {images.length > 0 && (<Portrait src={`/img/${images[imageIndex]}`}/>)}
-      <Box>
+      <Box id="promptInput">
         <form id="prompt">
         <textarea
           value={prompt}
