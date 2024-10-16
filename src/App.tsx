@@ -86,7 +86,7 @@ function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
       if (images.length === 0) {
         return;
       }
-      let newValue = (imageIndex - delta + images.length) % images.length;
+      let newValue = (imageIndex + delta + images.length) % images.length;
       setImageIndex(newValue);
     };
   }
