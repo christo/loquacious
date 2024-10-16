@@ -1,4 +1,5 @@
 import {addAudioStreamRoute} from "audioStream";
+import {ensureDataDirsExist} from "config";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
@@ -10,18 +11,25 @@ import {OpenAiLlm} from 'llm/OpenAiLlm';
 import {Modes} from "Modes";
 import * as path from 'path';
 import {timed} from "performance";
-import {TYPE_DEFAULT, TYPE_MP3} from "speech/audio";
+import {TYPE_DEFAULT} from "speech/audio";
 import {MACOS_SPEECH_SYSTEM_NAME} from "speech/MacOsSpeech";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
-import {pipeline} from "stream";
 import {systemHealth} from "SystemStatus";
 // Load environment variables
 dotenv.config();
 
 /** relative to server module root */
 const PATH_PORTRAIT = "../public/img";
-const PATH_DATA = "../data";
+
+const PATH_BASE_DATA: string = process.env.DATA_DIR!;
+if (!PATH_BASE_DATA) {
+  console.error("ensure environment variable DATA_DIR is set");
+}
+
+
+// make sure data subdirectories exist
+ensureDataDirsExist(process.env.DATA_DIR!);
 
 const LM_STUDIO_BACKEND: Llm = new LmStudioLlm();
 const OPEN_AI_BACKEND: Llm = new OpenAiLlm();
