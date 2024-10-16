@@ -15,6 +15,9 @@ function dateTimePrompt() {
 }
 
 class Modes {
+  constructor() {
+  }
+
   pauseInstructions(ss: SpeechSystem) {
     const cmd = ss.pauseCommand(1000);
     if (cmd == null) {
@@ -28,13 +31,15 @@ class Modes {
 
   chatModeMessages(prompt: string, ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
     return [
-      {role: 'system', content: `${dateTimePrompt()}
+      {
+        role: 'system', content: `${dateTimePrompt()}
       
       ${chatModeSystemPrompt}
       
       ${universalSystemPrompt}
       
-      ${this.pauseInstructions(ss)}`},
+      ${this.pauseInstructions(ss)}`
+      },
       {role: 'user', content: prompt}
     ];
   }
@@ -50,9 +55,6 @@ class Modes {
       
       ${this.pauseInstructions(ss)}`
     }];
-  }
-
-  constructor() {
   }
 }
 

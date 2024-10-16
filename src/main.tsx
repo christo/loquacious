@@ -1,8 +1,8 @@
-import { createRoot } from 'react-dom/client'
+import CssBaseline from '@mui/material/CssBaseline';
+import {createTheme, ThemeProvider} from '@mui/material/styles';
+import {createRoot} from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 
 const darkTheme = createTheme({
   palette: {
@@ -11,8 +11,8 @@ const darkTheme = createTheme({
 });
 
 createRoot(document.getElementById('root')!).render(
-    <ThemeProvider theme={darkTheme}>
-    <CssBaseline />
-    <App />
-    </ThemeProvider>
+  <ThemeProvider theme={darkTheme}>
+    <CssBaseline/>
+    <App/>
+  </ThemeProvider>
 )

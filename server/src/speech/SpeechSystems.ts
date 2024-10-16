@@ -27,7 +27,7 @@ class SpeechSystemOption {
 
   /** Display object represending a speech system and its configured option */
   safeObject() {
-    return { system: this.system.name, option: this.option, description: this.description };
+    return {system: this.system.name, option: this.option, description: this.description};
   }
 }
 
@@ -42,6 +42,7 @@ class SpeechSystems {
     new NoSpeech(),
     new ElevenLabsSpeech(),
   ]
+
   currentSpeechSystem() {
     return this.systems[this.currentSystemIndex];
   }

@@ -12,7 +12,7 @@ function ensureDataDirsExist(dataDir: string) {
   for (const d of DATA_DIRS) {
     const p = path.join(dataDir, d);
     if (!fs.existsSync(p)) {
-      fs.mkdirSync(p, { recursive: true });
+      fs.mkdirSync(p, {recursive: true});
     }
   }
 }

@@ -65,7 +65,7 @@ async function speak(text: string, voice: string, wpm: number): Promise<string> 
   try {
     await convertAudio(desiredFormat, savePath);
   } catch (e) {
-    console.error(`problem converting audio to ${desiredFormat}`,e);
+    console.error(`problem converting audio to ${desiredFormat}`, e);
     return Promise.reject(e);
   }
   return savePath;

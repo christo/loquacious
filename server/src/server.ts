@@ -27,7 +27,6 @@ if (!PATH_BASE_DATA) {
   console.error("ensure environment variable DATA_DIR is set");
 }
 
-
 // make sure data subdirectories exist
 ensureDataDirsExist(process.env.DATA_DIR!);
 

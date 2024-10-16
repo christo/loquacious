@@ -202,7 +202,7 @@ const App: React.FC = () => {
     let handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        setDrawerOpen((o:boolean) => !o);
+        setDrawerOpen((o: boolean) => !o);
       }
     };
     window.addEventListener('keydown', handleKeyDown);

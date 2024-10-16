@@ -1,4 +1,4 @@
-import type {Llm, ChatResult} from "llm/Llm";
+import type {ChatResult, Llm} from "llm/Llm";
 import OpenAI from "openai";
 import Model = OpenAI.Model;
 

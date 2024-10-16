@@ -1,5 +1,5 @@
-import type {CharacterVoice} from "../server/src/speech/CharacterVoice.ts";
 import OpenAI from "openai";
+import type {CharacterVoice} from "../server/src/speech/CharacterVoice.ts";
 import Model = OpenAI.Model;
 
 type PerfStat = {
