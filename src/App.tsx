@@ -67,26 +67,22 @@ function Status({system}: { system: System }) {
 }
 
 function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
-  const prevSeer = () => {
-    if (images.length === 0) {
-      return;
-    }
-    let newValue = (imageIndex - 1 + images.length) % images.length;
-    setImageIndex(newValue);
-  };
-  const nextSeer = () => {
-    if (images.length === 0) {
-      return;
-    }
-    let newValue = (imageIndex + 1 + images.length) % images.length;
-    setImageIndex(newValue % images.length);
-  };
+  const imgShift = (delta: number) => {
+    return () => {
+      if (images.length === 0) {
+        return;
+      }
+      let newValue = (imageIndex - delta + images.length) % images.length;
+      setImageIndex(newValue);
+    };
+  }
+
   return <Box sx={{display: "flex", gap: 2, mt: 2, alignItems: "center"}}>
-    <IconButton aria-label="previous" size="large" onClick={prevSeer}>
+    <IconButton aria-label="previous" size="large" onClick={imgShift(-1)}>
       <ArrowCircleLeft fontSize="inherit"/>
     </IconButton>
     <Typography fontWeight="700">{imageIndex + 1} of {images.length}</Typography>
-    <IconButton aria-label="next" size="large" onClick={nextSeer}>
+    <IconButton aria-label="next" size="large" onClick={imgShift(1)}>
       <ArrowCircleRight fontSize="inherit"/>
     </IconButton>
   </Box>
