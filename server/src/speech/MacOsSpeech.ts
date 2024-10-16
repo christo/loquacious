@@ -3,7 +3,7 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
 import {timed} from "performance";
-import type {SupportedAudioFormat} from "speech/audio";
+import {type SupportedAudioFormat, TYPE_DEFAULT} from "speech/audio";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
@@ -21,20 +21,16 @@ function mkVoiceFile() {
 }
 
 async function convertAudio(desiredFormat: SupportedAudioFormat, path: string): Promise<string> {
-  if (desiredFormat !== 'aiff') {
-    const finalPath = `${path}.${desiredFormat}`;
-
-    await new Promise<void>((resolve, reject) => {
-      ffmpeg(path)
-        .toFormat(desiredFormat)
-        .on('error', (err) => reject(err))
-        .on('end', () => resolve())
-        .save(finalPath);
-    });
-    return finalPath;
-  }
-  console.log("no conversion required for aiff");
-  return path;
+  const finalPath = `${path}.${desiredFormat}`;
+  console.log(`using ffmpeg to convert ${path} to ${desiredFormat} in ${finalPath}`);
+  await new Promise<void>((resolve, reject) => {
+    ffmpeg(path)
+      .toFormat(desiredFormat)
+      .on('error', (err) => reject(err))
+      .on('end', () => resolve())
+      .save(finalPath);
+  });
+  return finalPath;
 }
 
 const escaped = (x: string) => x.replace(/"/g, '\\"');
@@ -58,14 +54,18 @@ async function speak(text: string, voice: string, wpm: number): Promise<string> 
     return Promise.reject(e);
   }
 
-  let desiredFormat = "mp3" as SupportedAudioFormat;
+  let desiredFormat = TYPE_DEFAULT as SupportedAudioFormat;
   try {
-    await timed("convert audio format", () => convertAudio(desiredFormat, savePath))
+    if (desiredFormat !== 'aiff') {
+      return await timed("convert audio format", () => convertAudio(desiredFormat, savePath))
+    } else {
+      console.log(`no conversion required for aiff ${savePath}`);
+      return savePath;
+    }
   } catch (e) {
     console.error(`problem converting audio to ${desiredFormat}`, e);
     return Promise.reject(e);
   }
-  return savePath;
 }
 
 const VOICES: Array<CharacterVoice> = [

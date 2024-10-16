@@ -1,33 +1,46 @@
 import express, {Request, Response} from "express";
 import fs from "fs";
+import path from "path";
 import {formatToMimeType, TYPE_DEFAULT} from "speech/audio";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {pipeline} from "stream";
 
+function streamFromPath(audioPath: string, res: Response) {
+  const readStream = fs.createReadStream(audioPath);
+  res.setHeader('Content-Type', formatToMimeType(TYPE_DEFAULT));
+  const ppp = audioPath.split(path.sep);
+  // TODO verify this is how we should do audio streams
+  res.setHeader('Content-Disposition', `attachment; filename="${ppp[ppp.length - 1]}"`);
+  pipeline(readStream, res, (err) => {
+    if (err && err.code === "ENOENT") {
+      res.status(404).json({message: "NOT OFOUNDO"}).end();
+    } else if (err) {
+      console.log('Stream pipeline failed:', err);
+      res.status(500).end();
+    }
+  });
+}
+
 // TODO replace format string with media format abstraction that merges mime types, extensions etc.
-function addAudioStreamRoute(app: express.Application, format: string, speechSystem: SpeechSystem) {
+function addAudioStreamRoutes(app: express.Application, speechSystem: SpeechSystem) {
   app.post('/speak', async (req: Request, res: Response) => {
     const {prompt} = req.body;
     const audioPath = await speechSystem.speak(prompt);
     console.log(`got audioPath ${audioPath}`);
-    res.setHeader('Content-Type', formatToMimeType(TYPE_DEFAULT));
-    // TODO verify this is how we should do audio streams
-    res.setHeader('Content-Disposition', `attachment; filename="speech.${format}"`);
 
+    streamFromPath(audioPath, res);
+  })
 
-    try {
-      const readStream = fs.createReadStream(audioPath);
-      pipeline(readStream, res, (err) => {
-        if (err) {
-          console.error('Stream pipeline failed:', err);
-          res.end();
-        }
-      });
-    } catch (e) {
-      console.error('Stream pipeline failed:', e);
-      res.end()
+  app.get('/audio', async (req: Request, res: Response) => {
+    const audioFile = req.query.file?.toString();
+    console.log(`got request for audioFile ${audioFile}`);
+    if (!audioFile) {
+      res.status(404).json({message: "NOT OFOUNDO"});
+    } else {
+      // TODO remove hard-coded extension
+      streamFromPath(audioFile, res);
     }
   })
 }
 
-export {addAudioStreamRoute};
+export {addAudioStreamRoutes};

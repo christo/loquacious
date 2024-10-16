@@ -1,4 +1,4 @@
-import {addAudioStreamRoute} from "audioStream";
+import {addAudioStreamRoutes} from "audioStream";
 import {ensureDataDirsExist} from "config";
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -90,8 +90,8 @@ app.get("/system", async (req: Request, res: Response) => {
 
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
-  const prompt = req.body;
-
+  const {prompt, portrait} = req.body;
+  console.log(`chat request for portrait ${portrait}`);
   if (!prompt) {
     res.status(400).json({error: 'No prompt provided'});
   } else {
@@ -104,12 +104,14 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       });
 
       if (message) {
-        const speechResult = await timed("speech", () => speechSystems.current().speak(message));
+        const speechResult = await timed("speech generation", () => speechSystems.current().speak(message));
         res.json({
-          response: {message},
-          speech: speechResult,
-          backend: BACKENDS[backendIndex].name,
-          model: (await BACKENDS[backendIndex].models())[0]
+          response: {
+            message: message,
+            speech: speechResult,
+            backend: BACKENDS[backendIndex].name,
+            model: (await BACKENDS[backendIndex].models())[0],
+          }
         });
       } else {
         res.status(500).json({error: 'No message in response'});
@@ -122,7 +124,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 });
 
 // TODO remove mac hard-coding once all systems generate audio file / or we abstract streamable audio from file
-addAudioStreamRoute(app, TYPE_DEFAULT, speechSystems.byName(MACOS_SPEECH_SYSTEM_NAME));
+addAudioStreamRoutes(app, speechSystems.byName(MACOS_SPEECH_SYSTEM_NAME));
 
 // Start the server
 app.listen(port, async () => {

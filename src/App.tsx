@@ -1,29 +1,43 @@
 import {ArrowCircleLeft, ArrowCircleRight, Error, QuestionAnswer, School, Settings} from "@mui/icons-material";
 import {Box, Drawer, IconButton, Typography} from "@mui/material";
 import {marked} from 'marked';
+import OpenAI from "openai";
 import React, {useEffect, useState} from 'react';
 import "./App.css";
 import type {HealthError, System} from "./types";
+import Model = OpenAI.Model;
 
 type ChatResponse = {
-  message: string;
+  message: string | undefined;
+  speech: string | undefined;
+  backend: string | undefined;
+  model: Model | undefined;
 }
 
 const responseError = (e: any): ChatResponse => ({
   message: `Error fetching response: ${e}`,
+  speech: undefined,
+  backend: undefined,
+  model: undefined,
 });
 
 const RESPONSE_NULL: ChatResponse = {
   message: "",
+  speech: undefined,
+  backend: undefined,
+  model: undefined,
 }
 
 const RESPONSE_NONE: ChatResponse = {
   message: "No response from LLM",
+  speech: undefined,
+  backend: undefined,
+  model: undefined,
 }
 
-function markdownResponse(response: ChatResponse) {
-  if (response !== null) {
-    return marked.parse(response.message);
+function markdownResponse(message: string | undefined) {
+  if (message) {
+    return marked.parse(message);
   } else {
     return "";
   }
@@ -124,6 +138,46 @@ function Portrait({src}: { src: string }) {
   return <img alt="portrait of a fortune teller" width="100%" className="seer" src={src}/>
 }
 
+function CompResponse({response, loading}: { response: ChatResponse, loading: boolean }) {
+  const speech = response.speech;
+
+  useEffect(() => {
+    if (speech) {
+      const url = `http://localhost:3001/audio?file=${speech}`;
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw "network response for audio was crap";
+          } else {
+            return response.blob();
+          }
+        })
+        .then(blob => {
+          const audioUrl = URL.createObjectURL(blob);
+          const audio = new Audio(audioUrl);
+          audio.play();
+        })
+        .catch(error => {
+          console.error('Fetch-o-Error:', error);
+        });
+    }
+  })
+
+  return <Box className="controls">
+    {(
+      loading ?
+        <Typography>Loading...</Typography>
+        : response === RESPONSE_NULL || !response
+          ? ""
+          : (<Box>
+              <Typography variant="body2" color="textSecondary">{speech}</Typography>
+              <Typography dangerouslySetInnerHTML={{__html: markdownResponse(response.message)}}/>
+            </Box>
+          )
+    )}
+  </Box>;
+}
+
 const App: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState<ChatResponse>(RESPONSE_NULL);
@@ -157,13 +211,16 @@ const App: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({"prompt": prompt}),
+        body: JSON.stringify({
+          prompt: prompt,
+          portrait: images[imageIndex],
+        }),
       });
 
       const data = await result.json();
       setResponse(data.response || RESPONSE_NONE);
     } catch (error) {
-      console.error('Error fetching response:', error);
+      console.error('Error fetching chat response:', error);
       setResponse(responseError(error));
     } finally {
       setLoading(false);
@@ -183,14 +240,6 @@ const App: React.FC = () => {
   const toggleDrawer = (newOpen: boolean) => () => {
     setDrawerOpen(newOpen);
   };
-
-  const respText = (
-    loading ?
-      <Typography>Loading...</Typography>
-      : response === RESPONSE_NULL
-        ? ""
-        : <Typography dangerouslySetInnerHTML={{__html: markdownResponse(response)}}/>
-  );
 
   // ESC toggles drawer
   useEffect(() => {
@@ -229,9 +278,7 @@ const App: React.FC = () => {
           placeholder="welcome, seeker"
         />
         </form>
-        <Box className="controls">
-          {respText}
-        </Box>
+        <CompResponse response={response} loading={loading}/>
       </Box>
 
     </Box>
