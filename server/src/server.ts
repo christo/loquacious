@@ -60,10 +60,11 @@ app.get("/health", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.get("/portraits", async (req: Request, res: Response) => {
+  const extensions = ['.png', '.gif', '.jpg', '.jpeg'];
   const files = await fs.readdir(PATH_PORTRAIT, {withFileTypes: true});
   res.json(
     files
-      .filter(f => f.isFile() && path.extname(f.name).toLowerCase() === '.png')
+      .filter(f => f.isFile() && extensions.includes(path.extname(f.name).toLowerCase()))
       .map(x => x.name));
 });
 
