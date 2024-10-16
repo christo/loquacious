@@ -3,8 +3,9 @@ import {Box, Drawer, IconButton, Typography} from "@mui/material";
 import {marked} from 'marked';
 import React, {useEffect, useState} from 'react';
 import "./App.css";
+import type {HealthError, System} from "./types";
 
-interface ChatResponse {
+type ChatResponse = {
   message: string;
 }
 
@@ -28,25 +29,6 @@ function markdownResponse(response: ChatResponse) {
   }
 }
 
-type HealthError = {
-  code: number,
-  message: string;
-  type: string;
-}
-
-type HealthStatus = {
-  freeMem: {
-    bytes: number,
-    formatted: string,
-  },
-  totalMem: {
-    bytes: number,
-    formatted: string,
-  },
-  error: HealthError | null;
-  message: string | null;
-} | null;
-
 function ShowError({error}: { error: HealthError }) {
   return (<Typography color="error"><Error fontSize="large"/>{error.message}</Typography>);
 }
@@ -55,100 +37,47 @@ function SpeechSettings({speechSettings}: any) {
   return <Box>SPEECH: {speechSettings.current.system}/{speechSettings.current.option}</Box>;
 }
 
-function SettingsDetail({settings}: {settings: any}) {
-  return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start"}}>
-    <Typography>Mode: {settings.mode.current}</Typography>
-    {settings.mode.options.map((m: string) => (<Typography key={`mode_${m}`}>{m}</Typography>))}
-    <Typography><QuestionAnswer fontSize="small"/> {settings.llmMain.name} (models: {settings.llmMain.models.length})</Typography>
-    <Typography><School fontSize="small"/> {settings.llmMain.models[0].id}</Typography>
-    <SpeechSettings speechSettings={settings.speech}/>
-  </Box>
+function SettingsDetail({system}: { system: System }) {
+  if (system == null) {
+    return "";
+  } else {
+    return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start"}}>
+      <Typography>Mode: {system.mode.current}</Typography>
+      {system.mode.options.map((m: string) => (<Typography key={`mode_${m}`}>{m}</Typography>))}
+      <Typography><QuestionAnswer
+        fontSize="small"/> {system.llmMain.name} (models: {system.llmMain.models.length})</Typography>
+      <Typography><School fontSize="small"/> {system.llmMain.models[0].id}</Typography>
+      <SpeechSettings speechSettings={system.speech}/>
+    </Box>
+  }
 }
 
-function FetchSettings() {
-  const [settings, setSettings] = useState<HealthStatus>(null);
-
-  function fetchData() {
-    try {
-      fetch("http://localhost:3001/settings").then(result => {
-        result.json().then(data => {
-          setSettings(data || null);
-        });
-      });
-    } catch (e) {
-      console.error(e);
-    }
+function Status({system}: { system: System }) {
+  if (system == null) {
+    return <p>...</p>
+  } else {
+    const health = system.health;
+    return (<Box>
+      {health.error ? <ShowError error={health.error}/> : ""}
+      <p>{health.message}</p>
+      <p>{health.freeMem.formatted} RAM unused</p>
+      <p>{health.totalMem.formatted} total</p>
+    </Box>);
   }
-
-  useEffect(() => {
-    fetchData();
-
-    const intervalId = setInterval(() => {
-      fetchData();
-    }, 60000);
-
-    // Clean up the interval when the component unmounts
-    return () => clearInterval(intervalId);
-  }, []);
-
-
-  return settings === null ? "" : (
-     <SettingsDetail settings={settings}/>
-  );
-
-}
-
-function Status() {
-  const [status, setStatus] = useState<HealthStatus>(null);
-
-  function fetchData() {
-    try {
-      fetch("http://localhost:3001/health", {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }).then(result => {
-        result.json().then(data => {
-          setStatus(data || null);
-        });
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  useEffect(() => {
-    fetchData();
-
-    const intervalId = setInterval(() => {
-      fetchData();
-    }, 60000);
-
-    // Clean up the interval when the component unmounts
-    return () => clearInterval(intervalId);
-  }, []);
-
-
-  return status === null ? <p>...</p> : (
-    status?.error ? <ShowError error={status.error}/>
-      : (
-        <Box><p>{status.message}</p>
-        <p>{status.freeMem.formatted} RAM unused</p>
-        <p>{status.totalMem.formatted} total</p>
-        </Box>
-      )
-  );
-
 }
 
 function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
   const prevSeer = () => {
-    if (images.length === 0) return;
+    if (images.length === 0) {
+      return;
+    }
     let newValue = (imageIndex - 1 + images.length) % images.length;
     setImageIndex(newValue);
   };
   const nextSeer = () => {
-    if (images.length === 0) return;
+    if (images.length === 0) {
+      return;
+    }
     let newValue = (imageIndex + 1 + images.length) % images.length;
     setImageIndex(newValue % images.length);
   };
@@ -169,13 +98,29 @@ interface SettingsProps {
   setImageIndex: (i: number) => void;
 }
 
-function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps ) {
+function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
+  const [settings, setSettings] = useState<any>(null);
 
-  return <Box sx={{p: 2}}>
-    <Status/>
+  useEffect(() => {
+    try {
+      fetch("http://localhost:3001/system").then(result => {
+        result.json().then(data => {
+          setSettings(data || null);
+        });
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+
+  }, []);
+
+  return <Box sx={{p: 2, display: "flex", flexDirection: "column", gap: 2, mt: 2, alignItems: "center"}}>
     <Typography variant="h4">Settings</Typography>
-    <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} />
-    <FetchSettings/>
+    <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>
+    <SettingsDetail system={settings}/>
+    <Typography variant="h4">System</Typography>
+    <Status system={settings}/>
   </Box>
 }
 
@@ -251,14 +196,29 @@ const App: React.FC = () => {
         ? ""
         : <Typography dangerouslySetInnerHTML={{__html: markdownResponse(response)}}/>
   );
+
+  // ESC toggles drawer
+  useEffect(() => {
+    let handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setDrawerOpen((o:boolean) => !o);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
-    <Box className="primary">
+    <Box className="primary" component="div">
       <Box sx={{m: 2, position: "absolute", bottom: 0, left: 0, p: 0}}>
         <IconButton aria-label="delete" size="large" onClick={toggleDrawer(true)}>
-          <Settings fontSize="inherit" />
+          <Settings fontSize="inherit"/>
         </IconButton>
-        <Drawer sx={{opacity: 0.9}}open={drawerOpen} onClose={toggleDrawer(false)}>
-          <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} />
+        <Drawer sx={{opacity: 0.9}} open={drawerOpen} onClose={toggleDrawer(false)}>
+          <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>
         </Drawer>
 
       </Box>

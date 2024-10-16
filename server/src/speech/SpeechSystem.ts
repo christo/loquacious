@@ -13,13 +13,21 @@ class DisplaySpeechSystem {
 
 // may need to add a method to clean text of speech system directives for display
 
+/**
+ * Represents a test to speech system.
+ */
 type SpeechSystem = {
   name: string;
-  speak: (message: string) => Promise<void>;
+
+  /**
+   * Generates spoken audio for message and returns relative filepath to audio from data base dir.
+   * @param message
+   */
+  speak: (message: string) => Promise<string>;
   options: () => Array<string>;
   /** Command for inserting a speech of this duration or null if no such command exists */
   pauseCommand: (msDuration: number) => string | null;
-  currentOption(): SpeechSystemOption;
+  currentOption: () => SpeechSystemOption;
   display: DisplaySpeechSystem;
 }
 

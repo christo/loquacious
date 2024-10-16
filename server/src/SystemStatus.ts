@@ -3,7 +3,9 @@ import os from "os";
 
 const formatBytes = (bytes: number) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  if (bytes === 0) return '0 Byte';
+  if (bytes === 0) {
+    return '0 Byte';
+  }
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
 };
@@ -34,39 +36,37 @@ async function systemHealth(backends: Array<Llm>, backendIndex: number) {
     perf: [
       {
         seconds: 60,
-        stv: {
-          mean: -1,
-          median: -1,
-          p80: -1,
-          p90: -1,
-          worst: -1,
-          best: -1,
-          count: -1
-        }
+        measure: "stv",
+        mean: -1,
+        median: -1,
+        p80: -1,
+        p90: -1,
+        worst: -1,
+        best: -1,
+        count: -1
+
       },
       {
         seconds: 600,
-        stv: {
-          mean: -1,
-          median: -1,
-          p80: -1,
-          p90: -1,
-          worst: -1,
-          best: -1,
-          count: -1
-        }
+        measure: "stv",
+        mean: -1,
+        median: -1,
+        p80: -1,
+        p90: -1,
+        worst: -1,
+        best: -1,
+        count: -1
       },
       {
         seconds: 6000,
-        stv: {
-          mean: -1,
-          median: -1,
-          p80: -1,
-          p90: -1,
-          worst: -1,
-          best: -1,
-          count: -1
-        }
+        measure: "stv",
+        mean: -1,
+        median: -1,
+        p80: -1,
+        p90: -1,
+        worst: -1,
+        best: -1,
+        count: -1
       }
     ]
   };

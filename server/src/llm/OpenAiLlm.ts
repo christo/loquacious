@@ -1,7 +1,7 @@
 import type {Llm, ChatResult} from "./Llm";
 import OpenAI from "openai";
-import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 import Model = OpenAI.Model;
+import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 
 /**
  * OpenAI LLM Backend

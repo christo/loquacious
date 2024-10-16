@@ -1,3 +1,4 @@
+import {addAudioStreamRoute} from "audioStream";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
@@ -9,12 +10,18 @@ import {OpenAiLlm} from 'llm/OpenAiLlm';
 import {Modes} from "Modes";
 import * as path from 'path';
 import {timed} from "performance";
+import {TYPE_DEFAULT, TYPE_MP3} from "speech/audio";
+import {MACOS_SPEECH_SYSTEM_NAME} from "speech/MacOsSpeech";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
+import {pipeline} from "stream";
 import {systemHealth} from "SystemStatus";
 // Load environment variables
 dotenv.config();
 
+/** relative to server module root */
+const PATH_PORTRAIT = "../public/img";
+const PATH_DATA = "../data";
 
 const LM_STUDIO_BACKEND: Llm = new LmStudioLlm();
 const OPEN_AI_BACKEND: Llm = new OpenAiLlm();
@@ -40,20 +47,20 @@ let currentMode = "invite";
 app.use(cors());
 app.use(express.json());
 
-// Health check route
+// TODO remove this, it's in system
 app.get("/health", async (req: Request, res: Response): Promise<void> => {
   res.json(await systemHealth(BACKENDS, backendIndex));
 });
 
 app.get("/portraits", async (req: Request, res: Response) => {
-  const files = await fs.readdir("../public/img", { withFileTypes: true });
+  const files = await fs.readdir(PATH_PORTRAIT, {withFileTypes: true});
   res.json(
     files
       .filter(f => f.isFile() && path.extname(f.name).toLowerCase() === '.png')
       .map(x => x.name));
 });
 
-app.get("/settings", async (req: Request, res: Response) => {
+app.get("/system", async (req: Request, res: Response) => {
   const current = speechSystems.currentSpeechSystem().currentOption();
   res.json({
     mode: {
@@ -67,7 +74,9 @@ app.get("/settings", async (req: Request, res: Response) => {
     speech: {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
       current: current.safeObject(),
-    }
+      // TODO include filecount of saved speech audio
+    },
+    health: await systemHealth(BACKENDS, backendIndex)
   });
 });
 
@@ -103,6 +112,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     }
   }
 });
+
+// TODO remove mac hard-coding once all systems generate audio file / or we abstract streamable audio from file
+addAudioStreamRoute(app, TYPE_DEFAULT, speechSystems.byName(MACOS_SPEECH_SYSTEM_NAME));
 
 // Start the server
 app.listen(port, async () => {

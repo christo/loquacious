@@ -19,13 +19,15 @@ class SpeechSystemOption {
     this.description = description;
   }
 
+  /** Returns a compact string representation of a {@link SpeechSystem} and its current option. */
   descriptor() {
     const desc = this.description ? ` (${this.description})` : "";
     return `${this.system.name}/${this.option}${desc}`;
   }
 
+  /** Display object represending a speech system and its configured option */
   safeObject() {
-    return { system: this.system.name, option: this.option}
+    return { system: this.system.name, option: this.option, description: this.description };
   }
 }
 
@@ -42,6 +44,15 @@ class SpeechSystems {
   ]
   currentSpeechSystem() {
     return this.systems[this.currentSystemIndex];
+  }
+
+  byName(name: string): SpeechSystem {
+    const maybeFound: SpeechSystem | undefined = this.systems.find(s => s.name == name);
+    if (maybeFound) {
+      return maybeFound;
+    } else {
+      throw Error(`No speech system with name "${name}" found.`);
+    }
   }
 }
 

@@ -60,7 +60,7 @@ class ElevenLabsSpeech implements SpeechSystem {
     return new SpeechSystemOption(this, this.options()[this.currentVoice]);
   }
 
-  async speak(message: string) {
+  async speak(message: string): Promise<string> {
     try {
       console.log("about to generate voice");
       let start = new Date();
@@ -88,6 +88,8 @@ class ElevenLabsSpeech implements SpeechSystem {
     } catch (e) {
       console.error("Error while creating voice stream", e);
     }
+    //TODO return filepath or should we pipe-stream this from remote and tee to file?
+    return "unimplemented";
   }
 
   pauseCommand(msDuration: number): string {
