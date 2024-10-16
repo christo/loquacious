@@ -68,7 +68,7 @@ app.get("/portraits", async (req: Request, res: Response) => {
 });
 
 app.get("/system", async (req: Request, res: Response) => {
-  const current = speechSystems.currentSpeechSystem().currentOption();
+  const current = speechSystems.current().currentOption();
   res.json({
     mode: {
       current: currentMode,
@@ -97,19 +97,20 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     try {
       let message: string | null = await timed("text generation", async () => {
-        let messages = modes.inviteModeMessages(prompt["prompt"], speechSystems.currentSpeechSystem());
+        let messages = modes.inviteModeMessages(prompt["prompt"], speechSystems.current());
         // console.dir(messages);
         const response = await BACKENDS[backendIndex].chat(messages);
         return response.message
       });
 
       if (message) {
+        const speechResult = await timed("speech", () => speechSystems.current().speak(message));
         res.json({
           response: {message},
+          speech: speechResult,
           backend: BACKENDS[backendIndex].name,
           model: (await BACKENDS[backendIndex].models())[0]
         });
-        await timed("speech", () => speechSystems.currentSpeechSystem().speak(message));
       } else {
         res.status(500).json({error: 'No message in response'});
       }
@@ -133,5 +134,5 @@ app.listen(port, async () => {
   console.log(`LLM current model: ${await llm.currentModel()}`);
   console.log("LLM available models:");
   (await llm.models()).forEach(m => console.log(`   ${m.id}`));
-  console.log(`Current Speech System: ${speechSystems.currentSpeechSystem().currentOption().descriptor()}`);
+  console.log(`Current Speech System: ${speechSystems.current().currentOption().descriptor()}`);
 });

@@ -36,14 +36,14 @@ class SpeechSystemOption {
  */
 class SpeechSystems {
 
-  currentSystemIndex = 0;
+  private currentSystemIndex = 0;
   systems: Array<SpeechSystem> = [
     new MacOsSpeech(),
     new NoSpeech(),
     new ElevenLabsSpeech(),
   ]
 
-  currentSpeechSystem() {
+  current() {
     return this.systems[this.currentSystemIndex];
   }
 

@@ -2,6 +2,7 @@ import {exec} from 'child_process';
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
+import {timed} from "performance";
 import type {SupportedAudioFormat} from "speech/audio";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
@@ -51,11 +52,7 @@ async function speak(text: string, voice: string, wpm: number): Promise<string> 
   let command = `say "${escaped(text)}" -v "${escaped(voice)}" -r ${wpm} -o "${savePath}"`;
 
   try {
-    let child = await execPromise(command);
-    // TODO remove this debugging output
-    console.log("say command output follows");
-    console.log(child.stdout);
-    console.error(child.stderr)
+    await execPromise(command);
   } catch (e) {
     console.error(e);
     return Promise.reject(e);
@@ -63,7 +60,7 @@ async function speak(text: string, voice: string, wpm: number): Promise<string> 
 
   let desiredFormat = "mp3" as SupportedAudioFormat;
   try {
-    await convertAudio(desiredFormat, savePath);
+    await timed("convert audio format", () => convertAudio(desiredFormat, savePath))
   } catch (e) {
     console.error(`problem converting audio to ${desiredFormat}`, e);
     return Promise.reject(e);
@@ -94,7 +91,8 @@ class MacOsSpeech implements SpeechSystem {
   display = new DisplaySpeechSystem(this.name, VOICES);
 
   currentOption(): SpeechSystemOption {
-    return new SpeechSystemOption(this, VOICES[this.currentIndex].voiceId, VOICES[this.currentIndex].description);
+    const v = VOICES[this.currentIndex];
+    return new SpeechSystemOption(this, v.voiceId, v.description);
   }
 
   options(): Array<string> {
