@@ -21,7 +21,7 @@ LLM chat application experiment.
 
 ## TODO
 
-* [ ] save generated voice to file
+* [x] save generated voice to file
 * [ ] db schema
   * system prompt versions
   * modestates
