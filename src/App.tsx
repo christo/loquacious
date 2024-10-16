@@ -95,7 +95,7 @@ function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
     <IconButton aria-label="previous" size="large" onClick={imgShift(-1)}>
       <ArrowCircleLeft fontSize="inherit"/>
     </IconButton>
-    <Typography fontWeight="700">{imageIndex + 1} of {images.length}</Typography>
+    <Typography fontWeight="700">Image {imageIndex + 1} of {images.length}</Typography>
     <IconButton aria-label="next" size="large" onClick={imgShift(1)}>
       <ArrowCircleRight fontSize="inherit"/>
     </IconButton>
