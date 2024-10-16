@@ -120,9 +120,8 @@ function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
   </Box>
 }
 
-function Seer({src}: { src: string }) {
+function Portrait({src}: { src: string }) {
   return <img alt="portrait of a fortune teller" width="100%" className="seer" src={src}/>
-
 }
 
 const App: React.FC = () => {
@@ -218,7 +217,7 @@ const App: React.FC = () => {
         </Drawer>
 
       </Box>
-      {images.length > 0 && (<Seer src={`/img/${images[imageIndex]}`}/>)}
+      {images.length > 0 && (<Portrait src={`/img/${images[imageIndex]}`}/>)}
       <Box>
         <form id="prompt">
         <textarea
