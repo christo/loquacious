@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "Server component that can connect to OpenAI or local llama.cpp server",
   "dependencies": {
+    "@fal-ai/client": "^1.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "elevenlabs": "^0.16.1",
