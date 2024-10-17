@@ -61,6 +61,7 @@ class FalService implements LipSync {
     //console.log(`imgFile.size: ${imgFile.size}`);
     const imgUrl = await timed<string>("fal upload image", () => fal.storage.upload(imgFile));
     //console.log(`imgUrl: ${imgUrl}`);
+    console.log("about to read speech file", speech);
     const speechFile = await readBinaryFile(speech);
     //console.log(`speechFile.size: ${speechFile.size}`);
     const speechUrl = await timed<string>("fal upload speech", () => fal.storage.upload(speechFile));
@@ -72,16 +73,17 @@ class FalService implements LipSync {
       input: {
         source_image_url: imgUrl,
         driven_audio_url: speechUrl,
-        // pose_style: 14,             // 0-45 integer
+        pose_style: 14,             // 0-45 integer
         face_model_resolution: "512",    // string 256 or 512
         expression_scale: 1.4,      // 0-3 float
-        face_enhancer: 'gfpgan',       // blank or only option - not sure of impact
+        //face_enhancer: 'gfpgan',       // blank or only option - not sure of impact
         still_mode: false,             // whether to use few head movements
-        preprocess: "full",            // crop, extcrop, resize, full, extfull
+        preprocess: "extfull",            // crop, extcrop, resize, full, extfull
       }
     }));
     console.log("sadtalker result from fal");
-    const lipSyncResult = result.data.video as SadTalkerLipSyncResult;
+    const r = result.data.video;
+    const lipSyncResult = new SadTalkerLipSyncResult(r.url, r.content_type, r.file_name, r.file_size);
     const videoUrl = await fetch(lipSyncResult.getVideoUrl());
     const buffer = await videoUrl.arrayBuffer();
     await fs.writeFile(path.join(this.lipSyncDataDir, lipSyncResult.getFileName()), Buffer.from(buffer));
