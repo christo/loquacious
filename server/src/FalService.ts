@@ -74,7 +74,7 @@ class FalService implements LipSync {
         source_image_url: imgUrl,
         driven_audio_url: speechUrl,
         pose_style: 14,             // 0-45 integer
-        face_model_resolution: "512",    // string 256 or 512
+        face_model_resolution: "512",    // string "256" or "512"
         expression_scale: 1.4,      // 0-3 float
         //face_enhancer: 'gfpgan',       // blank or only option - not sure of impact
         still_mode: false,             // whether to use few head movements
