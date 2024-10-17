@@ -202,7 +202,7 @@ const App: React.FC = () => {
 
   }, []);
 
-  const [imageIndex, setImageIndex] = useState(39);
+  const [imageIndex, setImageIndex] = useState(40);
 
   const handleSubmit = async () => {
     if (!prompt.trim()) {
