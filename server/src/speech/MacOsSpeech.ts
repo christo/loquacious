@@ -3,6 +3,7 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
 import {timed} from "performance";
+import {Simulate} from "react-dom/test-utils";
 import {type SupportedAudioFormat, TYPE_DEFAULT} from "speech/audio";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
@@ -13,11 +14,10 @@ import util from "util";
 const execPromise = util.promisify(exec);
 const unlinkPromise = util.promisify(fs.unlink);
 
-function mkVoiceFile() {
+function mkVoiceFile(dataDir: string) {
   // TODO file tts under data/tts/<system>/<option>/tts_<db-id>.<format>
-  const tempDir = `${process.env.DATA_DIR}/tts`;
   const uniqueId = Date.now();
-  return path.join(tempDir, `tts_${uniqueId}.aiff`);
+  return path.join(dataDir, `tts_${uniqueId}.aiff`);
 }
 
 async function convertAudio(desiredFormat: SupportedAudioFormat, path: string): Promise<string> {
@@ -42,8 +42,8 @@ const escaped = (x: string) => x.replace(/"/g, '\\"');
  * @param wpm Optional. The speed rate (1 is default).
  * @returns A promise that resolves to the file to stream back.
  */
-async function speak(text: string, voice: string, wpm: number): Promise<string> {
-  const savePath = mkVoiceFile();
+async function speak(text: string, voice: string, wpm: number, dataDir: string): Promise<string> {
+  const savePath = mkVoiceFile(dataDir);
   // Construct the command
   let command = `say "${escaped(text)}" -v "${escaped(voice)}" -r ${wpm} -o "${savePath}"`;
 
@@ -89,6 +89,12 @@ class MacOsSpeech implements SpeechSystem {
   name = MACOS_SPEECH_SYSTEM_NAME;
   currentIndex = 0;
   display = new DisplaySpeechSystem(this.name, VOICES);
+  private ttsDataDir: string;
+
+
+  constructor(ttsDataDir: string) {
+    this.ttsDataDir = ttsDataDir;
+  }
 
   currentOption(): SpeechSystemOption {
     const v = VOICES[this.currentIndex];
@@ -100,7 +106,7 @@ class MacOsSpeech implements SpeechSystem {
   }
 
   async speak(message: string): Promise<string> {
-    return await speak(message, VOICES[this.currentIndex].voiceId, speed)
+    return await speak(message, VOICES[this.currentIndex].voiceId, speed, this.ttsDataDir)
       .catch((error) => {
         console.error('An error occurred during speech synthesis:', error);
         return Promise.reject(error);

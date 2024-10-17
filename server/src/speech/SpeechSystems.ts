@@ -36,11 +36,11 @@ class SpeechSystemOption {
  */
 class SpeechSystems {
 
-  private currentSystemIndex = 0;
+  private currentSystemIndex = 2;
   systems: Array<SpeechSystem> = [
-    new MacOsSpeech(),
+    new MacOsSpeech(`${process.env.DATA_DIR}/tts`),
     new NoSpeech(),
-    new ElevenLabsSpeech(),
+    new ElevenLabsSpeech(`${process.env.DATA_DIR}/tts`),
   ]
 
   current() {

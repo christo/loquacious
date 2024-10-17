@@ -1,4 +1,7 @@
-import {ElevenLabsClient, stream} from "elevenlabs";
+import {ElevenLabsClient} from "elevenlabs";
+import fs from 'fs';
+import path from "path";
+import {timed} from "performance";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
@@ -46,8 +49,10 @@ class ElevenLabsSpeech implements SpeechSystem {
   name = `ElevenLabs`;
   client: ElevenLabsClient;
   display: DisplaySpeechSystem;
+  private readonly ttsDataDir: string;
 
-  constructor() {
+  constructor(ttsDataDir: string) {
+    this.ttsDataDir = ttsDataDir;
     this.client = new ElevenLabsClient({});
     this.display = new DisplaySpeechSystem(this.name, VOICES)
   }
@@ -61,35 +66,40 @@ class ElevenLabsSpeech implements SpeechSystem {
   }
 
   async speak(message: string): Promise<string> {
+    const outFilename = `el_tts_${Date.now()}.mp3`;
+    const outFile = path.join(this.ttsDataDir, outFilename);
     try {
-      console.log("about to generate voice");
-      let start = new Date();
-      const audio = await this.client.generate({
-        voice: this.characterVoice.voiceId,
-        stream: true,
-
-        text: message,
-        model_id: "eleven_multilingual_v2",
-        voice_settings: {
-          stability: 0.4,
-          similarity_boost: 0.1,
-          style: 0.8,
-          use_speaker_boost: true
-        }
+      const audio = await timed(
+        "elevenlabs generate speech",
+        () => this.client.generate({
+          voice: this.characterVoice.voiceId,
+          output_format: "mp3_44100_128",
+          text: message,
+          model_id: "eleven_multilingual_v2",
+          voice_settings: {
+            stability: 0.4,
+            similarity_boost: 0.1,
+            style: 0.8,
+            use_speaker_boost: true
+          }
+        }));
+      const outStream = fs.createWriteStream(outFile);
+      audio.on('error', (err) => {
+        console.error('Error in reading the file:', err);
       });
-      console.log(`voice generation complete in ${new Date().getTime() - start.getTime()} ms`)
 
-      console.log("about to stream voice");
-      start = new Date();
+      outStream.on('error', (err) => {
+        console.error('Error in writing the file:', err);
+      });
 
-      await stream(audio);
-
-      console.log(`voice streaming finished ${new Date().getTime() - start.getTime()} ms`);
+      outStream.on('finish', () => {
+        console.log('File writing completed successfully.');
+      });
+      audio.pipe(outStream);
     } catch (e) {
       console.error("Error while creating voice stream", e);
     }
-    //TODO return filepath or should we pipe-stream this from remote and tee to file?
-    return "unimplemented";
+    return outFile;
   }
 
   pauseCommand(msDuration: number): string {
