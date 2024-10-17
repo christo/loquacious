@@ -5,16 +5,18 @@ import path from "path";
 import {timed} from "performance";
 
 class SadTalkerLipSyncResult implements LipSyncResult {
-  url: string;
-  content_type: string;
-  file_name: string;
-  file_size: number;
+  readonly url: string;
+  readonly content_type: string;
+  readonly file_name: string;
+  readonly file_size: number;
+  readonly videoPath: string;
 
-  constructor(url: string, content_type: string, file_name: string, file_size: number) {
+  constructor(url: string, content_type: string, file_name: string, file_size: number, videoPath: string) {
     this.url = url;
     this.content_type = content_type;
     this.file_name = file_name;
     this.file_size = file_size;
+    this.videoPath = videoPath;
   }
 
   getContentType(): string {
@@ -31,6 +33,10 @@ class SadTalkerLipSyncResult implements LipSyncResult {
 
   getVideoUrl(): string {
     return this.url;
+  }
+
+  getVideoPath(): string {
+    return this.videoPath;
   }
 }
 
@@ -56,20 +62,26 @@ class FalService implements LipSync {
   }
 
   async lipSync(img: string, speech: string): Promise<LipSyncResult> {
-    //console.log(img, speech);
     const imgFile = await readBinaryFile(img);
-    //console.log(`imgFile.size: ${imgFile.size}`);
     const imgUrl = await timed<string>("fal upload image", () => fal.storage.upload(imgFile));
-    //console.log(`imgUrl: ${imgUrl}`);
-    console.log("about to read speech file", speech);
     const speechFile = await readBinaryFile(speech);
-    //console.log(`speechFile.size: ${speechFile.size}`);
     const speechUrl = await timed<string>("fal upload speech", () => fal.storage.upload(speechFile));
-    //console.log(`speechUrl: ${speechUrl}`);
 
-    const result: Result<{
-      video: SadTalkerLipSyncResult
-    }> = await timed("fal run sadtalker", () => fal.run(FalService.SADTALKER_ENDPOINT, {
+    const result: Result<{ video: SadTalkerLipSyncResult }> = await timed(
+      "fal run sadtalker",
+      () => fal.run(FalService.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl)));
+    return timed("fal sadtalker video download", async () => {
+      const r = result.data.video;
+      const videoDownload = await fetch(r.url);
+      const buffer = await videoDownload.arrayBuffer();
+      const downloadedVideo = path.join(this.lipSyncDataDir, r.file_name);
+      await fs.writeFile(downloadedVideo, Buffer.from(buffer));
+      return new SadTalkerLipSyncResult(r.url, r.content_type, r.file_name, r.file_size, downloadedVideo);
+    });
+  }
+
+  private sadtalkerParams(imgUrl: string, speechUrl: string) {
+    return {
       input: {
         source_image_url: imgUrl,
         driven_audio_url: speechUrl,
@@ -80,14 +92,7 @@ class FalService implements LipSync {
         still_mode: false,             // whether to use few head movements
         preprocess: "extfull",            // crop, extcrop, resize, full, extfull
       }
-    }));
-    console.log("sadtalker result from fal");
-    const r = result.data.video;
-    const lipSyncResult = new SadTalkerLipSyncResult(r.url, r.content_type, r.file_name, r.file_size);
-    const videoUrl = await fetch(lipSyncResult.getVideoUrl());
-    const buffer = await videoUrl.arrayBuffer();
-    await fs.writeFile(path.join(this.lipSyncDataDir, lipSyncResult.getFileName()), Buffer.from(buffer));
-    return lipSyncResult;
+    };
   }
 }
 

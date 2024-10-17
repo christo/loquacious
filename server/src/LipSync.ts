@@ -3,6 +3,8 @@ type LipSyncResult = {
   getContentType(): string;
   getFileName(): string;
   getFileSize(): number;
+  /** Local relative path on server of video */
+  getVideoPath(): string;
 }
 
 interface LipSync {

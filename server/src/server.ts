@@ -107,7 +107,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         const speechResult = await timed("speech generation", () => speechSystems.current().speak(message));
 
         const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
-        const lipsyncFilename = await timed("lipsync", () => {
+        const lipsyncResult = await timed("lipsync", () => {
           return lipSync.lipSync(portait, speechResult)
         });
 
@@ -115,7 +115,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           response: {
             message: message,
             speech: speechResult,
-            lipsync: lipsyncFilename,
+            lipsync: lipsyncResult,
             backend: BACKENDS[backendIndex].name,
             model: (await BACKENDS[backendIndex].models())[0],
           }
