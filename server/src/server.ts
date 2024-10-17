@@ -130,8 +130,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// TODO remove mac hard-coding once all systems generate audio file / or we abstract streamable audio from file
-addAudioStreamRoutes(app, speechSystems.byName(MACOS_SPEECH_SYSTEM_NAME));
+addAudioStreamRoutes(app, speechSystems.current());
 
 // Start the server
 app.listen(port, async () => {

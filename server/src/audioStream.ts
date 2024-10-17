@@ -29,7 +29,7 @@ function addAudioStreamRoutes(app: express.Application, speechSystem: SpeechSyst
     console.log(`got audioPath ${audioPath}`);
 
     streamFromPath(audioPath, res);
-  })
+  });
 
   app.get('/audio', async (req: Request, res: Response) => {
     const audioFile = req.query.file?.toString();
@@ -40,7 +40,7 @@ function addAudioStreamRoutes(app: express.Application, speechSystem: SpeechSyst
       // TODO remove hard-coded extension
       streamFromPath(audioFile, res);
     }
-  })
+  });
 }
 
 export {addAudioStreamRoutes};
