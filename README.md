@@ -22,8 +22,27 @@ LLM chat application experiment.
 ## TODO
 
 * [x] save generated voice to file
+* design character persona and interaction workflow such that potentially long latency responses are normalised within the theatric context.
+  * expert-system graph of cached and precalculated fast responses or stalling performances
+  * small LLM for fast detection of sentiment or context that can be appropriately stalled.
+  * important goddess persona might imply momentus long latency interactions because she doesn't deal with trivialities of an everyday nature
+  * absent-minded old character may provide cover for more explicit stalling
+  * guided interactions that request long inputs that are expected to deserve long-pondering behaviour before any strict indication of comprehension or an answering response is expected. 
+    * e.g. if a fortune teller asks you to dig deep into your heart to ask a question of significance, it is OK to theatrically consult the crystal ball before finally providing a response
+    * the character should indulge in slow, high-ceremony behaviour such that high latency responses are less likely to break suspension-of-disbelief
+    * if the user is directed to speak slowly or can be asked to engage in ceremony too, then the expected cadence can better fit the high latency limitations of the system.
+    * shepherding the user away from fast banter towards deeply contemplated questions deserving of a divinely inspired being will hopefully provide cover for the otherwise conspicuous absence of fast-paced banter
 * [ ] db schema
   * system prompt versions
+  * expert-system graph
+    * pregenerated low-latency responses with sufficient variation renderings
+    * detection of equivalence matching for short phrases, even as subcomponents
+    * dynamic caching across media production graph:
+       * each text needs multiple voice renderings per voice
+       * each text needs multiple rephrasings
+       * each voice rendering needs multiple lipsync videos per portrait
+    * video segments must return to known origin pose
+    * front-end sequencing of a chain of video segments
   * modestates
   * text-to-text: prompts, output, modestate, system, model, datetime, system-parameters
   * text-to-speech: input, system, options
