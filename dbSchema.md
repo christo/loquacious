@@ -204,6 +204,23 @@ Text to text
 Workflow graph values may not belong in db but need to be referenced:
 idle, attract, invite, chat, close etc..
 
+Need a "warmup" mode that must complete before user-interactivity. Might cover
+pregeneration of canned responses or file format conversion. System needs to have well-defined front-end behaviour during each mode. The warmup mode might be
+a special case.
+
+Maybe a reset mode where the server is inacessible from the front-end and it
+indicates differently that it has no idea what is going on because it can't
+reach its server to even tell it if the network is down or that it is busy.
+
+Might need fault modes like if the network goes down unexpectedly. Maybe need
+to precalculate front-end behaviour to explain this. Such as making the
+persona go to sleep, meditate or have left the scene leaving an empty chair.
+
+It would be cool to be able to generate a meditating closed-eyed version of 
+each source portrait using pose-estimation and face detection on the source
+portrait. Also to use image to text to figure out if the image generation
+succeeded.
+
 These might be deployment specific and be implemented differently depending
 on available subsystems. If no video, then triggering a mode state transition
 needs to have an alternative defined mechanism than pose estimation.
@@ -227,6 +244,26 @@ Generated video from speech audio, portrait and maybe gesture reference
 * portrait - fk - input
 * gesture_reference - fk - optional input
 * video
+
+## vision
+
+Image-to-text interpretation of image contents for self-image, description and
+detection of punter or interpretation of arbitrary scene from some other cam.
+
+Will be used as template parameter input for system prompt or embeddings.
+
+* created - timestamp
+* system
+* parameters
+* image - file ref - not necessarily a self or punter portrait
+* description - basic description of image contents
+
+## embeddings
+
+Not sure how these work yet, but it would bulk load information to be used
+for reference by the persona. It could be an event schedule for the deployment
+or some set of predefined lore loaded this way as an alternative to training,
+fine-tuning or system prompt.
 
 ## judgement
 
@@ -270,18 +307,21 @@ also be detectable unwanted outputs (video format, length, size invariants
 can be broken). LLM refusal may or may not be considered a fault or a low
 quality legitimate output?
 
+* created - datetime
 * type - some short category (maybe also detect soft refusals by models)
 * description - detail
 * system_version - fk
 * deployment - fk
 * session - fk
+* current mode
 * ... other details similar to performance logs
 
 ## precalculation metadata
 
 Various artifacts should be generated either on-demand or preemptively.
 We may want to automatically generate combinatoric versions of canned tts and
-lipsync video automatically when portrait images update.
+lipsync video automatically when portrait images update. These could be done
+in a pre-startup baking operation which is more like a modestate.
 
 ## test suite specific data
 
