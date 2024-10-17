@@ -4,6 +4,7 @@ import {marked} from 'marked';
 import OpenAI from "openai";
 import React, {useEffect, useState} from 'react';
 import "./App.css";
+import type {ImageInfo} from "../server/src/ImageInfo.ts";
 import type {HealthError, System} from "./types";
 import Model = OpenAI.Model;
 
@@ -91,19 +92,24 @@ function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
     };
   }
 
-  return <Box sx={{display: "flex", gap: 2, mt: 2, alignItems: "center"}}>
-    <IconButton aria-label="previous" size="large" onClick={imgShift(-1)}>
-      <ArrowCircleLeft fontSize="inherit"/>
-    </IconButton>
-    <Typography fontWeight="700">Image {imageIndex + 1} of {images.length}</Typography>
-    <IconButton aria-label="next" size="large" onClick={imgShift(1)}>
-      <ArrowCircleRight fontSize="inherit"/>
-    </IconButton>
+  return <Box sx={{display: "flex", flexDirection: "column", gap: 1}}>
+    <Box sx={{display: "flex", gap: 2, mt: 2, alignItems: "center"}}>
+      <IconButton aria-label="previous" size="large" onClick={imgShift(-1)}>
+        <ArrowCircleLeft fontSize="inherit"/>
+      </IconButton>
+      <Typography fontWeight="700">Image {imageIndex + 1} of {images.length}</Typography>
+      <IconButton aria-label="next" size="large" onClick={imgShift(1)}>
+        <ArrowCircleRight fontSize="inherit"/>
+      </IconButton>
+    </Box>
+    <Box>
+      <Typography>{images[imageIndex].w} x {images[imageIndex].h}</Typography>
+    </Box>
   </Box>
 }
 
 interface SettingsProps {
-  images: string[];
+  images: ImageInfo[];
   imageIndex: number;
   setImageIndex: (i: number) => void;
 }
@@ -176,11 +182,12 @@ function CompResponse({response, loading}: { response: ChatResponse, loading: bo
   </Box>;
 }
 
+
 const App: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState<ChatResponse>(RESPONSE_NULL);
   const [loading, setLoading] = useState(false);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<ImageInfo[]>([]);
 
   useEffect(() => {
     try {
@@ -195,7 +202,7 @@ const App: React.FC = () => {
 
   }, []);
 
-  const [imageIndex, setImageIndex] = useState(34);
+  const [imageIndex, setImageIndex] = useState(39);
 
   const handleSubmit = async () => {
     if (!prompt.trim()) {
@@ -264,7 +271,7 @@ const App: React.FC = () => {
         </Drawer>
 
       </Box>
-      {images.length > 0 && (<Portrait src={`/img/${images[imageIndex]}`}/>)}
+      {images.length > 0 && (<Portrait src={`/img/${images[imageIndex].f}`}/>)}
       <Box id="promptInput">
         <form id="prompt">
         <textarea

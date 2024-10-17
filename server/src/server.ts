@@ -3,7 +3,9 @@ import {ensureDataDirsExist} from "config";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
+import {FalService} from "FalService";
 import {promises as fs} from 'fs';
+import {ImageInfo} from "ImageInfo";
 import {LlamaCppLlm} from "llm/LlamaCppLlm";
 import {type Llm} from 'llm/Llm';
 import {LmStudioLlm} from "llm/LmStudioLlm";
@@ -11,7 +13,6 @@ import {OpenAiLlm} from 'llm/OpenAiLlm';
 import {Modes} from "Modes";
 import * as path from 'path';
 import {timed} from "performance";
-import {TYPE_DEFAULT} from "speech/audio";
 import {MACOS_SPEECH_SYSTEM_NAME} from "speech/MacOsSpeech";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
@@ -40,10 +41,10 @@ const BACKENDS = [
   LM_STUDIO_BACKEND,
 ]
 
-let backendIndex = 2;
+let backendIndex = 1;
 
 const speechSystems = new SpeechSystems();
-
+const lipSync = new FalService(path.join(PATH_BASE_DATA, "lipsync").toString());
 const modes = new Modes();
 
 const app = express();
@@ -54,18 +55,16 @@ let currentMode = "invite";
 app.use(cors());
 app.use(express.json());
 
-// TODO remove this, it's in system
-app.get("/health", async (req: Request, res: Response): Promise<void> => {
-  res.json(await systemHealth(BACKENDS, backendIndex));
-});
-
 app.get("/portraits", async (req: Request, res: Response) => {
   const extensions = ['.png', '.gif', '.jpg', '.jpeg'];
-  const files = await fs.readdir(PATH_PORTRAIT, {withFileTypes: true});
-  res.json(
-    files
-      .filter(f => f.isFile() && extensions.includes(path.extname(f.name).toLowerCase()))
-      .map(x => x.name));
+  const files = (await fs.readdir(PATH_PORTRAIT, {withFileTypes: true}))
+    .filter(f => f.isFile() && extensions.includes(path.extname(f.name).toLowerCase()))
+    .map(x => x.name);
+  const imageInfos = [];
+  for (let file of files) {
+    imageInfos.push(await ImageInfo.fromFile(PATH_PORTRAIT, file));
+  }
+  res.json(imageInfos);
 });
 
 app.get("/system", async (req: Request, res: Response) => {
@@ -106,10 +105,18 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
       if (message) {
         const speechResult = await timed("speech generation", () => speechSystems.current().speak(message));
+
+        const lipsyncFilename = await timed("lipsync", async () => {
+          const result = await lipSync.lipSync(path.join(PATH_PORTRAIT, portrait.f).toString(), speechResult)
+
+        });
+
+
         res.json({
           response: {
             message: message,
             speech: speechResult,
+            lipsync: lipsyncFilename,
             backend: BACKENDS[backendIndex].name,
             model: (await BACKENDS[backendIndex].models())[0],
           }
@@ -118,7 +125,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({error: 'No message in response'});
       }
     } catch (error) {
-      console.error('Error fetching response from OpenAI:', error);
+      console.error('Error performing loquacious chat:', error);
       res.status(500);
     }
   }
