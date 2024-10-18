@@ -1,4 +1,4 @@
-import {addAudioStreamRoutes} from "api/audioStream";
+import {addVideoStreamRoutes, addAudioStreamRoutes} from "api/mediaStream";
 import {ensureDataDirsExist} from "config";
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -13,11 +13,9 @@ import {OpenAiLlm} from 'llm/OpenAiLlm';
 import {Modes} from "Modes";
 import * as path from 'path';
 import {timed} from "performance";
-import {MACOS_SPEECH_SYSTEM_NAME} from "speech/MacOsSpeech";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
 import {systemHealth} from "SystemStatus";
-import {addVideoStreamRoutes} from "api/videoStream";
 // Load environment variables
 dotenv.config();
 
