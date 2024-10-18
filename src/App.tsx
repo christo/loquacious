@@ -13,27 +13,13 @@ type ChatResponse = {
   speech: string | undefined;
   backend: string | undefined;
   model: Model | undefined;
-}
-
-const responseError = (e: any): ChatResponse => ({
-  message: `Error fetching response: ${e}`,
-  speech: undefined,
-  backend: undefined,
-  model: undefined,
-});
-
-const RESPONSE_NULL: ChatResponse = {
-  message: "",
-  speech: undefined,
-  backend: undefined,
-  model: undefined,
-}
-
-const RESPONSE_NONE: ChatResponse = {
-  message: "No response from LLM",
-  speech: undefined,
-  backend: undefined,
-  model: undefined,
+  lipsync: {
+    url: string;
+    content_type: string;
+    file_name: "string";
+    file_size: number,
+    videoPath: string;
+  } | undefined;
 }
 
 function markdownResponse(message: string | undefined) {
@@ -143,11 +129,11 @@ function Portrait({src}: { src: string }) {
 }
 
 function CompResponse({response, loading}: { response: ChatResponse, loading: boolean }) {
-  const speech = response.speech;
+  const video = response.lipsync?.videoPath;
 
   useEffect(() => {
-    if (speech) {
-      const url = `http://localhost:3001/audio?file=${speech}`;
+    if (video) {
+      const url = `http://localhost:3001/video?file=${video}`;
       fetch(url)
         .then(response => {
           if (!response.ok) {
@@ -157,9 +143,12 @@ function CompResponse({response, loading}: { response: ChatResponse, loading: bo
           }
         })
         .then(blob => {
-          const audioUrl = URL.createObjectURL(blob);
-          const audio = new Audio(audioUrl);
-          audio.play();
+          // TODO need to swap the img portrait for the video
+
+          console.log(`got blob size ${blob.size}`);
+          // const audioUrl = URL.createObjectURL(blob);
+          // const audio = new Audio(audioUrl);
+          // audio.play();
         })
         .catch(error => {
           console.error('Fetch-o-Error:', error);
@@ -171,10 +160,10 @@ function CompResponse({response, loading}: { response: ChatResponse, loading: bo
     {(
       loading ?
         <Typography>Loading...</Typography>
-        : response === RESPONSE_NULL || !response
+        : !response
           ? ""
           : (<Box>
-              <Typography variant="body2" color="textSecondary">{speech}</Typography>
+              <Typography variant="body2" color="textSecondary">{video}</Typography>
               <Typography dangerouslySetInnerHTML={{__html: markdownResponse(response.message)}}/>
             </Box>
           )
@@ -185,7 +174,7 @@ function CompResponse({response, loading}: { response: ChatResponse, loading: bo
 
 const App: React.FC = () => {
   const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState<ChatResponse>(RESPONSE_NULL);
+  const [response, setResponse] = useState<ChatResponse>({} as ChatResponse);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<ImageInfo[]>([]);
 
@@ -223,10 +212,11 @@ const App: React.FC = () => {
       });
 
       const data = await result.json();
-      setResponse(data.response || RESPONSE_NONE);
+      setResponse(data.response || {} as ChatResponse);
     } catch (error) {
+      // TODO signal error in frontend
       console.error('Error fetching chat response:', error);
-      setResponse(responseError(error));
+      setResponse({} as ChatResponse);
     } finally {
       setLoading(false);
     }
