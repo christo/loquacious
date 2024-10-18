@@ -6,11 +6,11 @@
   belong on the filesystem and ideally their content can be identified
   or categorised conveniently.
 * consider everything making sense when:
-  * sometimes different subsystems are disabled at runtime
-  * physical kiosk deployment
-  * online video call deployment
-  * online audio-only call deployment
-  * online remote deployment (e.g. staging/test)
+    * sometimes different subsystems are disabled at runtime
+    * physical kiosk deployment
+    * online video call deployment
+    * online audio-only call deployment
+    * online remote deployment (e.g. staging/test)
 
 ## system_version
 
@@ -177,7 +177,8 @@ Speech to text
 
 Forms a graph but how to resolve/store value references for usage instances?
 
-Templates for producing system prompt text with named holes for parameters that are dynamically filled (e.g. current time, another prompt template)
+Templates for producing system prompt text with named holes for parameters that
+are dynamically filled (e.g. current time, another prompt template)
 
 What format to use?
 
@@ -186,7 +187,8 @@ What format to use?
 ## prompt_parameter
 
 * unique_name
-* function_reference - code refe.g. current datetime refers to a function that always
+* function_reference - code refe.g. current datetime refers to a function that
+  always
   returns a different value or a prompt template?
 
 ## chat
@@ -205,7 +207,8 @@ Workflow graph values may not belong in db but need to be referenced:
 idle, attract, invite, chat, close etc..
 
 Need a "warmup" mode that must complete before user-interactivity. Might cover
-pregeneration of canned responses or file format conversion. System needs to have well-defined front-end behaviour during each mode. The warmup mode might be
+pregeneration of canned responses or file format conversion. System needs to
+have well-defined front-end behaviour during each mode. The warmup mode might be
 a special case.
 
 Maybe a reset mode where the server is inacessible from the front-end and it
@@ -216,7 +219,7 @@ Might need fault modes like if the network goes down unexpectedly. Maybe need
 to precalculate front-end behaviour to explain this. Such as making the
 persona go to sleep, meditate or have left the scene leaving an empty chair.
 
-It would be cool to be able to generate a meditating closed-eyed version of 
+It would be cool to be able to generate a meditating closed-eyed version of
 each source portrait using pose-estimation and face detection on the source
 portrait. Also to use image to text to figure out if the image generation
 succeeded.
@@ -265,6 +268,17 @@ for reference by the persona. It could be an event schedule for the deployment
 or some set of predefined lore loaded this way as an alternative to training,
 fine-tuning or system prompt.
 
+## cached_uploads
+
+Online services often require that file uploads are first submitted, from
+which they provide a globally accessible URL. Then that URL may be referenced
+as the file input for an API call. Such URLs should be cached in the db so they
+can be reused rather than a fresh upload of the file be performed every time the
+same local file is to be used as an input for the call.
+
+FAL sadtalker uploads are a good example of this since the input image is
+reused for many calls for lipsync.
+
 ## judgement
 
 Human judgement of a production artifact
@@ -277,7 +291,7 @@ Human judgement of a production artifact
 
 ## judgement joining tables
 
-Also need joining tables for each type that can receive judgement, 
+Also need joining tables for each type that can receive judgement,
 probably including other judgements, each looking similar.
 
 * judgement - fk
@@ -289,12 +303,12 @@ similar to judgements, may need multiple tables or maybe stored in a different
 db, in filesystem or some hybrid
 
 * created - timestamp
-* measure - string key identifying measured action 
+* measure - string key identifying measured action
 * value - always a duration in ms?
 * hardware - physical machine details if relevant to enable comparison
 * system - service identifier
 * parameters - might include model options etc.
-* resource details - sometimes available ram is relevant 
+* resource details - sometimes available ram is relevant
 * deployment - fk
 * session - fk
 * system version - fk
@@ -303,7 +317,7 @@ db, in filesystem or some hybrid
 
 All runtime failures should be captured for later analysis and correlation with
 judgements. Generally these are exception flows due to outages or bugs but can
-also be detectable unwanted outputs (video format, length, size invariants 
+also be detectable unwanted outputs (video format, length, size invariants
 can be broken). LLM refusal may or may not be considered a fault or a low
 quality legitimate output?
 
