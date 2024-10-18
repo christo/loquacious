@@ -7,12 +7,13 @@ import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 
 const VOICES = [
+  new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
+  new CharacterVoice("Lily", "Lily", "English woman, young, London"),
+  new CharacterVoice("Dorothy", "Dorothy", "English woman, slightly South Eastern"),
+  new CharacterVoice("Ines", "Ines", "Young English woman"),
+  new CharacterVoice("Amina - regal", "Amina", "Posh Scottish-ish middle-aged woman"),
   new CharacterVoice("Andromeda - warm and lovely", "Andromeda", "Posh English woman, mid tones"),
   new CharacterVoice("Emily", "Emily", "Meditation, American woman"),
-  new CharacterVoice("Amina - regal", "Amina", "English young regal woman"),
-  new CharacterVoice("Ines", "Ines", "Young English woman"),
-  new CharacterVoice("Lily", "Lily", "English woman, young, London"),
-  new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
   new CharacterVoice("Alicia - Warm, expressive, posh, old British female", "Alicia", "Warm posh English older woman"),
   new CharacterVoice("Nala - African Female", "Nala - African Female", "African English woman"),
   new CharacterVoice("ztyYYqlYMny7nllhThgo", "Petra", "Haughty, German middle-aged woman"),
@@ -27,7 +28,6 @@ const VOICES = [
   new CharacterVoice("Brie - feisty, sparkly, lovely", "Brie", "Older, quite posh"),
   new CharacterVoice("Jacqui Griffin", "Jacqui Griffin", "Australian woman, reasonably broad accent"),
   new CharacterVoice("Ky9j3wxFbp3dSAdrkOEv", "Hex", "Middle-aged English woman with moderate tone"),
-  new CharacterVoice("Dorothy", "Dorothy", "English woman, slightly South Eastern"),
   new CharacterVoice("Nicole", "Nicole", "Young American woman, whispering, ASMR"),
   new CharacterVoice("Sigrid - solemn, raspy, wise", "Sigrid", "English, slightly posh older woman"),
   new CharacterVoice("Grandma Margaret - Storybook Narrator", "Margaret", "Old and posh"),
