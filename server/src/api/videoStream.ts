@@ -21,6 +21,7 @@ function streamFromPath(videoPath: string, res: Response) {
 
 function addVideoStreamRoutes(app: express.Application, lipSync: LipSync) {
   app.get('/video', async (req: Request, res: Response) => {
+    // TODO move to path param like /video/:videoFile
     const videoFile = req.query.file?.toString();
     console.log(`got request for videoFile ${videoFile}`);
     if (!videoFile) {

@@ -1,7 +1,7 @@
 import express, {Request, Response} from "express";
 import fs from "fs";
 import path from "path";
-import {formatToMimeType, TYPE_DEFAULT} from "speech/audio";
+import {formatToMimeType, TYPE_DEFAULT} from "media";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {pipeline} from "stream";
 
@@ -32,6 +32,7 @@ function addAudioStreamRoutes(app: express.Application, speechSystem: SpeechSyst
   });
 
   app.get('/audio', async (req: Request, res: Response) => {
+    // TODO move to path param like /audio/:audioFile
     const audioFile = req.query.file?.toString();
     console.log(`got request for audioFile ${audioFile}`);
     if (!audioFile) {

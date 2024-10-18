@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import {timed} from "performance";
 import {Simulate} from "react-dom/test-utils";
-import {type SupportedAudioFormat, TYPE_DEFAULT} from "speech/audio";
+import {type SupportedAudioFormat, TYPE_DEFAULT} from "media";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
