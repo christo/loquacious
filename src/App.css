@@ -20,10 +20,28 @@ form#prompt textarea {
     border: none;
 }
 
-img.seer {
+.portraitContainer {
     margin-top: 0;
     margin-left: auto;
     margin-right: auto;
+    object-fit: cover;
+    object-position: top;
+}
+
+image.portrait {
+    z-index: 2;
+}
+
+video.portrait {
+    z-index: 3;
+}
+
+.portrait {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     object-position: top;
 }

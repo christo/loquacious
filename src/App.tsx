@@ -2,7 +2,7 @@ import {ArrowCircleLeft, ArrowCircleRight, Error, QuestionAnswer, School, Settin
 import {Box, Drawer, IconButton, Typography} from "@mui/material";
 import {marked} from 'marked';
 import OpenAI from "openai";
-import React, {useEffect, useState} from 'react';
+import React, {type MutableRefObject, useEffect, useRef, useState} from 'react';
 import "./App.css";
 import type {ImageInfo} from "../server/src/ImageInfo.ts";
 import type {HealthError, System} from "./types";
@@ -124,11 +124,24 @@ function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
   </Box>
 }
 
-function Portrait({src}: { src: string }) {
-  return <img alt="portrait of a fortune teller" width="100%" className="seer" src={src}/>
+function Portrait({src, imgRef, videoRef, videoSrc}: { src: string, imgRef: MutableRefObject<HTMLImageElement | null>, videoRef: MutableRefObject<HTMLVideoElement | null>, videoSrc: string | undefined }) {
+
+  return <Box className="portraitContainer">
+    <video className="portrait" ref={videoRef} src={videoSrc} preload="auto"/>
+    <img className="portrait" ref={imgRef} alt="portrait of a fortune teller" width="100%" src={src}/>
+  </Box>
+
 }
 
-function CompResponse({response, loading}: { response: ChatResponse, loading: boolean }) {
+type CompResponseProps = {
+  response: ChatResponse,
+  loading: boolean,
+  videoRef: MutableRefObject<HTMLVideoElement | null>,
+  hideVideo: () => void;
+  showVideo: () => void;
+}
+
+function CompResponse({response, loading, videoRef, hideVideo, showVideo}: CompResponseProps) {
   const video = response.lipsync?.videoPath;
 
   useEffect(() => {
@@ -143,16 +156,19 @@ function CompResponse({response, loading}: { response: ChatResponse, loading: bo
           }
         })
         .then(blob => {
-          // TODO need to swap the img portrait for the video
 
           console.log(`got blob size ${blob.size}`);
-          // const audioUrl = URL.createObjectURL(blob);
-          // const audio = new Audio(audioUrl);
-          // audio.play();
+          videoRef.current!.src = URL.createObjectURL(blob);
+          showVideo();
+          videoRef.current!.play().then(() => {
+            hideVideo();
+          });
         })
         .catch(error => {
           console.error('Fetch-o-Error:', error);
         });
+    } else {
+      hideVideo();
     }
   })
 
@@ -163,7 +179,6 @@ function CompResponse({response, loading}: { response: ChatResponse, loading: bo
         : !response
           ? ""
           : (<Box>
-              <Typography variant="body2" color="textSecondary">{video}</Typography>
               <Typography dangerouslySetInnerHTML={{__html: markdownResponse(response.message)}}/>
             </Box>
           )
@@ -191,7 +206,7 @@ const App: React.FC = () => {
 
   }, []);
 
-  const [imageIndex, setImageIndex] = useState(40);
+  const [imageIndex, setImageIndex] = useState(49);
 
   const handleSubmit = async () => {
     if (!prompt.trim()) {
@@ -223,9 +238,10 @@ const App: React.FC = () => {
   };
 
   // submit on enter
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleSubmitKey = async (e: React.KeyboardEvent<HTMLTextAreaElement> | KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Prevent default Enter behavior (new line)
+
       await handleSubmit(); // Submit the form
     }
   };
@@ -250,9 +266,26 @@ const App: React.FC = () => {
     };
   }, []);
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  const showVideo = () => {
+    if (videoRef.current) {
+      videoRef.current!.style.visibility = "visible";
+    } else {
+      hideVideo();
+    }
+  }
+  const hideVideo = () => {
+    if (videoRef.current) {
+      videoRef.current!.style.visibility = "hidden";
+    }
+  }
+
   return (
     <Box className="primary" component="div">
-      <Box sx={{m: 2, position: "absolute", top: 0, left: 0, p: 0}}>
+      {images.length > 0 && (<Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={`/img/${images[imageIndex].f}`}/>)}
+      <Box sx={{m: 2, position: "absolute", top: 0, left: 0, p: 0, zIndex: 200}}>
         <IconButton aria-label="delete" size="large" onClick={toggleDrawer(true)}>
           <Settings fontSize="inherit" sx={{opacity: 0.2}}/>
         </IconButton>
@@ -261,21 +294,23 @@ const App: React.FC = () => {
         </Drawer>
 
       </Box>
-      {images.length > 0 && (<Portrait src={`/img/${images[imageIndex].f}`}/>)}
-      <Box id="promptInput">
+      <Box id="promptInput" sx={{zIndex: 200}}>
         <form id="prompt">
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleSubmitKey}
           rows={10}
           cols={80}
           placeholder="welcome, seeker"
+
         />
         </form>
-        <CompResponse response={response} loading={loading}/>
+        <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo} hideVideo={hideVideo}/>
       </Box>
-
+      {/*<Button aria-label="img" size="large" onClick={imgRef.current?.style.}>*/}
+      {/*  <Settings fontSize="inherit" sx={{opacity: 0.2}}/>*/}
+      {/*</Button>*/}
     </Box>
   );
 };
