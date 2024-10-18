@@ -37,7 +37,6 @@ function addAudioStreamRoutes(app: express.Application, speechSystem: SpeechSyst
     if (!audioFile) {
       res.status(404).json({message: "NOT OFOUNDO"});
     } else {
-      // TODO remove hard-coded extension
       streamFromPath(audioFile, res);
     }
   });
