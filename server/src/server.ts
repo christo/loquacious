@@ -17,6 +17,7 @@ import {MACOS_SPEECH_SYSTEM_NAME} from "speech/MacOsSpeech";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
 import {systemHealth} from "SystemStatus";
+import {addVideoStreamRoutes} from "videoStream";
 // Load environment variables
 dotenv.config();
 
@@ -131,6 +132,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 });
 
 addAudioStreamRoutes(app, speechSystems.current());
+addVideoStreamRoutes(app, lipSync);
 
 // Start the server
 app.listen(port, async () => {
