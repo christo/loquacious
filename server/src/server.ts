@@ -90,7 +90,7 @@ app.get("/system", async (req: Request, res: Response) => {
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const {prompt, portrait} = req.body;
-  console.log(`chat request for portrait ${portrait}`);
+  console.log(`chat request for portrait ${portrait.f}`);
   if (!prompt) {
     res.status(400).json({error: 'No prompt provided'});
   } else {
