@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
 import {FalSadtalker} from "lipsync/FalSadtalker";
 import {promises as fs} from 'fs';
-import {ImageInfo} from "ImageInfo";
+import {ImageInfo} from "image/ImageInfo";
 import {LlamaCppLlm} from "llm/LlamaCppLlm";
 import {type Llm} from 'llm/Llm';
 import {LmStudioLlm} from "llm/LmStudioLlm";

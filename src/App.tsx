@@ -4,7 +4,7 @@ import {marked} from 'marked';
 import OpenAI from "openai";
 import React, {type MutableRefObject, useEffect, useRef, useState} from 'react';
 import "./App.css";
-import type {ImageInfo} from "../server/src/ImageInfo.ts";
+import type {ImageInfo} from "../server/src/image/ImageInfo.ts";
 import type {HealthError, System} from "./types";
 import Model = OpenAI.Model;
 
