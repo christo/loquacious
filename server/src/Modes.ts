@@ -1,16 +1,78 @@
 import {readFileSync} from "fs";
-import {type PromptPart, SimplePromptPart} from "llm/PromptPart";
-import {OpenAI} from "openai";
-import type {SpeechSystem} from "speech/SpeechSystem";
+import OpenAI from "openai";
+import {type PromptPart, SimplePromptPart} from "./llm/PromptPart";
+import type {SpeechSystem} from "./speech/SpeechSystem";
 
-// TODO need a warmup mode for any pre-operational work
+// TODO fix this hella mess
+// TODO need a bootstrap mode for any pre-operational work
 
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 const inviteModeSystemPrompt: string = readFileSync("prompts/invite-mode.prompt.txt").toString();
 const universalSystemPrompt: string = readFileSync("prompts/universal-system.prompt.txt").toString();
 
+/**
+ * Two-sided conversation, next step initiated by the given prompt, renderd for the given
+ * {@link SpeechSystem}.
+ *
+ * @param prompt
+ * @param ss
+ */
+const chatModeMessages = (prompt: string, ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] => {
+  console.log("chat mode function");
+  if (!prompt) {
+    console.error("prompt was falsy");
+  }
+  const systemParts = [
+    dateTimePrompt(),
+    chatModeSystemPrompt,
+    universalSystemPrompt,
+    pauseInstructions(ss).text()
+  ].join("\\n\\n");
+  return [
+    {role: 'system', content: systemParts},
+    {role: 'user', content: prompt}
+  ];
+};
+
+/**
+ * Gives system instructions for how to render a pause for the given speech system.
+ * @param ss the {@link SpeechSystem}
+ */
+const pauseInstructions = (ss: SpeechSystem): PromptPart => {
+  const cmd = ss.pauseCommand(1000);
+  if (cmd == null) {
+    // no explicit pause command syntax
+    return new SimplePromptPart("You frequently pause for dramatic effect. To do so, include elipsis and/or two new lines: `\\n\\n`");
+  } else {
+    return new SimplePromptPart(`You frequently pause for dramatic effect. To do so you always use precise syntax specifying the length of
+  pause. A one second (1000 millisecond) pause must be specified exactly like this: \`${cmd}\``);
+  }
+};
+
+/**
+ * Initiated by us to invite a conversation.
+ *
+ * @param _prompt ignored.
+ * @param ss speech system to render for.
+ */
+const inviteModeMessages = (_prompt: string, ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] => {
+  console.log("invite mode function");
+  const systemPrompt = [
+    dateTimePrompt(),
+    inviteModeSystemPrompt,
+    universalSystemPrompt,
+    pauseInstructions(ss).text()
+  ].join("\\n\\n");
+
+  return [{role: 'system', content: systemPrompt}];
+};
+
+/** Function each mode implements differently which supplies parameters for a chat completion request. */
+type ChatPrepper = (prompt: string, ss: SpeechSystem) => OpenAI.Chat.Completions.ChatCompletionMessageParam[];
+
+/** Map mode names to their chat functions. */
 interface ModeMap {
-  [key: string]: (prompt: string, ss: SpeechSystem) => OpenAI.Chat.Completions.ChatCompletionMessageParam[];
+  [key: string]: ChatPrepper;
 }
 
 function dateTimePrompt() {
@@ -21,62 +83,17 @@ function dateTimePrompt() {
  * Container for all conversation modes.
  */
 class Modes {
-  private modeMap: ModeMap;
+  private readonly modeMap: ModeMap;
+  private currentMode: string = "chat";
+
   constructor() {
     this.modeMap = {} as ModeMap;
+    this.modeMap["invite"] = inviteModeMessages;
+    this.modeMap["chat"] = chatModeMessages;
   }
 
-  /**
-   * Gives system instructions for how to render a pause for the given speech system.
-   * @param ss the {@link SpeechSystem}
-   */
-  private pauseInstructions(ss: SpeechSystem): PromptPart {
-    const cmd = ss.pauseCommand(1000);
-    if (cmd == null) {
-      // no explicit pause command syntax
-      return new SimplePromptPart("You frequently pause for dramatic effect. To do so, include elipsis and/or two new lines: `\\n\\n`");
-    } else {
-      return new SimplePromptPart(`You frequently pause for dramatic effect. To do so you always use precise syntax specifying the length of
-  pause. A one second (1000 millisecond) pause must be specified exactly like this: \`${cmd}\``);
-    }
-  }
-
-  /**
-   * Two-sided conversation, next step initiated by the given prompt, renderd for the given
-   * {@link SpeechSystem}.
-   *
-   * @param prompt
-   * @param ss
-   */
-  chatModeMessages(prompt: string, ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
-    const systemParts = [
-      dateTimePrompt(),
-      chatModeSystemPrompt,
-      universalSystemPrompt,
-      this.pauseInstructions(ss).text()
-    ].join("\\n\\n")
-    return [
-      {role: 'system', content: systemParts},
-      {role: 'user', content: prompt}
-    ];
-  }
-
-  /**
-   * Initiated by us to invite a conversation.
-   *
-   * @param prompt ignored.
-   * @param ss speech system to render for.
-   */
-  inviteModeMessages(prompt: string, ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
-
-    const systemPrompt = [
-      dateTimePrompt(),
-      inviteModeSystemPrompt,
-      universalSystemPrompt,
-      this.pauseInstructions(ss).text()
-    ].join("\\n\\n");
-
-    return [{role: 'system', content: systemPrompt}];
+  getMode(): ChatPrepper {
+    return this.modeMap[this.currentMode];
   }
 }
 

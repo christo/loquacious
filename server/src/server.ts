@@ -1,21 +1,21 @@
-import {addVideoStreamRoutes, addAudioStreamRoutes} from "api/mediaStream";
-import {ensureDataDirsExist} from "system/config";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {FalSadtalker} from "lipsync/FalSadtalker";
 import {promises as fs} from 'fs';
-import {ImageInfo} from "image/ImageInfo";
-import {LlamaCppLlm} from "llm/LlamaCppLlm";
-import {type Llm} from 'llm/Llm';
-import {LmStudioLlm} from "llm/LmStudioLlm";
-import {OpenAiLlm} from 'llm/OpenAiLlm';
-import {Modes} from "Modes";
 import * as path from 'path';
-import {timed} from "system/performance";
-import type {SpeechSystem} from "speech/SpeechSystem";
-import {SpeechSystems} from "speech/SpeechSystems";
-import {systemHealth} from "system/SystemStatus";
+import {addAudioStreamRoutes, addVideoStreamRoutes} from "./api/mediaStream";
+import {ImageInfo} from "./image/ImageInfo";
+import {FalSadtalker} from "./lipsync/FalSadtalker";
+import {LlamaCppLlm} from "./llm/LlamaCppLlm";
+import {type Llm} from './llm/Llm';
+import {LmStudioLlm} from "./llm/LmStudioLlm";
+import {OpenAiLlm} from './llm/OpenAiLlm';
+import {Modes} from "./Modes";
+import type {SpeechSystem} from "./speech/SpeechSystem";
+import {SpeechSystems} from "./speech/SpeechSystems";
+import {ensureDataDirsExist} from "./system/config";
+import {timed} from "./system/performance";
+import {systemHealth} from "./system/SystemStatus";
 // Load environment variables
 dotenv.config();
 
@@ -54,7 +54,7 @@ let currentMode = "invite";
 app.use(cors());
 app.use(express.json());
 
-app.get("/portraits", async (req: Request, res: Response) => {
+app.get("/portraits", async (_req: Request, res: Response) => {
   const extensions = ['.png', '.gif', '.jpg', '.jpeg'];
   const files = (await fs.readdir(PATH_PORTRAIT, {withFileTypes: true}))
     .filter(f => f.isFile() && extensions.includes(path.extname(f.name).toLowerCase()))
@@ -66,7 +66,7 @@ app.get("/portraits", async (req: Request, res: Response) => {
   res.json(imageInfos);
 });
 
-app.get("/system", async (req: Request, res: Response) => {
+app.get("/system", async (_req: Request, res: Response) => {
   const current = speechSystems.current().currentOption();
   res.json({
     mode: {
@@ -90,20 +90,25 @@ app.get("/system", async (req: Request, res: Response) => {
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const {prompt, portrait} = req.body;
-  console.log(`chat request for portrait ${portrait.f}`);
+  console.log(`chat request for portrait ${portrait.f} with prompt ${prompt}`);
   if (!prompt) {
     res.status(400).json({error: 'No prompt provided'});
   } else {
     try {
       let message: string | null = await timed("text generation", async () => {
-        let messages = modes.chatModeMessages(prompt["prompt"], speechSystems.current());
+
+        console.log("thePrompt:", prompt);
+        let messages = modes.getMode()(prompt, speechSystems.current());
         // console.dir(messages);
         const response = await BACKENDS[backendIndex].chat(messages);
         return response.message
       });
 
       if (message) {
-        const speechResult = await timed("speech generation", () => speechSystems.current().speak(message));
+        const speechResult = await timed<string>(
+          "speech generation",
+          () => speechSystems.current().speak(message)
+        );
 
         const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
         const lipsyncResult = await timed("lipsync", () => {

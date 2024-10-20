@@ -30,6 +30,8 @@ class OpenAiLlm implements Llm {
   }
 
   async chat(messages: Array<ChatCompletionMessageParam>): Promise<ChatResult> {
+    console.log("chat executing yo:");
+    console.dir(messages);
     const response = await this.openai.chat.completions.create({
       model: this.model,
       messages: messages

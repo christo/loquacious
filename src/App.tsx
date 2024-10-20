@@ -7,6 +7,9 @@ import {SystemPanel} from "./SystemPanel.tsx";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import Model = OpenAI.Model;
 
+const DEFAULT_PORTRAIT = 36;
+
+
 type ChatResponse = {
   message: string | undefined;
   speech: string | undefined;
@@ -117,7 +120,7 @@ const App: React.FC = () => {
 
   }, []);
 
-  const [imageIndex, setImageIndex] = useState(49);
+  const [imageIndex, setImageIndex] = useState(DEFAULT_PORTRAIT);
 
   const handleSubmit = async () => {
     if (!prompt.trim()) {
