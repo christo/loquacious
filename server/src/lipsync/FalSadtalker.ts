@@ -1,9 +1,9 @@
 import {fal, type Result} from "@fal-ai/client";
 import {promises as fs} from "fs";
-import type {LipSync, LipSyncResult} from "LipSync";
+import type {LipSync, LipSyncResult} from "lipsync/LipSync";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import path from "path";
-import {timed} from "performance";
+import {timed} from "system/performance";
 
 async function readBinaryFile(filePath: string): Promise<File> {
   const fileBuffer = await fs.readFile(filePath);
@@ -18,14 +18,23 @@ async function readBinaryFile(filePath: string): Promise<File> {
 class FalSadtalker implements LipSync {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
   private readonly lipSyncDataDir: string;
-  private urlCache : {[keyOf: string]: string} = {};
+  private urlCache: { [keyOf: string]: string } = {};
 
+  /**
+   * Constructor.
+   * @param lipSyncDataDir where to put the video files.
+   */
   constructor(lipSyncDataDir: string) {
     this.lipSyncDataDir = lipSyncDataDir;
     fal.config({
       credentials: process.env.FAL_API_KEY,
     });
   }
+
+  name(): string {
+    return "fal.ai SadTalker Lip Sync";
+  }
+
 
   async urlFor(filePath: string): Promise<string> {
     const fileUrl = this.urlCache[filePath];

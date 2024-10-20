@@ -1,30 +1,10 @@
 import express, {Request, Response} from "express";
 import fs from "fs";
-import type {LipSync} from "LipSync";
-import {extToFormat, formatToMimeType, mimeTypeToFormat, TYPE_DEFAULT} from "media";
+import type {LipSync} from "lipsync/LipSync";
+import {extToFormat} from "media";
 import path from "path";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {pipeline} from "stream";
-
-/** @deprecated use streamFromPath() */
-// @ts-ignore
-// noinspection JSUnusedLocalSymbols
-function streamFromPathDelete(audioPath: string, res: Response) {
-  // noinspection DuplicatedCode
-  const readStream = fs.createReadStream(audioPath);
-  res.setHeader('Content-Type', formatToMimeType(TYPE_DEFAULT));
-  const ppp = audioPath.split(path.sep);
-  // TODO verify this is how we should do audio streams
-  res.setHeader('Content-Disposition', `attachment; filename="${ppp[ppp.length - 1]}"`);
-  pipeline(readStream, res, (err) => {
-    if (err && err.code === "ENOENT") {
-      res.status(404).json({message: "NOT OFOUNDO"}).end();
-    } else if (err) {
-      console.log('Stream pipeline failed:', err);
-      res.status(500).end();
-    }
-  });
-}
 
 function die(res: Response, message: string, code=500, err?: any) {
   if (err) {
@@ -84,7 +64,7 @@ function addAudioStreamRoutes(app: express.Application, speechSystem: SpeechSyst
 }
 
 
-function addVideoStreamRoutes(app: express.Application, lipSync: LipSync) {
+function addVideoStreamRoutes(app: express.Application) {
   app.get('/video', async (req: Request, res: Response) => {
     // TODO move to path param like /video/:videoFile
     const videoFile = req.query.file?.toString();

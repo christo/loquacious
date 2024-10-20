@@ -2,9 +2,9 @@ import {exec} from 'child_process';
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
-import {timed} from "performance";
+import {timed} from "system/performance";
 import {Simulate} from "react-dom/test-utils";
-import {type SupportedAudioFormat, TYPE_DEFAULT} from "media";
+import {type MediaFormat, type SupportedAudioFormat, TYPE_DEFAULT} from "media";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
@@ -14,10 +14,10 @@ import util from "util";
 const execPromise = util.promisify(exec);
 const unlinkPromise = util.promisify(fs.unlink);
 
-function mkVoiceFile(dataDir: string) {
+function mkVoiceFile(dataDir: string, mediaFormat: MediaFormat) {
   // TODO file tts under data/tts/<system>/<option>/tts_<db-id>.<format>
   const uniqueId = Date.now();
-  return path.join(dataDir, `tts_${uniqueId}.aiff`);
+  return path.join(dataDir, `tts_${uniqueId}.${mediaFormat.extensions[0]}`);
 }
 
 async function convertAudio(desiredFormat: SupportedAudioFormat, path: string): Promise<string> {
@@ -40,10 +40,11 @@ const escaped = (x: string) => x.replace(/"/g, '\\"');
  * @param text The text to speak.
  * @param voice The voice to use.
  * @param wpm Optional. The speed rate (1 is default).
+ * @param dataDir where to store the generated speech audio files.
  * @returns A promise that resolves to the file to stream back.
  */
-async function speak(text: string, voice: string, wpm: number, dataDir: string): Promise<string> {
-  const savePath = mkVoiceFile(dataDir);
+async function speak(text: string, voice: string, wpm: number, dataDir: string, mediaFormat: MediaFormat): Promise<string> {
+  const savePath = mkVoiceFile(dataDir, mediaFormat);
   // Construct the command
   let command = `say "${escaped(text)}" -v "${escaped(voice)}" -r ${wpm} -o "${savePath}"`;
 
@@ -90,10 +91,12 @@ class MacOsSpeech implements SpeechSystem {
   currentIndex = 0;
   display = new DisplaySpeechSystem(this.name, VOICES);
   private ttsDataDir: string;
+  private fileFormat: MediaFormat;
 
 
-  constructor(ttsDataDir: string) {
+  constructor(ttsDataDir: string, fileFormat: MediaFormat) {
     this.ttsDataDir = ttsDataDir;
+    this.fileFormat = fileFormat;
   }
 
   currentOption(): SpeechSystemOption {
@@ -106,7 +109,7 @@ class MacOsSpeech implements SpeechSystem {
   }
 
   async speak(message: string): Promise<string> {
-    return await speak(message, VOICES[this.currentIndex].voiceId, speed, this.ttsDataDir)
+    return await speak(message, VOICES[this.currentIndex].voiceId, speed, this.ttsDataDir, this.fileFormat)
       .catch((error) => {
         console.error('An error occurred during speech synthesis:', error);
         return Promise.reject(error);

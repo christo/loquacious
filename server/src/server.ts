@@ -1,5 +1,5 @@
 import {addVideoStreamRoutes, addAudioStreamRoutes} from "api/mediaStream";
-import {ensureDataDirsExist} from "config";
+import {ensureDataDirsExist} from "system/config";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
@@ -12,10 +12,10 @@ import {LmStudioLlm} from "llm/LmStudioLlm";
 import {OpenAiLlm} from 'llm/OpenAiLlm';
 import {Modes} from "Modes";
 import * as path from 'path';
-import {timed} from "performance";
+import {timed} from "system/performance";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
-import {systemHealth} from "SystemStatus";
+import {systemHealth} from "system/SystemStatus";
 // Load environment variables
 dotenv.config();
 
@@ -130,7 +130,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 });
 
 addAudioStreamRoutes(app, speechSystems.current());
-addVideoStreamRoutes(app, lipSync);
+addVideoStreamRoutes(app);
 
 // Start the server
 app.listen(port, async () => {

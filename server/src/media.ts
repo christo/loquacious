@@ -71,13 +71,10 @@ function mimeTypeToFormat(mimeType: string): MediaFormat | undefined {
 /** @deprecated use MediaFormat instances */
 const TYPE_MP3 = "mp3"
 /** @deprecated use MediaFormat instances */
-const TYPE_AIFF = "aiff"
-/** @deprecated use MediaFormat instances */
-const TYPE_WAV = "wav"
-/** @deprecated use MediaFormat instances */
 const TYPE_DEFAULT = TYPE_MP3;
 
 type MediaFormat = {
+  /** All possible file extensions for this format, first is preferred for file generation. */
   extensions: string[];
   mimeType: string;
   modality: "image" | "video" | "audio";
@@ -85,4 +82,4 @@ type MediaFormat = {
 
 /** @deprecated use MediaFormat instances */
 export type SupportedAudioFormat = "aiff" | "mp3" | "wav";
-export {TYPE_AIFF, TYPE_MP3, TYPE_WAV, TYPE_DEFAULT, formatToMimeType, type MediaFormat, extToFormat, mimeTypeToFormat};
+export {TYPE_MP3, TYPE_DEFAULT, type MediaFormat, extToFormat, mimeTypeToFormat};

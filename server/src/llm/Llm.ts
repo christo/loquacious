@@ -1,12 +1,20 @@
 import OpenAI from "openai";
 import Model = OpenAI.Model;
 
+/**
+ * Encapsulates a result from calling chat on an Llm.
+ */
 type ChatResult = {
   message: string | null;
 }
 
 
+/**
+ * Large Language Model service.
+ * Can do chat completions. May have multiple models that can be dynamically selected.
+ */
 type Llm = {
+  /** Unique service name */
   name: string,
   baseUrl: string | undefined,
   enableHealth: boolean,

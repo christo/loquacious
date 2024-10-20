@@ -1,7 +1,7 @@
 import {ElevenLabsClient} from "elevenlabs";
 import fs from 'fs';
 import path from "path";
-import {timed} from "performance";
+import {timed} from "system/performance";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
