@@ -28,7 +28,7 @@ type Equivalence = {
   input: string;
   canonical: {
     normal: string | undefined;
-    /** Unique id for method of determining equivalence. */
+    /** Unique id for method of determining equivalence. Might be an LLM, system axiom, literality, etc. */
     authority: string;
     /** Unix time of judgement or undefined if equivalence is axiomatic. */
     timestamp: number | undefined;
