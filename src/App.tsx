@@ -1,11 +1,10 @@
-import {ArrowCircleLeft, ArrowCircleRight, Error, QuestionAnswer, School, Settings} from "@mui/icons-material";
-import {Box, Drawer, IconButton, Typography} from "@mui/material";
+import {Box, Typography} from "@mui/material";
 import {marked} from 'marked';
 import OpenAI from "openai";
 import React, {type MutableRefObject, useEffect, useRef, useState} from 'react';
 import "./App.css";
-import type {ImageInfo} from "../server/src/image/ImageInfo.ts";
-import type {HealthError, System} from "./types";
+import {SystemPanel} from "./SystemPanel.tsx";
+import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import Model = OpenAI.Model;
 
 type ChatResponse = {
@@ -14,7 +13,6 @@ type ChatResponse = {
   backend: string | undefined;
   model: Model | undefined;
   lipsync: {
-    url: string;
     content_type: string;
     file_name: "string";
     file_size: number,
@@ -30,101 +28,14 @@ function markdownResponse(message: string | undefined) {
   }
 }
 
-function ShowError({error}: { error: HealthError }) {
-  return (<Typography color="error"><Error fontSize="large"/>{error.message}</Typography>);
-}
 
-function SpeechSettings({speechSettings}: any) {
-  return <Box>SPEECH: {speechSettings.current.system}/{speechSettings.current.option}</Box>;
-}
 
-function SettingsDetail({system}: { system: System }) {
-  if (system == null) {
-    return "";
-  } else {
-    return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start"}}>
-      <Typography>Mode: {system.mode.current}</Typography>
-      {system.mode.options.map((m: string) => (<Typography key={`mode_${m}`}>{m}</Typography>))}
-      <Typography><QuestionAnswer
-        fontSize="small"/> {system.llmMain.name} (models: {system.llmMain.models.length})</Typography>
-      <Typography><School fontSize="small"/> {system.llmMain.models[0].id}</Typography>
-      <SpeechSettings speechSettings={system.speech}/>
-    </Box>
-  }
-}
-
-function Status({system}: { system: System }) {
-  if (system == null) {
-    return <p>...</p>
-  } else {
-    const health = system.health;
-    return (<Box>
-      {health.error ? <ShowError error={health.error}/> : ""}
-      <p>{health.message}</p>
-      <p>{health.freeMem.formatted} RAM unused</p>
-      <p>{health.totalMem.formatted} total</p>
-    </Box>);
-  }
-}
-
-function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
-  const imgShift = (delta: number) => {
-    return () => {
-      if (images.length === 0) {
-        return;
-      }
-      let newValue = (imageIndex + delta + images.length) % images.length;
-      setImageIndex(newValue);
-    };
-  }
-
-  return <Box sx={{display: "flex", flexDirection: "column", gap: 1}}>
-    <Box sx={{display: "flex", gap: 2, mt: 2, alignItems: "center"}}>
-      <IconButton aria-label="previous" size="large" onClick={imgShift(-1)}>
-        <ArrowCircleLeft fontSize="inherit"/>
-      </IconButton>
-      <Typography fontWeight="700">Image {imageIndex + 1} of {images.length}</Typography>
-      <IconButton aria-label="next" size="large" onClick={imgShift(1)}>
-        <ArrowCircleRight fontSize="inherit"/>
-      </IconButton>
-    </Box>
-    <Box>
-      <Typography>{images[imageIndex].w} x {images[imageIndex].h}</Typography>
-    </Box>
-  </Box>
-}
-
-interface SettingsProps {
-  images: ImageInfo[];
-  imageIndex: number;
-  setImageIndex: (i: number) => void;
-}
-
-function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
-  const [settings, setSettings] = useState<any>(null);
-
-  useEffect(() => {
-    try {
-      fetch("http://localhost:3001/system").then(result => {
-        result.json().then(data => {
-          setSettings(data || null);
-        });
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
-
-  return <Box sx={{p: 2, display: "flex", flexDirection: "column", gap: 2, mt: 2, alignItems: "center"}}>
-    <Typography variant="h4">Settings</Typography>
-    <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>
-    <SettingsDetail system={settings}/>
-    <Typography variant="h4">System</Typography>
-    <Status system={settings}/>
-  </Box>
-}
-
-function Portrait({src, imgRef, videoRef, videoSrc}: { src: string, imgRef: MutableRefObject<HTMLImageElement | null>, videoRef: MutableRefObject<HTMLVideoElement | null>, videoSrc: string | undefined }) {
+function Portrait({src, imgRef, videoRef, videoSrc}: {
+  src: string,
+  imgRef: MutableRefObject<HTMLImageElement | null>,
+  videoRef: MutableRefObject<HTMLVideoElement | null>,
+  videoSrc: string | undefined
+}) {
 
   return <Box className="portraitContainer">
     <video className="portrait" ref={videoRef} src={videoSrc} preload="auto"/>
@@ -246,26 +157,6 @@ const App: React.FC = () => {
     }
   };
 
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
-
-  const toggleDrawer = (newOpen: boolean) => () => {
-    setDrawerOpen(newOpen);
-  };
-
-  // ESC toggles drawer
-  useEffect(() => {
-    let handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setDrawerOpen((o: boolean) => !o);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-
   const videoRef = useRef<HTMLVideoElement>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
@@ -284,16 +175,10 @@ const App: React.FC = () => {
 
   return (
     <Box className="primary" component="div">
-      {images.length > 0 && (<Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={`/img/${images[imageIndex].f}`}/>)}
-      <Box sx={{m: 2, position: "absolute", top: 0, left: 0, p: 0, zIndex: 200}}>
-        <IconButton aria-label="delete" size="large" onClick={toggleDrawer(true)}>
-          <Settings fontSize="inherit" sx={{opacity: 0.2}}/>
-        </IconButton>
-        <Drawer sx={{opacity: 0.9}} open={drawerOpen} onClose={toggleDrawer(false)}>
-          <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>
-        </Drawer>
-
-      </Box>
+      {images.length > 0 && (
+        <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={`/img/${images[imageIndex].f}`}/>)
+      }
+      <SystemPanel images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}/>
       <Box id="promptInput" sx={{zIndex: 200}}>
         <form id="prompt">
         <textarea
@@ -302,15 +187,12 @@ const App: React.FC = () => {
           onKeyDown={handleSubmitKey}
           rows={10}
           cols={80}
-          placeholder="welcome, seeker"
-
+          placeholder="Welcome, seeker"
         />
         </form>
-        <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo} hideVideo={hideVideo}/>
+        <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
+                      hideVideo={hideVideo}/>
       </Box>
-      {/*<Button aria-label="img" size="large" onClick={imgRef.current?.style.}>*/}
-      {/*  <Settings fontSize="inherit" sx={{opacity: 0.2}}/>*/}
-      {/*</Button>*/}
     </Box>
   );
 };
