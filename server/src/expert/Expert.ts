@@ -20,7 +20,36 @@ Finally, we can use caching and some kind of equivalence analysis to
 determine when dynamically generated text, speech and video
  */
 
-type Equivalence = {}
+/**
+ * When interpreting an input string, determine whether the string is equivalent
+ * to a normal form and if so, by which authority was it determined to be so.
+ */
+type Equivalence = {
+  input: string;
+  canonical: {
+    normal: string | undefined;
+    /** Unique id for method of determining equivalence. */
+    authority: string;
+    /** Unix time of judgement or undefined if equivalence is axiomatic. */
+    timestamp: number | undefined;
+  }
+
+}
+
+/**
+ * Given a string, determine its meaning by finding an equivalence.
+ * @param text
+ */
+function interpret(text: string): Equivalence {
+  return {
+    input: text,
+    canonical: {
+      normal: undefined,
+      authority: "not implemented",
+      timestamp: Date.now(),
+    }
+  }
+}
 
 const EXPERT = {
   speak: {
@@ -218,7 +247,7 @@ const EXPERT = {
     "da fuck",
     "what the"
   ],
-  detect: [
+  puzzledQuestions: [
     "what is it",
     "what do you do",
     "how do you do it"
