@@ -134,6 +134,7 @@ addVideoStreamRoutes(app);
 
 // Start the server
 app.listen(port, async () => {
+  // TODO remove host hard-coding
   console.log(`Server is running on http://localhost:${port}`);
 
   const llm = BACKENDS[backendIndex];
