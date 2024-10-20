@@ -34,8 +34,10 @@ class FalSadtalker implements LipSync {
 
   async urlFor(filePath: string): Promise<string> {
     const fileUrl = this.urlCache[filePath];
-    if (!fileUrl) {
-      await timed("fal upload image", async () => {
+    if (fileUrl) {
+      console.log(`file URL found in cache: ${fileUrl}`);
+    } else {
+      await timed(`fal upload ${filePath.split(path.sep).pop()}`, async () => {
         this.urlCache[filePath] = await fal.storage.upload(await readBinaryFile(filePath));
       });
     }
