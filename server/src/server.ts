@@ -3,7 +3,7 @@ import {ensureDataDirsExist} from "config";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {FalService} from "FalService";
+import {FalService} from "services/FalService";
 import {promises as fs} from 'fs';
 import {ImageInfo} from "ImageInfo";
 import {LlamaCppLlm} from "llm/LlamaCppLlm";
