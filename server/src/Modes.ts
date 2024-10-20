@@ -1,4 +1,5 @@
 import {readFileSync} from "fs";
+import {type PromptPart, SimplePromptPart} from "llm/PromptPart";
 import {OpenAI} from "openai";
 import type {SpeechSystem} from "speech/SpeechSystem";
 
@@ -8,7 +9,7 @@ const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt
 const inviteModeSystemPrompt: string = readFileSync("prompts/invite-mode.prompt.txt").toString();
 const universalSystemPrompt: string = readFileSync("prompts/universal-system.prompt.txt").toString();
 
-interface ModeType {
+interface ModeMap {
   [key: string]: (prompt: string, ss: SpeechSystem) => OpenAI.Chat.Completions.ChatCompletionMessageParam[];
 }
 
@@ -16,22 +17,27 @@ function dateTimePrompt() {
   return `The current date and time is ${new Date()}`;
 }
 
+/**
+ * Container for all conversation modes.
+ */
 class Modes {
+  private modeMap: ModeMap;
   constructor() {
+    this.modeMap = {} as ModeMap;
   }
 
   /**
    * Gives system instructions for how to render a pause for the given speech system.
-   * @param ss
+   * @param ss the {@link SpeechSystem}
    */
-  pauseInstructions(ss: SpeechSystem) {
+  private pauseInstructions(ss: SpeechSystem): PromptPart {
     const cmd = ss.pauseCommand(1000);
     if (cmd == null) {
       // no explicit pause command syntax
-      return "You frequently pause for dramatic effect. To do so, include elipsis and/or two new lines: `\\n\\n`"
+      return new SimplePromptPart("You frequently pause for dramatic effect. To do so, include elipsis and/or two new lines: `\\n\\n`");
     } else {
-      return `You frequently pause for dramatic effect. To do so you always use precise syntax specifying the length of
-  pause. A one second (1000 millisecond) pause must be specified exactly like this: \`${cmd}\``;
+      return new SimplePromptPart(`You frequently pause for dramatic effect. To do so you always use precise syntax specifying the length of
+  pause. A one second (1000 millisecond) pause must be specified exactly like this: \`${cmd}\``);
     }
   }
 
@@ -47,7 +53,7 @@ class Modes {
       dateTimePrompt(),
       chatModeSystemPrompt,
       universalSystemPrompt,
-      this.pauseInstructions(ss)
+      this.pauseInstructions(ss).text()
     ].join("\\n\\n")
     return [
       {role: 'system', content: systemParts},
@@ -67,7 +73,7 @@ class Modes {
       dateTimePrompt(),
       inviteModeSystemPrompt,
       universalSystemPrompt,
-      this.pauseInstructions(ss)
+      this.pauseInstructions(ss).text()
     ].join("\\n\\n");
 
     return [{role: 'system', content: systemPrompt}];
@@ -75,4 +81,4 @@ class Modes {
 }
 
 
-export {type ModeType, Modes};
+export {type ModeMap, Modes};
