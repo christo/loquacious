@@ -3,7 +3,7 @@ import {ensureDataDirsExist} from "config";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {FalService} from "services/FalService";
+import {FalSadtalker} from "lipsync/FalSadtalker";
 import {promises as fs} from 'fs';
 import {ImageInfo} from "ImageInfo";
 import {LlamaCppLlm} from "llm/LlamaCppLlm";
@@ -43,7 +43,7 @@ const BACKENDS = [
 let backendIndex = 1;
 
 const speechSystems = new SpeechSystems();
-const lipSync = new FalService(path.join(PATH_BASE_DATA, "lipsync").toString());
+const lipSync = new FalSadtalker(path.join(PATH_BASE_DATA, "lipsync").toString());
 const modes = new Modes();
 
 const app = express();
@@ -96,7 +96,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     try {
       let message: string | null = await timed("text generation", async () => {
-        let messages = modes.inviteModeMessages(prompt["prompt"], speechSystems.current());
+        let messages = modes.chatModeMessages(prompt["prompt"], speechSystems.current());
         // console.dir(messages);
         const response = await BACKENDS[backendIndex].chat(messages);
         return response.message

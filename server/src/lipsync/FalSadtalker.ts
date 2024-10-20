@@ -1,44 +1,9 @@
 import {fal, type Result} from "@fal-ai/client";
 import {promises as fs} from "fs";
 import type {LipSync, LipSyncResult} from "LipSync";
+import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import path from "path";
 import {timed} from "performance";
-
-class SadTalkerLipSyncResult implements LipSyncResult {
-  readonly url: string;
-  readonly content_type: string;
-  readonly file_name: string;
-  readonly file_size: number;
-  readonly videoPath: string;
-
-  constructor(url: string, content_type: string, file_name: string, file_size: number, videoPath: string) {
-    this.url = url;
-    this.content_type = content_type;
-    this.file_name = file_name;
-    this.file_size = file_size;
-    this.videoPath = videoPath;
-  }
-
-  getContentType(): string {
-    return this.content_type;
-  }
-
-  getFileName(): string {
-    return this.file_name;
-  }
-
-  getFileSize(): number {
-    return this.file_size;
-  }
-
-  getVideoUrl(): string {
-    return this.url;
-  }
-
-  getVideoPath(): string {
-    return this.videoPath;
-  }
-}
 
 async function readBinaryFile(filePath: string): Promise<File> {
   const fileBuffer = await fs.readFile(filePath);
@@ -50,7 +15,7 @@ async function readBinaryFile(filePath: string): Promise<File> {
   return new File([fileBuffer], fileName, {type: 'application/octet-stream'});
 }
 
-class FalService implements LipSync {
+class FalSadtalker implements LipSync {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
   private readonly lipSyncDataDir: string;
   private urlCache : {[keyOf: string]: string} = {};
@@ -75,16 +40,16 @@ class FalService implements LipSync {
   async lipSync(img: string, speech: string): Promise<LipSyncResult> {
     const imgUrl = await this.urlFor(img);
     const speechUrl = await this.urlFor(speech);
-    const result: Result<{ video: SadTalkerLipSyncResult }> = await timed(
+    const result: Result<{ video: SadTalkerResult }> = await timed(
       "fal run sadtalker",
-      async () => await fal.run(FalService.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl)));
+      async () => await fal.run(FalSadtalker.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl)));
     return timed("fal sadtalker video download", async () => {
       const r = result.data.video;
       const videoDownload = await fetch(r.url);
       const buffer = await videoDownload.arrayBuffer();
       const downloadedVideo = path.join(this.lipSyncDataDir, r.file_name);
       await fs.writeFile(downloadedVideo, Buffer.from(buffer));
-      return new SadTalkerLipSyncResult(r.url, r.content_type, r.file_name, r.file_size, downloadedVideo);
+      return new SadTalkerResult(r.url, r.content_type, r.file_name, r.file_size, downloadedVideo);
     });
   }
 
@@ -104,4 +69,4 @@ class FalService implements LipSync {
   }
 }
 
-export {FalService};
+export {FalSadtalker};
