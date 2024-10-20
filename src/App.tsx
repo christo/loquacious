@@ -7,7 +7,7 @@ import {SystemPanel} from "./SystemPanel.tsx";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import Model = OpenAI.Model;
 
-const DEFAULT_PORTRAIT = 36;
+const DEFAULT_PORTRAIT = 46;
 
 
 type ChatResponse = {
@@ -31,15 +31,19 @@ function markdownResponse(message: string | undefined) {
   }
 }
 
-
-
-function Portrait({src, imgRef, videoRef, videoSrc}: {
+function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
   src: string,
   imgRef: MutableRefObject<HTMLImageElement | null>,
   videoRef: MutableRefObject<HTMLVideoElement | null>,
-  videoSrc: string | undefined
+  videoSrc: string | undefined,
+  hideVideo: () => void
 }) {
-
+  // TODO add callback for end of playback
+  useEffect(() => {
+    videoRef.current!.addEventListener('ended', () => {
+      hideVideo();
+    });
+  }, []);
   return <Box className="portraitContainer">
     <video className="portrait" ref={videoRef} src={videoSrc} preload="auto"/>
     <img className="portrait" ref={imgRef} alt="portrait of a fortune teller" width="100%" src={src}/>
@@ -70,13 +74,9 @@ function CompResponse({response, loading, videoRef, hideVideo, showVideo}: CompR
           }
         })
         .then(blob => {
-
-          console.log(`got blob size ${blob.size}`);
           videoRef.current!.src = URL.createObjectURL(blob);
           showVideo();
-          videoRef.current!.play().then(() => {
-            hideVideo();
-          });
+          videoRef.current!.play();
         })
         .catch(error => {
           console.error('Fetch-o-Error:', error);
@@ -163,6 +163,7 @@ const App: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
+  // TODO fade-in and fade out for video show and hide
   const showVideo = () => {
     if (videoRef.current) {
       videoRef.current!.style.visibility = "visible";
@@ -179,7 +180,7 @@ const App: React.FC = () => {
   return (
     <Box className="primary" component="div">
       {images.length > 0 && (
-        <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={`/img/${images[imageIndex].f}`}/>)
+        <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={`/img/${images[imageIndex].f}`} hideVideo={hideVideo}/>)
       }
       <SystemPanel images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}/>
       <Box id="promptInput" sx={{zIndex: 200}}>

@@ -7,11 +7,7 @@ import {timed} from "system/performance";
 
 async function readBinaryFile(filePath: string): Promise<File> {
   const fileBuffer = await fs.readFile(filePath);
-
-  // Get the file name from the path
   const fileName = filePath.split('/').pop()!;
-
-  // Create a File object (with fetch-blob)
   return new File([fileBuffer], fileName, {type: 'application/octet-stream'});
 }
 
