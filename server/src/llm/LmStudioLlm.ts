@@ -21,7 +21,7 @@ class LmStudioLlm implements Llm {
     if (allModels.length === 1) {
       return allModels[0].id;
     } else {
-      return "I do not know";
+      return "unknown";
     }
   }
 
