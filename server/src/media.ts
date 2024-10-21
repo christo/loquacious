@@ -15,12 +15,13 @@ function formatToMimeType(format: SupportedAudioFormat) {
   }
 }
 
+const MF_MP3: MediaFormat = {
+  extensions: ["mp3"],
+  mimeType: "audio/mp3",
+  modality: "audio"
+};
 const FORMATS: MediaFormat[] = [
-  {
-    extensions: ["mp3"],
-    mimeType: "audio/mp3",
-    modality: "audio"
-  },
+  MF_MP3,
   {
     extensions: ["aiff"],
     mimeType: "audio/aiff",
@@ -35,8 +36,27 @@ const FORMATS: MediaFormat[] = [
     extensions: ["mp4"],
     mimeType: "video/mp4",
     modality: "video"
+  },
+  {
+    extensions: ["jpg", "jpeg"],
+    mimeType: "image/jpeg",
+    modality: "image"
+  },
+  {
+    extensions: ["png"],
+    mimeType: "image/png",
+    modality: "image"
+  },
+  {
+    extensions: ["gif"],
+    mimeType: "image/gif",
+    modality: "image"
   }
 ]
+
+function supportedImageTypes(): MediaFormat[] {
+  return FORMATS.filter(f => f.modality === "image")
+}
 
 type FormatByString = { [key: string]: MediaFormat };
 const FORMAT_BY_EXT: FormatByString = FORMATS.reduce((m, f) => {
@@ -80,6 +100,7 @@ type MediaFormat = {
   modality: "image" | "video" | "audio";
 }
 
+
 /** @deprecated use MediaFormat instances */
 export type SupportedAudioFormat = "aiff" | "mp3" | "wav";
-export {TYPE_MP3, TYPE_DEFAULT, type MediaFormat, extToFormat, mimeTypeToFormat};
+export {TYPE_MP3, TYPE_DEFAULT, MF_MP3, type MediaFormat, extToFormat, mimeTypeToFormat, supportedImageTypes};
