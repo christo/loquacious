@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# runtime generated scaled images
+/public/img/600x800/
+/public/img/1080x1920/
