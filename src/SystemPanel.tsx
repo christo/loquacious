@@ -79,7 +79,7 @@ function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
 
   useEffect(() => {
     try {
-      fetch("http://localhost:3001/system").then(result => {
+      fetch(`http://${location.hostname}:3001/system`).then(result => {
         result.json().then(data => {
           setSettings(data || null);
         });
