@@ -82,6 +82,7 @@ app.get("/portraits", async (_req: Request, res: Response) => {
   const allEntries = await fs.readdir(PATH_PORTRAIT, {withFileTypes: true});
   const goodExt = (f: Dirent) => exts.includes(path.extname(f.name).toLowerCase());
   const imgFiles = allEntries.filter(f => f.isFile() && goodExt(f));
+  // TODO make ImageInfo relative to web root
   const imageInfos = await Promise.all(imgFiles.map((de: Dirent) => ImageInfo.fromFile(PATH_PORTRAIT, de.name)));
   res.json(imageInfos);
 });
