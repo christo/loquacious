@@ -70,7 +70,7 @@ function CompResponse({response, loading, videoRef, hideVideo, showVideo}: CompR
 
   useEffect(() => {
     if (video) {
-      const url = `http://${location.hostname}:3001/video?file=${video}`;
+      const url = `//${location.hostname}:3001/video?file=${video}`;
       fetch(url)
         .then(response => {
           if (!response.ok) {
@@ -115,7 +115,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     try {
-      fetch(`http://${location.hostname}:3001/portraits`).then(result => {
+      fetch(`//${location.hostname}:3001/portraits`).then(result => {
         result.json().then(data => {
           setImages(data || null);
         });
