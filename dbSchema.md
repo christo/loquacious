@@ -123,26 +123,11 @@ lipsync, used as input for gesture reference etc.
 
 * created - timestamp
 * video file reference
-* length
-* format
+* length_ms
+* mime_type
 * post-processing
 * type - input/output
 * provenance - ?
-
-## pose
-
-* video file reference
-* provenance (synthesised, from a session/deployment?)
-* pose system parameters
-* captured pose coordinates?
-* interpretation by system
-
-## pose_sequence
-
-Some kind of chain of poses captured in sequence
-
-* index
-* pose - fk
 
 ## audio
 
@@ -154,14 +139,6 @@ Smallest unit of stored audio
 * audio_filter - fk, optional only if applied
 * type - raw input, tts output
 * provenance - where did this come from?
-
-## audio_filter
-
-Some small number of audio processing definitions to help categorise different
-pre-processing methods and distinguish rows in audio_recording
-
-* name
-* implementation - code ref?
 
 ## stt
 
@@ -201,7 +178,7 @@ Text to text
 * system_prompt - fk
 * user_prompt - optional (could be initiator)
 
-## mode
+## modestate
 
 Workflow graph values may not belong in db but need to be referenced:
 idle, attract, invite, chat, close etc..
@@ -260,6 +237,29 @@ Will be used as template parameter input for system prompt or embeddings.
 * parameters
 * image - file ref - not necessarily a self or punter portrait
 * description - basic description of image contents
+
+## audio_filter
+
+Some small number of audio processing definitions to help categorise different
+pre-processing methods and distinguish rows in audio_recording
+
+* name
+* implementation - code ref?
+
+## pose
+
+* video file reference
+* provenance (synthesised, from a session/deployment?)
+* pose system parameters
+* captured pose coordinates?
+* interpretation by system
+
+## pose_sequence
+
+Some kind of chain of poses captured in sequence
+
+* index
+* pose - fk
 
 ## embeddings
 
