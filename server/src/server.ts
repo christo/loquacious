@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
 import {FakeLlm} from "FakeLlm";
 import {promises as fs} from 'fs';
+import {prescaleImages} from "image/imageOps";
 import {FakeLipSync} from "lipsync/FakeLipSync";
 import type {LipSync} from "lipsync/LipSync";
 import {supportedImageTypes} from "media";
@@ -24,8 +25,15 @@ import {systemHealth} from "./system/SystemStatus";
 // Load environment variables
 dotenv.config();
 
-/** relative to server module root */
-const PATH_PORTRAIT = "../public/img";
+/** file path relative to server module root */
+const BASE_PATH_PORTRAIT = "../public/img";
+const PORTRAIT_SCALE_DIMENSIONS = [
+  {width: 600, height: 800},
+  {width: 1080, height:1920}
+];
+const currentDimensionIndex = 0;
+const PATH_PORTRAIT = `../public/img/${PORTRAIT_SCALE_DIMENSIONS[currentDimensionIndex].width}x${PORTRAIT_SCALE_DIMENSIONS[currentDimensionIndex].height}`;
+console.log(`path portrait: ${PATH_PORTRAIT}`)
 
 const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 if (!PATH_BASE_DATA) {
@@ -155,6 +163,7 @@ addVideoStreamRoutes(app);
 
 // Start the server
 app.listen(port, async () => {
+  await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_SCALE_DIMENSIONS));
   // TODO remove host hard-coding
   console.log(`Server is running on http://localhost:${port}`);
 
