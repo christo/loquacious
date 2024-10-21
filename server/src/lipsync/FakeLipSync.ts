@@ -26,10 +26,8 @@ class FakeLipSync implements LipSync {
    * @param _speechFile ignored
    */
   async lipSync(_imageFile: string, _speechFile: string): Promise<LipSyncResult> {
-    const extensions = supportedImageTypes().flatMap((f: MediaFormat) => f.extensions);
-
-    const aFile: Dirent | undefined = (await fs.readdir(this.lipSyncDataDir, {withFileTypes: true}))
-      .find(f => f.isFile() && extensions.includes(path.extname(f.name).toLowerCase()));
+    const files = await fs.readdir(this.lipSyncDataDir, {withFileTypes: true});
+    const aFile: Dirent | undefined = files.find(f => f.isFile() && path.extname(f.name).toLowerCase() === ".mp4");
     if (!aFile) {
       return Promise.reject("no lip sync files");
     } else {
