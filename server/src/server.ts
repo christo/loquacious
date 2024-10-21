@@ -31,7 +31,7 @@ const PORTRAIT_SCALE_DIMENSIONS = [
   {width: 600, height: 800},
   {width: 1080, height:1920}
 ];
-const currentDimensionIndex = 0;
+const currentDimensionIndex = 1;
 const PATH_PORTRAIT = `../public/img/${PORTRAIT_SCALE_DIMENSIONS[currentDimensionIndex].width}x${PORTRAIT_SCALE_DIMENSIONS[currentDimensionIndex].height}`;
 console.log(`path portrait: ${PATH_PORTRAIT}`)
 
