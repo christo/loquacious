@@ -1,11 +1,10 @@
-import express, {Request, Response} from "express";
+import {Response} from "express";
 import fs from "fs";
 import {extToFormat} from "media";
 import path from "path";
-import type {SpeechSystem} from "speech/SpeechSystem";
 import {pipeline} from "stream";
 
-function die(res: Response, message: string, code=500, err?: any) {
+function die(res: Response, message: string, code = 500, err?: any) {
   if (err) {
     console.error(message, err);
   } else {
