@@ -3,8 +3,7 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
 import {timed} from "system/performance";
-import {Simulate} from "react-dom/test-utils";
-import {type MediaFormat, type SupportedAudioFormat, TYPE_DEFAULT} from "media";
+import {type MediaFormat, MF_MP3, type SupportedAudioFormat, TYPE_DEFAULT} from "media";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
@@ -94,7 +93,7 @@ class MacOsSpeech implements SpeechSystem {
   private fileFormat: MediaFormat;
 
 
-  constructor(ttsDataDir: string, fileFormat: MediaFormat) {
+  constructor(ttsDataDir: string, fileFormat = MF_MP3) {
     this.ttsDataDir = ttsDataDir;
     this.fileFormat = fileFormat;
   }
