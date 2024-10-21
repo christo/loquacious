@@ -23,9 +23,13 @@ type ChatResponse = {
   } | undefined;
 }
 
-function markdownResponse(message: string | undefined) {
-  if (message) {
-    return marked.parse(message);
+/**
+ * Converts Markdown to HTML.
+ * @param markdown
+ */
+function mdToHtml(markdown: string | undefined) {
+  if (markdown) {
+    return marked.parse(markdown);
   } else {
     return "";
   }
@@ -93,7 +97,7 @@ function CompResponse({response, loading, videoRef, hideVideo, showVideo}: CompR
         : !response
           ? ""
           : (<Box>
-              <Typography dangerouslySetInnerHTML={{__html: markdownResponse(response.message)}}/>
+              <Typography dangerouslySetInnerHTML={{__html: mdToHtml(response.message)}}/>
             </Box>
           )
     )}
