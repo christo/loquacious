@@ -69,11 +69,11 @@ function CompResponse({response, loading, videoRef, hideVideo, showVideo}: CompR
 
   useEffect(() => {
     if (video) {
-      const url = `//${location.hostname}:3001/video/${video}`;
+      const url = `//${location.hostname}:3001/video?file=${video}`;
       fetch(url)
         .then(response => {
           if (!response.ok) {
-            throw "network response for audio was crap";
+            throw "network response for video was crap";
           } else {
             return response.blob();
           }

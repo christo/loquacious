@@ -44,7 +44,7 @@ if (!PATH_BASE_DATA) {
 ensureDataDirsExist(process.env.DATA_DIR!);
 
 const LM_STUDIO_BACKEND: Llm = new LmStudioLlm();
-const OPEN_AI_BACKEND: Llm = new OpenAiLlm();
+const OPEN_AI_BACKEND: Llm = new OpenAiLlm("gpt-4o-2024-08-06");
 const LLAMA_CPP_BACKEND: Llm = new LlamaCppLlm();
 
 const FAKE_LLM: Llm = new FakeLlm();
@@ -168,12 +168,12 @@ app.post('/speak', async (req: Request, res: Response) => {
 /**
  * Endpoint to stream the given audio file.
  */
-app.get('/audio/:filename', async (req: Request, res: Response) => fileStream(req.params.filename, res));
+app.get('/audio', async (req: Request, res: Response) => fileStream(req.query.file!.toString(), res));
 
 /**
  * Endpoint to stream the given video file.
  */
-app.get('/video/:filename', async (req: Request, res: Response) => fileStream(req.params.filename, res));
+app.get('/video', async (req: Request, res: Response) => fileStream(req.query.file!.toString(), res));
 
 // Start the server
 app.listen(port, async () => {
