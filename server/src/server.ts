@@ -9,7 +9,7 @@ import type {LipSync} from "lipsync/LipSync";
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
-import {addAudioStreamRoutes, addVideoStreamRoutes} from "./api/mediaStream";
+import {fileStream, streamFromPath} from "./api/mediaStream";
 import {ImageInfo} from "./image/ImageInfo";
 import {FalSadtalker} from "./lipsync/FalSadtalker";
 import {LlamaCppLlm} from "./llm/LlamaCppLlm";
@@ -158,8 +158,22 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-addAudioStreamRoutes(app, speechSystems.current());
-addVideoStreamRoutes(app);
+/**
+ * Endpoint to generate and return speech for the given prompt.
+ */
+app.post('/speak', async (req: Request, res: Response) => {
+  streamFromPath(await speechSystems.current().speak(req.body.prompt), res);
+});
+
+/**
+ * Endpoint to stream the given audio file.
+ */
+app.get('/audio/:filename', async (req: Request, res: Response) => fileStream(req.params.filename, res));
+
+/**
+ * Endpoint to stream the given video file.
+ */
+app.get('/video/:filename', async (req: Request, res: Response) => fileStream(req.params.filename, res));
 
 // Start the server
 app.listen(port, async () => {

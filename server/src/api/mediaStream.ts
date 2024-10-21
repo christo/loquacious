@@ -20,7 +20,7 @@ function die(res: Response, message: string, code=500, err?: any) {
  * @param filePath relative path to audio or video media file
  * @param res response
  */
-function streamFromPath(filePath: string, res: Response) {
+export function streamFromPath(filePath: string, res: Response) {
   const readStream = fs.createReadStream(filePath);
   const format = extToFormat(filePath);
   if (!format) {
@@ -41,7 +41,7 @@ function streamFromPath(filePath: string, res: Response) {
   }
 }
 
-function fileStream(filename: string, res: Response) {
+export function fileStream(filename: string, res: Response) {
   console.log(`got request for file ${filename}`);
   if (!filename) {
     res.status(404).json({message: "No filename given"});
@@ -49,27 +49,3 @@ function fileStream(filename: string, res: Response) {
     streamFromPath(filename, res);
   }
 }
-
-function addAudioStreamRoutes(app: express.Application, speechSystem: SpeechSystem) {
-
-  /**
-   * Endpoint to generate and return speech for the given prompt.
-   */
-  app.post('/speak', async (req: Request, res: Response) => {
-    streamFromPath(await speechSystem.speak(req.body.prompt), res);
-  });
-
-  /**
-   * Endpoint to stream the given audio file.
-   */
-  app.get('/audio/:filename', async (req: Request, res: Response) => fileStream(req.params.filename, res));
-}
-
-/**
- * Endpoint to stream the given video file.
- */
-function addVideoStreamRoutes(app: express.Application) {
-  app.get('/video/:filename', async (req: Request, res: Response) => fileStream(req.params.filename, res));
-}
-
-export {addVideoStreamRoutes, addAudioStreamRoutes};
