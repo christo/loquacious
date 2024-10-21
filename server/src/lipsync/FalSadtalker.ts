@@ -3,6 +3,7 @@ import {promises as fs} from "fs";
 import type {LipSync, LipSyncResult} from "lipsync/LipSync";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import path from "path";
+import {mkDirIfMissing} from "system/config";
 import {timed} from "system/performance";
 
 async function readBinaryFile(filePath: string): Promise<File> {
@@ -21,7 +22,8 @@ class FalSadtalker implements LipSync {
    * @param lipSyncDataDir base directory for all lipsync videos
    */
   constructor(lipSyncDataDir: string) {
-    this.lipSyncDataDir = lipSyncDataDir;
+    this.lipSyncDataDir = path.join(lipSyncDataDir, "fal-sadtalker");
+    mkDirIfMissing(this.lipSyncDataDir);
     fal.config({
       credentials: process.env.FAL_API_KEY,
     });
