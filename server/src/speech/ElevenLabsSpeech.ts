@@ -84,18 +84,19 @@ class ElevenLabsSpeech implements SpeechSystem {
           }
         }));
       const outStream = fs.createWriteStream(outFile);
-      audio.on('error', (err) => {
-        console.error('Error in reading the file:', err);
-      });
+      return new Promise<string>((resolve, reject) => {
+        outStream.on('error', (err) => {
+          console.error('Error in writing the file:', err);
+          reject();
+        });
 
-      outStream.on('error', (err) => {
-        console.error('Error in writing the file:', err);
-      });
+        outStream.on('finish', () => {
+          console.log('File writing completed successfully.');
+          resolve(outFile);
+        });
+        audio.pipe(outStream);
+      })
 
-      outStream.on('finish', () => {
-        console.log('File writing completed successfully.');
-      });
-      audio.pipe(outStream);
     } catch (e) {
       console.error("Error while creating voice stream", e);
     }
