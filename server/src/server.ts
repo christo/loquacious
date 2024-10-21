@@ -1,7 +1,7 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {FakeLlm} from "FakeLlm";
+import {FakeLlm} from "llm/FakeLlm";
 import {promises as fs} from 'fs';
 import {prescaleImages} from "image/imageOps";
 import {FakeLipSync} from "lipsync/FakeLipSync";
