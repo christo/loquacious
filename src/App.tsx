@@ -7,8 +7,10 @@ import {SystemPanel} from "./SystemPanel.tsx";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import Model = OpenAI.Model;
 
-const DEFAULT_PORTRAIT = 46;
-
+// TODO use current dimensions from server
+const DEFAULT_PORTRAIT = 0;
+const BASE_URL_PORTRAIT = "/img/1080x1920";
+// const BASE_URL_PORTRAIT = "/img/600x800";
 
 type ChatResponse = {
   message: string | undefined;
@@ -50,7 +52,7 @@ function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
   }, []);
   return <Box className="portraitContainer">
     <video className="portrait" ref={videoRef} src={videoSrc} preload="auto"/>
-    <img className="portrait" ref={imgRef} alt="portrait of a fortune teller" width="100%" src={src}/>
+    <img className="portrait" ref={imgRef} alt="portrait of a fortune teller" src={src}/>
   </Box>
 
 }
@@ -180,11 +182,11 @@ const App: React.FC = () => {
       videoRef.current!.style.visibility = "hidden";
     }
   }
-
+  const imageUrl = () => `${BASE_URL_PORTRAIT}/${images[imageIndex].f}`;
   return (
     <Box className="primary" component="div">
       {images.length > 0 && (
-        <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={`/img/${images[imageIndex].f}`} hideVideo={hideVideo}/>)
+        <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={imageUrl()} hideVideo={hideVideo}/>)
       }
       <SystemPanel images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}/>
       <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
