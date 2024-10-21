@@ -7,6 +7,7 @@ import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 
 const VOICES = [
+  new CharacterVoice("ztyYYqlYMny7nllhThgo", "Petra", "Haughty, German middle-aged woman"),
   new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
   new CharacterVoice("Lily", "Lily", "English woman, young, London"),
   new CharacterVoice("Dorothy", "Dorothy", "English woman, slightly South Eastern"),
@@ -16,7 +17,6 @@ const VOICES = [
   new CharacterVoice("Emily", "Emily", "Meditation, American woman"),
   new CharacterVoice("Alicia - Warm, expressive, posh, old British female", "Alicia", "Warm posh English older woman"),
   new CharacterVoice("Nala - African Female", "Nala - African Female", "African English woman"),
-  new CharacterVoice("ztyYYqlYMny7nllhThgo", "Petra", "Haughty, German middle-aged woman"),
   new CharacterVoice("Amina - clearly spoken African young lady", "Amina", "Maybe Botswana"),
   new CharacterVoice("Old Osirion Woman - Timeless, Mystical, Nurturing", "Anne", "Neutral English woman"),
   new CharacterVoice("Vidhi - Young & Bold", "Vidhi - Young & Bold", "Indian woman"),
