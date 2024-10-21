@@ -55,8 +55,7 @@ const BACKENDS = [
   LM_STUDIO_BACKEND,
   FAKE_LLM
 ]
-
-let backendIndex = 3;
+let backendIndex = 1;
 
 const speechSystems = new SpeechSystems();
 const BASEDIR_LIPSYNC = path.join(PATH_BASE_DATA, "lipsync");
@@ -64,7 +63,7 @@ const LIPSYNCS: LipSync[] = [
   new FalSadtalker(BASEDIR_LIPSYNC.toString()),
   new FakeLipSync(BASEDIR_LIPSYNC)
 ]
-let lipsyncIndex = 1;
+let lipsyncIndex = 0;
 
 const lipSync = LIPSYNCS[lipsyncIndex];
 
