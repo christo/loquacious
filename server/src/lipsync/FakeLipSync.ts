@@ -1,7 +1,6 @@
 import {promises as fs} from "fs";
 import type {LipSync, LipSyncResult} from "./LipSync";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
-import {type MediaFormat, supportedImageTypes} from "../media";
 import type {Dirent} from "node:fs";
 import path from "path";
 
