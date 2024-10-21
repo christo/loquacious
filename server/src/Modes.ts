@@ -95,7 +95,15 @@ class Modes {
   getMode(): ChatPrepper {
     return this.modeMap[this.currentMode];
   }
+
+  current(): string {
+    return this.currentMode;
+  }
+
+  allModes(): string[] {
+    return Object.keys(this.modeMap);
+  }
 }
 
 
-export {type ModeMap, Modes};
+export {type ModeMap, Modes, ChatPrepper};

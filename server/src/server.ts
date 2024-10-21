@@ -85,8 +85,8 @@ app.get("/system", async (_req: Request, res: Response) => {
   const current = speechSystems.current().currentOption();
   res.json({
     mode: {
-      current: currentMode,
-      options: ["invite", "chat"]
+      current: modes.current(),
+      options: modes.allModes()
     },
     llmMain: {
       name: BACKENDS[backendIndex].name,
