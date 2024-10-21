@@ -187,6 +187,8 @@ const App: React.FC = () => {
         <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={`/img/${images[imageIndex].f}`} hideVideo={hideVideo}/>)
       }
       <SystemPanel images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}/>
+      <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
+                    hideVideo={hideVideo}/>
       <Box id="promptInput" sx={{zIndex: 200}}>
         <form id="prompt">
         <textarea
@@ -198,8 +200,7 @@ const App: React.FC = () => {
           placeholder="Welcome, seeker"
         />
         </form>
-        <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
-                      hideVideo={hideVideo}/>
+
       </Box>
     </Box>
   );
