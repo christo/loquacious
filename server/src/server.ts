@@ -1,7 +1,10 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
+import {FakeLlm} from "FakeLlm";
 import {promises as fs} from 'fs';
+import {FakeLipSync} from "lipsync/FakeLipSync";
+import {supportedImageTypes} from "media";
 import * as path from 'path';
 import {addAudioStreamRoutes, addVideoStreamRoutes} from "./api/mediaStream";
 import {ImageInfo} from "./image/ImageInfo";
@@ -34,16 +37,27 @@ const LM_STUDIO_BACKEND: Llm = new LmStudioLlm();
 const OPEN_AI_BACKEND: Llm = new OpenAiLlm();
 const LLAMA_CPP_BACKEND: Llm = new LlamaCppLlm();
 
+const FAKE_LLM: Llm = new FakeLlm();
+
 const BACKENDS = [
   LLAMA_CPP_BACKEND,
   OPEN_AI_BACKEND,
   LM_STUDIO_BACKEND,
+  FAKE_LLM
 ]
 
-let backendIndex = 1;
+let backendIndex = 3;
 
 const speechSystems = new SpeechSystems();
-const lipSync = new FalSadtalker(path.join(PATH_BASE_DATA, "lipsync").toString());
+const BASEDIR_LIPSYNC = path.join(PATH_BASE_DATA, "lipsync");
+const LIPSYNCS = [
+  new FalSadtalker(BASEDIR_LIPSYNC.toString()),
+  new FakeLipSync(BASEDIR_LIPSYNC)
+]
+let lipsyncIndex = 1;
+
+const lipSync = LIPSYNCS[lipsyncIndex];
+
 const modes = new Modes();
 
 const app = express();
@@ -55,7 +69,8 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/portraits", async (_req: Request, res: Response) => {
-  const extensions = ['.png', '.gif', '.jpg', '.jpeg'];
+  const extensions = supportedImageTypes().flatMap(f => f.extensions);
+
   const files = (await fs.readdir(PATH_PORTRAIT, {withFileTypes: true}))
     .filter(f => f.isFile() && extensions.includes(path.extname(f.name).toLowerCase()))
     .map(x => x.name);
@@ -149,4 +164,5 @@ app.listen(port, async () => {
   console.log("LLM available models:");
   (await llm.models()).forEach(m => console.log(`   ${m.id}`));
   console.log(`Current Speech System: ${speechSystems.current().currentOption().descriptor()}`);
+  console.log(`Current LipSync: ${lipSync.name()}`);
 });
