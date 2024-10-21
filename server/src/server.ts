@@ -4,6 +4,7 @@ import express, {Request, Response} from 'express';
 import {FakeLlm} from "FakeLlm";
 import {promises as fs} from 'fs';
 import {FakeLipSync} from "lipsync/FakeLipSync";
+import type {LipSync} from "lipsync/LipSync";
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
@@ -51,7 +52,7 @@ let backendIndex = 3;
 
 const speechSystems = new SpeechSystems();
 const BASEDIR_LIPSYNC = path.join(PATH_BASE_DATA, "lipsync");
-const LIPSYNCS = [
+const LIPSYNCS: LipSync[] = [
   new FalSadtalker(BASEDIR_LIPSYNC.toString()),
   new FakeLipSync(BASEDIR_LIPSYNC)
 ]
@@ -92,6 +93,10 @@ app.get("/system", async (_req: Request, res: Response) => {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
       current: current.safeObject(),
       // TODO include filecount of saved speech audio
+    },
+    lipsync: {
+      systems: LIPSYNCS.map(ls => ls.name()),
+      current: lipSync.name(),
     },
     health: await systemHealth(BACKENDS, backendIndex)
   });
