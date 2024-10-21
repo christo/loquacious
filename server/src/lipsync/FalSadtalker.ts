@@ -18,7 +18,7 @@ class FalSadtalker implements LipSync {
 
   /**
    * Constructor.
-   * @param lipSyncDataDir where to put the video files.
+   * @param lipSyncDataDir base directory for all lipsync videos
    */
   constructor(lipSyncDataDir: string) {
     this.lipSyncDataDir = lipSyncDataDir;
@@ -28,9 +28,8 @@ class FalSadtalker implements LipSync {
   }
 
   name(): string {
-    return "fal.ai SadTalker";
+    return FalSadtalker.SADTALKER_ENDPOINT;
   }
-
 
   async urlFor(filePath: string): Promise<string> {
     const fileUrl = this.urlCache[filePath];
