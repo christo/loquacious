@@ -24,8 +24,9 @@ export async function prescaleImages(baseDir: string, dimensions: Dim[]) {
         const destFile = path.join(dimDir, file.name);
         // skip if the file already exists
         fs.access(destFile, fs.constants.R_OK | fs.constants.W_OK).then(null, async () => {
+          // resize images to width, preserving aspect ratio
           await sharp(path.join(baseDir, file.name))
-            .resize(dimension.width, dimension.height, {fit: "contain"})
+            .resize(dimension.width, null)
             .toFile(destFile)
         });
       }
