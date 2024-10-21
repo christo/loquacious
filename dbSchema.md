@@ -335,7 +335,8 @@ quality legitimate output?
 Various artifacts should be generated either on-demand or preemptively.
 We may want to automatically generate combinatoric versions of canned tts and
 lipsync video automatically when portrait images update. These could be done
-in a pre-startup baking operation which is more like a modestate.
+in a pre-startup baking operation which is more like a modestate. A record
+of what has been or is to be precalculated might need db tables.
 
 ## test suite specific data
 
