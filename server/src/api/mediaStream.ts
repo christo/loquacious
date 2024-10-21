@@ -1,6 +1,5 @@
 import express, {Request, Response} from "express";
 import fs from "fs";
-import type {LipSync} from "lipsync/LipSync";
 import {extToFormat} from "media";
 import path from "path";
 import type {SpeechSystem} from "speech/SpeechSystem";
@@ -42,40 +41,35 @@ function streamFromPath(filePath: string, res: Response) {
   }
 }
 
+function fileStream(filename: string, res: Response) {
+  console.log(`got request for file ${filename}`);
+  if (!filename) {
+    res.status(404).json({message: "No filename given"});
+  } else {
+    streamFromPath(filename, res);
+  }
+}
+
 function addAudioStreamRoutes(app: express.Application, speechSystem: SpeechSystem) {
+
+  /**
+   * Endpoint to generate and return speech for the given prompt.
+   */
   app.post('/speak', async (req: Request, res: Response) => {
-    const {prompt} = req.body;
-    const audioPath = await speechSystem.speak(prompt);
-    console.log(`got audioPath ${audioPath}`);
-
-    streamFromPath(audioPath, res);
+    streamFromPath(await speechSystem.speak(req.body.prompt), res);
   });
 
-  app.get('/audio', async (req: Request, res: Response) => {
-    // TODO move to path param like /audio/:audioFile
-    const audioFile = req.query.file?.toString();
-    console.log(`got request for audioFile ${audioFile}`);
-    if (!audioFile) {
-      res.status(404).json({message: "NOT OFOUNDO"});
-    } else {
-      streamFromPath(audioFile, res);
-    }
-  });
+  /**
+   * Endpoint to stream the given audio file.
+   */
+  app.get('/audio/:filename', async (req: Request, res: Response) => fileStream(req.params.filename, res));
 }
 
-
+/**
+ * Endpoint to stream the given video file.
+ */
 function addVideoStreamRoutes(app: express.Application) {
-  app.get('/video', async (req: Request, res: Response) => {
-    // TODO move to path param like /video/:videoFile
-    const videoFile = req.query.file?.toString();
-    console.log(`got request for videoFile ${videoFile}`);
-    if (!videoFile) {
-      res.status(404).json({message: "NOT OFOUNDO"});
-    } else {
-      streamFromPath(videoFile, res);
-    }
-  })
+  app.get('/video/:filename', async (req: Request, res: Response) => fileStream(req.params.filename, res));
 }
 
-export {addVideoStreamRoutes};
-export {addAudioStreamRoutes};
+export {addVideoStreamRoutes, addAudioStreamRoutes};
