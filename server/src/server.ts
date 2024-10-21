@@ -63,7 +63,6 @@ const modes = new Modes();
 const app = express();
 const port = process.env.PORT || 3001;
 
-let currentMode = "invite";
 
 app.use(cors());
 app.use(express.json());
