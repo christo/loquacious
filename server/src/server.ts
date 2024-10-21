@@ -5,6 +5,7 @@ import {FakeLlm} from "FakeLlm";
 import {promises as fs} from 'fs';
 import {FakeLipSync} from "lipsync/FakeLipSync";
 import {supportedImageTypes} from "media";
+import type {Dirent} from "node:fs";
 import * as path from 'path';
 import {addAudioStreamRoutes, addVideoStreamRoutes} from "./api/mediaStream";
 import {ImageInfo} from "./image/ImageInfo";
@@ -68,15 +69,11 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/portraits", async (_req: Request, res: Response) => {
-  const extensions = supportedImageTypes().flatMap(f => f.extensions);
-
-  const files = (await fs.readdir(PATH_PORTRAIT, {withFileTypes: true}))
-    .filter(f => f.isFile() && extensions.includes(path.extname(f.name).toLowerCase()))
-    .map(x => x.name);
-  const imageInfos = [];
-  for (let file of files) {
-    imageInfos.push(await ImageInfo.fromFile(PATH_PORTRAIT, file));
-  }
+  const exts = supportedImageTypes().flatMap(f => f.extensions).map(f => `.${f}`);
+  const allEntries = await fs.readdir(PATH_PORTRAIT, {withFileTypes: true});
+  const goodExt = (f: Dirent) => exts.includes(path.extname(f.name).toLowerCase());
+  const imgFiles = allEntries.filter(f => f.isFile() && goodExt(f));
+  const imageInfos = await Promise.all(imgFiles.map((de: Dirent) => ImageInfo.fromFile(PATH_PORTRAIT, de.name)));
   res.json(imageInfos);
 });
 
