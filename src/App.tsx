@@ -44,7 +44,6 @@ function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
   videoSrc: string | undefined,
   hideVideo: () => void
 }) {
-  // TODO add callback for end of playback
   useEffect(() => {
     videoRef.current!.addEventListener('ended', () => {
       hideVideo();
