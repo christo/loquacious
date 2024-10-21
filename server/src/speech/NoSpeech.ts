@@ -17,7 +17,7 @@ class NoSpeech implements SpeechSystem {
 
   speak(message: string): Promise<string> {
     console.log(`Silently speaking message of length ${message.length}`);
-    return Promise.reject("No audio because no speech");
+    return Promise.resolve("No audio because no speech");
   }
 
   pauseCommand(msDuration: number): string | null {
