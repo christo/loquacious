@@ -11,7 +11,7 @@ class OpenAiLlm implements Llm {
   enableHealth = false;
   name = "ChatGPT";
   private openai;
-  private model;
+  private readonly model;
 
   constructor(model = "gpt-4o-mini") {
     this.model = model;

@@ -69,8 +69,7 @@ class ElevenLabsSpeech implements SpeechSystem {
     const outFilename = `el_tts_${Date.now()}.mp3`;
     const outFile = path.join(this.ttsDataDir, outFilename);
     try {
-      const audio = await timed(
-        "elevenlabs generate speech",
+      const audio = await timed("elevenlabs generate speech",
         () => this.client.generate({
           voice: this.characterVoice.voiceId,
           output_format: "mp3_44100_128",

@@ -129,8 +129,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       });
 
       if (message) {
-        const speechResult = await timed<string>(
-          "speech generation",
+        const speechResult = await timed<string>("speech synthesis",
           () => speechSystems.current().speak(message)
         );
 

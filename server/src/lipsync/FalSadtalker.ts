@@ -48,8 +48,7 @@ class FalSadtalker implements LipSync {
   async lipSync(img: string, speech: string): Promise<LipSyncResult> {
     const imgUrl = await this.urlFor(img);
     const speechUrl = await this.urlFor(speech);
-    const result: Result<{ video: SadTalkerResult }> = await timed(
-      "fal run sadtalker",
+    const result: Result<{ video: SadTalkerResult }> = await timed("fal run sadtalker",
       async () => await fal.run(FalSadtalker.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl)));
     return timed("fal sadtalker video download", async () => {
       const r = result.data.video;

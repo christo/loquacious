@@ -39,11 +39,11 @@ export function streamFromPath(filePath: string, res: Response) {
   }
 }
 
-export function fileStream(filename: string, res: Response) {
-  console.log(`got request for file ${filename}`);
+export function fileStream(filename: string | undefined, res: Response) {
   if (!filename) {
     res.status(404).json({message: "No filename given"});
   } else {
+    console.log(`got request for file ${filename}`);
     streamFromPath(filename, res);
   }
 }
