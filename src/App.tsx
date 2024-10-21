@@ -64,7 +64,7 @@ function CompResponse({response, loading, videoRef, hideVideo, showVideo}: CompR
 
   useEffect(() => {
     if (video) {
-      const url = `http://localhost:3001/video?file=${video}`;
+      const url = `http://${location.hostname}:3001/video?file=${video}`;
       fetch(url)
         .then(response => {
           if (!response.ok) {
@@ -109,7 +109,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     try {
-      fetch("http://localhost:3001/portraits").then(result => {
+      fetch(`http://${location.hostname}:3001/portraits`).then(result => {
         result.json().then(data => {
           setImages(data || null);
         });
@@ -129,7 +129,7 @@ const App: React.FC = () => {
     setLoading(true);
 
     try {
-      const result = await fetch('http://localhost:3001/api/chat', {
+      const result = await fetch(`http://${location.hostname}:3001/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
