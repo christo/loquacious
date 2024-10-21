@@ -13,7 +13,6 @@ function die(res: Response, message: string, code = 500, err?: any) {
   res.status(code).end();
 }
 
-
 /**
  * Return media file at path to response appropriate for being fetched by client code.
  * @param filePath relative path to audio or video media file
