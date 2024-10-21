@@ -8,13 +8,17 @@ const DATA_DIRS = [
   "lipsync"
 ];
 
-function ensureDataDirsExist(dataDir: string) {
-  for (const d of DATA_DIRS) {
-    const p = path.join(dataDir, d);
-    if (!fs.existsSync(p)) {
-      fs.mkdirSync(p, {recursive: true});
-    }
+function mkDirIfMissing(p: string) {
+  if (!fs.existsSync(p)) {
+    fs.mkdirSync(p, {recursive: true});
   }
 }
 
-export {ensureDataDirsExist};
+function ensureDataDirsExist(dataDir: string) {
+  for (const d of DATA_DIRS) {
+    const p = path.join(dataDir, d);
+    mkDirIfMissing(p);
+  }
+}
+
+export {ensureDataDirsExist, mkDirIfMissing};
