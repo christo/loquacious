@@ -28,7 +28,7 @@ class FalSadtalker implements LipSync {
   }
 
   name(): string {
-    return "fal.ai SadTalker Lip Sync";
+    return "fal.ai SadTalker";
   }
 
 
