@@ -65,12 +65,12 @@ class FalSadtalker implements LipSync {
       input: {
         source_image_url: imgUrl,
         driven_audio_url: speechUrl,
-        pose_style: 24,             // 0-45 integer
+        pose_style: 28,             // 0-45 integer
         face_model_resolution: "256",    // string "256" or "512"
         expression_scale: 1.4,      // 0-3 float
-        //face_enhancer: 'gfpgan',       // blank or only option - not sure of impact
-        still_mode: true,             // whether to use few head movements
-        preprocess: "extfull",            // crop, extcrop, resize, full, extfull
+        // face_enhancer: 'gfpgan',       // blank or only option - not sure of impact
+        still_mode: false,             // whether to use few head movements
+        preprocess: "full",            // crop, extcrop, resize, full, extfull
       }
     };
   }
