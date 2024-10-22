@@ -23,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 # runtime generated scaled images
-/public/img/600x800/
+/public/img/608x800/
+/public/img/640x800/
 /public/img/1080x1920/
