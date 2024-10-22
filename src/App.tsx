@@ -1,16 +1,17 @@
-import {Box, Typography} from "@mui/material";
+import {Box, CircularProgress, Typography} from "@mui/material";
 import {marked} from 'marked';
 import OpenAI from "openai";
-import React, {type MutableRefObject, useEffect, useRef, useState} from 'react';
+import React, {type MutableRefObject, type ReactNode, useEffect, useRef, useState} from 'react';
 import "./App.css";
-import {SystemPanel} from "./SystemPanel.tsx";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
+import {SystemPanel} from "./SystemPanel.tsx";
 import Model = OpenAI.Model;
 
 // TODO use current dimensions from server
-const DEFAULT_PORTRAIT = 0;
-const BASE_URL_PORTRAIT = "/img/1080x1920";
-// const BASE_URL_PORTRAIT = "/img/600x800";
+const DEFAULT_PORTRAIT = 29;
+// const BASE_URL_PORTRAIT = "/img/1080x1920";
+const BASE_URL_PORTRAIT = "/img/608x800";
+const SERVER_PORT = 3001;
 
 type ChatResponse = {
   message: string | undefined;
@@ -56,6 +57,31 @@ function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
 
 }
 
+function ChatHistory({children}: { children: ReactNode }) {
+
+  const [chat, setChat] = useState([]);
+
+  useEffect(() => {
+    fetch(`http://${location.hostname}:${SERVER_PORT}/api/chat`)
+      .then(response => {
+        if (!response.ok) {
+          throw "network response for chat was crap";
+        } else {
+          return response.json();
+        }
+      }).then(json => {
+      setChat(json.response.messages);
+    })
+  });
+
+    return <Box className="chathistory">
+      {chat.map((c: {from: string, text: string}, i: number) => {
+        return <Typography key={`ch_${i}`} className={`chat ${c.from}chat`}>{`${c.text}`}</Typography>
+  })}
+      {children}
+      </Box>;
+}
+
 type CompResponseProps = {
   response: ChatResponse,
   loading: boolean,
@@ -69,7 +95,7 @@ function CompResponse({response, loading, videoRef, hideVideo, showVideo}: CompR
 
   useEffect(() => {
     if (video) {
-      const url = `//${location.hostname}:3001/video?file=${video}`;
+      const url = `//${location.hostname}:${SERVER_PORT}/video?file=${video}`;
       fetch(url)
         .then(response => {
           if (!response.ok) {
@@ -93,14 +119,15 @@ function CompResponse({response, loading, videoRef, hideVideo, showVideo}: CompR
 
   return <Box className="controls">
     {(
-      loading ?
-        <Typography>Loading...</Typography>
-        : !response
-          ? ""
-          : (<Box>
-              <Typography dangerouslySetInnerHTML={{__html: mdToHtml(response.message)}}/>
-            </Box>
-          )
+      loading ? <CircularProgress size="3rem" className="loadingSpinner"/>
+        : <Box>
+          <ChatHistory>
+            {response && response.message ? <Typography className="chat systemchat"
+                                                        dangerouslySetInnerHTML={{__html: mdToHtml(response.message)}}/> : null}
+
+          </ChatHistory>
+        </Box>
+
     )}
   </Box>;
 }
@@ -114,7 +141,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     try {
-      fetch(`//${location.hostname}:3001/portraits`).then(result => {
+      fetch(`//${location.hostname}:${SERVER_PORT}/portraits`).then(result => {
         result.json().then(data => {
           setImages(data || null);
         });
@@ -127,14 +154,14 @@ const App: React.FC = () => {
 
   const [imageIndex, setImageIndex] = useState(DEFAULT_PORTRAIT);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
     if (!prompt.trim()) {
       return;
     }
     setLoading(true);
-
     try {
-      const result = await fetch(`http://${location.hostname}:3001/api/chat`, {
+      const result = await fetch(`//${location.hostname}:${SERVER_PORT}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,12 +183,14 @@ const App: React.FC = () => {
     }
   };
 
+  // TODO fix interruptive replay video on keystroke
+
   // submit on enter
-  const handleSubmitKey = async (e: React.KeyboardEvent<HTMLTextAreaElement> | KeyboardEvent) => {
+  const handleSubmitKey = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Prevent default Enter behavior (new line)
 
-      await handleSubmit(); // Submit the form
+      await handleSubmit(e); // Submit the form
     }
   };
 
@@ -188,20 +217,17 @@ const App: React.FC = () => {
         <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={imageUrl()} hideVideo={hideVideo}/>)
       }
       <SystemPanel images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}/>
-      <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
-                    hideVideo={hideVideo}/>
-      <Box id="promptInput" sx={{zIndex: 200}}>
-        <form id="prompt">
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={handleSubmitKey}
-          rows={10}
-          cols={80}
-          placeholder="Welcome, seeker"
-        />
-        </form>
-
+      <Box className="ui">
+        <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
+                      hideVideo={hideVideo}/>
+        <Box id="promptInput">
+          <form id="prompt">
+          <textarea value={prompt} placeholder="Welcome, seeker"
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleSubmitKey}
+          />
+          </form>
+        </Box>
       </Box>
     </Box>
   );

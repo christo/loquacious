@@ -1,23 +1,14 @@
+html, body, textarea {
+    box-sizing: border-box;
+}
 
 .primary {
     padding: 0;
     display: flex;
     flex-direction: row;
+    align-items: end;
     width: 100dvw;
     height: 100dvh;
-}
-
-#promptInput {
-    position: absolute;
-    bottom: 50px;
-    right: 50px;
-}
-
-form#prompt textarea {
-    background-color: #22222288;
-    color: white;
-    padding: 10px;
-    border: none;
 }
 
 .portraitContainer {
@@ -46,9 +37,81 @@ video.portrait {
     object-position: top;
 }
 
-.controls {
+.ui {
     position: absolute;
-    bottom: 20px;
-    right: 70px;
+    width: 100%;
+    z-index: 200;
+    max-height: 36em;
+    bottom: 0;
+    left: 0;
+    overflow: clip;
+}
+
+.controls {
+    font-size: x-small;
     padding: 1em;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 40;
+    display: flex;
+    flex-direction: column-reverse;
+    mask-image: linear-gradient(to bottom, transparent 0%, white 15%);
+    overflow: scroll;
+}
+
+.chathistory {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    max-height: 18rem;
+    gap: 0.2em;
+    overflow: scroll;
+}
+
+.chat {
+    border-radius: 1rem;
+    padding: 0.8rem 1.4rem;
+    max-width: 30rem;
+    box-shadow: 5px 10px 10px #00000022;
+}
+
+.userchat {
+    align-self: end;
+    border-radius: 1rem 1rem 0 1rem;
+    background-color: #224266a8;
+}
+
+.systemchat {
+    background-color: #222222a8;
+    border-radius: 1rem 1rem 1rem 0;
+}
+
+.promptInput {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+}
+
+form#prompt textarea {
+    background-color: #22222288;
+    color: #a9a9a9;
+    width: 100%;
+    height: 4rem;
+    padding: 10px;
+    border: none;
+    outline: none;
+}
+
+form#prompt textarea:focus {
+    background-color: #00000066;
+    color: white;
+}
+
+.loadingSpinner {
+    position: absolute;
+    z-index: 500;
+    top: -1rem;
+    left: 50%;
 }

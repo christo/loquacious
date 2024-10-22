@@ -28,10 +28,10 @@ dotenv.config();
 /** file path relative to server module root */
 const BASE_PATH_PORTRAIT = "../public/img";
 const PORTRAIT_SCALE_DIMENSIONS = [
-  {width: 600, height: 800},
+  {width: 608, height: 800},
   {width: 1080, height:1920}
 ];
-const currentDimensionIndex = 1;
+const currentDimensionIndex = 0;
 const PATH_PORTRAIT = `../public/img/${PORTRAIT_SCALE_DIMENSIONS[currentDimensionIndex].width}x${PORTRAIT_SCALE_DIMENSIONS[currentDimensionIndex].height}`;
 console.log(`path portrait: ${PATH_PORTRAIT}`)
 
@@ -110,6 +110,22 @@ app.get("/system", async (_req: Request, res: Response) => {
   });
 });
 
+app.get('/api/chat', async (req: Request, res: Response) => {
+  res.json({
+    response: {
+      messages: [
+        {from: "user", text: "Hello I am the user saying something"},
+        {from: "system", text: "Hello user, this is system. What do?"},
+        {from: "user", text: `Not much, just testing you out. This one has to be really long 
+        because I am testing how the overflow works with really long messages. It should ideally
+        not extend past half the width of the screen but who knows if that is a good rule of thumb?`},
+        {from: "system", text: "All G LMK how I go"},
+        {from: "user", text: "Sure thing dog, just chill rn"},
+        {from: "system", text: "Chill mode activated"},
+      ]
+    }
+  });
+});
 
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
@@ -137,7 +153,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         const lipsyncResult = await timed("lipsync", () => {
           return lipSync.lipSync(portait, speechResult)
         });
-
+        // TODO return text history here
         res.json({
           response: {
             message: message,
@@ -173,6 +189,8 @@ app.get('/audio', async (req: Request, res: Response) => fileStream(req.query.fi
  * Endpoint to stream the given video file.
  */
 app.get('/video', async (req: Request, res: Response) => fileStream(req.query.file!.toString(), res));
+
+
 
 // Start the server
 app.listen(port, async () => {
