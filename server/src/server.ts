@@ -100,7 +100,7 @@ app.get("/system", async (_req: Request, res: Response) => {
     speech: {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
       current: current.safeObject(),
-      // TODO include filecount of saved speech audio
+      // TODO include count of saved speech audio
     },
     lipsync: {
       systems: LIPSYNCS.map(ls => ls.name()),
