@@ -1,6 +1,20 @@
-import {ArrowCircleLeft, ArrowCircleRight, Close, Error, QuestionAnswer, School, Settings} from "@mui/icons-material";
-import {Box, IconButton, SwipeableDrawer, Typography} from "@mui/material";
-import React, {useEffect, useState} from "react";
+import {
+  AccountTree,
+  ArrowCircleLeft,
+  ArrowCircleRight,
+  AspectRatio,
+  Campaign,
+  Close,
+  Error,
+  Memory,
+  MonitorHeart,
+  QuestionAnswer,
+  School,
+  Settings,
+  type SvgIconComponent
+} from "@mui/icons-material";
+import {Box, Chip, IconButton, Stack, SwipeableDrawer, Tooltip, Typography} from "@mui/material";
+import React, {type ReactNode, useEffect, useState} from "react";
 import type {ImageInfo} from "../server/src/image/ImageInfo.ts";
 import type {HealthError, System} from "./types.ts";
 
@@ -15,19 +29,41 @@ interface SettingsProps {
 }
 
 function SpeechSettings({speechSettings}: any) {
-  return <Box>SPEECH: {speechSettings.current.system}/{speechSettings.current.option}</Box>;
+  return <Box>
+    <IconLabelled TheIcon={Campaign} tooltip="Speech System">
+      <Typography>{speechSettings.current.system} {speechSettings.current.optionName}</Typography>
+    </IconLabelled>
+  </Box>;
+}
+
+function IconLabelled({TheIcon, tooltip, children}: {
+  TheIcon: SvgIconComponent,
+  tooltip: string,
+  children: ReactNode
+}): ReactNode {
+  return <Stack direction="row" alignItems="center" spacing={1}>
+    <Tooltip title={tooltip}><TheIcon fontSize="small" sx={{mr: 1}}/></Tooltip>
+    <Box sx={{display: "flex", flexDirection: "row", alignItems: "center"}} >{children}</Box>
+  </Stack>
 }
 
 function SettingsDetail({system}: { system: System }) {
-  if (system == null) {
+  function modelist() {
+    const currentMode = system.mode.current;
+    return system.mode.options.map((m: string) => {
+      return <Chip key={`mode_${m}`} label={m} size="small" variant={m === currentMode ? "filled" : "outlined"} sx={{mr: 1}}/>
+    });
+  }
+
+  if (system === null) {
     return "";
   } else {
-    return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start"}}>
-      <Typography>Mode: {system.mode.current}</Typography>
-      {system.mode.options.map((m: string) => (<Typography key={`mode_${m}`}>{m}</Typography>))}
-      <Typography><QuestionAnswer
-        fontSize="small"/> {system.llmMain.name} (models: {system.llmMain.models.length})</Typography>
-      <Typography><School fontSize="small"/> {system.llmMain.models[0].id}</Typography>
+    return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start", width: "100%", gap: 1}}>
+      <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">{modelist()}</IconLabelled>
+      <IconLabelled TheIcon={QuestionAnswer} tooltip="LLM">{system.llmMain.name}</IconLabelled>
+      <IconLabelled TheIcon={School} tooltip="model">
+        <Typography>{system.llmMain.models[0].id} (total: {system.llmMain.models.length})</Typography>
+      </IconLabelled>
       <SpeechSettings speechSettings={system.speech}/>
     </Box>
   }
@@ -40,9 +76,9 @@ function Status({system}: { system: System }) {
     const health = system.health;
     return (<Box>
       {health.error ? <ShowError error={health.error}/> : ""}
-      <p>{health.message}</p>
-      <p>{health.freeMem.formatted} RAM unused</p>
-      <p>{health.totalMem.formatted} total</p>
+      <IconLabelled TheIcon={MonitorHeart} tooltip="Health">{health.message || "unknown"}</IconLabelled>
+      <IconLabelled TheIcon={Memory} tooltip="System RAM">{health.freeMem.formatted} free
+        of {health.totalMem.formatted}</IconLabelled>
     </Box>);
   }
 }
@@ -57,19 +93,21 @@ function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
       setImageIndex(newValue);
     };
   }
-
+  const portraitWidth = images[imageIndex].w;
+  const portraitHeight = images[imageIndex].h;
   return <Box sx={{display: "flex", flexDirection: "column", gap: 1}}>
-    <Box sx={{display: "flex", gap: 2, mt: 2, alignItems: "center"}}>
+    <Box sx={{display: "flex", gap: 2, alignItems: "center"}}>
       <IconButton aria-label="previous" size="large" onClick={imgShift(-1)}>
         <ArrowCircleLeft fontSize="inherit"/>
       </IconButton>
-      <Typography fontWeight="700">Image {imageIndex + 1} of {images.length}</Typography>
+      <Typography fontWeight="700">Portrait {imageIndex + 1} of {images.length}</Typography>
       <IconButton aria-label="next" size="large" onClick={imgShift(1)}>
         <ArrowCircleRight fontSize="inherit"/>
       </IconButton>
     </Box>
     <Box>
-      <Typography>{images[imageIndex].w} x {images[imageIndex].h}</Typography>
+      <IconLabelled TheIcon={AspectRatio}
+                    tooltip="Character Portrait Dimensions">{portraitWidth} x {portraitHeight}</IconLabelled>
     </Box>
   </Box>
 }
@@ -89,7 +127,7 @@ function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
     }
   }, []);
 
-  return <Box sx={{p: 2, display: "flex", flexDirection: "column", gap: 2, mt: 2, alignItems: "center"}}>
+  return <Box sx={{p: 2, display: "flex", flexDirection: "column", width: "100%", gap: 2, alignItems: "left"}}>
     <Typography variant="h4">Settings</Typography>
     {images?.length > 0 && <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>}
     <SettingsDetail system={settings}/>
@@ -123,12 +161,13 @@ export function SystemPanel({images, setImageIndex, imageIndex}: SystemPanelProp
   const toggleDrawer = (newOpen: boolean) => () => {
     setDrawerOpen(newOpen);
   };
-  return <Box sx={{m: 2, position: "absolute", top: 0, left: 0, p: 0, zIndex: 200}}>
+  return <Box sx={{position: "absolute", top: 0, left: 0, p: 0, zIndex: 200}}>
     <IconButton aria-label="settings" size="large" onClick={toggleDrawer(true)}>
       <Settings fontSize="inherit" sx={{opacity: 0.2}}/>
     </IconButton>
-    <SwipeableDrawer sx={{opacity: 0.9, p: 1}} open={drawerOpen} onClose={toggleDrawer(false)} onOpen={toggleDrawer(false)}>
-      <Close sx={{mt: 1, mr: 1, ml: "auto", cursor: "pointer"}} onClick={toggleDrawer(false)} />
+    <SwipeableDrawer sx={{opacity: 0.9, m: 0}} open={drawerOpen} onClose={toggleDrawer(false)}
+                     onOpen={toggleDrawer(false)}>
+      <Close sx={{mt: 1, mr: 1, ml: "auto", cursor: "pointer"}} onClick={toggleDrawer(false)}/>
       <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>
     </SwipeableDrawer>
   </Box>
