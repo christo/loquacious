@@ -76,12 +76,12 @@ function ChatHistory({children}: { children: ReactNode }) {
     }
   }, []);
 
-    return <Box className="chathistory">
-      {chat.map((c: {from: string, text: string}, i: number) => {
-        return <Typography key={`ch_${i}`} className={`chat ${c.from}chat`}>{`${c.text}`}</Typography>
-  })}
-      {children}
-      </Box>;
+  return <Box className="chathistory">
+    {chat.map((c: {from: string, text: string}, i: number) => {
+      return <Typography key={`ch_${i}`} className={`chat ${c.from}chat`}>{`${c.text}`}</Typography>
+    })}
+    {children}
+  </Box>;
 }
 
 type CompResponseProps = {
@@ -118,19 +118,13 @@ function CompResponse({response, loading, videoRef, hideVideo, showVideo}: CompR
       hideVideo();
     }
   })
-
+  function hotResponse(message: string) {
+    return <Typography className="chat systemchat" dangerouslySetInnerHTML={{__html: mdToHtml(message)}}/>;
+  }
   return <Box className="controls">
-    {(
-      loading ? <CircularProgress size="3rem" className="loadingSpinner"/>
-        : <Box>
-          <ChatHistory>
-            {response && response.message ? <Typography className="chat systemchat"
-                                                        dangerouslySetInnerHTML={{__html: mdToHtml(response.message)}}/> : null}
-
-          </ChatHistory>
-        </Box>
-
-    )}
+    <ChatHistory>
+      {response?.message && hotResponse(response.message)}
+    </ChatHistory>
   </Box>;
 }
 
