@@ -62,7 +62,8 @@ class ElevenLabsSpeech implements SpeechSystem {
   }
 
   currentOption(): SpeechSystemOption {
-    return new SpeechSystemOption(this, this.options()[this.currentVoice]);
+    const currentVoice = VOICES[this.currentVoice];
+    return new SpeechSystemOption(this, currentVoice.voiceId, currentVoice.name, currentVoice.description);
   }
 
   async speak(message: string): Promise<string> {

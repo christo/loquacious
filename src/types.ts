@@ -16,7 +16,8 @@ type PerfStat = {
 type SpeechSystemDisplay = {
   current: {
     system: string,
-    option: string,
+    optionKey: string,
+    optionName: string,
   },
   systems: {
     name: string,

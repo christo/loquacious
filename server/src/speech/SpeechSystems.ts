@@ -10,24 +10,26 @@ import {type SpeechSystem} from "speech/SpeechSystem";
  */
 class SpeechSystemOption {
   system: SpeechSystem;
-  option: string;
+  optionKey: string;
+  optionName: string;
   description?: string
 
-  constructor(system: SpeechSystem, option: string, description?: string) {
+  constructor(system: SpeechSystem, key: string, name: string, description?: string) {
     this.system = system;
-    this.option = option;
+    this.optionKey = key;
+    this.optionName = name;
     this.description = description;
   }
 
   /** Returns a compact string representation of a {@link SpeechSystem} and its current option. */
   descriptor() {
     const desc = this.description ? ` (${this.description})` : "";
-    return `${this.system.name}/${this.option}${desc}`;
+    return `${this.system.name}/${this.optionName}${desc}`;
   }
 
   /** Display object represending a speech system and its configured option */
   safeObject() {
-    return {system: this.system.name, option: this.option, description: this.description};
+    return {system: this.system.name, optionKey: this.optionKey, optionName: this.optionName, description: this.descriptor()};
   }
 }
 
