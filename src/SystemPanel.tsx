@@ -152,8 +152,22 @@ function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
   </Box>
 }
 
-function SessionControl() {
-  return <Button onClick={() => {console.log("new session")}}>New Session</Button>;
+function SessionControl({serverPort}: {serverPort: number}) {
+
+  const [inFlight, setInFlight] = useState(false);
+
+  const newSession = () => {
+    setInFlight(true);
+    fetch(`//${location.hostname}:${serverPort}/session`, {
+      method: 'PUT',
+    }).then(result => {
+      result.json().then(_ => {
+        setInFlight(false);
+      });
+    });
+  }
+
+  return <Button sx={{mt:2}} disabled={inFlight} variant="outlined" onClick={newSession}>New Session</Button>;
 }
 
 function SettingsPanel({images, imageIndex, setImageIndex, serverPort}: SettingsProps) {
@@ -177,7 +191,7 @@ function SettingsPanel({images, imageIndex, setImageIndex, serverPort}: Settings
     {images?.length > 0 && <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort}/>}
     <SettingsDetail system={settings}/>
     <Status system={settings}/>
-    <SessionControl/>
+    <SessionControl serverPort={serverPort} />
   </Box>
 }
 
