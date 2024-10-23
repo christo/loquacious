@@ -1,15 +1,24 @@
-import {Pool, type QueryResult} from "pg";
+import {Pool, type QueryConfigValues, type QueryResult} from "pg";
 import {Deployment} from "../domain/Deployment";
 import {Run} from "../domain/Run";
 import {Session} from "../domain/Session";
 
 class Db {
   private pool: Pool;
-  /** The current Deployment */
+
+  /**
+   * Created on boot and cached in memory until shutdown.
+   * @private
+   */
   private run: Run | null = null;
 
-  constructor(poolSize: number) {
+  /**
+   * Until boot() is called.
+   * @private
+   */
+  private booted: boolean = false;
 
+  constructor(poolSize: number) {
     this.pool = new Pool({
       max: poolSize
     });
@@ -21,34 +30,46 @@ class Db {
   }
 
   getRun(): Run {
+    if (!this.booted) {
+      throw Error("system has not booted");
+    } else if (this.run === null) {
+      throw Error("system invariant violated: booted but no run!");
+    }
     return this.run!;
   }
 
-  async validate() {
+  /**
+   * Returns true if database connection is good.
+   */
+  async validate(): Promise<boolean> {
     try {
       const r = await this.fetchRows("select 1", [])
-      return r && r.length > 0;
+      return r!.length > 0;
     } catch (e) {
       console.error(`error validating database: ${e}`);
       return false;
     }
   }
 
-  async fetchRows(query: string, values: string[]) {
+  async fetchRows<V>(query: string, values: QueryConfigValues<V>): Promise<Array<any>> {
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
       const res = await client.query(query, values);
       await client.query("COMMIT");
+      if (res.rows === undefined) {
+        return Promise.reject("no rows bro");
+      }
       return res.rows;
-    } catch {
+    } catch (e) {
       await client.query("ROLLBACK");
+      return Promise.reject(e);
     } finally {
       client.release();
     }
   }
 
-  async fetchOne<T>(query: string, values: string[]): Promise<T> {
+  async fetchOne<V, T>(query: string, values: QueryConfigValues<V>): Promise<T> {
     return this.fetchRows(query, values).then(r => {
       return r && r.length > 0 ? Promise.resolve(r[0]) : Promise.reject("not found");
     }, (reason) => {
@@ -56,17 +77,21 @@ class Db {
     });
   }
 
-  async countQuery(query: string, values: string[]): Promise<number> {
+  // noinspection JSUnusedGlobalSymbols
+  async countQuery<V>(query: string, values: QueryConfigValues<V>): Promise<number> {
     const result: { count: string } = await this.fetchOne(query, values);
     return parseInt(result.count);
   }
 
+  // noinspection JSUnusedGlobalSymbols
   async createDeployment(name: string, metadata: string): Promise<Deployment> {
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
 
-      const q = `insert into deployment (name, metadata) values ($1, $2) returning deployment.*`;
+      const q = `insert into deployment (name, metadata)
+                 values ($1, $2)
+                 returning deployment.*`;
       const insertSession = client.query(q, [name, metadata]);
       return insertSession.then((result: QueryResult) => {
         if (result.rowCount === 1) {
@@ -82,61 +107,115 @@ class Db {
     }
   }
 
-  async createSession(run: Run):Promise<Session> {
-    // TODO finish this implementation
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      // get current run
-      const qCreateSession = `insert into session (run) values ($1) returning session.*, run.* inner join run on session.run = run.id`;
-      const insertSession = client.query(qCreateSession, [run.id]);
-      return insertSession.then((result: QueryResult) => {
-        if (result.rowCount === 1) {
-          //const row = result.rows[0];
-          //const session = new Session(row.id, row.created, row.run);
+  async createSession(): Promise<Session> {
+    if (!this.run) {
+      return Promise.reject("No current Run - has boot() not been run or failed?");
+    } else {
+      const client = await this.pool.connect();
+      try {
+        await client.query("BEGIN");
+        // get current run
+        const res = await client.query(
+          `insert into session (run)
+           values ($1)
+           returning session.*`, [this.run.id]
+        );
+        if (res.rowCount === 1) {
+          const session = new Session(res.rows[0].id, res.rows[0].created, this.run!);
+          await client.query("COMMIT");
+          return Promise.resolve(session);
+        } else {
+          return Promise.reject(`Got ${res.rowCount} rows for Session, expecting 1`);
         }
-
-        client.query("COMMIT");
-        return Promise.reject();
-      });
-    } finally {
-      client.release()
+      } finally {
+        client.release()
+      }
     }
   }
 
   async boot(deploymentName: string, sha1: string): Promise<Run> {
     console.log("booting database");
+    const dbValid = this.validate();
+    if (!dbValid) {
+      return Promise.reject("Database not valid");
+    }
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
       // get depoloyment and create run
-      const qGetDeployment = `select * from deployment where name = $1`;
-      const qCreateRun = `insert into run (sha1, deployment) values ($1, $2) returning *`;
+      const qGetDeployment = `select *
+                              from deployment
+                              where name = $1`;
+      const qCreateRun = `insert into run (sha1, deployment)
+                          values ($1, $2)
+                          returning *`;
       try {
         // look up the deployment
-        console.log(`fetching "${deploymentName}" Deployment from db`);
+        //console.log(`fetching "${deploymentName}" Deployment from db`);
         let result = await client.query(qGetDeployment, [deploymentName]);
         if (result.rowCount === 1) {
-          console.log("found deployment");
+          console.log(`Loaded ${deploymentName} deployment`);
           let row = result.rows[0];
           const deployment = new Deployment(row.id, row.created, row.name, row.metadata);
-          console.log(`inserting Run in db`);
+          //console.log(`inserting Run in db`);
           result = await client.query(qCreateRun, [sha1, deployment.id]);
           if (result.rowCount === 1) {
             row = result.rows[0];
             this.run = new Run(row.id, row.created, row.metadata, row.sha1, deployment);
             await client.query("COMMIT");
+            this.booted = true;
             return Promise.resolve(this.run);
           } else {
             return Promise.reject("Could not insert new Run in db");
           }
         } else {
-          console.log(`deployment rowcount = ${result.rowCount}`)
-          return Promise.reject(`Deployment ${deploymentName} not found in db`);
+          console.error(`deployment rows = ${result.rowCount}`)
+          return Promise.reject(`Unique ${deploymentName} deployment not found in db`);
         }
       } catch (e) {
         return Promise.reject(`problem fetching deployment or initialising run ${e}`);
       }
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * For now, just fetches the most recently created session for the current run.
+   */
+  async currentSession(): Promise<Session> {
+    const query = `select * from session
+     where finished is null
+       and run = $1
+     order by created
+     limit 1`;
+    const values: Array<number> = [this.getRun().id];
+    const session = await this.fetchOne<number[], Session>(query, [this.getRun().id]);
+    console.log(`query is: ${query}`)
+    console.dir({session: session});
+    if (2 * 4 > 1) {
+      throw Error("Guru Meditation Error");
+    }
+    return Promise.resolve(session);
+  }
+
+  async finishAllSessions(): Promise<void> {
+    console.log("finishing all current sessions");
+    const q = `update session set finished = CURRENT_TIMESTAMP where finished is null`;
+    const client = await this.pool.connect();
+    try {
+      await client.query(q);
+    } finally {
+      client.release();
+    }
+  }
+
+  async finishCurrentSession(): Promise<void> {
+    console.log("finishing any current session");
+    const q = `update session set finished = CURRENT_TIMESTAMP where finished is null and run = $1`;
+    const client = await this.pool.connect();
+    try {
+      await client.query(q, [this.getRun().id]);
     } finally {
       client.release();
     }
