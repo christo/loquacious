@@ -19,6 +19,21 @@ this would include all such services: clairvoyant, astrologer, tarot reader etc.
 The fortune teller character is entirely automatic, built with the following
 components.
 
+While there are several design choices that are tuned for something like the
+fortune teller character, systems and configuration are expected to work the
+same for a very different character scenario. At the moment animals or 
+cartoon characters cannot produce lipsync video.
+
+## Design Principles
+
+It is hoped that this system can operate without a traditional human-operated 
+media production toolchain or pipeline. So far all media assets are driven by
+code and AI prompts. Adding video production, illustration or any other kind
+of media editing may offer quality benefits or potential time or money savings.
+Nevertheless, exclusively constraining all human development-time input to
+text from a keyboard makes for an interesting exploration and at the moment
+is adopted as a defining feature of this research project.
+
 ## Character Portrait
 
 The first thing a user sees when interacting with the system contains a portrait
@@ -31,16 +46,57 @@ Various design alternatives include making the installation like a portal or
 magic mirror through which the character could be summoned akin to a kind of
 cosmic video conference call.
 
+Good character portraits seem to have the following features:
+
+* Proportion of the frame that is occupied by the head is between 10% and 30%
+* Background of head is relatively uniform. Any detail here may be subject to
+warping or tearing.
+* No foreground objects or obstructions should be near the head or face.
+Otherwise they will be warped.
+* Body position ideally should look natural if held still indefinitely. Having
+the character's hands on a crystal ball or be hidden somehow makes the expected
+absence of hand gestures less conspicuous.
+* Face lighting and colour should be most like the training data. Face paint,
+extreme wrinkles, exaggerated features, excessive shadows or extreme postures
+all seem to result in pathalogically bad lip sync results.
+* Long hair is sometimes problematic because the head and face are animated
+exclusively inside an inset rectangle which may tear at the edge rather than
+produce natural movement in long hair that may extend beyond the animated
+inset frame. Hair motion is not properly simulated so hairstyles rigidly fixed
+to the head will work best.
+* Image resolution has a dramatic effect on lipsync latency and final quality
+but more experimentation is required to determine sweet spots.
+
 ## Speech to Text
 
 (STT) Listens to audio and transcribes audible speech to text that is fed to the
 LLM.
+
+Interesting problems:
+
+* Voice isolation
+* Distinguishing ambient speech from conversational address.
+* Interruption and speaking over.
+* Collaborative handling of transcription errors.
+* Accent tuning.
+* Round-trip pronunciation metadata. The LLM can't hear the speech, only the
+transcription. This may make some interactions terrible unless there is some
+metadata that the STT and TTS can share around pronunciation. Worst case
+scenarios are expected to be ridiculous.
 
 ## Large Language Model (LLM)
 
 Takes text input from the user (or some other situational instructions) and
 using a prepared system prompt, responds in-character with text that is fed to
 the text-to-speech (TTS) system.
+
+The LLM may be useful for augmenting an additional expert system described
+below also for making judgements about situational workflow using several
+inputs: transcript, vision to text, pose estimation to text, relevant
+knowledge base embeddings, explicit guided review of conversation history,
+possibly conversation from sessions with other users at the same event.
+
+Some form of "memory" may also be usefully implemented.
 
 ## Text to Speech (TTS)
 
@@ -101,6 +157,14 @@ The physical deployment scenario can also be fed to the image-to-text system and
 it's possible that the LLM is provided the resulting description to better
 understand what the customer might be referring to in conversation or to, for
 example, invite the customer to help themselves to tea or snacks.
+
+## Non-verbal Animation
+
+Video sequences may be generated to make the character more life-like when it
+is not speaking. These can be categorised and used appropriately.
+
+* Q: How to generate gesture animations for the character?
+* Q: Could these videos be used as additional video input to lipsync?
 
 ## Expert System
 
@@ -495,6 +559,17 @@ and some comments about it.
 
 * slow speech cadence
 * canned smalltalk
+* pregenerated output for response graph driven by expert system and elaborated
+  by LLM for variety. 
+  * LLM can detect equivalence of phrases and help choose a
+    pregenerated response.
+* chunked TTS producing chunked lipsync video
+  * cut LLM output text into paragraphs or sentences
+  * generate individual voice for each fragment
+  * elevenlabs API supports providing preceding and proceeding context
+  * feed multiple speech audio chunks to lipsync in parallel
+  * modify front-end to work with a dynamic queue of video streams played
+    sequentially
 * environmental theatrics - externally controlled sound effects, crystal ball,
   etc.
 * crafted stalling and in-character ceremony - e.g. reading tarot cards or "gaze
