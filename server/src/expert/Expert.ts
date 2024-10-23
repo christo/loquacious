@@ -18,6 +18,17 @@ average response time overall.
 
 Finally, we can use caching and some kind of equivalence analysis to
 determine when dynamically generated text, speech and video
+
+Each unique text resulting from expansion here could be sent through
+TTS for each voice multiple times to get possibly different vocal
+renditions.
+
+Each resulting generated speech audio can be fed to lip sync for
+each portrait multiple times to get differently animated video.
+
+Not all this must be pre-generated.
+
+Many can be generated in parallel.
  */
 
 /**
