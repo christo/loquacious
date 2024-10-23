@@ -50,18 +50,18 @@ const LLAMA_CPP_BACKEND: Llm = new LlamaCppLlm();
 
 const FAKE_LLM: Llm = new FakeLlm();
 
-const BACKENDS = [
+const LLMS = [
   LLAMA_CPP_BACKEND,
   OPEN_AI_BACKEND,
   LM_STUDIO_BACKEND,
   FAKE_LLM
 ]
-let backendIndex = 1;
+let llmIndex = 1;
 
-const speechSystems = new SpeechSystems();
+const speechSystems = new SpeechSystems(path.join(PATH_BASE_DATA, "tts"));
 const BASEDIR_LIPSYNC = path.join(PATH_BASE_DATA, "lipsync");
 const LIPSYNCS: LipSync[] = [
-  new FalSadtalker(BASEDIR_LIPSYNC.toString()),
+  new FalSadtalker(BASEDIR_LIPSYNC),
   new FakeLipSync(BASEDIR_LIPSYNC)
 ]
 let lipsyncIndex = 0;
@@ -97,9 +97,9 @@ app.get("/system", async (_req: Request, res: Response) => {
       options: modes.allModes()
     },
     llmMain: {
-      name: BACKENDS[backendIndex].name,
-      models: await BACKENDS[backendIndex].models(),
-      currentModel: await BACKENDS[backendIndex].currentModel(),
+      name: LLMS[llmIndex].name,
+      models: await LLMS[llmIndex].models(),
+      currentModel: await LLMS[llmIndex].currentModel(),
     },
     speech: {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
@@ -113,7 +113,7 @@ app.get("/system", async (_req: Request, res: Response) => {
     runtime: {
       run: db.getRun()
     },
-    health: await systemHealth(BACKENDS, backendIndex)
+    health: await systemHealth(LLMS, llmIndex)
   });
 });
 
@@ -161,7 +161,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         console.log("thePrompt:", prompt);
         let messages = modes.getMode()(prompt, speechSystems.current());
         // console.dir(messages);
-        const response = await BACKENDS[backendIndex].chat(messages);
+        const response = await LLMS[llmIndex].chat(messages);
         return response.message
       });
 
@@ -187,9 +187,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
             // instance of LipSyncResult
             lipsync: lipsyncResult,
             // llm backend that generated the message
-            backend: BACKENDS[backendIndex].name,
+            backend: LLMS[llmIndex].name,
             // llm model used
-            model: (await BACKENDS[backendIndex].currentModel()),
+            model: (await LLMS[llmIndex].currentModel()),
           }
         });
       } else {
@@ -230,7 +230,7 @@ app.listen(port, async () => {
   // TODO remove host hard-coding
   console.log(`Server is running on http://localhost:${port}`);
 
-  const llm = BACKENDS[backendIndex];
+  const llm = LLMS[llmIndex];
   console.log(`LLM Health check: ${llm.enableHealth ? "enabled" : "disabled"}`);
   console.log(`LLM back end: ${llm.name} at URL: ${(llm.baseUrl)}`);
   console.log(`LLM current model: ${await llm.currentModel()}`);

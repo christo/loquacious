@@ -2,6 +2,7 @@ import {fal, type Result} from "@fal-ai/client";
 import {promises as fs} from "fs";
 import type {LipSync, LipSyncResult} from "lipsync/LipSync";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
+import type {PathLike} from "node:fs";
 import path from "path";
 import {mkDirIfMissing} from "system/config";
 import {timed} from "system/performance";
@@ -14,16 +15,16 @@ async function readBinaryFile(filePath: string): Promise<File> {
 
 class FalSadtalker implements LipSync {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
-  private readonly lipSyncDataDir: string;
+  private readonly dataDir: string;
   private urlCache: { [keyOf: string]: string } = {};
 
   /**
    * Constructor.
-   * @param lipSyncDataDir base directory for all lipsync videos
+   * @param lipSyncDataDir base directory for all lipsync videos, creates its own subdir.
    */
-  constructor(lipSyncDataDir: string) {
-    this.lipSyncDataDir = path.join(lipSyncDataDir, "fal-sadtalker");
-    mkDirIfMissing(this.lipSyncDataDir);
+  constructor(lipSyncDataDir: PathLike) {
+    this.dataDir = path.join(lipSyncDataDir.toString(), "fal-sadtalker");
+    mkDirIfMissing(this.dataDir);
     fal.config({
       credentials: process.env.FAL_API_KEY,
     });
@@ -54,7 +55,7 @@ class FalSadtalker implements LipSync {
       const r = result.data.video;
       const videoDownload = await fetch(r.url);
       const buffer = await videoDownload.arrayBuffer();
-      const downloadedVideo = path.join(this.lipSyncDataDir, r.file_name);
+      const downloadedVideo = path.join(this.dataDir, r.file_name);
       await fs.writeFile(downloadedVideo, Buffer.from(buffer));
       return new SadTalkerResult(r.url, r.content_type, r.file_name, r.file_size, downloadedVideo);
     });
@@ -65,7 +66,7 @@ class FalSadtalker implements LipSync {
       input: {
         source_image_url: imgUrl,
         driven_audio_url: speechUrl,
-        pose_style: 28,             // 0-45 integer
+        pose_style: 32,             // 0-45 integer
         face_model_resolution: "256",    // string "256" or "512"
         expression_scale: 1.4,      // 0-3 float
         // face_enhancer: 'gfpgan',       // blank or only option - not sure of impact

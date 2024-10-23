@@ -1,12 +1,15 @@
 import {ElevenLabsClient} from "elevenlabs";
 import fs from 'fs';
+import type {PathLike} from "node:fs";
 import path from "path";
 import {timed} from "system/performance";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
+import {mkDirIfMissing} from "../system/config";
 
 const VOICES = [
+  new CharacterVoice("Sigrid - solemn, raspy, wise", "Sigrid", "English, slightly posh older woman"),
   new CharacterVoice("Andromeda - warm and lovely", "Andromeda", "Posh English woman, mid tones"),
   new CharacterVoice("Ky9j3wxFbp3dSAdrkOEv", "Hex", "Middle-aged Northern English woman with moderate tone"),
   new CharacterVoice("Old Osirion Woman - Timeless, Mystical, Nurturing", "Anne", "Neutral English woman"),
@@ -28,7 +31,6 @@ const VOICES = [
   new CharacterVoice("Queen Rosamund - British, Older Woman", "Rosamund", "Very posh"),
   new CharacterVoice("Brie - feisty, sparkly, lovely", "Brie", "Older, quite posh"),
   new CharacterVoice("Nicole", "Nicole", "Young American woman, whispering, ASMR"),
-  new CharacterVoice("Sigrid - solemn, raspy, wise", "Sigrid", "English, slightly posh older woman"),
   new CharacterVoice("Grandma Margaret - Storybook Narrator", "Margaret", "Old and posh"),
   new CharacterVoice("Mima", "Mima", "Middle-aged Aarabic woman with warm tone"),
   new CharacterVoice("Tonia - Calm, soft and clear", "Tonia", "English middle-aged woman, calm"),
@@ -49,10 +51,11 @@ class ElevenLabsSpeech implements SpeechSystem {
   name = `ElevenLabs`;
   client: ElevenLabsClient;
   display: DisplaySpeechSystem;
-  private readonly ttsDataDir: string;
+  private readonly dataDir: string;
 
-  constructor(ttsDataDir: string) {
-    this.ttsDataDir = ttsDataDir;
+  constructor(ttsDataDir: PathLike) {
+    this.dataDir = path.join(ttsDataDir.toString(), "el");
+    mkDirIfMissing(this.dataDir);
     this.client = new ElevenLabsClient({});
     this.display = new DisplaySpeechSystem(this.name, VOICES)
   }
@@ -67,8 +70,8 @@ class ElevenLabsSpeech implements SpeechSystem {
   }
 
   async speak(message: string): Promise<string> {
-    const outFilename = `el_tts_${Date.now()}.mp3`;
-    const outFile = path.join(this.ttsDataDir, outFilename);
+    const outFilename = `el_tts_${Date.now()}_${this.characterVoice.name.replaceAll(/\s/g, '-')}.mp3`;
+    const outFile = path.join(this.dataDir, outFilename);
     try {
       const audio = await timed("elevenlabs generate speech",
         () => this.client.generate({

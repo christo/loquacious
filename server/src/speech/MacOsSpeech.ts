@@ -1,6 +1,7 @@
 import {exec} from 'child_process';
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
+import type {PathLike} from "node:fs";
 import path from "path";
 import {timed} from "system/performance";
 import {type MediaFormat, MF_MP3, type SupportedAudioFormat, TYPE_DEFAULT} from "media";
@@ -8,6 +9,7 @@ import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import util from "util";
+import {mkDirIfMissing} from "../system/config";
 
 
 const execPromise = util.promisify(exec);
@@ -89,12 +91,13 @@ class MacOsSpeech implements SpeechSystem {
   name = MACOS_SPEECH_SYSTEM_NAME;
   currentIndex = 0;
   display = new DisplaySpeechSystem(this.name, VOICES);
-  private ttsDataDir: string;
+  private readonly dataDir: string;
   private fileFormat: MediaFormat;
 
 
-  constructor(ttsDataDir: string, fileFormat = MF_MP3) {
-    this.ttsDataDir = ttsDataDir;
+  constructor(ttsDataDir: PathLike, fileFormat = MF_MP3) {
+    this.dataDir = path.join(ttsDataDir.toString(), "macos");
+    mkDirIfMissing(this.dataDir);
     this.fileFormat = fileFormat;
   }
 
@@ -108,7 +111,7 @@ class MacOsSpeech implements SpeechSystem {
   }
 
   async speak(message: string): Promise<string> {
-    return await speak(message, VOICES[this.currentIndex].voiceId, speed, this.ttsDataDir, this.fileFormat)
+    return await speak(message, VOICES[this.currentIndex].voiceId, speed, this.dataDir, this.fileFormat)
       .catch((error) => {
         console.error('An error occurred during speech synthesis:', error);
         return Promise.reject(error);

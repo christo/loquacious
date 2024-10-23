@@ -1,3 +1,4 @@
+import type {PathLike} from "node:fs";
 import {ElevenLabsSpeech} from "speech/ElevenLabsSpeech";
 import {MacOsSpeech} from "speech/MacOsSpeech";
 import {NoSpeech} from "speech/NoSpeech";
@@ -39,11 +40,18 @@ class SpeechSystemOption {
 class SpeechSystems {
 
   private currentSystemIndex = 2;
-  systems: Array<SpeechSystem> = [
-    new MacOsSpeech(`${process.env.DATA_DIR}/tts`),
-    new NoSpeech(),
-    new ElevenLabsSpeech(`${process.env.DATA_DIR}/tts`),
-  ]
+  systems: Array<SpeechSystem>;
+  private baseDir: PathLike;
+
+
+  constructor(baseDir: PathLike) {
+    this.baseDir = baseDir;
+    this.systems = [
+      new MacOsSpeech(this.baseDir),
+      new NoSpeech(),
+      new ElevenLabsSpeech(this.baseDir),
+    ]
+  }
 
   current() {
     return this.systems[this.currentSystemIndex];
