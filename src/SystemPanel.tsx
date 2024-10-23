@@ -170,12 +170,12 @@ function SessionControl({serverPort}: {serverPort: number}) {
   return <Button sx={{mt:2}} disabled={inFlight} variant="outlined" onClick={newSession}>New Session</Button>;
 }
 
-function SettingsPanel({images, imageIndex, setImageIndex, serverPort}: SettingsProps) {
+function SettingsPanel(props: SettingsProps) {
   const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
     try {
-      fetch(`//${location.hostname}:${serverPort}/system`).then(result => {
+      fetch(`//${location.hostname}:${props.serverPort}/system`).then(result => {
         result.json().then(data => {
           setSettings(data || null);
         });
@@ -188,10 +188,10 @@ function SettingsPanel({images, imageIndex, setImageIndex, serverPort}: Settings
   return <Box
     sx={{pt: 0, pl: 2, pr: 2, display: "flex", flexDirection: "column", width: "100%", gap: 1, alignItems: "left"}}>
     <Typography variant="h4">Loquacious</Typography>
-    {images?.length > 0 && <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort}/>}
+    {props.images?.length > 0 && <ImageChooser {...props} />}
     <SettingsDetail system={settings}/>
     <Status system={settings}/>
-    <SessionControl serverPort={serverPort} />
+    <SessionControl serverPort={props.serverPort} />
   </Box>
 }
 
