@@ -38,7 +38,21 @@ export type System = {
   lipsync: {
     systems: string[],
     current: string
-  }
+  },
+  runtime: {
+    run: {
+      id: number,
+      created: string,
+      metadata: string | null,
+      sha1: string,
+      deployment: {
+        id: number,
+        created : string,
+        name: string,
+        metadata: string | null,
+      }
+    }
+  },
   health: HealthStatus
 }
 export type HealthError = {

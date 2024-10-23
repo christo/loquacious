@@ -19,9 +19,10 @@ import {OpenAiLlm} from 'llm/OpenAiLlm';
 import {Modes} from "Modes";
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
-import {ensureDataDirsExist} from "system/config";
+import {ensureDataDirsExist, getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
 import {systemHealth} from "system/SystemStatus";
+import Db from "./db/Db";
 // Load environment variables
 dotenv.config();
 
@@ -70,6 +71,8 @@ const lipSync = LIPSYNCS[lipsyncIndex];
 
 const modes = new Modes();
 
+const db = new Db(10);
+
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -107,6 +110,9 @@ app.get("/system", async (_req: Request, res: Response) => {
     lipsync: {
       systems: LIPSYNCS.map(ls => ls.name()),
       current: lipSync.name(),
+    },
+    runtime: {
+      run: db.getRun()
     },
     health: await systemHealth(BACKENDS, backendIndex)
   });
@@ -196,6 +202,9 @@ app.get('/video', async (req: Request, res: Response) => fileStream(req.query.fi
 
 // Start the server
 app.listen(port, async () => {
+  // TODO make production implementation that has stored commit hash and uses explicit version metdata
+  const hash = await getCurrentCommitHash(process.cwd());
+  await db.boot(process.env.DEPLOYMENT_NAME!, hash);
   await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
   // TODO remove host hard-coding
   console.log(`Server is running on http://localhost:${port}`);

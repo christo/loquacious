@@ -21,4 +21,25 @@ function ensureDataDirsExist(dataDir: string) {
   }
 }
 
-export {ensureDataDirsExist, mkDirIfMissing};
+import { promisify } from 'util';
+import { exec } from 'child_process';
+
+const execAsync = promisify(exec);
+
+/**
+ * Retrieves the current Git commit SHA1 hash of the present repository.
+ * @param cwd - Optional directory path where the Git command should be executed.
+ * @returns A promise that resolves to the current commit SHA1 hash as a string.
+ */
+async function getCurrentCommitHash(cwd?: string): Promise<string> {
+  try {
+    const { stdout } = await execAsync('git rev-parse HEAD', { cwd });
+    return stdout.trim();
+  } catch (error) {
+    console.error('Error getting current commit hash:', error);
+    return Promise.reject(error);
+  }
+}
+
+
+export {ensureDataDirsExist, mkDirIfMissing, getCurrentCommitHash};
