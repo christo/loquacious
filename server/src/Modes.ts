@@ -3,9 +3,6 @@ import OpenAI from "openai";
 import {type PromptPart, SimplePromptPart} from "./llm/PromptPart";
 import type {SpeechSystem} from "./speech/SpeechSystem";
 
-// TODO fix this hella mess
-// TODO need a bootstrap mode for any pre-operational work
-
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 const inviteModeSystemPrompt: string = readFileSync("prompts/invite-mode.prompt.txt").toString();
 const universalSystemPrompt: string = readFileSync("prompts/universal-system.prompt.txt").toString();
