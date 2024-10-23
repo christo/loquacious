@@ -6,7 +6,7 @@ import {
   ArrowCircleRight,
   AspectRatio,
   Campaign,
-  Close, Dns,
+  Dns,
   Error, Face3,
   Memory, Mic,
   MonitorHeart, Portrait,
@@ -186,7 +186,7 @@ function SettingsPanel(props: SettingsProps) {
   }, []);
 
   return <Box
-    sx={{pt: 0, pl: 2, pr: 2, display: "flex", flexDirection: "column", width: "100%", gap: 1, alignItems: "left"}}>
+    sx={{p: 2, display: "flex", flexDirection: "column", width: "100%", gap: 1, alignItems: "left"}}>
     <Typography variant="h4">Loquacious</Typography>
     {props.images?.length > 0 && <ImageChooser {...props} />}
     <SettingsDetail system={settings}/>
@@ -227,7 +227,6 @@ export function SystemPanel({images, setImageIndex, imageIndex, serverPort}: Sys
     </IconButton>
     <SwipeableDrawer sx={{opacity: 0.9, m: 0}} open={drawerOpen} onClose={toggleDrawer(false)}
                      onOpen={toggleDrawer(false)}>
-      <Close sx={{mt: 1, ml: 1, mr: "auto", cursor: "pointer"}} onClick={toggleDrawer(false)}/>
       <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort}/>
     </SwipeableDrawer>
   </Box>
