@@ -4,6 +4,7 @@ import {type PromptPart, SimplePromptPart} from "./llm/PromptPart";
 import type {SpeechSystem} from "./speech/SpeechSystem";
 
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
+const rokosBasiliskSystemPrompt: string = readFileSync("prompts/rokos-basilisk.prompt.txt").toString();
 const inviteModeSystemPrompt: string = readFileSync("prompts/invite-mode.prompt.txt").toString();
 const universalSystemPrompt: string = readFileSync("prompts/universal-system.prompt.txt").toString();
 
@@ -16,19 +17,26 @@ const universalSystemPrompt: string = readFileSync("prompts/universal-system.pro
  */
 const chatModeMessages = (prompt: string, ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] => {
   console.log("chat mode function");
-  if (!prompt) {
-    console.error("prompt was falsy");
-  }
   const systemParts = [
     dateTimePrompt(),
     chatModeSystemPrompt,
+    rokosBasiliskSystemPrompt,
     universalSystemPrompt,
     pauseInstructions(ss).text()
-  ].join("\\n\\n");
-  return [
-    {role: 'system', content: systemParts},
-    {role: 'user', content: prompt}
   ];
+  if (!prompt) {
+    console.error("prompt was falsy");
+    systemParts.push("There is an awkward gap in the conversation. You say something next.");
+    return [
+      {role: 'system', content: systemParts.join("\\n\\n")},
+    ];
+  } else {
+    return [
+      {role: 'system', content: systemParts.join("\\n\\n")},
+      {role: 'user', content: prompt}
+    ];
+  }
+
 };
 
 /**
