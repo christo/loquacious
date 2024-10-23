@@ -227,7 +227,7 @@ export function SystemPanel({images, setImageIndex, imageIndex, serverPort}: Sys
     </IconButton>
     <SwipeableDrawer sx={{opacity: 0.9, m: 0}} open={drawerOpen} onClose={toggleDrawer(false)}
                      onOpen={toggleDrawer(false)}>
-      <Close sx={{mt: 1, mr: 1, ml: "auto", cursor: "pointer"}} onClick={toggleDrawer(false)}/>
+      <Close sx={{mt: 1, ml: 1, mr: "auto", cursor: "pointer"}} onClick={toggleDrawer(false)}/>
       <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort}/>
     </SwipeableDrawer>
   </Box>
