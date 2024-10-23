@@ -1,6 +1,7 @@
 import type {CharacterVoice} from "speech/CharacterVoice";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 
+/** UI struct for a speech system with its name and all possible options */
 class DisplaySpeechSystem {
   name: string;
   options: Array<CharacterVoice>;
@@ -24,6 +25,9 @@ type SpeechSystem = {
    * @param message
    */
   speak: (message: string) => Promise<string>;
+  /**
+   * Unique key for each option.
+   */
   options: () => Array<string>;
   /** Command for inserting a speech of this duration or null if no such command exists */
   pauseCommand: (msDuration: number) => string | null;
