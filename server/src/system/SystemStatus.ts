@@ -7,7 +7,7 @@ const formatBytes = (bytes: number) => {
     return '0 Byte';
   }
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
 };
 
 async function systemHealth(backends: Array<Llm>, backendIndex: number) {
