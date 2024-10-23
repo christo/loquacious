@@ -34,6 +34,10 @@ export type System = {
     models: Model[]
   },
   speech: SpeechSystemDisplay,
+  lipsync: {
+    systems: string[],
+    current: string
+  }
   health: HealthStatus
 }
 export type HealthError = {

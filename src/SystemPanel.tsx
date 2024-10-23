@@ -5,10 +5,10 @@ import {
   AspectRatio,
   Campaign,
   Close,
-  Error,
-  Memory,
-  MonitorHeart,
-  QuestionAnswer,
+  Error, Face3,
+  Memory, Mic,
+  MonitorHeart, Portrait,
+  QuestionAnswer, RemoveRedEye,
   School,
   Settings,
   type SvgIconComponent
@@ -59,12 +59,18 @@ function SettingsDetail({system}: { system: System }) {
     return "";
   } else {
     return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start", width: "100%", gap: 1}}>
+      <IconLabelled TheIcon={Mic} tooltip="Speech to Text">Unimplemented</IconLabelled>
+      <IconLabelled TheIcon={RemoveRedEye} tooltip="Vision System">Unimplemented</IconLabelled>
+      <IconLabelled TheIcon={Face3} tooltip="Self-image">Unimplemented</IconLabelled>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">{modelist()}</IconLabelled>
-      <IconLabelled TheIcon={QuestionAnswer} tooltip="LLM">{system.llmMain.name}</IconLabelled>
+      <IconLabelled TheIcon={QuestionAnswer} tooltip="LLM">{system.llmMain.name} (models: {system.llmMain.models.length})</IconLabelled>
       <IconLabelled TheIcon={School} tooltip="Model">
-        <Typography>{system.llmMain.models[0].id} (total: {system.llmMain.models.length})</Typography>
+        <Typography>{system.llmMain.models[0].id}</Typography>
       </IconLabelled>
       <SpeechSettings speechSettings={system.speech}/>
+      <IconLabelled TheIcon={Portrait} tooltip="Lip Sync System">
+        {system.lipsync.current}
+      </IconLabelled>
     </Box>
   }
 }
@@ -107,8 +113,9 @@ function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
       </IconButton>
     </Box>
     <Box>
-      <IconLabelled TheIcon={AspectRatio}
-                    tooltip="Character Portrait Dimensions">{portraitWidth} x {portraitHeight}</IconLabelled>
+      <IconLabelled TheIcon={AspectRatio} tooltip="Character Portrait Dimensions">
+        {portraitWidth} x {portraitHeight}
+      </IconLabelled>
     </Box>
   </Box>
 }
