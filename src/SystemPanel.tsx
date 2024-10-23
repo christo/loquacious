@@ -91,7 +91,7 @@ function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
 
   return <Box sx={{p: 2, display: "flex", flexDirection: "column", gap: 2, mt: 2, alignItems: "center"}}>
     <Typography variant="h4">Settings</Typography>
-    <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>
+    {images?.length > 0 && <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>}
     <SettingsDetail system={settings}/>
     <Typography variant="h4">System</Typography>
     <Status system={settings}/>
