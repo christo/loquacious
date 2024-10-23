@@ -62,17 +62,19 @@ function ChatHistory({children}: { children: ReactNode }) {
   const [chat, setChat] = useState([]);
 
   useEffect(() => {
-    fetch(`http://${location.hostname}:${SERVER_PORT}/api/chat`)
-      .then(response => {
-        if (!response.ok) {
-          throw "network response for chat was crap";
-        } else {
-          return response.json();
-        }
-      }).then(json => {
-      setChat(json.response.messages);
-    })
-  });
+    if (chat.length === 0) {
+      fetch(`//${location.hostname}:${SERVER_PORT}/api/chat`)
+        .then(response => {
+          if (!response.ok) {
+            throw "network response for chat was crap";
+          } else {
+            return response.json();
+          }
+        }).then(json => {
+        setChat(json.response.messages);
+      });
+    }
+  }, []);
 
     return <Box className="chathistory">
       {chat.map((c: {from: string, text: string}, i: number) => {
