@@ -4,6 +4,9 @@ import {LocalLipSyncResult} from "./LocalLipSyncResult";
 import type {Dirent} from "node:fs";
 import path from "path";
 
+/**
+ * Hacky implementation of LipSync that reuses pre-generated video.
+ */
 class FakeLipSync implements LipSync {
   private readonly lipSyncDataDir: string;
 
@@ -25,7 +28,8 @@ class FakeLipSync implements LipSync {
    * @param _speechFile ignored
    */
   async lipSync(_imageFile: string, _speechFile: string): Promise<LipSyncResult> {
-    const files = await fs.readdir(this.lipSyncDataDir, {withFileTypes: true});
+    const files = await fs.readdir(this.lipSyncDataDir, {withFileTypes: true, recursive: true});
+    // STTCPW
     const aFile: Dirent | undefined = files.find(f => f.isFile() && path.extname(f.name).toLowerCase() === ".mp4");
     if (!aFile) {
       return Promise.reject("no lip sync files");
