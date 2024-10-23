@@ -13,9 +13,9 @@ import {
   Settings,
   type SvgIconComponent
 } from "@mui/icons-material";
-import {Box, Chip, IconButton, Stack, SwipeableDrawer, Tooltip, Typography} from "@mui/material";
+import {Box, Button, Chip, IconButton, Stack, SwipeableDrawer, Tooltip, Typography} from "@mui/material";
 import React, {type ReactNode, useEffect, useState} from "react";
-import type {ImageInfo} from "../server/src/image/ImageInfo.ts";
+import  {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import type {HealthError, System} from "./types.ts";
 
 function ShowError({error}: { error: HealthError }) {
@@ -25,6 +25,7 @@ function ShowError({error}: { error: HealthError }) {
 interface SettingsProps {
   images: ImageInfo[];
   imageIndex: number;
+  serverPort: number;
   setImageIndex: (i: number) => void;
 }
 
@@ -43,15 +44,16 @@ function IconLabelled({TheIcon, tooltip, children}: {
 }): ReactNode {
   return <Stack direction="row" alignItems="center" spacing={1}>
     <Tooltip title={tooltip}><TheIcon fontSize="small" sx={{mr: 1}}/></Tooltip>
-    <Box sx={{display: "flex", flexDirection: "row", alignItems: "center"}} >{children}</Box>
+    <Box sx={{display: "flex", flexDirection: "row", alignItems: "center"}}>{children}</Box>
   </Stack>
 }
 
-function SettingsDetail({system}: { system: System }) {
+function SettingsDetail({system}: { system: System}) {
   function modelist() {
     const currentMode = system.mode.current;
     return system.mode.options.map((m: string) => {
-      return <Chip key={`mode_${m}`} label={m} size="small" variant={m === currentMode ? "filled" : "outlined"} sx={{mr: 1}}/>
+      return <Chip key={`mode_${m}`} label={m} size="small" variant={m === currentMode ? "filled" : "outlined"}
+                   sx={{mr: 1}}/>
     });
   }
 
@@ -63,7 +65,8 @@ function SettingsDetail({system}: { system: System }) {
       <IconLabelled TheIcon={RemoveRedEye} tooltip="Vision System">Unimplemented</IconLabelled>
       <IconLabelled TheIcon={Face3} tooltip="Self-image">Unimplemented</IconLabelled>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">{modelist()}</IconLabelled>
-      <IconLabelled TheIcon={QuestionAnswer} tooltip="LLM">{system.llmMain.name} (models: {system.llmMain.models.length})</IconLabelled>
+      <IconLabelled TheIcon={QuestionAnswer}
+                    tooltip="LLM">{system.llmMain.name} (models: {system.llmMain.models.length})</IconLabelled>
       <IconLabelled TheIcon={School} tooltip="Model">
         <Typography>{system.llmMain.models[0].id}</Typography>
       </IconLabelled>
@@ -120,12 +123,16 @@ function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
   </Box>
 }
 
-function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
+function SessionControl() {
+  return <Button onClick={() => {console.log("new session")}}>New Session</Button>;
+}
+
+function SettingsPanel({images, imageIndex, setImageIndex, serverPort}: SettingsProps) {
   const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
     try {
-      fetch(`//${location.hostname}:3001/system`).then(result => {
+      fetch(`//${location.hostname}:${serverPort}/system`).then(result => {
         result.json().then(data => {
           setSettings(data || null);
         });
@@ -135,21 +142,24 @@ function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
     }
   }, []);
 
-  return <Box sx={{pt: 0, pl: 2, pr: 2, display: "flex", flexDirection: "column", width: "100%", gap: 1, alignItems: "left"}}>
+  return <Box
+    sx={{pt: 0, pl: 2, pr: 2, display: "flex", flexDirection: "column", width: "100%", gap: 1, alignItems: "left"}}>
     <Typography variant="h4">Loquacious</Typography>
-    {images?.length > 0 && <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>}
+    {images?.length > 0 && <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort}/>}
     <SettingsDetail system={settings}/>
     <Status system={settings}/>
+    <SessionControl/>
   </Box>
 }
 
 interface SystemPanelProps {
   images: ImageInfo[],
   setImageIndex: (value: (((prevState: number) => number) | number)) => void,
-  imageIndex: number
+  imageIndex: number,
+  serverPort: number
 }
 
-export function SystemPanel({images, setImageIndex, imageIndex}: SystemPanelProps) {
+export function SystemPanel({images, setImageIndex, imageIndex, serverPort}: SystemPanelProps) {
   // ESC toggles drawer
   useEffect(() => {
     let handleKeyDown = (e: KeyboardEvent) => {
@@ -175,7 +185,7 @@ export function SystemPanel({images, setImageIndex, imageIndex}: SystemPanelProp
     <SwipeableDrawer sx={{opacity: 0.9, m: 0}} open={drawerOpen} onClose={toggleDrawer(false)}
                      onOpen={toggleDrawer(false)}>
       <Close sx={{mt: 1, mr: 1, ml: "auto", cursor: "pointer"}} onClick={toggleDrawer(false)}/>
-      <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>
+      <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort}/>
     </SwipeableDrawer>
   </Box>
 }

@@ -212,7 +212,7 @@ const App: React.FC = () => {
       {images.length > 0 && (
         <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={imageUrl()} hideVideo={hideVideo}/>)
       }
-      <SystemPanel images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}/>
+      <SystemPanel images={images} setImageIndex={setImageIndex} imageIndex={imageIndex} serverPort={SERVER_PORT}/>
       {loading && <CircularProgress size="3rem" className="loadingSpinner"/>}
       <Box className="ui">
         <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
