@@ -1,5 +1,5 @@
-import {ArrowCircleLeft, ArrowCircleRight, Error, QuestionAnswer, School, Settings} from "@mui/icons-material";
-import {Box, Drawer, IconButton, Typography} from "@mui/material";
+import {ArrowCircleLeft, ArrowCircleRight, Close, Error, QuestionAnswer, School, Settings} from "@mui/icons-material";
+import {Box, IconButton, SwipeableDrawer, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import type {ImageInfo} from "../server/src/image/ImageInfo.ts";
 import type {HealthError, System} from "./types.ts";
@@ -79,7 +79,7 @@ function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
 
   useEffect(() => {
     try {
-      fetch(`http://${location.hostname}:3001/system`).then(result => {
+      fetch(`//${location.hostname}:3001/system`).then(result => {
         result.json().then(data => {
           setSettings(data || null);
         });
@@ -127,8 +127,9 @@ export function SystemPanel({images, setImageIndex, imageIndex}: SystemPanelProp
     <IconButton aria-label="settings" size="large" onClick={toggleDrawer(true)}>
       <Settings fontSize="inherit" sx={{opacity: 0.2}}/>
     </IconButton>
-    <Drawer sx={{opacity: 0.9}} open={drawerOpen} onClose={toggleDrawer(false)}>
+    <SwipeableDrawer sx={{opacity: 0.9, p: 1}} open={drawerOpen} onClose={toggleDrawer(false)} onOpen={toggleDrawer(false)}>
+      <Close sx={{mt: 1, mr: 1, ml: "auto", cursor: "pointer"}} onClick={toggleDrawer(false)} />
       <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>
-    </Drawer>
+    </SwipeableDrawer>
   </Box>
 }
