@@ -61,7 +61,7 @@ function SettingsDetail({system}: { system: System }) {
     return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start", width: "100%", gap: 1}}>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">{modelist()}</IconLabelled>
       <IconLabelled TheIcon={QuestionAnswer} tooltip="LLM">{system.llmMain.name}</IconLabelled>
-      <IconLabelled TheIcon={School} tooltip="model">
+      <IconLabelled TheIcon={School} tooltip="Model">
         <Typography>{system.llmMain.models[0].id} (total: {system.llmMain.models.length})</Typography>
       </IconLabelled>
       <SpeechSettings speechSettings={system.speech}/>
@@ -74,11 +74,12 @@ function Status({system}: { system: System }) {
     return <p>...</p>
   } else {
     const health = system.health;
-    return (<Box>
+    return (<Box sx={{display: "flex", flexDirection: "column", alignItems: "start", width: "100%", gap: 1}}>
       {health.error ? <ShowError error={health.error}/> : ""}
-      <IconLabelled TheIcon={MonitorHeart} tooltip="Health">{health.message || "unknown"}</IconLabelled>
-      <IconLabelled TheIcon={Memory} tooltip="System RAM">{health.freeMem.formatted} free
-        of {health.totalMem.formatted}</IconLabelled>
+      <IconLabelled TheIcon={MonitorHeart} tooltip="Health">{health.message || "Health unknown"}</IconLabelled>
+      <IconLabelled TheIcon={Memory} tooltip="System RAM">
+        {health.freeMem.formatted} free of {health.totalMem.formatted}
+      </IconLabelled>
     </Box>);
   }
 }
@@ -127,11 +128,10 @@ function SettingsPanel({images, imageIndex, setImageIndex}: SettingsProps) {
     }
   }, []);
 
-  return <Box sx={{p: 2, display: "flex", flexDirection: "column", width: "100%", gap: 2, alignItems: "left"}}>
-    <Typography variant="h4">Settings</Typography>
+  return <Box sx={{pt: 0, pl: 2, pr: 2, display: "flex", flexDirection: "column", width: "100%", gap: 1, alignItems: "left"}}>
+    <Typography variant="h4">Loquacious</Typography>
     {images?.length > 0 && <ImageChooser images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}/>}
     <SettingsDetail system={settings}/>
-    <Typography variant="h4">System</Typography>
     <Status system={settings}/>
   </Box>
 }
@@ -161,7 +161,7 @@ export function SystemPanel({images, setImageIndex, imageIndex}: SystemPanelProp
   const toggleDrawer = (newOpen: boolean) => () => {
     setDrawerOpen(newOpen);
   };
-  return <Box sx={{position: "absolute", top: 0, left: 0, p: 0, zIndex: 200}}>
+  return <Box sx={{position: "absolute", top: 0, left: 0, p: 0, m: 2, zIndex: 200}}>
     <IconButton aria-label="settings" size="large" onClick={toggleDrawer(true)}>
       <Settings fontSize="inherit" sx={{opacity: 0.2}}/>
     </IconButton>
