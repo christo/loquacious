@@ -27,24 +27,25 @@ dotenv.config();
 
 /** file path relative to server module root */
 const BASE_PATH_PORTRAIT = "../public/img";
-const PORTRAIT_SCALE_DIMENSIONS = [
+const PORTRAIT_DIMS = [
   {width: 608, height: 800},
   {width: 1080, height:1920}
 ];
-const currentDimensionIndex = 0;
-const PATH_PORTRAIT = `../public/img/${PORTRAIT_SCALE_DIMENSIONS[currentDimensionIndex].width}x${PORTRAIT_SCALE_DIMENSIONS[currentDimensionIndex].height}`;
+const dimIndex = 0;
+const PATH_PORTRAIT = `../public/img/${PORTRAIT_DIMS[dimIndex].width}x${PORTRAIT_DIMS[dimIndex].height}`;
 console.log(`path portrait: ${PATH_PORTRAIT}`)
 
-const PATH_BASE_DATA: string = process.env.DATA_DIR!;
-if (!PATH_BASE_DATA) {
+if (!process.env.DATA_DIR) {
   console.error("ensure environment variable DATA_DIR is set");
 }
+const PATH_BASE_DATA: string = process.env.DATA_DIR!;
+
 
 // make sure data subdirectories exist
 ensureDataDirsExist(process.env.DATA_DIR!);
 
 const LM_STUDIO_BACKEND: Llm = new LmStudioLlm();
-const OPEN_AI_BACKEND: Llm = new OpenAiLlm("gpt-4o-2024-08-06");
+const OPEN_AI_BACKEND: Llm = new OpenAiLlm("gpt-4o");
 const LLAMA_CPP_BACKEND: Llm = new LlamaCppLlm();
 
 const FAKE_LLM: Llm = new FakeLlm();
@@ -96,6 +97,7 @@ app.get("/system", async (_req: Request, res: Response) => {
     llmMain: {
       name: BACKENDS[backendIndex].name,
       models: await BACKENDS[backendIndex].models(),
+      currentModel: await BACKENDS[backendIndex].currentModel(),
     },
     speech: {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
@@ -160,7 +162,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
             speech: speechResult,
             lipsync: lipsyncResult,
             backend: BACKENDS[backendIndex].name,
-            model: (await BACKENDS[backendIndex].models())[0],
+            model: (await BACKENDS[backendIndex].currentModel()),
           }
         });
       } else {
@@ -194,7 +196,7 @@ app.get('/video', async (req: Request, res: Response) => fileStream(req.query.fi
 
 // Start the server
 app.listen(port, async () => {
-  await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_SCALE_DIMENSIONS));
+  await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
   // TODO remove host hard-coding
   console.log(`Server is running on http://localhost:${port}`);
 
@@ -202,8 +204,9 @@ app.listen(port, async () => {
   console.log(`LLM Health check: ${llm.enableHealth ? "enabled" : "disabled"}`);
   console.log(`LLM back end: ${llm.name} at URL: ${(llm.baseUrl)}`);
   console.log(`LLM current model: ${await llm.currentModel()}`);
-  console.log("LLM available models:");
-  (await llm.models()).forEach(m => console.log(`   ${m.id}`));
+  const models = await llm.models();
+  console.log(`LLM available models (${models.length}):`);
+  models.forEach(m => console.log(`   ${m.id}`));
   console.log(`Current Speech System: ${speechSystems.current().currentOption().descriptor()}`);
   console.log(`Current LipSync: ${lipSync.name()}`);
 });

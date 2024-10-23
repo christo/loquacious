@@ -31,7 +31,8 @@ export type System = {
   },
   llmMain: {
     name: string,
-    models: Model[]
+    models: Model[],
+    currentModel: string
   },
   speech: SpeechSystemDisplay,
   lipsync: {

@@ -68,7 +68,7 @@ function SettingsDetail({system}: { system: System}) {
       <IconLabelled TheIcon={QuestionAnswer}
                     tooltip="LLM">{system.llmMain.name} (models: {system.llmMain.models.length})</IconLabelled>
       <IconLabelled TheIcon={School} tooltip="Model">
-        <Typography>{system.llmMain.models[0].id}</Typography>
+        <Typography>{system.llmMain.currentModel}</Typography>
       </IconLabelled>
       <SpeechSettings speechSettings={system.speech}/>
       <IconLabelled TheIcon={Portrait} tooltip="Lip Sync System">
