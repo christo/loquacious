@@ -41,7 +41,6 @@ if (!process.env.DATA_DIR) {
 }
 const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 
-
 // make sure data subdirectories exist
 ensureDataDirsExist(process.env.DATA_DIR!);
 

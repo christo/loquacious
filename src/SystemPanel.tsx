@@ -1,17 +1,19 @@
 import {
+  AccessibilityNew,
+  AccessTime,
   AccountTree,
   ArrowCircleLeft,
   ArrowCircleRight,
   AspectRatio,
   Campaign,
-  Close,
+  Close, Dns,
   Error, Face3,
   Memory, Mic,
   MonitorHeart, Portrait,
   QuestionAnswer, RemoveRedEye,
   School,
   Settings,
-  type SvgIconComponent
+  type SvgIconComponent, Videocam
 } from "@mui/icons-material";
 import {Box, Button, Chip, IconButton, Stack, SwipeableDrawer, Tooltip, Typography} from "@mui/material";
 import React, {type ReactNode, useEffect, useState} from "react";
@@ -47,7 +49,25 @@ function IconLabelled({TheIcon, tooltip, children}: {
     <Box sx={{display: "flex", flexDirection: "row", alignItems: "center"}}>{children}</Box>
   </Stack>
 }
-
+/**
+ * Formats to hh:mm:ss or mm:ss
+ */
+function Duration(props: { ms: number, className?: string }) {
+  let {ms, className} = props;
+  className = !className ? "" : className;
+  let t = Math.floor(ms / 1000);
+  const hours = Math.floor(t / 3600);
+  t -= hours * 3600;
+  const mins = Math.floor(t / 60);
+  t -= mins * 60;
+  const secs = t;
+  const pad = (n: number) => ('0' + n).slice(-2);
+  if (hours > 0) {
+    return <span className={className}>{pad(hours)}:{pad(mins)}:{pad(secs)}</span>
+  } else {
+    return <span className={className}>{pad(mins)}:{pad(secs)}</span>;
+  }
+}
 function SettingsDetail({system}: { system: System}) {
   function modelist() {
     const currentMode = system.mode.current;
@@ -60,10 +80,13 @@ function SettingsDetail({system}: { system: System}) {
   if (system === null) {
     return "";
   } else {
+    const uptime = Date.now()- Date.parse(system.runtime.run.created);
     return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start", width: "100%", gap: 1}}>
-      <IconLabelled TheIcon={Mic} tooltip="Speech to Text">Unimplemented</IconLabelled>
-      <IconLabelled TheIcon={RemoveRedEye} tooltip="Vision System">Unimplemented</IconLabelled>
-      <IconLabelled TheIcon={Face3} tooltip="Self-image">Unimplemented</IconLabelled>
+      <IconLabelled TheIcon={Mic} tooltip="Speech to Text"><i>Unimplemented</i></IconLabelled>
+      <IconLabelled TheIcon={Videocam} tooltip="Camera Input"><i>Unimplemented</i></IconLabelled>
+      <IconLabelled TheIcon={RemoveRedEye} tooltip="Vision System"><i>Unimplemented</i></IconLabelled>
+      <IconLabelled TheIcon={AccessibilityNew} tooltip="Pose Estimation"><i>Unimplemented</i></IconLabelled>
+      <IconLabelled TheIcon={Face3} tooltip="Self-image"><i>Unimplemented</i></IconLabelled>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">{modelist()}</IconLabelled>
       <IconLabelled TheIcon={QuestionAnswer}
                     tooltip="LLM">{system.llmMain.name} (models: {system.llmMain.models.length})</IconLabelled>
@@ -73,6 +96,12 @@ function SettingsDetail({system}: { system: System}) {
       <SpeechSettings speechSettings={system.speech}/>
       <IconLabelled TheIcon={Portrait} tooltip="Lip Sync System">
         {system.lipsync.current}
+      </IconLabelled>
+      <IconLabelled TheIcon={AccessTime} tooltip="Uptime">
+        <Duration ms={uptime}/>
+      </IconLabelled>
+      <IconLabelled TheIcon={Dns} tooltip="Deployment">
+        {system.runtime.run.deployment.name}
       </IconLabelled>
     </Box>
   }
