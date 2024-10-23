@@ -117,6 +117,20 @@ app.get("/system", async (_req: Request, res: Response) => {
   });
 });
 
+/**
+ * Front end request for a new session.
+ */
+app.put("/session", async (req: Request, res: Response) => {
+  try {
+    await db.finishCurrentSession();
+    const session = await db.createSession();
+    res.json(session);
+  } catch (error) {
+    console.error('Error creating a new session:', error);
+    res.status(500);
+  }
+});
+
 app.get('/api/chat', async (req: Request, res: Response) => {
   res.json({
     response: {
