@@ -112,6 +112,18 @@ stalling behaviours that likewise do not depend on user input.
 
 # System Design
 
+Currently only operated in devmode on MacOS. It should work on any system but
+`MacOsSpeech` will likely fail to execute the child process. Native subsystem
+implementations should detect missing system requirements at boot and show
+up disabled. 
+
+Database is postgres. `node-pg-migrate` scripts defined in `server/package.json`
+to create tables etc. Production deployment process is yet to be defined.
+
+Current boot-time check of git hash will fail if git is absent. Production
+deployment will have a configured version tag instead.
+ 
+
 ## Dependencies
 
 Each service component listed above can have different back end implementations,
@@ -122,6 +134,8 @@ both local and as online API services.
 * ElevenLabs account for the ElevenLabsVoice, and `brew install mpv`
 * For SystemVoice on `macos`, system command `say` is used. Various voices
   are assumed to exist
+* `git` assumed on `$PATH` for devmode version definition. Database tracks each
+  boot and run independently
 * SadTalker has been tested for speech audio and image to lip sync video and its
   dependencies are a bit wild and hairy. Installing it on a capable MacBook Pro
   required `Anaconda`, `ffmpeg` and various python packages. Instructions in the
@@ -131,15 +145,24 @@ both local and as online API services.
 ## Features
 
 * shows image of character
-* can choose a different character image
+* can choose a different character image from set found on disk
 * text input
 * text output
 * speech output
-* basic settings panel
+* settings panel
+* lip sync video output usually works but only for human faces
 
 ## TODO
 
-* [x] save generated voice to file
+* [ ] save conversation text to db
+* [ ] identify which LLM and model was used for the text
+* [ ] store all interactions in database
+* [ ] data file tree for generated media assets:
+    * `<base>/<type>/<system>/<option>/<tag>_<db-id>.<format>`
+    * type: tts, ttt, stv (speech to video), etc.
+    * e.g. `data/tts/elevenlabs/beatrice/xyz_12345.mp3`
+    * db-id: the record that traces the input, system and parameters to other
+      records such as session, timestamps, user prompt, modestate etc.
 * design character persona and interaction workflow such that potentially long
   latency responses are normalised within the theatric context.
     * expert-system graph of cached and precalculated fast responses or stalling
@@ -165,7 +188,7 @@ both local and as online API services.
           questions deserving of a divinely inspired being will hopefully
           provide cover for the otherwise conspicuous absence of fast-paced
           banter
-* [ ] db schema
+* [x] db schema
     * system prompt versions
     * expert-system graph
         * pregenerated low-latency responses with sufficient variation
@@ -188,50 +211,29 @@ both local and as online API services.
       timestamp,
 * [ ] test reference data filetree (better for version control not to require
   database so it can be version controlled)
-* [ ] save generated text to db
-* [ ] identify which model was used for the text
-* [ ] decide data file tree, maybe this:
-    * `<base>/<category>/<system>/<option>/<tag>_<db-id>.<format>`
-    * category: tts, ttt, stv (speech to video), etc.
-    * db-id: the record that connects the input, system and parameters to other
-      records
-* [ ] spike fal sadtalker to generate video from picture and speech file
+* [x] spike fal sadtalker to generate video from picture and speech file
   https://fal.ai/models/fal-ai/sadtalker/api
-* [ ] Q: does it make sense to inform llm in system prompt that output is
+* [x] Q: does it make sense to inform llm in system prompt that output is
   spoken with a specific system and all formatting should be appropriate
   for input into that speech system? i.e. no emojis, stage direction etc.
-* [ ] get local sadtalker running with conda per github
+* [x] get local sadtalker running with conda per github
 * [ ] settings panel
-    * [ ] show current main llm/model
+    * [x] show current main llm/model
     * [x] show current speech system and voice option
-    * [ ] show other main llm/model options
-    * [ ] show other speech/voice options
-* [ ] basic database schema
+    * [x] show other main llm/model options
+    * [x] show other speech/voice options
+    * [ ] make settings dynamically editable
+* [x] basic database schema
 * [ ] check out multimodal models like LLaVA 1.5 and LLaVA 1.6
-* store interactions in database
+    * may work to do both text and vision with the same model?
 * usable cached generated output
-* [ ] dynamic configuration from settings panel
-    * response length
-    * system prompt builder
-    * back-ends
-        * LLM service, model
-        * image-to-text
-        * lip sync
-        * text-to-speech
-        * speech-to-text
-            * character voice
-    * speaking
-        * installed MacOS voice list
-    * listening
-    * server-side image configuration
-* [x] rename `server/index.ts` to `server/server.ts`
 * [ ] pose estimation plan
 * [ ] ping-pong chat sequence
-* [ ] check how it works on mobile web
-* [ ] enumerate LLM backends
+* [x] check how it works on mobile web - sketchy embedded video
+* [x] enumerate LLM backends
 * [ ] show chat history (including cached audio)
-* [ ] plan to evaluate local system speech recognition option
-* [ ] plan to evaluate local whisper speech recognition option
+* [ ] evaluate local AI TTS (better than macos?)
+* [ ] evaluate local speech recognition: e.g. whisper
 * [ ] evaluate elevenlabs websocket "realtime" streaming:
   https://elevenlabs.io/docs/api-reference/websockets
 * [ ] generalise backend config options:
@@ -321,8 +323,12 @@ both local and as online API services.
     * stands as if to leave
     * expresses emotion
         * evaluate if it may have been in response to something that was said
+* [ ] authenticated web user with http session
+* [ ] multiple concurrent sessions
 
 ### Test Suite
+
+Currently zero tests!
 
 * Component tests
 * Full session log (replayable interactions)
@@ -353,7 +359,12 @@ both local and as online API services.
   If the person was detected very recently, recover workflow to pick up any
   unfinished interaction. Or if the person completed a chat, ask about having
   another chat.
+* Resume mode - after an interruption, pick up the thread.
+* Tangent mode - might get off on a tangent and come back to previous "stack
+  frame"
 * Admin Mode - various system changes can be made
+* Break Character Mode - where it can discuss itself, how it works, who made it
+  see also "creator clone" scene idea.
 * Reset - manual user-directed request to reset to some other mode (i.e. to
   show others - it should be smooth to chat as if it were fresh without past
   interactions informing current one (though next time they could be
@@ -366,17 +377,26 @@ both local and as online API services.
     * circus variant
 * character from ancient mythology
 * philosopher child
-* buddha
+* buddha kitten (animating animal faces doesn't work on sadtalker)
 * creator clone - self description and explanation of how it works
     * expert on self and how it works
     * can converse in this mode as a general assistant but with identity stuff
       in system prompt
+    * clone my voice
+    * use my image to drive animation
 
 ### Deployment Targets
 
 * dev mode laptop-only
     * use laptop camera, mic, speakers etc.
-* what about full mobile web app with mic & camera?
+* [ ] macos comparison test: chrome, chromium, safari, firefox
+    * camera audio/video capture codec support
+    * consider non-web components for production installation (tradeoffs?)
+* [ ] what about full mobile web app with mic & camera?
+    * [x] basic feasibility - works ok but testing is horrible
+    * [ ] how to get dev console or logs etc. from ios chrome
+    * [ ] might ios safari work better than ios chrome?
+    * [ ] test android chrome
 * specific mic and speaker alternative
 * docker containers with underlying GPU resource detection
 * remote API configuration
@@ -443,8 +463,11 @@ and some comments about it.
 
 ### Exception Flows
 
-* Corrections
-* Interruptions
+* Corrections / misunderstandings
+* Failure to hear
+* Interruptions and continuations
+* Being spoken about vs being spoken to
+* System failure requiring operator intervention
 
 ### Memory and Local Knowledge
 
@@ -452,6 +475,8 @@ and some comments about it.
     * festival
     * party/event
 * Reference material for important people known to all at event
+    * Host / hostess
+    * Schedule of events
 * Memory of people seen in previous sessions
 * Self-knowledge narrative
 * Meta-understanding
@@ -462,7 +487,7 @@ and some comments about it.
 
 ### Text to Speech
 
-* elevenlabs?
+* elevenlabs
 * voice clone
 * what is the best tts that can run locally?
 
@@ -483,5 +508,7 @@ and some comments about it.
 
 ### Speech to Text
 
+* options?
+* test native OS speech recognition
 * low latency
 * sentiment, emotion detection etc.
