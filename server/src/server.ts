@@ -1,22 +1,22 @@
+import {fileStream, streamFromPath} from "api/mediaStream";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {FakeLlm} from "llm/FakeLlm";
 import {promises as fs} from 'fs';
+import {ImageInfo} from "image/ImageInfo";
 import {prescaleImages} from "image/imageOps";
 import {FakeLipSync} from "lipsync/FakeLipSync";
-import type {LipSync} from "lipsync/LipSync";
-import {supportedImageTypes} from "media";
-import type {Dirent} from "node:fs";
-import * as path from 'path';
-import {fileStream, streamFromPath} from "api/mediaStream";
-import {ImageInfo} from "image/ImageInfo";
 import {FalSadtalker} from "lipsync/FalSadtalker";
+import type {LipSync, LipSyncResult} from "lipsync/LipSync";
+import {FakeLlm} from "llm/FakeLlm";
 import {LlamaCppLlm} from "llm/LlamaCppLlm";
 import {type Llm} from 'llm/Llm';
 import {LmStudioLlm} from "llm/LmStudioLlm";
 import {OpenAiLlm} from 'llm/OpenAiLlm';
+import {supportedImageTypes} from "media";
 import {Modes} from "Modes";
+import type {Dirent} from "node:fs";
+import * as path from 'path';
 import type {SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
 import {ensureDataDirsExist, getCurrentCommitHash} from "system/config";
@@ -152,21 +152,29 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       });
 
       if (message) {
-        const speechResult = await timed<string>("speech synthesis",
+        const speechResult: string = await timed<string>("speech synthesis",
           () => speechSystems.current().speak(message)
         );
 
         const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
-        const lipsyncResult = await timed("lipsync", () => {
+        const lipsyncResult: LipSyncResult = await timed("lipsync", () => {
           return lipSync.lipSync(portait, speechResult)
         });
         // TODO return text history here
+        //   actually want full session graph for enabling replay etc.
         res.json({
           response: {
+            // portrait instance of ImageInfo, input to lipsync
+            portrait: portrait,
+            // text response from llm as string
             message: message,
+            // file path to speech audio
             speech: speechResult,
+            // instance of LipSyncResult
             lipsync: lipsyncResult,
+            // llm backend that generated the message
             backend: BACKENDS[backendIndex].name,
+            // llm model used
             model: (await BACKENDS[backendIndex].currentModel()),
           }
         });
