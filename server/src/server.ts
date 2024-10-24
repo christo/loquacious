@@ -157,8 +157,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     try {
       let message: string | null = await timed("text generation", async () => {
-
-        console.log("thePrompt:", prompt);
         let messages = modes.getMode()(prompt, speechSystems.current());
         // console.dir(messages);
         const response = await LLMS[llmIndex].chat(messages);
@@ -166,9 +164,14 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       });
 
       if (message) {
+        // TODO store LLM response
+
+
         const speechResult: string = await timed<string>("speech synthesis",
           () => speechSystems.current().speak(message)
         );
+
+        // TODO store response message in session
 
         const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
         const lipsyncResult: LipSyncResult = await timed("lipsync", () => {
