@@ -1,3 +1,4 @@
+import {Collections} from "@mui/icons-material";
 import {fileStream, streamFromPath} from "api/mediaStream";
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -23,6 +24,7 @@ import {ensureDataDirsExist, getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
 import {systemHealth} from "system/SystemStatus";
 import Db from "./db/Db";
+import type {CreatorType} from "./domain/CreatorType";
 // Load environment variables
 dotenv.config();
 
@@ -165,10 +167,11 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({error: 'No prompt provided'});
   } else {
     try {
+      const currentLlm = LLMS[llmIndex];
       let message: string | null = await timed("text generation", async () => {
         let messages = modes.getMode()(prompt, speechSystems.current());
         // console.dir(messages);
-        const response = await LLMS[llmIndex].chat(messages);
+        const response = await currentLlm.chat(messages);
         return response.message
       });
       const session = await db.currentSession();
@@ -176,9 +179,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       await db.appendUserText(session, prompt);
 
       if (message) {
-        // TODO store LLM response
-
-
+        await db.appendText(session, message, currentLlm);
         const speechResult: string = await timed<string>("speech synthesis",
           () => speechSystems.current().speak(message)
         );
@@ -235,12 +236,25 @@ app.get('/audio', async (req: Request, res: Response) => fileStream(req.query.fi
 app.get('/video', async (req: Request, res: Response) => fileStream(req.query.file!.toString(), res));
 
 
+function systemCreatorTypes() {
+  return [
+    ...LLMS,
+    ...speechSystems.systems,
+    ...LIPSYNCS
+  ];
+}
 
 // Start the server
 app.listen(port, async () => {
   // TODO make production implementation that has stored commit hash and uses explicit version metdata
   const hash = await getCurrentCommitHash(process.cwd());
   await db.boot(process.env.DEPLOYMENT_NAME!, hash);
+  const creators: CreatorType[] = systemCreatorTypes();
+  console.log(`ensuring ${creators.length} creator types are in database`);
+  await Promise.all(creators.map(async creator => {
+    console.log(`   Finding ${creator.getName()}`);
+    return db.findCreator(creator.getName(), creator.getMetadata(), true);
+  }));
   await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
   // TODO remove host hard-coding
   console.log(`Server is running on http://localhost:${port}`);

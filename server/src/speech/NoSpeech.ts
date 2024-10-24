@@ -6,7 +6,7 @@ import {SpeechSystemOption} from "speech/SpeechSystems";
  * Does not make sound or generate audio files.
  */
 class NoSpeech implements SpeechSystem {
-  readonly name = "Silence";
+  readonly name = "NoSpeech";
   private onlyOptions = [new CharacterVoice("silence", "silence", "is golden")];
   readonly display = new DisplaySpeechSystem(this.name, this.onlyOptions)
 

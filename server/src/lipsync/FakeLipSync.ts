@@ -19,7 +19,7 @@ class FakeLipSync implements LipSync {
   }
 
   name(): string {
-    return "Fake Lip Sync";
+    return "Fake-LipSync";
   }
 
   /**

@@ -1,8 +1,11 @@
 import {Pool, type QueryConfigValues, type QueryResult} from "pg";
+import {Simulate} from "react-dom/test-utils";
 import {Creator} from "../domain/Creator";
+import type {CreatorType} from "../domain/CreatorType";
 import {Deployment} from "../domain/Deployment";
 import {Run} from "../domain/Run";
 import {Session} from "../domain/Session";
+import error = Simulate.error;
 
 export const CREATOR_USER_NAME = 'user';
 
@@ -202,17 +205,20 @@ class Db {
    * For now, just fetches the most recently created session for the current run.
    */
   async currentSession(): Promise<Session> {
-    const query = `select * from session
-     where finished is null
-       and run = $1
-     order by created
-     limit 1`;
+    const query = `select *
+                   from session
+                   where finished is null
+                     and run = $1
+                   order by created
+                   limit 1`;
     return Promise.resolve(await this.fetchOne<number[], Session>(query, [this.getRun().id]));
   }
 
   async finishAllSessions(): Promise<void> {
     console.log("finishing all current sessions");
-    const q = `update session set finished = CURRENT_TIMESTAMP where finished is null`;
+    const q = `update session
+               set finished = CURRENT_TIMESTAMP
+               where finished is null`;
     const client = await this.pool.connect();
     try {
       await client.query(q);
@@ -227,7 +233,10 @@ class Db {
     }
     console.log("finishing current session of this run");
     const runId = this.getRun().id
-    const q = `update session set finished = CURRENT_TIMESTAMP where finished is null and run = $1;`;
+    const q = `update session
+               set finished = CURRENT_TIMESTAMP
+               where finished is null
+                 and run = $1;`;
     const client = await this.pool.connect();
     try {
       await client.query(q, [runId]);
@@ -245,6 +254,60 @@ class Db {
    * @param message the message text
    */
   async appendUserText(session: Session, message: string): Promise<void> {
+    return this.appendTextByCreatorId(session, message, this.userCreator!.id);
+  }
+
+  async appendText(session: Session, message: string, creatorType: CreatorType): Promise<void> {
+    const creator = await this.findCreator(creatorType.getName(), creatorType.getMetadata(), false);
+    return this.appendTextByCreatorId(session, message, creator.id);
+  }
+
+  async findCreator(name: string, metadata: string | undefined, createIfMissing: boolean): Promise<Creator> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("begin");
+      let result;
+      if (metadata) {
+        const query = `select *
+                     from creator
+                     where name = $1
+                       and metadata = $2
+                     limit 1`;
+        result = await client.query(query, [name, metadata]);
+      } else {
+        const query = `select *
+                     from creator
+                     where name = $1
+                       and metadata is null
+                     limit 1`;
+        result = await client.query(query, [name]);
+      }
+
+      if (createIfMissing && result.rowCount && result.rowCount < 1) {
+        const query = `insert into creator (name, metadata) values ($1, $2) returning *`
+        const createResult = await client.query(query, [name, metadata]);
+        if (createResult && createResult.rowCount && createResult.rowCount === 1) {
+          console.log(`creating creator ${name}`);
+          await client.query("commit");
+          return Promise.resolve(createResult.rows[0] as Creator);
+        } else {
+          await client.query("rollback");
+          return Promise.reject("could not create creator")
+        }
+      } else if (result.rowCount && result.rowCount === 1) {
+        console.log(`found creator ${name}`);
+        await client.query("commit");
+        return Promise.resolve(result.rows[0] as Creator);
+      } else {
+        await client.query("rollback");
+        return Promise.reject("could not find creator");
+      }
+    } finally {
+      client.release();
+    }
+  }
+
+  async appendTextByCreatorId(session: Session, message: string, creatorId: number): Promise<void> {
     if (!this.booted) {
       return Promise.reject("db is not booted");
     }
@@ -255,7 +318,7 @@ class Db {
                    values ($1, $2, $3, (select max_seq + 1 from max_sequence))`;
     const client = await this.pool.connect();
     try {
-      await client.query(query, [message, session.id, this.userCreator!.id]);
+      await client.query(query, [message, session.id, creatorId]);
     } finally {
       client.release();
     }

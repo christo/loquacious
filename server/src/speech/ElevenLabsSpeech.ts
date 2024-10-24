@@ -78,7 +78,7 @@ type StreamPartialConfig = {
 class ElevenLabsSpeech implements SpeechSystem {
   private currentVoice = 0;
   private characterVoice = VOICES[this.currentVoice];
-  readonly name = `ElevenLabs`;
+  readonly name = `ElevenLabs-TTS`;
   readonly display: DisplaySpeechSystem;
   client: ElevenLabsClient;
   private readonly dataDir: string;

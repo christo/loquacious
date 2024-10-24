@@ -85,7 +85,7 @@ const VOICES: Array<CharacterVoice> = [
 const speed = 130; // fast, for debugging
 // const speed = 120; // good fortune-teller speaking speed
 
-const MACOS_SPEECH_SYSTEM_NAME = "MacOs Speech";
+const MACOS_SPEECH_SYSTEM_NAME = "MacOs-TTS";
 
 class MacOsSpeech implements SpeechSystem {
   name = MACOS_SPEECH_SYSTEM_NAME;

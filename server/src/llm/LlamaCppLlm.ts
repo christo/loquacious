@@ -8,7 +8,7 @@ import Model = OpenAI.Model;
 class LlamaCppLlm implements Llm {
   readonly baseUrl: string | undefined;
   readonly enableHealth = true;
-  readonly name = "Llama.cpp";
+  readonly name = "Llama.cpp-LLM";
   private openai;
 
   /**

@@ -10,7 +10,7 @@ import Model = OpenAI.Model;
 class OpenAiLlm implements Llm {
   readonly baseUrl = undefined;
   readonly enableHealth = false;
-  readonly name = "ChatGPT";
+  readonly name = "ChatGPT-LLM";
   private openai;
   private model: string;
 

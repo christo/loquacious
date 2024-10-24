@@ -5,7 +5,7 @@ import Model = OpenAI.Model;
 class LmStudioLlm implements Llm {
   readonly baseUrl: string | undefined;
   readonly enableHealth = false;
-  readonly name = "LM-Studio";
+  readonly name = "LM-Studio-LLM";
   private openai;
 
   constructor(baseUrl = "http://localhost:1234/v1") {
