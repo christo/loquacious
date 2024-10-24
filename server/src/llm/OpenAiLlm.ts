@@ -1,3 +1,4 @@
+import {response} from "express";
 import OpenAI from "openai";
 import type {ChatResult, Llm} from "./Llm";
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
@@ -7,11 +8,11 @@ import Model = OpenAI.Model;
  * OpenAI LLM Backend
  */
 class OpenAiLlm implements Llm {
-  baseUrl = undefined;
-  enableHealth = false;
-  name = "ChatGPT";
+  readonly baseUrl = undefined;
+  readonly enableHealth = false;
+  readonly name = "ChatGPT";
   private openai;
-  private readonly model;
+  private model: string;
 
   constructor(model = "gpt-4o-mini") {
     this.model = model;
@@ -34,7 +35,23 @@ class OpenAiLlm implements Llm {
       model: this.model,
       messages: messages
     });
+    // hacky opportunistic method to passively correct any failed model configuration request in config
+    this.model = response.model;
     return {message: response.choices[0]?.message?.content as (string | null)} as ChatResult;
+  }
+
+  getMetadata(): string | undefined {
+    return this.model;
+  }
+
+  getName(): string {
+    return this.name;
+  }
+
+  configure(metadata: string): Promise<void> {
+    // TODO see if we can implement configuration by metadata here - do not assume we can use use all models;
+    //   some do not support specifying system prompt and some options seem to be ignored
+    return Promise.reject("unimplemented - it's complicated");
   }
 
 }

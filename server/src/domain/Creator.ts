@@ -1,11 +1,26 @@
-export class Creator {
-  id: number;
-  name: string;
-  metadata: string;
+import type {CreatorType} from "./CreatorType";
 
-  constructor(id: number, name: string, metadata: string) {
+/**
+ * Full persistent struct for an entity that can produce an interaction asset like text, image, video etc.
+ * Metadata content is implementation-specific free format.
+ */
+export class Creator implements CreatorType {
+  readonly id: number;
+  readonly _name: string;
+  readonly _metadata: string | undefined;
+
+  constructor(id: number, name: string, metadata?: string) {
     this.id = id;
-    this.name = name;
-    this.metadata = metadata;
+    this._name = name;
+    this._metadata = metadata;
   }
+
+  getMetadata() {
+    return this._metadata
+  };
+
+  getName() {
+    return this._name
+  };
+
 }

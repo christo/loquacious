@@ -1,5 +1,6 @@
 import type {ChatResult, Llm} from "llm/Llm";
 import OpenAI from "openai";
+import type {ConfigurableCreator} from "../domain/ConfigurableCreator";
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 import Model = OpenAI.Model;
 
@@ -38,10 +39,10 @@ function dateTimeMessage() {
  * For testing.
  */
 class FakeLlm implements Llm {
-  baseUrl = "";
-  name = "FakeLlm"
-  enableHealth = false;
-  currentModelKey = KM_ECHO;
+  readonly baseUrl = undefined;
+  readonly name = "FakeLlm"
+  readonly enableHealth = false;
+  private currentModelKey = KM_ECHO;
 
   private readonly myModels: { [key: string]: FakeModel; } = {
     KM_STATIC: new FakeModel("static", (params: ChatCompletionMessageParam[]) => ({message: "fake chat result"})),
@@ -65,6 +66,23 @@ class FakeLlm implements Llm {
 
   models(): Promise<Array<Model>> {
     return Promise.resolve(Object.values(this.myModels));
+  }
+
+  getMetadata(): string | undefined {
+    return this.currentModelKey;
+  }
+
+  getName(): string {
+    return this.name;
+  }
+
+  configure(metadata: string): Promise<void> {
+    if (Object.keys(this.myModels).includes(metadata)) {
+      this.currentModelKey = metadata;
+      return Promise.resolve();
+    } else {
+      return Promise.reject();
+    }
   }
 }
 

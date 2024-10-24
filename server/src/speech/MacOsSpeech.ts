@@ -124,6 +124,29 @@ class MacOsSpeech implements SpeechSystem {
     return `[[slnc ${msDuration}]]`;
   }
 
+  getMetadata(): string | undefined {
+    return VOICES[this.currentIndex].voiceId;
+  }
+
+  getName(): string {
+    return this.name;
+  }
+
+  configure(metadata: string): Promise<void> {
+    // TODO implement available voice detection somehow. the say command lists voices not yet installed
+    let found = false;
+    for (let i = 0; i < VOICES.length; i++) {
+      if (VOICES[i].voiceId === metadata) {
+        this.currentIndex = i;
+        found = true;
+      }
+    }
+    if (found) {
+      return Promise.resolve();
+    } else {
+      return Promise.reject();
+    }
+  }
 }
 
 export {MacOsSpeech, MACOS_SPEECH_SYSTEM_NAME};

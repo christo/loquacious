@@ -2,10 +2,10 @@ import {ElevenLabsClient} from "elevenlabs";
 import fs from 'fs';
 import type {PathLike} from "node:fs";
 import path from "path";
-import {timed} from "system/performance";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
+import {timed} from "system/performance";
 import {mkDirIfMissing} from "../system/config";
 
 const VOICES = [
@@ -45,13 +45,62 @@ const VOICES = [
   new CharacterVoice("Ines", "Ines", "Young English woman but with weird rolled R"),
 ];
 
+type ElevenLabsPartialConfig = BulkPartialConfig | StreamPartialConfig;
+type ElevenLabsVoiceSettings = {
+  stability: number,
+  similarity_boost: number,
+  style: number,
+  use_speaker_boost: boolean
+}
+
+type BulkPartialConfig = {
+  type: "bulk",
+  config: {
+    voice: string,
+    output_format: string,
+    model_id: string,
+    voice_settings: ElevenLabsVoiceSettings,
+  }
+};
+
+type StreamPartialConfig = {
+  type: "bulk",
+  config: {
+    stream: true,   //sic
+    voice: string,
+    output_format: string,
+    model_id: string,
+    voice_settings: ElevenLabsVoiceSettings,
+  }
+};
+
+/** Implementation that calls elevenlabs.ai - requires an API key env var. */
 class ElevenLabsSpeech implements SpeechSystem {
-  currentVoice = 0;
-  characterVoice = VOICES[this.currentVoice];
-  name = `ElevenLabs`;
+  private currentVoice = 0;
+  private characterVoice = VOICES[this.currentVoice];
+  readonly name = `ElevenLabs`;
+  readonly display: DisplaySpeechSystem;
   client: ElevenLabsClient;
-  display: DisplaySpeechSystem;
   private readonly dataDir: string;
+  /**
+   * Partial config wraps the bulk or stream api call parameters but excludes the
+   * text because that changes with every invocation.
+   * @private
+   */
+  private partialConfig: ElevenLabsPartialConfig = {
+    type: "bulk",
+    config: {
+      voice: this.characterVoice.voiceId,
+      output_format: "mp3_44100_128",
+      model_id: "eleven_multilingual_v2",
+      voice_settings: {
+        stability: 0.4,
+        similarity_boost: 0.1,
+        style: 0.8,
+        use_speaker_boost: true
+      }
+    }
+  };
 
   constructor(ttsDataDir: PathLike) {
     this.dataDir = path.join(ttsDataDir.toString(), "el");
@@ -75,17 +124,9 @@ class ElevenLabsSpeech implements SpeechSystem {
     try {
       const audio = await timed("elevenlabs generate speech",
         () => this.client.generate({
-          voice: this.characterVoice.voiceId,
-          output_format: "mp3_44100_128",
           text: message,
-          model_id: "eleven_multilingual_v2",
-          voice_settings: {
-            stability: 0.4,
-            similarity_boost: 0.1,
-            style: 0.8,
-            use_speaker_boost: true
-          }
-        }));
+          ...(this.getConfig().config)
+        } as ElevenLabsClient.GeneratAudioBulk));
       const outStream = fs.createWriteStream(outFile);
       return new Promise<string>((resolve, reject) => {
         outStream.on('error', (err) => {
@@ -106,9 +147,31 @@ class ElevenLabsSpeech implements SpeechSystem {
     return outFile;
   }
 
+  private getConfig(): ElevenLabsPartialConfig {
+    return this.partialConfig;
+  }
+
   pauseCommand(msDuration: number): string {
     const sec = (msDuration / 1000).toFixed(1)
     return `<break time="${sec}s" />`;
+  }
+
+  getMetadata(): string | undefined {
+    // API call can be bulk or stream, so we store that this way:
+    return JSON.stringify(this.getConfig());
+  }
+
+  getName(): string {
+    return this.name;
+  }
+
+  configure(metadata: string): Promise<void> {
+    try {
+      this.partialConfig = JSON.parse(metadata);
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 }
 

@@ -37,6 +37,24 @@ class FakeLipSync implements LipSync {
       return Promise.resolve(new LocalLipSyncResult(path.join(this.lipSyncDataDir, aFile.name)));
     }
   }
+
+  /** Not supported or required. */
+  getMetadata(): string | undefined {
+    return undefined;
+  }
+
+  getName(): string {
+    return this.name();
+  }
+
+  /**
+   * Unsupported.
+   */
+  configure(metadata: string): Promise<void> {
+    return Promise.reject();
+  }
+
+
 }
 
 export {FakeLipSync};

@@ -1,5 +1,7 @@
 import type {CharacterVoice} from "speech/CharacterVoice";
 import {SpeechSystemOption} from "speech/SpeechSystems";
+import type {ConfigurableCreator} from "../domain/ConfigurableCreator";
+import type {CreatorType} from "../domain/CreatorType";
 
 /** UI struct for a speech system with its name and all possible options */
 class DisplaySpeechSystem {
@@ -12,12 +14,10 @@ class DisplaySpeechSystem {
   }
 }
 
-// may need to add a method to clean text of speech system directives for display
-
 /**
  * Represents a test to speech system.
  */
-type SpeechSystem = {
+interface SpeechSystem extends CreatorType, ConfigurableCreator {
   name: string;
 
   /**

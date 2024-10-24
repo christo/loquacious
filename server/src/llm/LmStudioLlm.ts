@@ -3,13 +3,14 @@ import type {ChatResult, Llm} from "./Llm";
 import Model = OpenAI.Model;
 
 class LmStudioLlm implements Llm {
-  baseUrl: string | undefined;
-  enableHealth = false;
-  name = "LM-Studio";
+  readonly baseUrl: string | undefined;
+  readonly enableHealth = false;
+  readonly name = "LM-Studio";
   private openai;
 
   constructor(baseUrl = "http://localhost:1234/v1") {
     this.baseUrl = baseUrl;
+    // TODO can we specify the model here?
     this.openai = new OpenAI({
       baseURL: baseUrl,
       apiKey: process.env.OPENAI_API_KEY as string,
@@ -40,7 +41,20 @@ class LmStudioLlm implements Llm {
     return {message: response.choices[0]?.message?.content as (string | null)} as ChatResult;
   }
 
+  getMetadata(): string | undefined {
+    // seemingly current model is not provided by the API but needs further investigation
+    // maybe we could be in charge of launching and configuring the process from here?
+    return undefined;
+  }
 
+  getName(): string {
+    return this.name;
+  }
+
+  configure(metadata: string): Promise<void> {
+    // currently does not support configuration
+    return Promise.reject("does not support configuration because external process defines model");
+  }
 }
 
 export {LmStudioLlm};

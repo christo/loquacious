@@ -2,10 +2,13 @@ import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 
+/**
+ * Does not make sound or generate audio files.
+ */
 class NoSpeech implements SpeechSystem {
-  name = "No Speech";
-  onlyOptions = [new CharacterVoice("silence", "silence", "is golden")];
-  display = new DisplaySpeechSystem(this.name, this.onlyOptions)
+  readonly name = "Silence";
+  private onlyOptions = [new CharacterVoice("silence", "silence", "is golden")];
+  readonly display = new DisplaySpeechSystem(this.name, this.onlyOptions)
 
   options(): Array<string> {
     return this.onlyOptions.map(x => x.voiceId);
@@ -24,7 +27,24 @@ class NoSpeech implements SpeechSystem {
     return null;
   }
 
+  /**
+   * Doesn't have any metadata.
+   */
+  getMetadata(): string | undefined {
+    return undefined;
+  }
 
+  getName(): string {
+    return this.name;
+  }
+
+  /**
+   * Always succeeds because we don't have metadata.
+   * @param metadata ignored.
+   */
+  configure(metadata: string): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 export {NoSpeech};

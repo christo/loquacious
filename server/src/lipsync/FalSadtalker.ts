@@ -13,10 +13,37 @@ async function readBinaryFile(filePath: string): Promise<File> {
   return new File([fileBuffer], fileName, {type: 'application/octet-stream'});
 }
 
+/**
+ * Just the config part of the invocation params, excluding those that change on every call.
+ */
+type FalSadtalkerInput = {
+    pose_style: number,             // 0-45 integer
+    face_model_resolution: "256" | "512",    // string "256" or "512"
+    expression_scale: number,      // 0-3 float
+    face_enhancer?: 'gfpgan' | undefined,       // blank or only option - always seems to fail
+    still_mode: boolean,             // whether to use few head movements
+    preprocess: "crop" | "extcrop" | "resize" | "full" | "extfull",            // crop, extcrop, resize, full, extfull
+}
+
+/**
+ * Goes inside an object with key "input" to perform an actual API invocation.
+ */
+type FalSadtalkerInvocationInput = {source_image_url: string, driven_audio_url: string} & FalSadtalkerInput;
+
+/**
+ * Implementation that calls fal.ai service, requires valid FAL_API_KEY in env.
+ */
 class FalSadtalker implements LipSync {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
   private readonly dataDir: string;
   private urlCache: { [keyOf: string]: string } = {};
+  private sadtalkerConfig: FalSadtalkerInput = {
+    pose_style: 32,             // 0-45 integer
+    face_model_resolution: "256",    // string "256" or "512"
+    expression_scale: 1.4,      // 0-3 float
+    still_mode: false,             // whether to use few head movements
+    preprocess: "full",            // crop, extcrop, resize, full, extfull
+  };
 
   /**
    * Constructor.
@@ -50,7 +77,9 @@ class FalSadtalker implements LipSync {
     const imgUrl = await this.urlFor(img);
     const speechUrl = await this.urlFor(speech);
     const result: Result<{ video: SadTalkerResult }> = await timed("fal run sadtalker",
-      async () => await fal.run(FalSadtalker.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl)));
+      async () => await fal.run(FalSadtalker.SADTALKER_ENDPOINT,
+        {input: this.sadtalkerParams(imgUrl, speechUrl)
+        }));
     return timed("fal sadtalker video download", async () => {
       const r = result.data.video;
       const videoDownload = await fetch(r.url);
@@ -61,18 +90,28 @@ class FalSadtalker implements LipSync {
     });
   }
 
-  private sadtalkerParams(imgUrl: string, speechUrl: string) {
+  getMetadata(): string | undefined {
+    return JSON.stringify(this.sadtalkerConfig);
+  }
+
+  getName(): string {
+    return this.name();
+  }
+
+  configure(metadata: string): Promise<void> {
+    try {
+      this.sadtalkerConfig = JSON.parse(metadata);
+      return Promise.resolve();
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
+  private sadtalkerParams(imgUrl: string, speechUrl: string): FalSadtalkerInvocationInput {
     return {
-      input: {
         source_image_url: imgUrl,
         driven_audio_url: speechUrl,
-        pose_style: 32,             // 0-45 integer
-        face_model_resolution: "256",    // string "256" or "512"
-        expression_scale: 1.4,      // 0-3 float
-        // face_enhancer: 'gfpgan',       // blank or only option - not sure of impact
-        still_mode: false,             // whether to use few head movements
-        preprocess: "full",            // crop, extcrop, resize, full, extfull
-      }
+        ...this.sadtalkerConfig
     };
   }
 }
