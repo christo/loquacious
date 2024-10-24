@@ -227,6 +227,11 @@ both local and as online API services.
     * e.g. `data/tts/elevenlabs/beatrice/xyz_12345.mp3`
     * db-id: the record that traces the input, system and parameters to other
       records such as session, timestamps, user prompt, modestate etc.
+* [ ] check out [d-id.com](http://d-id.com) API for lipsync video generation
+  [streaming API](https://docs.d-id.com/reference/talks-streams-overview)
+  could also be proxied and saved to disk.
+* [ ] check [Synthesia](https://www.synthesia.io/features/avatars) for lip sync
+* [ ] check [Hey Gen](https://www.heygen.com/interactive-avatar) for lip sync
 * design character persona and interaction workflow such that potentially long
   latency responses are normalised within the theatric context.
     * expert-system graph of cached and precalculated fast responses or stalling
