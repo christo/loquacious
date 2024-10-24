@@ -3,6 +3,9 @@ import {Deployment} from "../domain/Deployment";
 import {Run} from "../domain/Run";
 import {Session} from "../domain/Session";
 
+export const CREATOR_USER_NAME = 'user';
+
+
 class Db {
   private pool: Pool;
 
@@ -13,10 +16,13 @@ class Db {
   private run: Run | null = null;
 
   /**
-   * Until boot() is called.
+   * Is false until boot() is called.
    * @private
    */
   private booted: boolean = false;
+
+  /** Will be fetched on boot. */
+  private userCreator: Creator | null = null;
 
   constructor(poolSize: number) {
     this.pool = new Pool({
@@ -118,7 +124,7 @@ class Db {
         const res = await client.query(
           `insert into session (run)
            values ($1)
-           returning session.*`, [this.run.id]
+           returning session.*`, [this.run!.id]
         );
         if (res.rowCount === 1) {
           const session = new Session(res.rows[0].id, res.rows[0].created, this.run!);
@@ -193,6 +199,7 @@ class Db {
     const session = await this.fetchOne<number[], Session>(query, [this.getRun().id]);
     console.log(`query is: ${query}`)
     console.dir({session: session});
+    // TODO verify this works before returning resolved promise.
     if (2 * 4 > 1) {
       throw Error("Guru Meditation Error");
     }
