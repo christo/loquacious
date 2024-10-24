@@ -29,7 +29,9 @@ each portrait multiple times to get differently animated video.
 Not all this must be pre-generated.
 
 Many can be generated in parallel.
- */
+
+TODO: this is a WIP sketch
+*/
 
 /**
  * When interpreting an input string, determine whether the string is equivalent
