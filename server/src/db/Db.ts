@@ -115,7 +115,7 @@ class Db {
   }
 
   async createSession(): Promise<Session> {
-    if (!this.booted || this.run) {
+    if (!this.booted || !this.run) {
       return Promise.reject("No current Run - has boot() not been run or failed?");
     } else {
       const client = await this.pool.connect();
@@ -207,14 +207,7 @@ class Db {
        and run = $1
      order by created
      limit 1`;
-    const session = await this.fetchOne<number[], Session>(query, [this.getRun().id]);
-    console.log(`query is: ${query}`)
-    console.dir({session: session});
-    // TODO verify this works before returning resolved promise.
-    if (2 * 4 > 1) {
-      throw Error("Guru Meditation Error");
-    }
-    return Promise.resolve(session);
+    return Promise.resolve(await this.fetchOne<number[], Session>(query, [this.getRun().id]));
   }
 
   async finishAllSessions(): Promise<void> {

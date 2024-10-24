@@ -127,9 +127,18 @@ app.put("/session", async (req: Request, res: Response) => {
     res.json(session);
   } catch (error) {
     console.error('Error creating a new session:', error);
-    res.status(500);
+    res.status(500).end();
   }
 });
+
+app.get('/session', async (_req: Request, res: Response) => {
+  try {
+    res.json(await db.currentSession());
+  } catch (e) {
+    console.error('Error getting current session:', e);
+    res.status(500).end();
+  }
+})
 
 app.get('/api/chat', async (req: Request, res: Response) => {
   res.json({
