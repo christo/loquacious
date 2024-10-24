@@ -234,7 +234,7 @@ class Db {
     }
     console.log("finishing current session of this run");
     const runId = this.getRun().id
-    const q = `begin; update session set finished = CURRENT_TIMESTAMP where finished is null and run = $1; commit;`;
+    const q = `update session set finished = CURRENT_TIMESTAMP where finished is null and run = $1;`;
     const client = await this.pool.connect();
     try {
       await client.query(q, [runId]);
