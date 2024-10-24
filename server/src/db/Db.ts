@@ -1,4 +1,5 @@
 import {Pool, type QueryConfigValues, type QueryResult} from "pg";
+import {Creator} from "../domain/Creator";
 import {Deployment} from "../domain/Deployment";
 import {Run} from "../domain/Run";
 import {Session} from "../domain/Session";
@@ -114,7 +115,7 @@ class Db {
   }
 
   async createSession(): Promise<Session> {
-    if (!this.run) {
+    if (!this.booted || this.run) {
       return Promise.reject("No current Run - has boot() not been run or failed?");
     } else {
       const client = await this.pool.connect();
@@ -155,7 +156,10 @@ class Db {
       const qCreateRun = `insert into run (sha1, deployment)
                           values ($1, $2)
                           returning *`;
+      const qGetUserCreator = "select * from creator where name = $1 order by id desc";
       try {
+        // decided not to finish sessions from previous run so sessions can survive reboot
+        // but they're associated with their original run so needs a mild rethink
         // look up the deployment
         //console.log(`fetching "${deploymentName}" Deployment from db`);
         let result = await client.query(qGetDeployment, [deploymentName]);
@@ -163,14 +167,22 @@ class Db {
           console.log(`Loaded ${deploymentName} deployment`);
           let row = result.rows[0];
           const deployment = new Deployment(row.id, row.created, row.name, row.metadata);
-          //console.log(`inserting Run in db`);
+          console.log(`inserting Run in db`);
           result = await client.query(qCreateRun, [sha1, deployment.id]);
           if (result.rowCount === 1) {
             row = result.rows[0];
             this.run = new Run(row.id, row.created, row.metadata, row.sha1, deployment);
-            await client.query("COMMIT");
-            this.booted = true;
-            return Promise.resolve(this.run);
+            console.log(`Initialising run ${this.run.id}`);
+            result = await client.query(qGetUserCreator, [CREATOR_USER_NAME]);
+            if (result.rowCount && result.rowCount >= 1) {
+              row = result.rows[0];
+              this.userCreator = new Creator(row.id, row.name, row.metadata);
+              await client.query("COMMIT");
+              this.booted = true;
+              return Promise.resolve(this.run);
+            } else {
+              return Promise.reject(`Found ${result.rowCount} rows for user creator`);
+            }
           } else {
             return Promise.reject("Could not insert new Run in db");
           }
@@ -195,7 +207,6 @@ class Db {
        and run = $1
      order by created
      limit 1`;
-    const values: Array<number> = [this.getRun().id];
     const session = await this.fetchOne<number[], Session>(query, [this.getRun().id]);
     console.log(`query is: ${query}`)
     console.dir({session: session});
@@ -221,11 +232,37 @@ class Db {
     if (!this.booted) {
       return Promise.reject("db is not booted");
     }
-    console.log("finishing any current session");
-    const q = `update session set finished = CURRENT_TIMESTAMP where finished is null and run = $1`;
+    console.log("finishing current session of this run");
+    const runId = this.getRun().id
+    const q = `begin; update session set finished = CURRENT_TIMESTAMP where finished is null and run = $1; commit;`;
     const client = await this.pool.connect();
     try {
-      await client.query(q, [this.getRun().id]);
+      await client.query(q, [runId]);
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Append and store the given user text to the given session. Text content is stored directly in the db
+   * so no file references are needed and no filesystem io should be performed. The creator is the fixed
+   * Creator instance created by the db bootstrap, indicating human user input.
+   *
+   * @param session the session to add the message to
+   * @param message the message text
+   */
+  async appendUserText(session: Session, message: string): Promise<void> {
+    if (!this.booted) {
+      return Promise.reject("db is not booted");
+    }
+    const query = `with max_sequence as
+                            (select coalesce(max(m.sequence), 0) as max_seq from message m where session = $2)
+                   insert
+                   into message (content, session, creator, sequence)
+                   values ($1, $2, $3, (select max_seq + 1 from max_sequence))`;
+    const client = await this.pool.connect();
+    try {
+      await client.query(query, [message, session.id, this.userCreator!.id]);
     } finally {
       client.release();
     }
