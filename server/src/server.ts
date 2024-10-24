@@ -162,6 +162,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         const response = await LLMS[llmIndex].chat(messages);
         return response.message
       });
+      const session = await db.currentSession();
+      console.log("appending user message");
+      await db.appendUserText(session, prompt);
 
       if (message) {
         // TODO store LLM response
