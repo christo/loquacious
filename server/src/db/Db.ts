@@ -211,6 +211,9 @@ class Db {
   }
 
   async finishCurrentSession(): Promise<void> {
+    if (!this.booted) {
+      return Promise.reject("db is not booted");
+    }
     console.log("finishing any current session");
     const q = `update session set finished = CURRENT_TIMESTAMP where finished is null and run = $1`;
     const client = await this.pool.connect();
