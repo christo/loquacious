@@ -14,7 +14,7 @@ class OpenAiLlm implements Llm {
   private openai;
   private model: string;
 
-  constructor(model = "gpt-4o-mini") {
+  constructor(model = "gpt-4o") {
     this.model = model;
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY as string,

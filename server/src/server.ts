@@ -52,7 +52,7 @@ const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 ensureDataDirsExist(process.env.DATA_DIR!);
 
 const LM_STUDIO_BACKEND: Llm = new LmStudioLlm();
-const OPEN_AI_BACKEND: Llm = new OpenAiLlm("gpt-4o");
+const OPEN_AI_BACKEND: Llm = new OpenAiLlm();
 const LLAMA_CPP_BACKEND: Llm = new LlamaCppLlm();
 
 const FAKE_LLM: Llm = new FakeLlm();

@@ -19,6 +19,9 @@ class LmStudioLlm implements Llm {
     });
   }
 
+  /**
+   * If there's only one model, it must be current. Otherwise we assume we don't know.
+   */
   async currentModel(): Promise<string> {
     const allModels = await this.models();
     if (allModels.length === 1) {
@@ -53,8 +56,11 @@ class LmStudioLlm implements Llm {
     return this.name;
   }
 
-  configure(metadata: string): Promise<void> {
-    // currently does not support configuration
+  /**
+   * Not supported.
+   * @param _metadata
+   */
+  configure(_metadata: string): Promise<void> {
     return Promise.reject("does not support configuration because external process defines model");
   }
 
