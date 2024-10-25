@@ -14,6 +14,10 @@ class DisplaySpeechSystem {
   }
 }
 
+interface SpeechResult {
+  filePath: () => string | undefined;
+}
+
 /**
  * Represents a test to speech system.
  */
@@ -24,7 +28,7 @@ interface SpeechSystem extends CreatorType, ConfigurableCreator {
    * Generates spoken audio for message and returns relative filepath to audio from data base dir.
    * @param message
    */
-  speak: (message: string) => Promise<string>;
+  speak: (message: string) => Promise<SpeechResult>;
   /**
    * Unique key for each option.
    */
@@ -35,4 +39,4 @@ interface SpeechSystem extends CreatorType, ConfigurableCreator {
   display: DisplaySpeechSystem;
 }
 
-export {type SpeechSystem, DisplaySpeechSystem};
+export {type SpeechSystem, type SpeechResult, DisplaySpeechSystem};

@@ -1,5 +1,5 @@
 import {fal, type Result} from "@fal-ai/client";
-import fs, {promises as fs, readFileSync} from "fs";
+import {promises as fs, readFileSync} from "fs";
 import type {LipSync, LipSyncResult} from "lipsync/LipSync";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";

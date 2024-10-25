@@ -1,4 +1,4 @@
-import fs, {promises as fs} from "fs";
+import {promises as fs} from "fs";
 import type {LipSync, LipSyncResult} from "./LipSync";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
 import type {Dirent} from "node:fs";

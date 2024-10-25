@@ -115,6 +115,7 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
           console.error('Fetch-o-Error:', error);
         });
     } else {
+      // maybe a result with no lipsync
       hideVideo();
     }
   })

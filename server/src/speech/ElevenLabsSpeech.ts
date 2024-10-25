@@ -4,13 +4,13 @@ import type {PathLike} from "node:fs";
 import path from "path";
 import {Simulate} from "react-dom/test-utils";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
+import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import {mkDirIfMissing} from "../system/config";
-import error = Simulate.error;
 
 const VOICES = [
+  new CharacterVoice("Nicole", "Nicole", "Young American woman, whispering, ASMR"),
   new CharacterVoice("Agatha", "Agatha", "English older woman"),
   new CharacterVoice("Lily", "Lily", "English woman, young, London"),
   new CharacterVoice("Valentino", "Valentino", "Deep posh English older man"),
@@ -35,7 +35,6 @@ const VOICES = [
   new CharacterVoice("wise-woman", "Jabari", "African woman"),
   new CharacterVoice("Edith - elegant and mature", "Edith", "English middle-aged woman, storybook"),
   new CharacterVoice("Brie - feisty, sparkly, lovely", "Brie", "Older, quite posh"),
-  new CharacterVoice("Nicole", "Nicole", "Young American woman, whispering, ASMR"),
   new CharacterVoice("Mima", "Mima", "Middle-aged Aarabic woman with warm tone"),
   new CharacterVoice("Tonia - Calm, soft and clear", "Tonia", "English middle-aged woman, calm"),
   new CharacterVoice("Minerva - Fantasy Professor", "Minerva", "Older English posh woman"),
@@ -121,7 +120,7 @@ class ElevenLabsSpeech implements SpeechSystem {
     return new SpeechSystemOption(this, currentVoice.voiceId, currentVoice.name, currentVoice.description);
   }
 
-  async speak(message: string): Promise<string> {
+  async speak(message: string): Promise<SpeechResult> {
     const outFilename = `el_tts_${Date.now()}_${this.characterVoice.name.replaceAll(/\s/g, '-')}.mp3`;
     const outFile = path.join(this.dataDir, outFilename);
     try {
@@ -131,7 +130,7 @@ class ElevenLabsSpeech implements SpeechSystem {
           ...(this.getConfig().config)
         } as ElevenLabsClient.GeneratAudioBulk));
       const outStream = fs.createWriteStream(outFile);
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<SpeechResult>((resolve, reject) => {
         outStream.on('error', (err) => {
           console.error('Error in writing the file:', err);
           reject();
@@ -139,15 +138,14 @@ class ElevenLabsSpeech implements SpeechSystem {
 
         outStream.on('finish', () => {
           console.log('File writing completed successfully.');
-          resolve(outFile);
+          resolve({filePath: () => outFile});
         });
         audio.pipe(outStream);
       })
 
     } catch (e) {
       console.error("Error while creating voice stream", e);
-    }
-    return outFile;
+      return Promise.reject(e);}
   }
 
   private getConfig(): ElevenLabsPartialConfig {

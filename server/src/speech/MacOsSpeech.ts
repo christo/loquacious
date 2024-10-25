@@ -5,14 +5,13 @@ import path from "path";
 import {timed} from "system/performance";
 import {type MediaFormat, MF_MP3, type SupportedAudioFormat, TYPE_DEFAULT} from "media";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
+import {DisplaySpeechSystem, type SpeechSystem, type SpeechResult} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import util from "util";
 import {mkDirIfMissing} from "../system/config";
 
 
 const execPromise = util.promisify(exec);
-const unlinkPromise = util.promisify(fs.unlink);
 
 function mkVoiceFile(dataDir: string, mediaFormat: MediaFormat) {
   // TODO file tts under data/tts/<system>/<option>/tts_<db-id>.<format>
@@ -93,7 +92,6 @@ class MacOsSpeech implements SpeechSystem {
   private readonly dataDir: string;
   private fileFormat: MediaFormat;
 
-
   constructor(ttsDataDir: PathLike, fileFormat = MF_MP3) {
     this.dataDir = path.join(ttsDataDir.toString(), "macos");
     mkDirIfMissing(this.dataDir);
@@ -109,12 +107,16 @@ class MacOsSpeech implements SpeechSystem {
     return VOICES.map(v => v.voiceId);
   }
 
-  async speak(message: string): Promise<string> {
-    return await speak(message, VOICES[this.currentIndex].voiceId, speed, this.dataDir, this.fileFormat)
-      .catch((error) => {
-        console.error('An error occurred during speech synthesis:', error);
-        return Promise.reject(error);
-      });
+  async speak(message: string): Promise<SpeechResult> {
+    try {
+      const audioFile = await speak(message, VOICES[this.currentIndex].voiceId, speed, this.dataDir, this.fileFormat);
+      return {
+        filePath: () => audioFile
+      }
+    } catch (error) {
+      console.error('An error occurred during speech synthesis:', error);
+      return Promise.reject(error);
+    }
   }
 
   pauseCommand(msDuration: number): string {

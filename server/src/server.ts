@@ -17,7 +17,7 @@ import {supportedImageTypes} from "media";
 import {Modes} from "Modes";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
-import type {SpeechSystem} from "speech/SpeechSystem";
+import type {SpeechResult, SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
 import {ensureDataDirsExist, getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
@@ -202,15 +202,41 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         console.log("storing llm response");
         await db.appendText(session, llmResponse, currentLlm);
         try {
-          const speechResult: string = await timed<string>("speech synthesis",
+          const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
             () => speechSystems.current().speak(llmResponse)
           );
-          const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
-          try {
-            const lipsyncResult: LipSyncResult = await timed("lipsync", () => {
-              return lipSync.lipSync(portait, speechResult)
-            });
-            // TODO return text history with full session graph for enabling replay etc.
+          const speechFilePath = speechResult.filePath();
+          if (speechFilePath) {
+            const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
+            try {
+              const lipsyncResult: LipSyncResult = await timed("lipsync", () => {
+                return lipSync.lipSync(portait, speechFilePath!)
+              });
+              // TODO return text history with full session graph for enabling replay etc.
+              res.json({
+                response: {
+                  // portrait instance of ImageInfo, input to lipsync
+                  portrait: portrait,
+                  // text response from llm as string
+                  message: llmResponse,
+                  // file path to speech audio
+                  speech: speechFilePath,
+                  // instance of LipSyncResult
+                  lipsync: lipsyncResult,
+                  // llm backend that generated the message
+                  backend: LLMS[llmIndex].name,   // TODO rename backend to llm
+                  // llm model used
+                  model: (await LLMS[llmIndex].currentModel()),
+                }
+              });
+              await lipSync.writeCacheFile();
+            } catch (e) {
+              const msg = "lipsync generation failed";
+              console.error(msg, e);
+              res.status(500).json({error: msg}).end();
+            }
+          } else {
+            // TODO update front-end to handle missing speech and/or lipsync
             res.json({
               response: {
                 // portrait instance of ImageInfo, input to lipsync
@@ -218,21 +244,17 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                 // text response from llm as string
                 message: llmResponse,
                 // file path to speech audio
-                speech: speechResult,
+                speech: undefined,
                 // instance of LipSyncResult
-                lipsync: lipsyncResult,
+                lipsync: undefined,
                 // llm backend that generated the message
                 backend: LLMS[llmIndex].name,   // TODO rename backend to llm
                 // llm model used
                 model: (await LLMS[llmIndex].currentModel()),
               }
             });
-            await lipSync.writeCacheFile();
-          } catch (e) {
-            const msg = "lipsync generation failed";
-            console.error(msg, e);
-            res.status(500).json({error: msg}).end();
           }
+
         } catch (e) {
           const msg = "speech generation failed";
           console.error(msg, e);
@@ -250,9 +272,16 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
 /**
  * Endpoint to generate and return speech for the given prompt.
+ * Not used by main frontend.
  */
 app.post('/speak', async (req: Request, res: Response) => {
-  streamFromPath(await speechSystems.current().speak(req.body.prompt), res);
+  const speechResult: SpeechResult = await speechSystems.current().speak(req.body.prompt);
+  const filePath = speechResult.filePath();
+  if (filePath) {
+    streamFromPath(filePath, res);
+  } else {
+    res.status(404).json({error: 'No audio file'});
+  }
 });
 
 /**
@@ -266,12 +295,17 @@ app.get('/audio', async (req: Request, res: Response) => fileStream(req.query.fi
 app.get('/video', async (req: Request, res: Response) => fileStream(req.query.file!.toString(), res));
 
 
-function systemCreatorTypes() {
-  return [
+async function initialiseCreatorTypes() {
+  const creators: CreatorType[] = [
     ...LLMS,
     ...speechSystems.systems,
     ...LIPSYNCS
   ];
+  console.log(`ensuring ${creators.length} creator types are in database`);
+  await Promise.all(creators.map(async creator => {
+    console.log(`   initialising ${creator.getName()}`);
+    return db.findCreator(creator.getName(), creator.getMetadata(), true);
+  }));
 }
 
 // Start the server
@@ -279,12 +313,8 @@ app.listen(port, async () => {
   // TODO make production implementation that has stored commit hash and uses explicit version metdata
   const hash = await getCurrentCommitHash(process.cwd());
   await db.boot(process.env.DEPLOYMENT_NAME!, hash);
-  const creators: CreatorType[] = systemCreatorTypes();
-  console.log(`ensuring ${creators.length} creator types are in database`);
-  await Promise.all(creators.map(async creator => {
-    console.log(`   Finding ${creator.getName()}`);
-    return db.findCreator(creator.getName(), creator.getMetadata(), true);
-  }));
+  await initialiseCreatorTypes();
+
   await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
   // TODO remove host hard-coding
   console.log(`Server is running on http://localhost:${port}`);
