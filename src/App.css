@@ -72,7 +72,7 @@ video.portrait {
 .chat {
     border-radius: 1rem;
     padding: 0.8rem 1.4rem;
-    max-width: 30rem;
+    max-width: 24rem;
     box-shadow: 5px 10px 10px #00000033;
 }
 
@@ -112,6 +112,6 @@ form#prompt textarea:focus {
 .loadingSpinner {
     position: absolute;
     z-index: 500;
-    top: 10rem;
-    left: 50%;
+    top: 2rem;
+    right: 2rem;
 }
