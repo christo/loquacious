@@ -137,8 +137,7 @@ app.get('/session', async (_req: Request, res: Response) => {
   try {
     res.json(await db.currentSession());
   } catch (e) {
-    console.error('Error getting current session:', e);
-    res.status(500).end();
+    res.status(404).json({message: "no current session"}).end();
   }
 })
 
@@ -159,6 +158,17 @@ app.get('/api/chat', async (req: Request, res: Response) => {
   });
 });
 
+/**
+ * If there's a current session return it, otherwise create one.
+ */
+async function getOrCreateSession() {
+  try {
+    return await db.currentSession();
+  } catch {
+    return await db.createSession();
+  }
+}
+
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const {prompt, portrait} = req.body;
@@ -174,7 +184,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         const response = await currentLlm.chat(messages);
         return response.message
       });
-      const session = await db.currentSession();
+
+      let session = await getOrCreateSession();
+
       console.log("appending user message");
       await db.appendUserText(session, prompt);
 
@@ -183,7 +195,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         const speechResult: string = await timed<string>("speech synthesis",
           () => speechSystems.current().speak(message)
         );
-
+        // TODO handle speechResult failure - do not atempt to generate lipsync for failed speech
         // TODO store response message in session
 
         const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
