@@ -239,7 +239,7 @@ const App: React.FC = () => {
           <form id="prompt">
           <textarea value={prompt} placeholder="Welcome, seeker"
             onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={handleSubmitKey}
+            onKeyDown={handleSubmitKey} {...{disabled: loading}}
           />
           </form>
         </Box>
