@@ -59,12 +59,22 @@ function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
 }
 
 function renderMessage(m: Message) {
+  // const _font = {
+  //   fontFamily: '"Mate", serif',
+  //   fontWeight: 400,
+  //   fontStyle: "normal"
+  // };
+  const anotherFont = {
+    fontFamily: '"Prociono", serif',
+    fontWeight: 400,
+    fontStyle: "normal"
+  }
   if (m.creatorName === "user") {
-    return <Typography key={`ch_${m.id}`} className={`chat userchat`}>
+    return <Typography sx={anotherFont} key={`ch_${m.id}`} className={`chat userchat`}>
       {`${m.content}`}
     </Typography>
   } else {
-    return <Typography key={`ch_${m.id}`} className="chat systemchat" dangerouslySetInnerHTML={{__html: mdToHtml(m.content)}}/>
+    return <Typography sx={anotherFont} key={`ch_${m.id}`} className="chat systemchat" dangerouslySetInnerHTML={{__html: mdToHtml(m.content)}}/>
   }
 }
 
