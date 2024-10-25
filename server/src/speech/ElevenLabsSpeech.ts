@@ -2,7 +2,6 @@ import {ElevenLabsClient} from "elevenlabs";
 import fs from 'fs';
 import type {PathLike} from "node:fs";
 import path from "path";
-import {Simulate} from "react-dom/test-utils";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
@@ -10,14 +9,16 @@ import {timed} from "system/performance";
 import {mkDirIfMissing} from "../system/config";
 
 const VOICES = [
+  new CharacterVoice("Tarini - Expressive & Cheerful Narrator", "Tarini", "Indian woman"),
+  new CharacterVoice("Vidhi - Young & Bold", "Vidhi", "Expressive Indian woman +"),
+  new CharacterVoice("Alicia - Warm, expressive, posh, old British female", "Alicia", "Warm posh English older woman ++"),
   new CharacterVoice("Nicole", "Nicole", "Young American woman, whispering, ASMR"),
-  new CharacterVoice("Agatha", "Agatha", "English older woman"),
+  new CharacterVoice("Agatha", "Agatha", "English older woman, thin"),
   new CharacterVoice("Lily", "Lily", "English woman, young, London"),
   new CharacterVoice("Valentino", "Valentino", "Deep posh English older man"),
   new CharacterVoice("Kim Selch - Pro Studio Recording", "Kaspar", "Deep Danish older man"),
   new CharacterVoice("Northern Terry", "Terry", "Northern English man"),
   new CharacterVoice("U1Vk2oyatMdYs096Ety7", "Michael", "Urban English middle-aged man"),
-  new CharacterVoice("Alicia - Warm, expressive, posh, old British female", "Alicia", "Warm posh English older woman"),
   new CharacterVoice("Old Osirion Woman - Timeless, Mystical, Nurturing", "Anne", "Neutral English woman"),
   new CharacterVoice("Ky9j3wxFbp3dSAdrkOEv", "Hex", "Middle-aged Northern English woman with moderate tone"),
   new CharacterVoice("Sigrid - solemn, raspy, wise", "Sigrid", "English, slightly posh older woman +"),
@@ -25,7 +26,6 @@ const VOICES = [
   new CharacterVoice("Emily", "Emily", "Meditation, American woman"),
   new CharacterVoice("Jacqui Griffin", "Jacqui", "Australian woman, reasonably broad accent"),
   new CharacterVoice("Dorothy", "Dorothy", "English woman, slightly South Eastern"),
-  new CharacterVoice("Vidhi - Young & Bold", "Vidhi", "Expressive Indian woman"),
   new CharacterVoice("ztyYYqlYMny7nllhThgo", "Petra", "Haughty, German middle-aged woman"),
   new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
   new CharacterVoice("Sarah - warrior princess", "Sarah", "English middle-aged woman"),
@@ -41,10 +41,11 @@ const VOICES = [
   new CharacterVoice("Nora - cold and wise", "Nora", "English woman, educated, precise"),
   new CharacterVoice("Mampai", "Mampai", "African woman"),
   new CharacterVoice("Mistress Valerie", "Valerie", "English middle-aged posh woman"),
-  new CharacterVoice("Tarini - Expressive & Cheerful Narrator", "Tarini", "Indian woman"),
   new CharacterVoice("Victoria, Queen of England", "Victoria", "Posh English woman"),
+  // not current:
+  /*
   new CharacterVoice("Diana - Upbeat and Clear", "Vashti", "Indian woman"),
-  new CharacterVoice("Ines", "Ines", "Young English woman but with weird rolled R"),
+  */
 ];
 
 type ElevenLabsPartialConfig = BulkPartialConfig | StreamPartialConfig;
