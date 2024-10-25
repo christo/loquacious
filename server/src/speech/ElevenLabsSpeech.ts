@@ -9,6 +9,8 @@ import {timed} from "system/performance";
 import {mkDirIfMissing} from "../system/config";
 
 const VOICES = [
+  new CharacterVoice("Agatha", "Agatha", "English older woman"),
+  new CharacterVoice("Lily", "Lily", "English woman, young, London"),
   new CharacterVoice("Valentino", "Valentino", "Deep posh English older man"),
   new CharacterVoice("Kim Selch - Pro Studio Recording", "Kaspar", "Deep Danish older man"),
   new CharacterVoice("Northern Terry", "Terry", "Northern English man"),
@@ -24,7 +26,6 @@ const VOICES = [
   new CharacterVoice("Vidhi - Young & Bold", "Vidhi", "Expressive Indian woman"),
   new CharacterVoice("ztyYYqlYMny7nllhThgo", "Petra", "Haughty, German middle-aged woman"),
   new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
-  new CharacterVoice("Lily", "Lily", "English woman, young, London"),
   new CharacterVoice("Sarah - warrior princess", "Sarah", "English middle-aged woman"),
   new CharacterVoice("Amina - regal", "Amina", "Posh Scottish-ish middle-aged woman"),
   new CharacterVoice("Nala - African Female", "Nala", "African English woman"),
@@ -39,7 +40,6 @@ const VOICES = [
   new CharacterVoice("Nora - cold and wise", "Nora", "English woman, educated, precise"),
   new CharacterVoice("Mampai", "Mampai", "African woman"),
   new CharacterVoice("Mistress Valerie", "Valerie", "English middle-aged posh woman"),
-  new CharacterVoice("Agatha", "Agatha", "English older woman"),
   new CharacterVoice("Tarini - Expressive & Cheerful Narrator", "Tarini", "Indian woman"),
   new CharacterVoice("Victoria, Queen of England", "Victoria", "Posh English woman"),
   new CharacterVoice("Diana - Upbeat and Clear", "Vashti", "Indian woman"),
