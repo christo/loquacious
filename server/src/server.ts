@@ -178,7 +178,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     try {
       const currentLlm = LLMS[llmIndex];
-      let message: string | null = await timed("text generation", async () => {
+      let llmResponse: string | null = await timed("text generation", async () => {
         let messages = modes.getMode()(prompt, speechSystems.current());
         // console.dir(messages);
         const response = await currentLlm.chat(messages);
@@ -187,39 +187,49 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
       let session = await getOrCreateSession();
 
-      console.log("appending user message");
+      console.log("storing user message");
       await db.appendUserText(session, prompt);
 
-      if (message) {
-        await db.appendText(session, message, currentLlm);
-        const speechResult: string = await timed<string>("speech synthesis",
-          () => speechSystems.current().speak(message)
-        );
-        // TODO handle speechResult failure - do not atempt to generate lipsync for failed speech
-        // TODO store response message in session
-
-        const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
-        const lipsyncResult: LipSyncResult = await timed("lipsync", () => {
-          return lipSync.lipSync(portait, speechResult)
-        });
-        // TODO return text history here
-        //   actually want full session graph for enabling replay etc.
-        res.json({
-          response: {
-            // portrait instance of ImageInfo, input to lipsync
-            portrait: portrait,
-            // text response from llm as string
-            message: message,
-            // file path to speech audio
-            speech: speechResult,
-            // instance of LipSyncResult
-            lipsync: lipsyncResult,
-            // llm backend that generated the message
-            backend: LLMS[llmIndex].name,
-            // llm model used
-            model: (await LLMS[llmIndex].currentModel()),
+      if (llmResponse) {
+        console.log("storing llm response");
+        await db.appendText(session, llmResponse, currentLlm);
+        try {
+          const speechResult: string = await timed<string>("speech synthesis",
+            () => speechSystems.current().speak(llmResponse)
+          );
+          const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
+          try {
+            const lipsyncResult: LipSyncResult = await timed("lipsync", () => {
+              return lipSync.lipSync(portait, speechResult)
+            });
+            // TODO return text history with full session graph for enabling replay etc.
+            res.json({
+              response: {
+                // portrait instance of ImageInfo, input to lipsync
+                portrait: portrait,
+                // text response from llm as string
+                message: llmResponse,
+                // file path to speech audio
+                speech: speechResult,
+                // instance of LipSyncResult
+                lipsync: lipsyncResult,
+                // llm backend that generated the message
+                backend: LLMS[llmIndex].name,   // TODO rename backend to llm
+                // llm model used
+                model: (await LLMS[llmIndex].currentModel()),
+              }
+            });
+            await lipSync.writeCacheFile();
+          } catch (e) {
+            const msg = "lipsync generation failed";
+            console.error(msg, e);
+            res.status(500).json({error: msg}).end();
           }
-        });
+        } catch (e) {
+          const msg = "speech generation failed";
+          console.error(msg, e);
+          res.status(500).json({error: msg}).end();
+        }
       } else {
         res.status(500).json({error: 'No message in response'});
       }
