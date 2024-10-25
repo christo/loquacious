@@ -49,9 +49,9 @@ class OpenAiLlm implements Llm {
   }
 
   configure(metadata: string): Promise<void> {
-    // TODO see if we can implement configuration by metadata here - do not assume we can use use all models;
-    //   some do not support specifying system prompt and some options seem to be ignored
-    return Promise.reject("unimplemented - it's complicated");
+    // note configured model is not necessarily effective model because borked
+    this.model = metadata;
+    return Promise.resolve();
   }
 
   free(): boolean {
