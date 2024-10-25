@@ -84,6 +84,10 @@ class FakeLlm implements Llm {
       return Promise.reject();
     }
   }
+
+  free(): boolean {
+    return true;
+  }
 }
 
 export {FakeLlm};

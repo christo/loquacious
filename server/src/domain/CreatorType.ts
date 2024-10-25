@@ -9,4 +9,6 @@ export type CreatorType = {
   getName: () => string;
   /** Serialised configuration parameters for the service, if the creator is a service */
   getMetadata: () => string | undefined;
+  /** Returns true iff using the service implementation incurs no monetary cost */
+  free: () => boolean;
 }

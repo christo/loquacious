@@ -55,6 +55,10 @@ class LmStudioLlm implements Llm {
     // currently does not support configuration
     return Promise.reject("does not support configuration because external process defines model");
   }
+
+  free(): boolean {
+    return true;
+  }
 }
 
 export {LmStudioLlm};

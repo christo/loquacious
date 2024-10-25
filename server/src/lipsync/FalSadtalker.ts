@@ -1,11 +1,13 @@
 import {fal, type Result} from "@fal-ai/client";
-import {promises as fs, readFileSync} from "fs";
+import fs, {promises as fs, readFileSync} from "fs";
 import type {LipSync, LipSyncResult} from "lipsync/LipSync";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
 import path from "path";
+import {Simulate} from "react-dom/test-utils";
 import {mkDirIfMissing} from "system/config";
 import {timed} from "system/performance";
+import error = Simulate.error;
 
 async function readBinaryFile(filePath: string): Promise<File> {
   const fileBuffer = await fs.readFile(filePath);
@@ -139,6 +141,10 @@ class FalSadtalker implements LipSync {
         ...this.sadtalkerConfig
       }
     });
+  }
+
+  free(): boolean {
+    return false;
   }
 }
 

@@ -2,11 +2,13 @@ import {ElevenLabsClient} from "elevenlabs";
 import fs from 'fs';
 import type {PathLike} from "node:fs";
 import path from "path";
+import {Simulate} from "react-dom/test-utils";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import {mkDirIfMissing} from "../system/config";
+import error = Simulate.error;
 
 const VOICES = [
   new CharacterVoice("Agatha", "Agatha", "English older woman"),
@@ -173,6 +175,10 @@ class ElevenLabsSpeech implements SpeechSystem {
     } catch (error) {
       return Promise.reject(error);
     }
+  }
+
+  free(): boolean {
+    return false;
   }
 }
 

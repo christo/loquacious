@@ -54,6 +54,9 @@ class OpenAiLlm implements Llm {
     return Promise.reject("unimplemented - it's complicated");
   }
 
+  free(): boolean {
+    return false;
+  }
 }
 
 export {OpenAiLlm};

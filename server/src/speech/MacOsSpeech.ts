@@ -89,7 +89,7 @@ const MACOS_SPEECH_SYSTEM_NAME = "MacOs-TTS";
 
 class MacOsSpeech implements SpeechSystem {
   name = MACOS_SPEECH_SYSTEM_NAME;
-  currentIndex = 0;
+  private currentIndex = 0;
   display = new DisplaySpeechSystem(this.name, VOICES);
   private readonly dataDir: string;
   private fileFormat: MediaFormat;

@@ -1,4 +1,4 @@
-import {promises as fs} from "fs";
+import fs, {promises as fs} from "fs";
 import type {LipSync, LipSyncResult} from "./LipSync";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
 import type {Dirent} from "node:fs";
@@ -59,6 +59,10 @@ class FakeLipSync implements LipSync {
    */
   writeCacheFile(): Promise<void> {
     return Promise.resolve(undefined);
+  }
+
+  free(): boolean {
+    return true;
   }
 
 }

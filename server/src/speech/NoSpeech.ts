@@ -45,6 +45,10 @@ class NoSpeech implements SpeechSystem {
   configure(metadata: string): Promise<void> {
     return Promise.resolve();
   }
+
+  free(): boolean {
+    return true;
+  }
 }
 
 export {NoSpeech};
