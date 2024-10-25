@@ -7,10 +7,12 @@ import type {CreatorType} from "../domain/CreatorType";
 class DisplaySpeechSystem {
   name: string;
   options: Array<CharacterVoice>;
+  isFree: boolean;
 
-  constructor(name: string, options: Array<CharacterVoice>) {
+  constructor(name: string, options: Array<CharacterVoice>, isFree: boolean) {
     this.name = name;
     this.options = options;
+    this.isFree = isFree;
   }
 }
 

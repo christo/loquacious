@@ -30,7 +30,13 @@ class SpeechSystemOption {
 
   /** Display object represending a speech system and its configured option */
   safeObject() {
-    return {system: this.system.name, optionKey: this.optionKey, optionName: this.optionName, description: this.descriptor()};
+    return {
+      system: this.system.name,
+      optionKey: this.optionKey,
+      optionName: this.optionName,
+      description: this.descriptor(),
+      isFree: this.system.free()
+    };
   }
 }
 
@@ -39,7 +45,7 @@ class SpeechSystemOption {
  */
 class SpeechSystems {
 
-  private currentSystemIndex = 2;
+  private currentSystemIndex = 1;
   readonly systems: Array<SpeechSystem>;
   private readonly baseDir: PathLike;
 

@@ -108,7 +108,7 @@ class ElevenLabsSpeech implements SpeechSystem {
     this.dataDir = path.join(ttsDataDir.toString(), "el");
     mkDirIfMissing(this.dataDir);
     this.client = new ElevenLabsClient({});
-    this.display = new DisplaySpeechSystem(this.name, VOICES)
+    this.display = new DisplaySpeechSystem(this.name, VOICES, this.free())
   }
 
   options(): Array<string> {

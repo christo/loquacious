@@ -16,7 +16,7 @@ class NoSpeech implements SpeechSystem {
   readonly name = "NoSpeech";
   private onlyOptions = [new CharacterVoice("silence", "silence", "is golden")];
 
-  readonly display = new DisplaySpeechSystem(this.name, this.onlyOptions)
+  readonly display = new DisplaySpeechSystem(this.name, this.onlyOptions, this.free());
 
   options(): Array<string> {
     return this.onlyOptions.map(x => x.voiceId);

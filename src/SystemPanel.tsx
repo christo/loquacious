@@ -68,7 +68,7 @@ function Duration(props: { ms: number, className?: string }) {
 }
 
 function FreePaid({isFree}: { isFree: boolean }) {
-  return isFree ? null : <MonetizationOn sx={{ml: 1}} fontSize="small" color="warning"/>
+  return isFree ? "" : <Tooltip title="Uses Commercial API"><MonetizationOn sx={{ml: 1}} fontSize="small" color="warning"/></Tooltip>;
 }
 
 function SettingsDetail({system}: { system: System }) {
