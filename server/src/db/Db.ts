@@ -283,10 +283,10 @@ class Db {
         result = await client.query(query, [name]);
       }
 
-      if (createIfMissing && result.rowCount && result.rowCount < 1) {
+      if (createIfMissing && result.rowCount === 0) {
         const query = `insert into creator (name, metadata) values ($1, $2) returning *`
         const createResult = await client.query(query, [name, metadata]);
-        if (createResult && createResult.rowCount && createResult.rowCount === 1) {
+        if (createResult && createResult.rowCount === 1) {
           console.log(`creating creator ${name}`);
           await client.query("commit");
           return Promise.resolve(createResult.rows[0] as Creator);
@@ -294,13 +294,13 @@ class Db {
           await client.query("rollback");
           return Promise.reject("could not create creator")
         }
-      } else if (result.rowCount && result.rowCount === 1) {
+      } else if (result.rowCount === 1) {
         console.log(`found creator ${name}`);
         await client.query("commit");
         return Promise.resolve(result.rows[0] as Creator);
       } else {
         await client.query("rollback");
-        return Promise.reject("could not find creator");
+        return Promise.reject(`could not find creator ${name} ${metadata}`);
       }
     } finally {
       client.release();
