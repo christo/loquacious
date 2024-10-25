@@ -1,4 +1,3 @@
-import {Collections} from "@mui/icons-material";
 import {fileStream, streamFromPath} from "api/mediaStream";
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -23,8 +22,14 @@ import {SpeechSystems} from "speech/SpeechSystems";
 import {ensureDataDirsExist, getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
 import {systemHealth} from "system/SystemStatus";
+import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
 import type {CreatorType} from "./domain/CreatorType";
+import Agent = Undici.Agent;
+
+// TODO confirm we want connect timeout and not ?"request timeout"
+setGlobalDispatcher(new Agent({connect: { timeout: 300_000 }}));
+
 // Load environment variables
 dotenv.config();
 
