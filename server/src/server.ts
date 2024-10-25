@@ -130,7 +130,7 @@ app.get("/system", async (_req: Request, res: Response) => {
 /**
  * Front end request for a new session.
  */
-app.put("/session", async (req: Request, res: Response) => {
+app.put("/session", async (_req: Request, res: Response) => {
   try {
     await db.finishCurrentSession();
     const session = await db.createSession();
@@ -149,7 +149,7 @@ app.get('/session', async (_req: Request, res: Response) => {
   }
 })
 
-app.get('/api/chat', async (req: Request, res: Response) => {
+app.get('/api/chat', async (_req: Request, res: Response) => {
   res.json({
     response: {
       messages: [
