@@ -54,6 +54,12 @@ class FakeLipSync implements LipSync {
     return Promise.reject();
   }
 
+  /**
+   * Does nothing.
+   */
+  writeCacheFile(): Promise<void> {
+    return Promise.resolve(undefined);
+  }
 
 }
 

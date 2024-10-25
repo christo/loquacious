@@ -31,6 +31,7 @@ interface LipSync extends CreatorType, ConfigurableCreator {
    */
   lipSync(imageFile: string, speechFile: string): Promise<LipSyncResult>;
 
+  writeCacheFile(): Promise<void>
 }
 
 export type {LipSync, LipSyncResult};
