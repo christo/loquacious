@@ -2,8 +2,8 @@
 
 AI face-to-face chat experiment.
 
-At this stage, this is a feasibility investigation to see if a face-to-face
-video chat can be assembled using various AI models. Various components can be
+At this stage, this is a feasibility investigation to see how a face-to-face
+video chat can be assembled using various AI models. Components can be
 swapped for alternatives which is especially useful for quality and performance
 testing.
 
