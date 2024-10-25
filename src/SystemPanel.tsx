@@ -23,7 +23,7 @@ import {
 } from "@mui/icons-material";
 import {Box, Button, Chip, IconButton, Stack, SwipeableDrawer, Tooltip, Typography} from "@mui/material";
 import React, {type ReactNode, useEffect, useState} from "react";
-import  {type ImageInfo} from "../server/src/image/ImageInfo.ts";
+import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import type {HealthError, System} from "./types.ts";
 
 function ShowError({error}: { error: HealthError }) {
@@ -159,7 +159,7 @@ function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
   </Box>
 }
 
-function SessionControl({serverPort}: {serverPort: number}) {
+function SessionControl({serverPort}: { serverPort: number }) {
 
   const [inFlight, setInFlight] = useState(false);
 
@@ -174,7 +174,7 @@ function SessionControl({serverPort}: {serverPort: number}) {
     });
   }
 
-  return <Button sx={{mt:2}} disabled={inFlight} variant="outlined" onClick={newSession}>New Session</Button>;
+  return <Button sx={{mt: 2}} disabled={inFlight} variant="outlined" onClick={newSession}>New Session</Button>;
 }
 
 function SettingsPanel(props: SettingsProps) {
@@ -198,7 +198,7 @@ function SettingsPanel(props: SettingsProps) {
     {props.images?.length > 0 && <ImageChooser {...props} />}
     <SettingsDetail system={settings}/>
     <Status system={settings}/>
-    <SessionControl serverPort={props.serverPort} />
+    <SessionControl serverPort={props.serverPort}/>
   </Box>
 }
 
