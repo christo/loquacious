@@ -99,7 +99,7 @@ app.get("/portraits", async (_req: Request, res: Response) => {
 });
 
 app.get("/system", async (_req: Request, res: Response) => {
-  const current = speechSystems.current().currentOption();
+  const currentSpeech = speechSystems.current().currentOption();
   res.json({
     mode: {
       current: modes.current(),
@@ -113,7 +113,7 @@ app.get("/system", async (_req: Request, res: Response) => {
     },
     speech: {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
-      current: current.safeObject(),
+      current: currentSpeech.safeObject(),
       isFree: speechSystems.current().free()
     },
     lipsync: {
