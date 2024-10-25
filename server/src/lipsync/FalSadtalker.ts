@@ -35,6 +35,7 @@ type FalSadtalkerInvocationInput = {source_image_url: string, driven_audio_url: 
  */
 class FalSadtalker implements LipSync {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
+  private static NAME = "FalSadtalker";
   private readonly dataDir: string;
   private urlCache: { [keyOf: string]: string } = {};
   private sadtalkerConfig: FalSadtalkerInput = {
@@ -58,7 +59,7 @@ class FalSadtalker implements LipSync {
   }
 
   name(): string {
-    return FalSadtalker.SADTALKER_ENDPOINT;
+    return FalSadtalker.NAME;
   }
 
   async urlFor(filePath: string): Promise<string> {
