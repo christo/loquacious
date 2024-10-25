@@ -8,7 +8,7 @@ import {SystemPanel} from "./SystemPanel.tsx";
 import Model = OpenAI.Model;
 
 // TODO use current dimensions from server
-const DEFAULT_PORTRAIT = 29;
+const DEFAULT_PORTRAIT = 0;
 // const BASE_URL_PORTRAIT = "/img/1080x1920";
 const BASE_URL_PORTRAIT = "/img/608x800";
 const SERVER_PORT = 3001;
