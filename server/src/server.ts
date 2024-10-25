@@ -60,12 +60,12 @@ const LLAMA_CPP_BACKEND: Llm = new LlamaCppLlm();
 const FAKE_LLM: Llm = new FakeLlm();
 
 const LLMS = [
-  LLAMA_CPP_BACKEND,
   OPEN_AI_BACKEND,
+  LLAMA_CPP_BACKEND,
   LM_STUDIO_BACKEND,
   FAKE_LLM
 ]
-let llmIndex = 2;
+let llmIndex = 0;
 
 const speechSystems = new SpeechSystems(path.join(PATH_BASE_DATA, "tts"));
 const BASEDIR_LIPSYNC = path.join(PATH_BASE_DATA, "lipsync");
@@ -115,7 +115,6 @@ app.get("/system", async (_req: Request, res: Response) => {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
       current: current.safeObject(),
       isFree: speechSystems.current().free()
-      // TODO include count of saved speech audio
     },
     lipsync: {
       systems: LIPSYNCS.map(ls => ls.name()),
