@@ -18,6 +18,7 @@ type SpeechSystemDisplay = {
     system: string,
     optionKey: string,
     optionName: string,
+    isFree: boolean
   },
   systems: {
     name: string,
@@ -32,12 +33,14 @@ export type System = {
   llmMain: {
     name: string,
     models: Model[],
-    currentModel: string
+    currentModel: string,
+    isFree: boolean
   },
   speech: SpeechSystemDisplay,
   lipsync: {
     systems: string[],
     current: string
+    isFree: boolean
   },
   runtime: {
     run: {
