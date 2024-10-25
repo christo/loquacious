@@ -39,7 +39,7 @@ class FalSadtalker implements LipSync {
   private readonly dataDir: string;
   private urlCache: { [keyOf: string]: string } = {};
   private sadtalkerConfig: FalSadtalkerInput = {
-    pose_style: 32,             // 0-45 integer
+    pose_style: 20,             // 0-45 integer
     face_model_resolution: "256",    // string "256" or "512"
     expression_scale: 1.4,      // 0-3 float
     still_mode: false,             // whether to use few head movements
