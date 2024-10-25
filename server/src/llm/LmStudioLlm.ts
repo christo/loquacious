@@ -10,7 +10,9 @@ class LmStudioLlm implements Llm {
 
   constructor(baseUrl = "http://localhost:1234/v1") {
     this.baseUrl = baseUrl;
-    // TODO can we specify the model here?
+    // seems we cannot simply specify the model here, not all results from models() can be used with a system prompt
+    // and the effective model indicated on the response is not necessarily what was requested, it may partly be a
+    // version alias thing i.e. asking for gpt4o-latest may result in gpt4o-x.y.z
     this.openai = new OpenAI({
       baseURL: baseUrl,
       apiKey: process.env.OPENAI_API_KEY as string,
