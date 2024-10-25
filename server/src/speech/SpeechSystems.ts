@@ -45,7 +45,7 @@ class SpeechSystemOption {
  */
 class SpeechSystems {
 
-  private currentSystemIndex = 1;
+  private currentSystemIndex = 2;
   readonly systems: Array<SpeechSystem>;
   private readonly baseDir: PathLike;
 
