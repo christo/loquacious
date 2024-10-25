@@ -102,15 +102,18 @@ app.get("/system", async (_req: Request, res: Response) => {
       name: LLMS[llmIndex].name,
       models: await LLMS[llmIndex].models(),
       currentModel: await LLMS[llmIndex].currentModel(),
+      isFree: LLMS[llmIndex].free()
     },
     speech: {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
       current: current.safeObject(),
+      isFree: speechSystems.current().free(),
       // TODO include count of saved speech audio
     },
     lipsync: {
       systems: LIPSYNCS.map(ls => ls.name()),
       current: lipSync.name(),
+      isFree: lipSync.free()
     },
     runtime: {
       run: db.getRun()

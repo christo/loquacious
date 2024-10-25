@@ -23,7 +23,8 @@
     "node-pg-migrate": "^6.2.2",
     "openai": "^4.67.0",
     "pg": "^8.13.0",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "undici": "^6.20.1"
   },
   "devDependencies": {
     "@swc/core": "^1.7.35",

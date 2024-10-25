@@ -1,6 +1,5 @@
 import {exec} from 'child_process';
 import ffmpeg from "fluent-ffmpeg";
-import fs from "fs";
 import type {PathLike} from "node:fs";
 import path from "path";
 import {timed} from "system/performance";
@@ -146,6 +145,10 @@ class MacOsSpeech implements SpeechSystem {
     } else {
       return Promise.reject();
     }
+  }
+
+  free(): boolean {
+    return true;
   }
 }
 

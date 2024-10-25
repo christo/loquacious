@@ -7,13 +7,19 @@ import {
   AspectRatio,
   Campaign,
   Dns,
-  Error, Face3,
-  Memory, Mic,
-  MonitorHeart, Portrait,
-  QuestionAnswer, RemoveRedEye,
+  Error,
+  Face3,
+  Memory,
+  Mic,
+  MonetizationOn,
+  MonitorHeart,
+  Portrait,
+  QuestionAnswer,
+  RemoveRedEye,
   School,
   Settings,
-  type SvgIconComponent, Videocam
+  type SvgIconComponent,
+  Videocam
 } from "@mui/icons-material";
 import {Box, Button, Chip, IconButton, Stack, SwipeableDrawer, Tooltip, Typography} from "@mui/material";
 import React, {type ReactNode, useEffect, useState} from "react";
@@ -31,20 +37,12 @@ interface SettingsProps {
   setImageIndex: (i: number) => void;
 }
 
-function SpeechSettings({speechSettings}: any) {
-  return <Box>
-    <IconLabelled TheIcon={Campaign} tooltip="Speech System">
-      <Typography>{speechSettings.current.system} {speechSettings.current.optionName}</Typography>
-    </IconLabelled>
-  </Box>;
-}
-
 function IconLabelled({TheIcon, tooltip, children}: {
   TheIcon: SvgIconComponent,
   tooltip: string,
   children: ReactNode
 }): ReactNode {
-  return <Stack direction="row" alignItems="center" spacing={1}>
+  return <Stack direction="row" alignItems="center" spacing={2}>
     <Tooltip title={tooltip}><TheIcon fontSize="small" sx={{mr: 1}}/></Tooltip>
     <Box sx={{display: "flex", flexDirection: "row", alignItems: "center"}}>{children}</Box>
   </Stack>
@@ -68,7 +66,12 @@ function Duration(props: { ms: number, className?: string }) {
     return <span className={className}>{pad(mins)}:{pad(secs)}</span>;
   }
 }
-function SettingsDetail({system}: { system: System}) {
+
+function FreePaid({isFree}: { isFree: boolean }) {
+  return isFree ? null : <MonetizationOn sx={{ml: 1}} fontSize="small" color="warning"/>
+}
+
+function SettingsDetail({system}: { system: System }) {
   function modelist() {
     const currentMode = system.mode.current;
     return system.mode.options.map((m: string) => {
@@ -80,8 +83,8 @@ function SettingsDetail({system}: { system: System}) {
   if (system === null) {
     return "";
   } else {
-    const uptime = Date.now()- Date.parse(system.runtime.run.created);
-    return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start", width: "100%", gap: 1}}>
+    const uptime = Date.now() - Date.parse(system.runtime.run.created);
+    return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start", width: "100%", gap: 2}}>
       <IconLabelled TheIcon={Mic} tooltip="Speech to Text"><i>Unimplemented</i></IconLabelled>
       <IconLabelled TheIcon={Videocam} tooltip="Camera Input"><i>Unimplemented</i></IconLabelled>
       <IconLabelled TheIcon={RemoveRedEye} tooltip="Vision System"><i>Unimplemented</i></IconLabelled>
@@ -89,13 +92,17 @@ function SettingsDetail({system}: { system: System}) {
       <IconLabelled TheIcon={Face3} tooltip="Self-image"><i>Unimplemented</i></IconLabelled>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">{modelist()}</IconLabelled>
       <IconLabelled TheIcon={QuestionAnswer}
-                    tooltip="LLM">{system.llmMain.name} (models: {system.llmMain.models.length})</IconLabelled>
+                    tooltip="LLM">{system.llmMain.name} (models: {system.llmMain.models.length})<FreePaid
+        isFree={system.llmMain.isFree}/></IconLabelled>
       <IconLabelled TheIcon={School} tooltip="Model">
         <Typography>{system.llmMain.currentModel}</Typography>
       </IconLabelled>
-      <SpeechSettings speechSettings={system.speech}/>
+      <IconLabelled TheIcon={Campaign} tooltip="Speech System">
+        <Typography>{system.speech.current.system} {system.speech.current.optionName}</Typography>
+        <FreePaid isFree={system.speech.current.isFree}/>
+      </IconLabelled>
       <IconLabelled TheIcon={Portrait} tooltip="Lip Sync System">
-        {system.lipsync.current}
+        {system.lipsync.current} <FreePaid isFree={system.lipsync.isFree}/>
       </IconLabelled>
       <IconLabelled TheIcon={AccessTime} tooltip="Uptime">
         <Duration ms={uptime}/>
