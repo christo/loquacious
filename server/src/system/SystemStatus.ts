@@ -10,13 +10,13 @@ const formatBytes = (bytes: number) => {
   return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
 };
 
-async function systemHealth(backends: Array<Llm>, backendIndex: number) {
+async function systemHealth(llms: Array<Llm>, backendIndex: number) {
   const totalMem = os.totalmem();
   const freeMem = os.freemem();
   let tttHealth: any = {message: "disabled"};
-  if (backends[backendIndex].enableHealth) {
+  if (llms[backendIndex].enableHealth) {
     try {
-      const r = await fetch(`${(backends[backendIndex].baseUrl)}/health`, {});
+      const r = await fetch(`${(llms[backendIndex].baseUrl)}/health`, {});
       tttHealth = await r.json();
     } catch (error) {
       tttHealth = {"error": `Health check failed ${error}`};

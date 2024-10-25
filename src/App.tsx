@@ -16,7 +16,7 @@ const SERVER_PORT = 3001;
 type ChatResponse = {
   message: string | undefined;
   speech: string | undefined;
-  backend: string | undefined;
+  llm: string | undefined;
   model: Model | undefined;
   lipsync: {
     content_type: string;

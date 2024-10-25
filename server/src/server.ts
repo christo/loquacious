@@ -223,8 +223,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                   speech: speechFilePath,
                   // instance of LipSyncResult
                   lipsync: lipsyncResult,
-                  // llm backend that generated the message
-                  backend: LLMS[llmIndex].name,   // TODO rename backend to llm
+                  // llm that generated the message
+                  llm: LLMS[llmIndex].name,
                   // llm model used
                   model: (await LLMS[llmIndex].currentModel()),
                 }
@@ -248,7 +248,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                 // instance of LipSyncResult
                 lipsync: undefined,
                 // llm backend that generated the message
-                backend: LLMS[llmIndex].name,   // TODO rename backend to llm
+                llm: LLMS[llmIndex].name,
                 // llm model used
                 model: (await LLMS[llmIndex].currentModel()),
               }
