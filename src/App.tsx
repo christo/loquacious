@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import React, {type MutableRefObject, type ReactNode, useEffect, useRef, useState} from 'react';
 import "./App.css";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
+import {Message} from "../server/src/domain/Message.ts";
 import {SystemPanel} from "./SystemPanel.tsx";
 import Model = OpenAI.Model;
 
@@ -14,7 +15,7 @@ const BASE_URL_PORTRAIT = "/img/608x800";
 const SERVER_PORT = 3001;
 
 type ChatResponse = {
-  message: string | undefined;
+  messages: Message[];
   speech: string | undefined;
   llm: string | undefined;
   model: Model | undefined;
@@ -59,7 +60,8 @@ function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
 
 function ChatHistory({children}: { children: ReactNode }) {
 
-  const [chat, setChat] = useState([]);
+  const [chat, setChat] = useState<Array<Message>>([]);
+  const [sessionId, setSessionId] = useState<number>(-1);
 
   useEffect(() => {
     if (chat.length === 0) {
@@ -72,14 +74,22 @@ function ChatHistory({children}: { children: ReactNode }) {
           }
         }).then(json => {
         setChat(json.response.messages);
+        setSessionId(json.response.session);
       });
     }
   }, []);
 
-  return <Box className="chathistory">
-    {chat.map((c: {from: string, text: string}, i: number) => {
-      return <Typography key={`ch_${i}`} className={`chat ${c.from}chat`}>{`${c.text}`}</Typography>
-    })}
+  function renderMessage(m: Message) {
+    if (m.creatorName === "user") {
+      return <Typography key={`ch_${m.id}`} className={`chat userchat`}>
+        {`${m.content}`}
+      </Typography>
+    } else {
+      return <Typography key={`ch_${m.id}`} className="chat systemchat" dangerouslySetInnerHTML={{__html: mdToHtml(m.content)}}/>
+    }
+  }
+  return <Box className="chathistory">{sessionId}
+    {chat.map(renderMessage)}
     {children}
   </Box>;
 }
@@ -118,14 +128,10 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
       // maybe a result with no lipsync
       hideVideo();
     }
-  })
-  function hotResponse(message: string) {
-    return <Typography className="chat systemchat" dangerouslySetInnerHTML={{__html: mdToHtml(message)}}/>;
-  }
+  }, [response])
+
   return <Box className="controls">
-    <ChatHistory>
-      {response?.message && hotResponse(response.message)}
-    </ChatHistory>
+    <ChatHistory>.</ChatHistory>
   </Box>;
 }
 

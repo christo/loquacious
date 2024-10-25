@@ -1,11 +1,11 @@
 import {Pool, type QueryConfigValues, type QueryResult} from "pg";
-import {Simulate} from "react-dom/test-utils";
 import {Creator} from "../domain/Creator";
 import type {CreatorType} from "../domain/CreatorType";
 import {Deployment} from "../domain/Deployment";
+import {Message} from "../domain/Message";
 import {Run} from "../domain/Run";
 import {Session} from "../domain/Session";
-import error = Simulate.error;
+
 
 export const CREATOR_USER_NAME = 'user';
 
@@ -269,22 +269,24 @@ class Db {
       let result;
       if (metadata) {
         const query = `select *
-                     from creator
-                     where name = $1
-                       and metadata = $2
-                     limit 1`;
+                       from creator
+                       where name = $1
+                         and metadata = $2
+                       limit 1`;
         result = await client.query(query, [name, metadata]);
       } else {
         const query = `select *
-                     from creator
-                     where name = $1
-                       and metadata is null
-                     limit 1`;
+                       from creator
+                       where name = $1
+                         and metadata is null
+                       limit 1`;
         result = await client.query(query, [name]);
       }
 
       if (createIfMissing && result.rowCount === 0) {
-        const query = `insert into creator (name, metadata) values ($1, $2) returning *`
+        const query = `insert into creator (name, metadata)
+                       values ($1, $2)
+                       returning *`
         const createResult = await client.query(query, [name, metadata]);
         if (createResult && createResult.rowCount === 1) {
           console.log(`creating creator ${name}`);
@@ -319,6 +321,28 @@ class Db {
     const client = await this.pool.connect();
     try {
       await client.query(query, [message, session.id, creatorId]);
+    } finally {
+      client.release();
+    }
+  }
+
+  async getSessionMessages(session: Session): Promise<Message[]> {
+    const query = `select m.id,
+                          m.created,
+                          m.content,
+                          c.name as creator_name,
+                          c.metadata
+                   from message m
+                            inner join creator c on m.creator = c.id
+                   where m.session = $1
+                   order by m.sequence`;
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(query, [session.id]);
+      // may be empty
+      return result.rows.map((r: any) => {
+        return new Message(r.id, r.created, r.content, r.creator_name);
+      });
     } finally {
       client.release();
     }

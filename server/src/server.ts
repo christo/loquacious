@@ -25,6 +25,7 @@ import {systemHealth} from "system/SystemStatus";
 import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
 import type {CreatorType} from "./domain/CreatorType";
+import type {Session} from "./domain/Session";
 import Agent = Undici.Agent;
 
 // TODO confirm we want connect timeout and not ?"request timeout"
@@ -150,26 +151,24 @@ app.get('/session', async (_req: Request, res: Response) => {
 })
 
 app.get('/api/chat', async (_req: Request, res: Response) => {
-  res.json({
-    response: {
-      messages: [
-        {from: "user", text: "Hello I am the user saying something"},
-        {from: "system", text: "Hello user, this is system. What do?"},
-        {from: "user", text: `Not much, just testing you out. This one has to be really long 
-        because I am testing how the overflow works with really long messages. It should ideally
-        not extend past half the width of the screen but who knows if that is a good rule of thumb?`},
-        {from: "system", text: "All G LMK how I go"},
-        {from: "user", text: "Sure thing dog, just chill rn"},
-        {from: "system", text: "Chill mode activated"},
-      ]
-    }
-  });
+  try {
+    const session = await getOrCreateSession()
+    const messages = await db.getSessionMessages(session);
+    res.json({
+      response: {
+        session: session.id,
+        messages: messages
+      }
+    });
+  } catch (e) {
+    res.status(500).end();
+  }
 });
 
 /**
  * If there's a current session return it, otherwise create one.
  */
-async function getOrCreateSession() {
+async function getOrCreateSession(): Promise<Session> {
   try {
     return await db.currentSession();
   } catch {
@@ -218,7 +217,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                   // portrait instance of ImageInfo, input to lipsync
                   portrait: portrait,
                   // text response from llm as string
-                  message: llmResponse,
+                  messages: await db.getSessionMessages(session),
                   // file path to speech audio
                   speech: speechFilePath,
                   // instance of LipSyncResult
@@ -242,7 +241,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                 // portrait instance of ImageInfo, input to lipsync
                 portrait: portrait,
                 // text response from llm as string
-                message: llmResponse,
+                messages: await db.getSessionMessages(session),
                 // file path to speech audio
                 speech: undefined,
                 // instance of LipSyncResult
