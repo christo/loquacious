@@ -12,10 +12,6 @@ class Message {
     this.content = content;
     this.creatorName = creatorName;
   }
-
-  fromUser() {
-    return this.creatorName === CREATOR_USER_NAME;
-  }
 }
 
 export {Message};

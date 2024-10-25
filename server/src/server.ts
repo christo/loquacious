@@ -25,6 +25,7 @@ import {systemHealth} from "system/SystemStatus";
 import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
 import type {CreatorType} from "./domain/CreatorType";
+import type {Message} from "./domain/Message";
 import type {Session} from "./domain/Session";
 import Agent = Undici.Agent;
 
@@ -185,17 +186,17 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     try {
       const currentLlm = LLMS[llmIndex];
-      let llmResponse: string | null = await timed("text generation", async () => {
-        let messages = modes.getMode()(prompt, speechSystems.current());
-        // console.dir(messages);
-        const response = await currentLlm.chat(messages);
-        return response.message
-      });
-
       let session = await getOrCreateSession();
 
       console.log("storing user message");
       await db.appendUserText(session, prompt);
+      const messageHistory: Message[] = await db.getSessionMessages(session);
+      const mode = modes.getMode();
+      let allMessages = mode(messageHistory, speechSystems.current());
+      let llmResponse: string | null = await timed("text generation", async () => {
+        const response = await currentLlm.chat(allMessages);
+        return response.message
+      });
 
       if (llmResponse) {
         console.log("storing llm response");

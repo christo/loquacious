@@ -58,38 +58,19 @@ function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
 
 }
 
-function ChatHistory({children}: { children: ReactNode }) {
-
-  const [chat, setChat] = useState<Array<Message>>([]);
-  const [sessionId, setSessionId] = useState<number>(-1);
-
-  useEffect(() => {
-    if (chat.length === 0) {
-      fetch(`//${location.hostname}:${SERVER_PORT}/api/chat`)
-        .then(response => {
-          if (!response.ok) {
-            throw "network response for chat was crap";
-          } else {
-            return response.json();
-          }
-        }).then(json => {
-        setChat(json.response.messages);
-        setSessionId(json.response.session);
-      });
-    }
-  }, []);
-
-  function renderMessage(m: Message) {
-    if (m.creatorName === "user") {
-      return <Typography key={`ch_${m.id}`} className={`chat userchat`}>
-        {`${m.content}`}
-      </Typography>
-    } else {
-      return <Typography key={`ch_${m.id}`} className="chat systemchat" dangerouslySetInnerHTML={{__html: mdToHtml(m.content)}}/>
-    }
+function renderMessage(m: Message) {
+  if (m.creatorName === "user") {
+    return <Typography key={`ch_${m.id}`} className={`chat userchat`}>
+      {`${m.content}`}
+    </Typography>
+  } else {
+    return <Typography key={`ch_${m.id}`} className="chat systemchat" dangerouslySetInnerHTML={{__html: mdToHtml(m.content)}}/>
   }
-  return <Box className="chathistory">{sessionId}
-    {chat.map(renderMessage)}
+}
+
+function CompletedChatHistory({children, messages}: { children: ReactNode, messages: Message[] }) {
+  return <Box className="chathistory">
+    {messages.map(renderMessage)}
     {children}
   </Box>;
 }
@@ -125,20 +106,29 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
           console.error('Fetch-o-Error:', error);
         });
     } else {
-      // maybe a result with no lipsync
+      // may be a success result with no lipsync
       hideVideo();
     }
   }, [response])
 
   return <Box className="controls">
-    <ChatHistory>.</ChatHistory>
+    <CompletedChatHistory messages={response.messages}>.</CompletedChatHistory>
   </Box>;
 }
 
 
 const App: React.FC = () => {
+
+  const EMPTY_RESPONSE: ChatResponse = {
+    messages: [],
+    speech: undefined,
+    llm: undefined,
+    model: undefined,
+    lipsync: undefined,
+  }
+
   const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState<ChatResponse>({} as ChatResponse);
+  const [response, setResponse] = useState<ChatResponse>(EMPTY_RESPONSE);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<ImageInfo[]>([]);
 
@@ -162,7 +152,18 @@ const App: React.FC = () => {
     if (!prompt.trim()) {
       return;
     }
+    const anticipatedMessg = new Message(-1, new Date(), prompt, "user");
+    const anticipatedResponse: ChatResponse = {
+      messages: [...response.messages, anticipatedMessg],
+      speech: undefined,
+      llm: undefined,
+      model: undefined,
+      lipsync: undefined,
+    }
+    setResponse(anticipatedResponse);
     setLoading(true);
+    setPrompt("");
+    e.currentTarget.blur();
     try {
       const result = await fetch(`//${location.hostname}:${SERVER_PORT}/api/chat`, {
         method: 'POST',
@@ -176,11 +177,11 @@ const App: React.FC = () => {
       });
 
       const data = await result.json();
-      setResponse(data.response || {} as ChatResponse);
+      setResponse(data.response || EMPTY_RESPONSE);
     } catch (error) {
       // TODO signal error in frontend
       console.error('Error fetching chat response:', error);
-      setResponse({} as ChatResponse);
+      setResponse(EMPTY_RESPONSE);
     } finally {
       setLoading(false);
     }

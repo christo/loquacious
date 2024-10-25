@@ -1,5 +1,7 @@
 import {readFileSync} from "fs";
 import OpenAI from "openai";
+import {CREATOR_USER_NAME} from "./db/Db";
+import type {Message} from "./domain/Message";
 import {type PromptPart, SimplePromptPart} from "./llm/PromptPart";
 import type {SpeechSystem} from "./speech/SpeechSystem";
 
@@ -9,13 +11,12 @@ const inviteModeSystemPrompt: string = readFileSync("prompts/invite-mode.prompt.
 const universalSystemPrompt: string = readFileSync("prompts/universal-system.prompt.txt").toString();
 
 /**
- * Two-sided conversation, next step initiated by the given prompt, renderd for the given
- * {@link SpeechSystem}.
+ * Two-sided conversation, next step initiated by the given prompt, rendered for the given {@link SpeechSystem}.
  *
- * @param prompt
- * @param ss
+ * @param messageHistory the possibly two way conversation until now
+ * @param ss the speech system being used
  */
-const chatModeMessages = (prompt: string, ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] => {
+const chatModeMessages = (messageHistory: Message[], ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] => {
   console.log("chat mode function");
   const systemParts = [
     dateTimePrompt(),
@@ -24,8 +25,9 @@ const chatModeMessages = (prompt: string, ss: SpeechSystem): OpenAI.Chat.Complet
     universalSystemPrompt,
     pauseInstructions(ss).text()
   ];
-  if (!prompt) {
-    console.error("prompt was falsy");
+  if (messageHistory.length === 0) {
+    console.error("message history was empty");
+    // TODO do this whenever the last message was from system.
     systemParts.push("There is an awkward gap in the conversation. You say something next.");
     return [
       {role: 'system', content: systemParts.join("\\n\\n")},
@@ -33,7 +35,7 @@ const chatModeMessages = (prompt: string, ss: SpeechSystem): OpenAI.Chat.Complet
   } else {
     return [
       {role: 'system', content: systemParts.join("\\n\\n")},
-      {role: 'user', content: prompt}
+      ...messageHistory.map(m => ({role: m.creatorName === CREATOR_USER_NAME ? 'user' : 'assistant', content: m.content}) as OpenAI.Chat.Completions.ChatCompletionMessageParam)
     ];
   }
 
@@ -57,10 +59,10 @@ const pauseInstructions = (ss: SpeechSystem): PromptPart => {
 /**
  * Initiated by us to invite a conversation.
  *
- * @param _prompt ignored.
+ * @param chatHistory currently ignored.
  * @param ss speech system to render for.
  */
-const inviteModeMessages = (_prompt: string, ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] => {
+const inviteModeMessages = (chatHistory: Message[], ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] => {
   console.log("invite mode function");
   const systemPrompt = [
     dateTimePrompt(),
@@ -73,7 +75,7 @@ const inviteModeMessages = (_prompt: string, ss: SpeechSystem): OpenAI.Chat.Comp
 };
 
 /** Function each mode implements differently which supplies parameters for a chat completion request. */
-type ChatPrepper = (prompt: string, ss: SpeechSystem) => OpenAI.Chat.Completions.ChatCompletionMessageParam[];
+type ChatPrepper = (chatHistory: Message[], ss: SpeechSystem) => OpenAI.Chat.Completions.ChatCompletionMessageParam[];
 
 /** Map mode names to their chat functions. */
 interface ModeMap {
