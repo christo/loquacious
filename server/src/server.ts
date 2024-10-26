@@ -218,7 +218,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               // TODO store in db lipsync video file reference
               // TODO store in db lipsync response linked to video file, portrait and speech response
 
-              // TODO return text history with full session graph for enabling replay etc.
+              // TODO return full session graph for enabling replay etc.
               res.json({
                 response: {
                   // portrait instance of ImageInfo, input to lipsync
