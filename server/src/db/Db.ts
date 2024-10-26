@@ -202,14 +202,14 @@ class Db {
   }
 
   /**
-   * For now, just fetches the most recently created session for the current run.
+   * For now, just fetches the most recently created open session for the current run.
    */
   async currentSession(): Promise<Session> {
     const query = `select *
                    from session
                    where finished is null
                      and run = $1
-                   order by created
+                   order by created desc
                    limit 1`;
     const run = this.getRun();
     const row = await this.fetchOne<number[], any>(query, [run.id]);
