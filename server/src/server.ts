@@ -204,6 +204,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
             () => speechSystems.current().speak(llmResponse)
           );
+
+          // TODO store in db speech file reference
+          // TODO store in db tts response linked to speech file and text response
           const speechFilePath = speechResult.filePath();
           if (speechFilePath) {
             const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
@@ -211,6 +214,10 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               const lipsyncResult: LipSyncResult = await timed("lipsync", () => {
                 return lipSync.lipSync(portait, speechFilePath!)
               });
+
+              // TODO store in db lipsync video file reference
+              // TODO store in db lipsync response linked to video file, portrait and speech response
+
               // TODO return text history with full session graph for enabling replay etc.
               res.json({
                 response: {
