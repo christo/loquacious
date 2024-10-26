@@ -112,13 +112,11 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
           } else {
             return response.blob();
           }
-        })
-        .then(blob => {
+        }).then(blob => {
           videoRef.current!.src = URL.createObjectURL(blob);
           showVideo();
           videoRef.current!.play();
-        })
-        .catch(error => {
+        }).catch(error => {
           console.error('Fetch-o-Error:', error);
         });
     } else {
