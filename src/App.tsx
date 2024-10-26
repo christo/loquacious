@@ -3,8 +3,8 @@ import {marked} from 'marked';
 import OpenAI from "openai";
 import React, {type MutableRefObject, type ReactNode, useEffect, useRef, useState} from 'react';
 import "./App.css";
-import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import {Message} from "../server/src/domain/Message.ts";
+import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import {SystemPanel} from "./SystemPanel.tsx";
 import Model = OpenAI.Model;
 
@@ -59,22 +59,18 @@ function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
 }
 
 function renderMessage(m: Message) {
-  // const _font = {
-  //   fontFamily: '"Mate", serif',
-  //   fontWeight: 400,
-  //   fontStyle: "normal"
-  // };
-  const anotherFont = {
-    fontFamily: '"Libre Baskerville", serif',
-    fontWeight: 400,
-    fontStyle: "normal"
-  }
+  const common = {
+    sx: {
+      fontFamily: '"Libre Baskerville", serif',
+      fontWeight: 400,
+      fontStyle: "normal"
+    },
+    key: `ch_${m.id}`
+  };
   if (m.creatorName === "user") {
-    return <Typography sx={anotherFont} key={`ch_${m.id}`} className={`chat userchat`}>
-      {`${m.content}`}
-    </Typography>
+    return <Typography {...common} className="chat userchat">{m.content}</Typography>
   } else {
-    return <Typography sx={anotherFont} key={`ch_${m.id}`} className="chat systemchat" dangerouslySetInnerHTML={{__html: mdToHtml(m.content)}}/>
+    return <Typography {...common} className="chat systemchat" dangerouslySetInnerHTML={{__html: mdToHtml(m.content)}}/>
   }
 }
 
@@ -113,12 +109,13 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
             return response.blob();
           }
         }).then(blob => {
-          videoRef.current!.src = URL.createObjectURL(blob);
-          showVideo();
-          videoRef.current!.play();
-        }).catch(error => {
-          console.error('Fetch-o-Error:', error);
-        });
+        videoRef.current!.src = URL.createObjectURL(blob);
+        showVideo();
+        // noinspection JSIgnoredPromiseFromCall
+        videoRef.current!.play();
+      }).catch(error => {
+        console.error('Fetch-o-Error:', error);
+      });
     } else {
       // may be a success result with no lipsync
       hideVideo();
@@ -242,8 +239,8 @@ const App: React.FC = () => {
         <Box id="promptInput">
           <form id="prompt">
           <textarea value={prompt} placeholder="Welcome, seeker"
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={handleSubmitKey} {...{disabled: loading}}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    onKeyDown={handleSubmitKey} {...{disabled: loading}}
           />
           </form>
         </Box>
