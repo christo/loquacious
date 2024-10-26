@@ -214,6 +214,9 @@ class Db {
     return Promise.resolve(await this.fetchOne<number[], Session>(query, [this.getRun().id]));
   }
 
+  /**
+   * Finishes all incomplete sessions.
+   */
   async finishAllSessions(): Promise<void> {
     console.log("finishing all current sessions");
     const q = `update session
@@ -227,6 +230,9 @@ class Db {
     }
   }
 
+  /**
+   * Finishes any incomplete session attached to this run.
+   */
   async finishCurrentSession(): Promise<void> {
     if (!this.booted) {
       return Promise.reject("db is not booted");
