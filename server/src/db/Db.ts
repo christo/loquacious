@@ -211,7 +211,9 @@ class Db {
                      and run = $1
                    order by created
                    limit 1`;
-    return Promise.resolve(await this.fetchOne<number[], Session>(query, [this.getRun().id]));
+    const run = this.getRun();
+    const row = await this.fetchOne<number[], any>(query, [run.id]);
+    return Promise.resolve(new Session(row.id, row.created, run));
   }
 
   /**
