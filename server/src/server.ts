@@ -25,8 +25,8 @@ import {systemHealth} from "system/SystemStatus";
 import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
 import type {CreatorType} from "./domain/CreatorType";
-import type {Message} from "./domain/Message";
-import type {Session} from "./domain/Session";
+import {Message} from "./domain/Message";
+import {Session} from "./domain/Session";
 import Agent = Undici.Agent;
 
 // TODO confirm we want connect timeout and not ?"request timeout"
