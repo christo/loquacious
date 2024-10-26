@@ -9,7 +9,8 @@ import {timed} from "system/performance";
 import {mkDirIfMissing} from "../system/config";
 
 const VOICES = [
-  new CharacterVoice("Tarini - Expressive & Cheerful Narrator", "Tarini", "Indian woman"),
+  new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
+  new CharacterVoice("Tarini - Expressive & Cheerful Narrator", "Tarini", "Indian woman +"),
   new CharacterVoice("Vidhi - Young & Bold", "Vidhi", "Expressive Indian woman +"),
   new CharacterVoice("Alicia - Warm, expressive, posh, old British female", "Alicia", "Warm posh English older woman ++"),
   new CharacterVoice("Nicole", "Nicole", "Young American woman, whispering, ASMR"),
@@ -27,7 +28,6 @@ const VOICES = [
   new CharacterVoice("Jacqui Griffin", "Jacqui", "Australian woman, reasonably broad accent"),
   new CharacterVoice("Dorothy", "Dorothy", "English woman, slightly South Eastern"),
   new CharacterVoice("ztyYYqlYMny7nllhThgo", "Petra", "Haughty, German middle-aged woman"),
-  new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
   new CharacterVoice("Sarah - warrior princess", "Sarah", "English middle-aged woman"),
   new CharacterVoice("Amina - regal", "Amina", "Posh Scottish-ish middle-aged woman"),
   new CharacterVoice("Nala - African Female", "Nala", "African English woman"),
