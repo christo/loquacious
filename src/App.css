@@ -72,18 +72,18 @@ video.portrait {
 .chat {
     border-radius: 1rem;
     padding: 0.8rem 1rem;
-    max-width: 24rem;
+    max-width: max(26rem, 45%);
     box-shadow: 5px 10px 10px #00000033;
 }
 
 .userchat {
     align-self: end;
     border-radius: 1rem 1rem 0 1rem;
-    background-color: #224266a8;
+    background-color: rgba(44, 101, 101, 0.76);
 }
 
 .systemchat {
-    background-color: #222222a8;
+    background-color: rgba(44, 58, 58, 0.76);
     border-radius: 1rem 1rem 1rem 0;
 }
 

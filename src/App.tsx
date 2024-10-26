@@ -65,7 +65,7 @@ function renderMessage(m: Message) {
   //   fontStyle: "normal"
   // };
   const anotherFont = {
-    fontFamily: '"Prociono", serif',
+    fontFamily: '"Libre Baskerville", serif',
     fontWeight: 400,
     fontStyle: "normal"
   }
@@ -78,8 +78,14 @@ function renderMessage(m: Message) {
   }
 }
 
-function CompletedChatHistory({children, messages}: { children: ReactNode, messages: Message[] }) {
-  return <Box className="chathistory">
+function ChatHistory({children, messages}: { children: ReactNode, messages: Message[] }) {
+  const chatHistory = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    if (chatHistory.current) {
+      chatHistory.current.scrollIntoView({behavior: "smooth", inline: "end"})
+    }
+  });
+  return <Box ref={chatHistory} className="chathistory">
     {messages.map(renderMessage)}
     {children}
   </Box>;
@@ -122,7 +128,7 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
   }, [response])
 
   return <Box className="controls">
-    <CompletedChatHistory messages={response.messages}>.</CompletedChatHistory>
+    <ChatHistory messages={response.messages}>.</ChatHistory>
   </Box>;
 }
 
