@@ -218,9 +218,11 @@ both local and as online API services.
 
 ## TODO
 
-* [ ] save conversation text to db
+* [x] save conversation text to db
 * [ ] identify which LLM and model was used for the text
 * [ ] store all interactions in database
+* [ ] design for possible workflow that produces spoken audio in lipsync video
+      directly from text message without intermediate speech audio
 * [ ] data file tree for generated media assets:
     * `<base>/<type>/<system>/<option>/<tag>_<db-id>.<format>`
     * type: tts, ttt, stv (speech to video), etc.
@@ -229,7 +231,8 @@ both local and as online API services.
       records such as session, timestamps, user prompt, modestate etc.
 * [ ] check out [d-id.com](http://d-id.com) API for lipsync video generation
   [streaming API](https://docs.d-id.com/reference/talks-streams-overview)
-  could also be proxied and saved to disk.
+  could also be proxied and saved to disk. It also claims to support direct
+  elevenlabs integration so could do speech and lipsync video in one API call.
 * [ ] check [Synthesia](https://www.synthesia.io/features/avatars) for lip sync
 * [ ] check [Hey Gen](https://www.heygen.com/interactive-avatar) for lip sync
 * design character persona and interaction workflow such that potentially long
