@@ -1,5 +1,3 @@
-import {CREATOR_USER_NAME} from "../db/Db";
-
 class Message {
   id: number;
   created: Date;
