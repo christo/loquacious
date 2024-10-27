@@ -1,4 +1,5 @@
 import {Pool, type QueryConfigValues, type QueryResult} from "pg";
+import {AudioFile} from "../domain/AudioFile";
 import {Creator} from "../domain/Creator";
 import type {CreatorType} from "../domain/CreatorType";
 import {Deployment} from "../domain/Deployment";
@@ -351,6 +352,31 @@ class Db {
       return result.rows.map((r: any) => {
         return new Message(r.id, r.created, r.content, r.creator_name);
       });
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Creates an audio file record.
+   * @param mimeType of the audio
+   * @param creatorId linking to the originator
+   * @param durationMs if optional, database will get -1
+   */
+  async createAudioFile(mimeType: string, creatorId: number, durationMs: number = -1): Promise<AudioFile> {
+    // TODO review this idea - maybe link to the file the other way instead so we can write the file first?
+    const query = `insert into audio (duration_ms, mime_type, creator)
+                       values ($1, $2, $3)
+                       returning *`;
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(query, [durationMs, mimeType, creatorId]);
+      if (result.rowCount === 1) {
+        const r = result.rows[0];
+        return new AudioFile(r.id, r.created, r.duration_ms, r.mime_type, r.creator);
+      } else {
+        return Promise.reject("Could not create audio file");
+      }
     } finally {
       client.release();
     }

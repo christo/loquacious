@@ -24,6 +24,7 @@ import {timed} from "system/performance";
 import {systemHealth} from "system/SystemStatus";
 import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
+import type {AudioFile} from "./domain/AudioFile";
 import type {CreatorType} from "./domain/CreatorType";
 import {Message} from "./domain/Message";
 import {Session} from "./domain/Session";
@@ -202,11 +203,13 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         await db.appendText(session, llmResponse, currentLlm);
         try {
           const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
-            () => speechSystems.current().speak(llmResponse)
+            async () => {
+              const speechResult = await generateSpeech(llmResponse, speechSystems.current());
+              // TODO add entry for tts
+              return speechResult
+            }
           );
 
-          // TODO store in db speech file reference
-          // TODO store in db tts response linked to speech file and text response
           const speechFilePath = speechResult.filePath();
           if (speechFilePath) {
             const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
@@ -276,12 +279,21 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+async function generateSpeech(text: string, speechSystem: SpeechSystem): Promise<SpeechResult> {
+  const ssCreator = await db.findCreator(speechSystem.getName(), speechSystem.getMetadata(), true);
+  // TODO get rid of hard-coded mime type here - speech system should provide it?
+  // store in db speech file reference
+  const audioFile: AudioFile = await db.createAudioFile("audio/mp3", ssCreator.id);
+  return await speechSystem.speak(text, `${audioFile.id}`);
+}
+
 /**
  * Endpoint to generate and return speech for the given prompt.
  * Not used by main frontend.
  */
 app.post('/speak', async (req: Request, res: Response) => {
-  const speechResult: SpeechResult = await speechSystems.current().speak(req.body.prompt);
+  const speechResult = await generateSpeech(req.body.prompt,  speechSystems.current());
+  // TODO update duration in database for audio file after it has streamed
   const filePath = speechResult.filePath();
   if (filePath) {
     streamFromPath(filePath, res);
