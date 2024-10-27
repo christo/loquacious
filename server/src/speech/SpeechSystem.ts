@@ -29,8 +29,10 @@ interface SpeechSystem extends CreatorType, ConfigurableCreator {
   /**
    * Generates spoken audio for message and returns relative filepath to audio from data base dir.
    * @param message
+   * @param basename file base name
    */
-  speak: (message: string) => Promise<SpeechResult>;
+  speak: (message: string, basename: string) => Promise<SpeechResult>;
+
   /**
    * Unique key for each option.
    */

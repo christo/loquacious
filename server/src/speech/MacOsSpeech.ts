@@ -1,25 +1,19 @@
 import {exec} from 'child_process';
 import ffmpeg from "fluent-ffmpeg";
+import {type MediaFormat, MF_MP3} from "media";
 import type {PathLike} from "node:fs";
 import path from "path";
-import {timed} from "system/performance";
-import {type MediaFormat, MF_MP3, type SupportedAudioFormat, TYPE_DEFAULT} from "media";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {DisplaySpeechSystem, type SpeechSystem, type SpeechResult} from "speech/SpeechSystem";
+import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
+import {timed} from "system/performance";
 import util from "util";
 import {mkDirIfMissing} from "../system/config";
 
 
 const execPromise = util.promisify(exec);
 
-function mkVoiceFile(dataDir: string, mediaFormat: MediaFormat) {
-  // TODO file tts under data/tts/<system>/<option>/tts_<db-id>.<format>
-  const uniqueId = Date.now();
-  return path.join(dataDir, `tts_${uniqueId}.${mediaFormat.extensions[0]}`);
-}
-
-async function convertAudio(desiredFormat: SupportedAudioFormat, path: string): Promise<string> {
+async function convertAudio(desiredFormat: string, path: string): Promise<string> {
   const finalPath = `${path}.${desiredFormat}`;
   console.log(`using ffmpeg to convert ${path} to ${desiredFormat} in ${finalPath}`);
   await new Promise<void>((resolve, reject) => {
@@ -34,40 +28,6 @@ async function convertAudio(desiredFormat: SupportedAudioFormat, path: string): 
 
 const escaped = (x: string) => x.replace(/"/g, '\\"');
 
-/**
- * Speaks the given text using macOS's say command.
- * @param text The text to speak.
- * @param voice The voice to use.
- * @param wpm Optional. The speed rate (1 is default).
- * @param dataDir where to store the generated speech audio files.
- * @returns A promise that resolves to the file to stream back.
- */
-async function speak(text: string, voice: string, wpm: number, dataDir: string, mediaFormat: MediaFormat): Promise<string> {
-  const savePath = mkVoiceFile(dataDir, mediaFormat);
-  // Construct the command
-  let command = `say "${escaped(text)}" -v "${escaped(voice)}" -r ${wpm} -o "${savePath}"`;
-
-  try {
-    await execPromise(command);
-  } catch (e) {
-    console.error(e);
-    return Promise.reject(e);
-  }
-
-  let desiredFormat = TYPE_DEFAULT as SupportedAudioFormat;
-  try {
-    if (desiredFormat !== 'aiff') {
-      return await timed("convert audio format", () => convertAudio(desiredFormat, savePath))
-    } else {
-      console.log(`no conversion required for aiff ${savePath}`);
-      return savePath;
-    }
-  } catch (e) {
-    console.error(`problem converting audio to ${desiredFormat}`, e);
-    return Promise.reject(e);
-  }
-}
-
 const VOICES: Array<CharacterVoice> = [
   new CharacterVoice("Serena (Premium)", "Serena", "Mature English woman, slightly posh"),
   new CharacterVoice("Matilda (Premium)", "Matilda", "Australian woman"),
@@ -80,7 +40,7 @@ const VOICES: Array<CharacterVoice> = [
   new CharacterVoice("Kate (Enhanced)", "Kate", "English woman"),
 ]
 
-const speed = 130; // fast, for debugging
+const wpm = 130; // fast, for debugging
 // const speed = 120; // good fortune-teller speaking speed
 
 const MACOS_SPEECH_SYSTEM_NAME = "MacOs-TTS";
@@ -107,12 +67,39 @@ class MacOsSpeech implements SpeechSystem {
     return VOICES.map(v => v.voiceId);
   }
 
-  async speak(message: string): Promise<SpeechResult> {
+  async speak(message: string, basename: string): Promise<SpeechResult> {
     try {
-      const audioFile = await speak(message, VOICES[this.currentIndex].voiceId, speed, this.dataDir, this.fileFormat);
+      const voice = VOICES[this.currentIndex];
+      const voicePart = voice.name.replaceAll(/[\s\/]/g, '-');
+      const filename = `tts_${basename}_${voicePart}.${this.fileFormat.extensions[0]}`;
+      const savePath = path.join(this.dataDir, filename);
+      console.log(`savePath: ${savePath}`);
+      const aiffFile = `${savePath}.aiff`;
+      let command = `say "${escaped(message)}" -v "${escaped(voice.voiceId)}" -r ${wpm} -o "${aiffFile}"`;
+      let result: Promise<string>;
+      try {
+        await execPromise(command);
+        let desiredFormat = this.fileFormat.extensions[0];
+        try {
+          if (desiredFormat !== 'aiff') {
+            // TODO clean up later the converted aiff files
+            result = timed("convert audio format", () => convertAudio(desiredFormat, aiffFile));
+          } else {
+            console.log(`no conversion required for aiff ${savePath}`);
+            result = Promise.resolve(savePath);
+          }
+        } catch (e) {
+          console.error(`problem converting audio to ${desiredFormat}`, e);
+          result = Promise.reject(e);
+        }
+      } catch (e) {
+        console.error("problem executing say command", e);
+        result = Promise.reject(e);
+      }
+      const audioFile = await result;
       return {
         filePath: () => audioFile
-      }
+      } as SpeechResult;
     } catch (error) {
       console.error('An error occurred during speech synthesis:', error);
       return Promise.reject(error);

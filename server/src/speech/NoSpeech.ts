@@ -26,7 +26,7 @@ class NoSpeech implements SpeechSystem {
     return new SpeechSystemOption(this, this.onlyOptions[0].voiceId, this.onlyOptions[0].description);
   }
 
-  speak(_message: string): Promise<SpeechResult> {
+  speak(_message: string, _filename: string): Promise<SpeechResult> {
     return Promise.resolve(SILENT_SUCCESS);
   }
 

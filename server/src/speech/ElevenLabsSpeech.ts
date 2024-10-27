@@ -121,8 +121,8 @@ class ElevenLabsSpeech implements SpeechSystem {
     return new SpeechSystemOption(this, currentVoice.voiceId, currentVoice.name, currentVoice.description);
   }
 
-  async speak(message: string): Promise<SpeechResult> {
-    const outFilename = `el_tts_${Date.now()}_${this.characterVoice.name.replaceAll(/\s/g, '-')}.mp3`;
+  async speak(message: string, basename: string): Promise<SpeechResult> {
+    const outFilename = `el_tts_${basename}_${this.characterVoice.name.replaceAll(/\s\//g, '-')}.mp3`;
     const outFile = path.join(this.dataDir, outFilename);
     try {
       const audio = await timed("elevenlabs generate speech",
