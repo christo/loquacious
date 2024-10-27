@@ -9,8 +9,6 @@ import type {LipSyncResult} from "./LipSync";
  *
  */
 class LocalLipSyncResult implements LipSyncResult{
-  // TODO a LipSyncResult should be more generic - InteractionResult? which may or may not have text, audio and video
-  //   and the front-end should handle the interaction appropriately. Good for turning off video-generation for testing.
   private readonly size: number;
   private readonly name: string;
   private readonly contentType: string;
