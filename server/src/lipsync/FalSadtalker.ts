@@ -4,10 +4,9 @@ import type {LipSync, LipSyncResult} from "lipsync/LipSync";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
 import path from "path";
-import {Simulate} from "react-dom/test-utils";
 import {mkDirIfMissing} from "system/config";
 import {timed} from "system/performance";
-import error = Simulate.error;
+
 
 async function readBinaryFile(filePath: string): Promise<File> {
   const fileBuffer = await fs.readFile(filePath);
@@ -79,7 +78,7 @@ class FalSadtalker implements LipSync {
   async urlFor(filePath: string): Promise<string> {
     const fileUrl = this.urlCache[filePath];
     if (fileUrl) {
-      console.log(`file URL found in cache: ${fileUrl}`);
+      console.log(`URL found in cache for ${filePath}`);
     } else {
       await timed(`fal upload ${filePath.split(path.sep).pop()}`, async () => {
         this.urlCache[filePath] = await fal.storage.upload(await readBinaryFile(filePath));
@@ -93,8 +92,7 @@ class FalSadtalker implements LipSync {
     const speechUrl = await this.urlFor(speech);
     const result: Result<{ video: SadTalkerResult }> = await timed("fal run sadtalker",
       async () => {
-        const result = await fal.run(FalSadtalker.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl));
-        return result
+        return await fal.run(FalSadtalker.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl))
       }
     );
     return timed("fal sadtalker video download", async () => {
@@ -102,18 +100,18 @@ class FalSadtalker implements LipSync {
       const videoDownload = await fetch(r.url);
       const buffer = await videoDownload.arrayBuffer();
       const downloadedVideo = path.join(this.dataDir, r.file_name);
-      await fs.writeFile(downloadedVideo, Buffer.from(buffer));
+      writeFileSync(downloadedVideo, Buffer.from(buffer));
       return new SadTalkerResult(r.url, r.content_type, r.file_name, r.file_size, downloadedVideo);
     });
   }
 
   async writeCacheFile(): Promise<void> {
     try {
-      writeFileSync(this.urlCacheFile, JSON.stringify(this.urlCache), 'utf-8');
+      return fs.writeFile(this.urlCacheFile, JSON.stringify(this.urlCache), 'utf-8');
     } catch (error: unknown) {
       console.error(`Error occurred while writing ${this.urlCacheFile}`, error);
+      return Promise.reject(error);
     }
-    return Promise.resolve();
   }
 
   getMetadata(): string | undefined {
