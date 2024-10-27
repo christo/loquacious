@@ -59,18 +59,17 @@ function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
 }
 
 function renderMessage(m: Message) {
-  const common = {
-    sx: {
-      fontFamily: '"Libre Baskerville", serif',
-      fontWeight: 400,
-      fontStyle: "normal"
-    },
-    key: `ch_${m.id}`
+  const sx = {
+    fontFamily: '"Libre Baskerville", serif',
+    fontWeight: 400,
+    fontStyle: "normal"
   };
+
   if (m.creatorName === "user") {
-    return <Typography {...common} className="chat userchat">{m.content}</Typography>
+    return <Typography sx={sx} key={`ch_${m.id}`} className="chat userchat">{m.content}</Typography>
   } else {
-    return <Typography {...common} className="chat systemchat" dangerouslySetInnerHTML={{__html: mdToHtml(m.content)}}/>
+    return <Typography sx={sx} key={`ch_${m.id}`} className="chat systemchat"
+                       dangerouslySetInnerHTML={{__html: mdToHtml(m.content)}}/>
   }
 }
 
