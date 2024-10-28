@@ -32,7 +32,7 @@ import type {VideoFile} from "./domain/VideoFile";
 import Agent = Undici.Agent;
 
 // TODO confirm we want connect timeout and not ?"request timeout"
-setGlobalDispatcher(new Agent({connect: { timeout: 300_000 }}));
+setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
 
 // Load environment variables
 dotenv.config();
@@ -41,7 +41,7 @@ dotenv.config();
 const BASE_PATH_PORTRAIT = "../public/img";
 const PORTRAIT_DIMS = [
   {width: 608, height: 800},
-  {width: 1080, height:1920}
+  {width: 1080, height: 1920}
 ];
 const dimIndex = 0;
 const PATH_PORTRAIT = `../public/img/${PORTRAIT_DIMS[dimIndex].width}x${PORTRAIT_DIMS[dimIndex].height}`;
@@ -185,6 +185,23 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     try {
       const currentLlm = LLMS[llmIndex];
+      const currentModel = await LLMS[llmIndex].currentModel()
+      const buildResponse = (messages: Message[], speechFilePath: string | undefined, lipsyncResult: LipSyncResult | undefined) => ({
+        response: {
+          // portrait instance of ImageInfo, input to lipsync
+          portrait: portrait,
+          // text response from llm as string
+          messages: messages,
+          // file path to speech audio
+          speech: speechFilePath,
+          // instance of LipSyncResult
+          lipsync: lipsyncResult,
+          // llm that generated the message
+          llm: currentLlm.name,
+          // llm model used
+          model: currentModel,
+        }
+      });
       let session = await getOrCreateSession();
 
       console.log("storing user message");
@@ -193,6 +210,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const mode = modes.getMode();
       const currentSpeechSystem = speechSystems.current();
       let allMessages = mode(messageHistory, currentSpeechSystem);
+      // TODO remove SpeechSystem-specific pause commands from messages when sent to front-end
       let llmResponse: string | null = await timed("text generation", async () => {
         const response = await currentLlm.chat(allMessages);
         return response.message
@@ -211,7 +229,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               const sr = await currentSpeechSystem.speak(llmMessage.content, `${audioFile.id}`);
 
               const tts = await db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
-              // this is a bit hacky
               return {...sr, tts: () => tts} as SpeechResult;
             }
           );
@@ -230,22 +247,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
 
               // TODO return full session graph for enabling replay etc.
-              res.json({
-                response: {
-                  // portrait instance of ImageInfo, input to lipsync
-                  portrait: portrait,
-                  // text response from llm as string
-                  messages: await db.getSessionMessages(session),
-                  // file path to speech audio
-                  speech: speechFilePath,
-                  // instance of LipSyncResult
-                  lipsync: lipsyncResult,
-                  // llm that generated the message
-                  llm: LLMS[llmIndex].name,
-                  // llm model used
-                  model: (await LLMS[llmIndex].currentModel()),
-                }
-              });
+              res.json(buildResponse(await db.getSessionMessages(session), speechFilePath, lipsyncResult));
+
               await lipSync.writeCacheFile();
             } catch (e) {
               const msg = "lipsync generation failed";
@@ -253,24 +256,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               res.status(500).json({error: msg}).end();
             }
           } else {
-            res.json({
-              response: {
-                // portrait instance of ImageInfo, input to lipsync
-                portrait: portrait,
-                // text response from llm as string
-                messages: await db.getSessionMessages(session),
-                // file path to speech audio
-                speech: undefined,
-                // instance of LipSyncResult
-                lipsync: undefined,
-                // llm backend that generated the message
-                llm: LLMS[llmIndex].name,
-                // llm model used
-                model: (await LLMS[llmIndex].currentModel()),
-              }
-            });
+            res.json(buildResponse(await db.getSessionMessages(session), undefined, undefined));
           }
-
         } catch (e) {
           const msg = "speech generation failed";
           console.error(msg, e);
