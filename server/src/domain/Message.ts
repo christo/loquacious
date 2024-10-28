@@ -1,4 +1,3 @@
-import type {Creator} from "./Creator";
 
 class Message {
   id: number;
