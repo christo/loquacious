@@ -1,5 +1,4 @@
-import type {ConfigurableCreator} from "../domain/ConfigurableCreator";
-import type {CreatorType} from "../domain/CreatorType";
+import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
 
 /**
@@ -33,7 +32,9 @@ interface LipSyncAnimator extends CreatorService {
    */
   animate(imageFile: string, speechFile: string, fileKey: string): Promise<LipSyncResult>;
 
-  writeCacheFile(): Promise<void>
+  writeCacheFile(): Promise<void>;
+
+  preferredOutputFormat(): MediaFormat;
 }
 
 export type {LipSyncAnimator, LipSyncResult};

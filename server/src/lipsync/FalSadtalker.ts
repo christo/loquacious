@@ -5,6 +5,7 @@ import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
 import path from "path";
 import {timed} from "system/performance";
+import {type MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
 import {mkDirIfMissing} from "../system/filetoy";
 
@@ -133,6 +134,14 @@ class FalSadtalker implements LipSyncAnimator {
     }
   }
 
+  free(): boolean {
+    return false;
+  }
+
+  preferredOutputFormat(): MediaFormat {
+    return MF_MP4;
+  }
+
   private sadtalkerParams(imgUrl: string, speechUrl: string): FalSadtalkerInvocation {
     return ({
       input: {
@@ -141,10 +150,6 @@ class FalSadtalker implements LipSyncAnimator {
         ...this.sadtalkerConfig
       }
     });
-  }
-
-  free(): boolean {
-    return false;
   }
 }
 
