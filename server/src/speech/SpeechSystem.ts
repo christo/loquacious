@@ -29,11 +29,6 @@ interface SpeechResult {
 interface SpeechSystem extends CreatorService {
 
   /**
-   * @deprecated TODO migrate this to CreatorType#getName() function
-   */
-  //name: string;
-
-  /**
    * Generates spoken audio for message and returns relative filepath to audio from data base dir.
    * @param message
    * @param basename file base name
@@ -60,6 +55,9 @@ interface SpeechSystem extends CreatorService {
    */
   removePauseCommands(m: Message): Message;
 
+  /**
+   * Provide the {@link MediaFormat} of the created audio.
+   */
   preferredOutputFormat(): MediaFormat;
 }
 
