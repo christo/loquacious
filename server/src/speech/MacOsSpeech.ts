@@ -99,7 +99,8 @@ class MacOsSpeech implements SpeechSystem {
       }
       const audioFile = await result;
       return {
-        filePath: () => audioFile
+        filePath: () => audioFile,
+        tts: () => undefined
       } as SpeechResult;
     } catch (error) {
       console.error('An error occurred during speech synthesis:', error);

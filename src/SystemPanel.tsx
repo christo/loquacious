@@ -35,6 +35,7 @@ interface SettingsProps {
   imageIndex: number;
   serverPort: number;
   setImageIndex: (i: number) => void;
+  resetResponse: () => void;
 }
 
 function IconLabelled({TheIcon, tooltip, children}: {
@@ -159,7 +160,7 @@ function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
   </Box>
 }
 
-function SessionControl({serverPort}: { serverPort: number }) {
+function SessionControl({serverPort, resetResponse}: { serverPort: number, resetResponse: () => void }) {
 
   const [inFlight, setInFlight] = useState(false);
 
@@ -170,6 +171,7 @@ function SessionControl({serverPort}: { serverPort: number }) {
     }).then(result => {
       result.json().then(_ => {
         setInFlight(false);
+        resetResponse();
       });
     });
   }
@@ -198,7 +200,7 @@ function SettingsPanel(props: SettingsProps) {
     {props.images?.length > 0 && <ImageChooser {...props} />}
     <SettingsDetail system={settings}/>
     <Status system={settings}/>
-    <SessionControl serverPort={props.serverPort}/>
+    <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
   </Box>
 }
 
@@ -206,10 +208,11 @@ interface SystemPanelProps {
   images: ImageInfo[],
   setImageIndex: (value: (((prevState: number) => number) | number)) => void,
   imageIndex: number,
-  serverPort: number
+  serverPort: number,
+  resetResponse: () => void,
 }
 
-export function SystemPanel({images, setImageIndex, imageIndex, serverPort}: SystemPanelProps) {
+export function SystemPanel({images, setImageIndex, imageIndex, serverPort, resetResponse}: SystemPanelProps) {
   // ESC toggles drawer
   useEffect(() => {
     let handleKeyDown = (e: KeyboardEvent) => {
@@ -234,7 +237,7 @@ export function SystemPanel({images, setImageIndex, imageIndex, serverPort}: Sys
     </IconButton>
     <SwipeableDrawer sx={{opacity: 0.9, m: 0}} open={drawerOpen} onClose={toggleDrawer(false)}
                      onOpen={toggleDrawer(false)}>
-      <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort}/>
+      <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort} resetResponse={resetResponse}/>
     </SwipeableDrawer>
   </Box>
 }

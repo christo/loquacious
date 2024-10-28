@@ -6,6 +6,7 @@ import {Deployment} from "../domain/Deployment";
 import {Message} from "../domain/Message";
 import {Run} from "../domain/Run";
 import {Session} from "../domain/Session";
+import {Tts} from "../domain/Tts";
 
 
 export const CREATOR_USER_NAME = 'user';
@@ -38,6 +39,10 @@ class Db {
       console.error('Unexpected error on idle client', err);
       poolClient.release(err);
     });
+  }
+
+  getUserCreator(): Creator {
+    return this.userCreator!;
   }
 
   getRun(): Run {
@@ -254,23 +259,6 @@ class Db {
     }
   }
 
-  /**
-   * Append and store the given user text to the given session. Text content is stored directly in the db
-   * so no file references are needed and no filesystem io should be performed. The creator is the fixed
-   * Creator instance created by the db bootstrap, indicating human user input.
-   *
-   * @param session the session to add the message to
-   * @param message the message text
-   */
-  async appendUserText(session: Session, message: string): Promise<void> {
-    return this.appendTextByCreatorId(session, message, this.userCreator!.id);
-  }
-
-  async appendText(session: Session, message: string, creatorType: CreatorType): Promise<void> {
-    const creator = await this.findCreator(creatorType.getName(), creatorType.getMetadata(), false);
-    return this.appendTextByCreatorId(session, message, creator.id);
-  }
-
   async findCreator(name: string, metadata: string | undefined, createIfMissing: boolean): Promise<Creator> {
     const client = await this.pool.connect();
     try {
@@ -318,31 +306,68 @@ class Db {
     }
   }
 
-  async appendTextByCreatorId(session: Session, message: string, creatorId: number): Promise<void> {
+  /**
+   * Append and store the given user text to the given session. Text content is stored directly in the db
+   * so no file references are needed and no filesystem io should be performed. The creator is the fixed
+   * Creator instance created by the db bootstrap, indicating human user input.
+   *
+   * @param session the session to add the message to
+   * @param content the message text
+   */
+  async createUserMessage(session: Session, content: string): Promise<Message> {
+    return this.createMessage(session, content, this.userCreator!);
+  }
+
+  /**
+   * Stores a message with the given content for the given session by the creator identified by the given
+   * CreatorType implementation.
+   * @param session
+   * @param content
+   * @param creatorType
+   */
+  async createCreatorTypeMessage(session: Session, content: string, creatorType: CreatorType): Promise<Message> {
+    const creator = await this.findCreator(creatorType.getName(), creatorType.getMetadata(), true);
+    return this.createMessage(session, content, creator);
+  }
+
+  async createMessage(session: Session, message: string, creator: Creator): Promise<Message> {
     if (!this.booted) {
       return Promise.reject("db is not booted");
     }
+    // create message for session with incremented sequence number
     const query = `with max_sequence as
                             (select coalesce(max(m.sequence), 0) as max_seq from message m where session = $2)
                    insert
                    into message (content, session, creator, sequence)
-                   values ($1, $2, $3, (select max_seq + 1 from max_sequence))`;
+                   values ($1, $2, $3, (select max_seq + 1 from max_sequence)) returning *`;
     const client = await this.pool.connect();
     try {
-      await client.query(query, [message, session.id, creatorId]);
+      const result = await client.query(query, [message, session.id, creator.id]);
+      if (result.rowCount === 1) {
+        const row = result.rows[0];
+        // TODO
+        return new Message(row.id, row.created, row.content, row.creator, row.creator === this.getUserCreator().id);
+      } else {
+        return Promise.reject("no rows returned from append message query");
+      }
     } finally {
       client.release();
     }
   }
 
+  /**
+   * Fetch all the messages for a session in sequence order.
+   * @param session
+   */
   async getSessionMessages(session: Session): Promise<Message[]> {
+    if (!this.booted) {
+      throw new Error("db is not booted");
+    }
     const query = `select m.id,
                           m.created,
                           m.content,
-                          c.name as creator_name,
-                          c.metadata
+                          m.creator
                    from message m
-                            inner join creator c on m.creator = c.id
                    where m.session = $1
                    order by m.sequence`;
     const client = await this.pool.connect();
@@ -350,7 +375,7 @@ class Db {
       const result = await client.query(query, [session.id]);
       // may be empty
       return result.rows.map((r: any) => {
-        return new Message(r.id, r.created, r.content, r.creator_name);
+        return new Message(r.id, r.created, r.content, r.creator, r.creator === this.getUserCreator().id);
       });
     } finally {
       client.release();
@@ -374,6 +399,24 @@ class Db {
       if (result.rowCount === 1) {
         const r = result.rows[0];
         return new AudioFile(r.id, r.created, r.duration_ms, r.mime_type, r.creator);
+      } else {
+        return Promise.reject("Could not create audio file");
+      }
+    } finally {
+      client.release();
+    }
+  }
+
+  async createTts(creatorId: number, messageId: number, audioFileId: number): Promise<Tts> {
+    const query = `insert into tts (creator, input, output)
+                       values ($1, $2, $3)
+                       returning *`;
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(query, [creatorId, messageId, audioFileId]);
+      if (result.rowCount === 1) {
+        const r = result.rows[0];
+        return new Tts(r.id, r.created, creatorId, messageId, audioFileId);
       } else {
         return Promise.reject("Could not create audio file");
       }

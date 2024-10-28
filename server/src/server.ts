@@ -1,4 +1,4 @@
-import {fileStream, streamFromPath} from "api/mediaStream";
+import {fileStream} from "api/mediaStream";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
@@ -12,9 +12,9 @@ import {FakeLlm} from "llm/FakeLlm";
 import {LlamaCppLlm} from "llm/LlamaCppLlm";
 import {type Llm} from 'llm/Llm';
 import {LmStudioLlm} from "llm/LmStudioLlm";
+import {Modes} from "llm/Modes";
 import {OpenAiLlm} from 'llm/OpenAiLlm';
 import {supportedImageTypes} from "media";
-import {Modes} from "Modes";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
 import type {SpeechResult, SpeechSystem} from "speech/SpeechSystem";
@@ -51,7 +51,6 @@ if (!process.env.DATA_DIR) {
 }
 const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 
-// make sure data subdirectories exist
 ensureDataDirsExist(process.env.DATA_DIR!);
 
 const LM_STUDIO_BACKEND: Llm = new LmStudioLlm();
@@ -100,7 +99,6 @@ app.get("/portraits", async (_req: Request, res: Response) => {
 });
 
 app.get("/system", async (_req: Request, res: Response) => {
-  const currentSpeech = speechSystems.current().currentOption();
   res.json({
     mode: {
       current: modes.current(),
@@ -114,7 +112,7 @@ app.get("/system", async (_req: Request, res: Response) => {
     },
     speech: {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
-      current: currentSpeech.safeObject(),
+      current: speechSystems.current().currentOption().safeObject(),
       isFree: speechSystems.current().free()
     },
     lipsync: {
@@ -189,10 +187,11 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       let session = await getOrCreateSession();
 
       console.log("storing user message");
-      await db.appendUserText(session, prompt);
+      const userMessage = await db.createUserMessage(session, prompt);
       const messageHistory: Message[] = await db.getSessionMessages(session);
       const mode = modes.getMode();
-      let allMessages = mode(messageHistory, speechSystems.current());
+      const currentSpeechSystem = speechSystems.current();
+      let allMessages = mode(messageHistory, currentSpeechSystem);
       let llmResponse: string | null = await timed("text generation", async () => {
         const response = await currentLlm.chat(allMessages);
         return response.message
@@ -200,13 +199,20 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
       if (llmResponse) {
         console.log("storing llm response");
-        await db.appendText(session, llmResponse, currentLlm);
+        const llmMessage = await db.createCreatorTypeMessage(session, llmResponse, currentLlm);
         try {
-          const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
+          const speechResult: SpeechResult = await timed<SpeechResult>(
+            "speech synthesis",
             async () => {
-              const speechResult = await generateSpeech(llmResponse, speechSystems.current());
-              // TODO add entry for tts
-              return speechResult
+              const ssCreator = await db.findCreator(currentSpeechSystem.getName(), currentSpeechSystem.getMetadata(), true);
+              // TODO get rid of hard-coded mime type here - speech system should provide it?
+              // store in db speech file reference
+              const audioFile: AudioFile = await db.createAudioFile("audio/mp3", ssCreator.id);
+              const sr = await currentSpeechSystem.speak(llmMessage.content, `${audioFile.id}`);
+
+              const tts = await db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
+              // this is a bit hacky
+              return {...sr, tts: () => tts} as SpeechResult;
             }
           );
 
@@ -276,29 +282,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       console.error('Error performing loquacious chat:', error);
       res.status(500);
     }
-  }
-});
-
-async function generateSpeech(text: string, speechSystem: SpeechSystem): Promise<SpeechResult> {
-  const ssCreator = await db.findCreator(speechSystem.getName(), speechSystem.getMetadata(), true);
-  // TODO get rid of hard-coded mime type here - speech system should provide it?
-  // store in db speech file reference
-  const audioFile: AudioFile = await db.createAudioFile("audio/mp3", ssCreator.id);
-  return await speechSystem.speak(text, `${audioFile.id}`);
-}
-
-/**
- * Endpoint to generate and return speech for the given prompt.
- * Not used by main frontend.
- */
-app.post('/speak', async (req: Request, res: Response) => {
-  const speechResult = await generateSpeech(req.body.prompt,  speechSystems.current());
-  // TODO update duration in database for audio file after it has streamed
-  const filePath = speechResult.filePath();
-  if (filePath) {
-    streamFromPath(filePath, res);
-  } else {
-    res.status(404).json({error: 'No audio file'});
   }
 });
 

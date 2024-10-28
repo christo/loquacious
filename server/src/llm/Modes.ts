@@ -1,14 +1,27 @@
 import {readFileSync} from "fs";
 import OpenAI from "openai";
-import {CREATOR_USER_NAME} from "./db/Db";
-import type {Message} from "./domain/Message";
-import {type PromptPart, SimplePromptPart} from "./llm/PromptPart";
-import type {SpeechSystem} from "./speech/SpeechSystem";
+import type {Message} from "../domain/Message";
+import {type PromptPart, SimplePromptPart} from "./PromptPart";
+import type {SpeechSystem} from "../speech/SpeechSystem";
 
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 const rokosBasiliskSystemPrompt: string = readFileSync("prompts/rokos-basilisk.prompt.txt").toString();
 const inviteModeSystemPrompt: string = readFileSync("prompts/invite-mode.prompt.txt").toString();
 const universalSystemPrompt: string = readFileSync("prompts/universal-system.prompt.txt").toString();
+
+// LLM-specific message role
+const ROLE_SYSTEM = 'system';
+const ROLE_USER = 'user';
+const ROLE_ASSISTANT = 'assistant';
+
+/**
+ * Converts a {@link Message} to the expected OpenAI API type.
+ * @param m the message.
+ */
+const messageToOpenAi = (m: Message) => ({
+  role: m.isFromUser ? ROLE_USER : ROLE_ASSISTANT,
+  content: m.content
+}) as OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 /**
  * Two-sided conversation, next step initiated by the given prompt, rendered for the given {@link SpeechSystem}.
@@ -30,12 +43,12 @@ const chatModeMessages = (messageHistory: Message[], ss: SpeechSystem): OpenAI.C
     // TODO do this whenever the last message was from system.
     systemParts.push("There is an awkward gap in the conversation. You say something next.");
     return [
-      {role: 'system', content: systemParts.join("\\n\\n")},
+      {role: ROLE_SYSTEM, content: systemParts.join("\\n\\n")},
     ];
   } else {
     return [
-      {role: 'system', content: systemParts.join("\\n\\n")},
-      ...messageHistory.map(m => ({role: m.creatorName === CREATOR_USER_NAME ? 'user' : 'assistant', content: m.content}) as OpenAI.Chat.Completions.ChatCompletionMessageParam)
+      {role: ROLE_SYSTEM, content: systemParts.join("\\n\\n")},
+      ...messageHistory.map(messageToOpenAi)
     ];
   }
 
@@ -71,7 +84,7 @@ const inviteModeMessages = (chatHistory: Message[], ss: SpeechSystem): OpenAI.Ch
     pauseInstructions(ss).text()
   ].join("\\n\\n");
 
-  return [{role: 'system', content: systemPrompt}];
+  return [{role: ROLE_SYSTEM, content: systemPrompt}];
 };
 
 /** Function each mode implements differently which supplies parameters for a chat completion request. */
@@ -83,7 +96,7 @@ interface ModeMap {
 }
 
 function dateTimePrompt() {
-  return `The current date and time is ${new Date()}`;
+  return `The current date is ${new Date().toLocaleDateString()} and the current time is ${new Date().toLocaleTimeString()}`;
 }
 
 /**

@@ -6,7 +6,8 @@ import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
-import {mkDirIfMissing} from "../system/config";
+
+import {mkDirIfMissing} from "../system/filetoy";
 
 const VOICES = [
   new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
@@ -139,7 +140,8 @@ class ElevenLabsSpeech implements SpeechSystem {
 
         outStream.on('finish', () => {
           console.log('File writing completed successfully.');
-          resolve({filePath: () => outFile});
+          // hack alert
+          resolve({filePath: () => outFile, tts: ()=>undefined});
         });
         audio.pipe(outStream);
       })

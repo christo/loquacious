@@ -8,11 +8,13 @@ export class Creator implements CreatorType {
   readonly id: number;
   readonly _name: string;
   readonly _metadata: string | undefined;
+  readonly _free: boolean;
 
-  constructor(id: number, name: string, metadata?: string) {
+  constructor(id: number, name: string, free: boolean, metadata?: string) {
     this.id = id;
     this._name = name;
     this._metadata = metadata;
+    this._free = free;
   }
 
   getMetadata() {
@@ -23,4 +25,7 @@ export class Creator implements CreatorType {
     return this._name
   };
 
+  free(): boolean {
+    return this._free;
+  }
 }

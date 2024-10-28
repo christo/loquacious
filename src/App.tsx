@@ -65,7 +65,7 @@ function renderMessage(m: Message) {
     fontStyle: "normal"
   };
 
-  if (m.creatorName === "user") {
+  if (m.isFromUser) {
     return <Typography sx={sx} key={`ch_${m.id}`} className="chat userchat">{m.content}</Typography>
   } else {
     return <Typography sx={sx} key={`ch_${m.id}`} className="chat systemchat"
@@ -162,7 +162,7 @@ const App: React.FC = () => {
     if (!prompt.trim()) {
       return;
     }
-    const anticipatedMessg = new Message(-1, new Date(), prompt, "user");
+    const anticipatedMessg = new Message(-1, new Date(), prompt, -1, true);
     const anticipatedResponse: ChatResponse = {
       messages: [...response.messages, anticipatedMessg],
       speech: undefined,
@@ -197,6 +197,10 @@ const App: React.FC = () => {
     }
   };
 
+  const resetResponse = () => {
+    setResponse(EMPTY_RESPONSE);
+  }
+
   // TODO fix interruptive replay video on keystroke
 
   // submit on enter
@@ -230,7 +234,7 @@ const App: React.FC = () => {
       {images.length > 0 && (
         <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={imageUrl()} hideVideo={hideVideo}/>)
       }
-      <SystemPanel images={images} setImageIndex={setImageIndex} imageIndex={imageIndex} serverPort={SERVER_PORT}/>
+      <SystemPanel images={images} setImageIndex={setImageIndex} imageIndex={imageIndex} serverPort={SERVER_PORT} resetResponse={resetResponse}/>
       {loading && <CircularProgress size="2rem" color="secondary" className="loadingSpinner"/>}
       <Box className="ui">
         <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}

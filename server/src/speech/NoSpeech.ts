@@ -3,9 +3,8 @@ import {DisplaySpeechSystem, type SpeechSystem, type SpeechResult} from "speech/
 import {SpeechSystemOption} from "speech/SpeechSystems";
 
 const SILENT_SUCCESS: SpeechResult = {
-  filePath(): string | undefined {
-    return undefined;
-  }
+  filePath: () => undefined,
+  tts: () => undefined
 }
 
 /**

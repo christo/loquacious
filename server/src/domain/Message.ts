@@ -1,14 +1,18 @@
+import type {Creator} from "./Creator";
+
 class Message {
   id: number;
   created: Date;
   content: string;
-  creatorName: string;
+  creatorId: number;
+  isFromUser: boolean;
 
-  constructor(id: number, created: Date, content: string, creatorName: string) {
+  constructor(id: number, created: Date, content: string, creatorId: number, isFromUser: boolean) {
     this.id = id;
     this.created = created;
     this.content = content;
-    this.creatorName = creatorName;
+    this.creatorId = creatorId;
+    this.isFromUser = isFromUser;
   }
 }
 
