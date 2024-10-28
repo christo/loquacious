@@ -1,28 +1,23 @@
-import fs from "fs";
+import {exec} from 'child_process';
 import path from "path";
+import {promisify} from 'util';
+import {mkDirIfMissing} from "./filetoy";
 
-const DATA_DIRS = [
-  "tts",
-  "vision",
-  "stt",
-  "lipsync"
-];
-
-function mkDirIfMissing(p: string) {
-  if (!fs.existsSync(p)) {
-    fs.mkdirSync(p, {recursive: true});
-  }
-}
-
+/**
+ * @deprecated - each service should make their own
+ * @param dataDir
+ */
 function ensureDataDirsExist(dataDir: string) {
-  for (const d of DATA_DIRS) {
+  for (const d of [
+    "tts",
+    "vision",
+    "stt",
+    "lipsync"
+  ]) {
     const p = path.join(dataDir, d);
     mkDirIfMissing(p);
   }
 }
-
-import { promisify } from 'util';
-import { exec } from 'child_process';
 
 const execAsync = promisify(exec);
 
@@ -42,4 +37,4 @@ async function getCurrentCommitHash(cwd?: string): Promise<string> {
 }
 
 
-export {ensureDataDirsExist, mkDirIfMissing, getCurrentCommitHash};
+export {ensureDataDirsExist, getCurrentCommitHash};
