@@ -1,4 +1,4 @@
-import type {LipSyncResult} from "lipsync/LipSync";
+import type {LipSyncResult} from "lipsync/LipSyncAnimator";
 
 export class SadTalkerResult implements LipSyncResult {
   readonly url: string;

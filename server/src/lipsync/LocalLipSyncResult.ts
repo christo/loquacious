@@ -2,7 +2,7 @@ import fs from 'fs';
 import {extToFormat} from "../media";
 import type {PathLike} from "node:fs";
 import {basename} from 'path';
-import type {LipSyncResult} from "./LipSync";
+import type {LipSyncResult} from "./LipSyncAnimator";
 
 /**
  * Lip sync result that plays an existing video.

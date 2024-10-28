@@ -102,7 +102,7 @@ function SettingsDetail({system}: { system: System }) {
         <Typography>{system.speech.current.system} {system.speech.current.optionName}</Typography>
         <FreePaid isFree={system.speech.current.isFree}/>
       </IconLabelled>
-      <IconLabelled TheIcon={Portrait} tooltip="Lip Sync System">
+      <IconLabelled TheIcon={Portrait} tooltip="Lip Sync Animator">
         {system.lipsync.current} <FreePaid isFree={system.lipsync.isFree}/>
       </IconLabelled>
       <IconLabelled TheIcon={AccessTime} tooltip="Uptime">

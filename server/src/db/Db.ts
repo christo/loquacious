@@ -3,10 +3,12 @@ import {AudioFile} from "../domain/AudioFile";
 import {Creator} from "../domain/Creator";
 import type {CreatorType} from "../domain/CreatorType";
 import {Deployment} from "../domain/Deployment";
+import {LipSync} from "../domain/LipSync";
 import {Message} from "../domain/Message";
 import {Run} from "../domain/Run";
 import {Session} from "../domain/Session";
 import {Tts} from "../domain/Tts";
+import {VideoFile} from "../domain/VideoFile";
 
 
 export const CREATOR_USER_NAME = 'user';
@@ -407,6 +409,24 @@ class Db {
     }
   }
 
+  async createVideoFile(mimeType: string, creatorId: number, durationMs: number = -1): Promise<VideoFile> {
+    const query = `insert into video (duration_ms, mime_type, creator)
+                    values ($1, $2, $3)
+                    returning *`
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(query, [durationMs, mimeType, creatorId]);
+      if (result.rowCount === 1) {
+        const r = result.rows[0];
+        return new VideoFile(r.id, r.created, r.duration_ms, r.mime_type, r.creator);
+      } else {
+        return Promise.reject("Could not create video file");
+      }
+    } finally {
+      client.release();
+    }
+  }
+
   async createTts(creatorId: number, messageId: number, audioFileId: number): Promise<Tts> {
     const query = `insert into tts (creator, input, output)
                        values ($1, $2, $3)
@@ -418,7 +438,25 @@ class Db {
         const r = result.rows[0];
         return new Tts(r.id, r.created, creatorId, messageId, audioFileId);
       } else {
-        return Promise.reject("Could not create audio file");
+        return Promise.reject("Could not create Tts");
+      }
+    } finally {
+      client.release();
+    }
+  }
+
+  async createLipSync(creatorId: number, ttsId: number, videoFileId: number): Promise<LipSync> {
+    const query = `insert into lipsync (creator, input, output)
+                       values ($1, $2, $3)
+                       returning *`;
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(query, [creatorId, ttsId, videoFileId]);
+      if (result.rowCount === 1) {
+        const r = result.rows[0];
+        return new LipSync(r.id, r.created, creatorId, ttsId, videoFileId);
+      } else {
+        return Promise.reject("Could not create LipSync");
       }
     } finally {
       client.release();

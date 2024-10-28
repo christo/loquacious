@@ -18,7 +18,7 @@ type LipSyncResult = {
 /**
  * Service that can create animation video from portrait image and speech audio.
  */
-interface LipSync extends CreatorType, ConfigurableCreator {
+interface LipSyncAnimator extends CreatorType, ConfigurableCreator {
 
   /** Unique name for the service. */
   name(): string;
@@ -28,10 +28,11 @@ interface LipSync extends CreatorType, ConfigurableCreator {
    * Save it in the correctly configured data directory and return a LipSyncResult for it.
    * @param imageFile
    * @param speechFile
+   * @param fileKey unique database id to use as unique key in filename
    */
-  lipSync(imageFile: string, speechFile: string): Promise<LipSyncResult>;
+  animate(imageFile: string, speechFile: string, fileKey: string): Promise<LipSyncResult>;
 
   writeCacheFile(): Promise<void>
 }
 
-export type {LipSync, LipSyncResult};
+export type {LipSyncAnimator, LipSyncResult};

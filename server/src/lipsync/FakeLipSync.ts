@@ -1,13 +1,17 @@
 import {promises as fs} from "fs";
-import type {LipSync, LipSyncResult} from "./LipSync";
+import type {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
 import type {Dirent} from "node:fs";
 import path from "path";
 
+// TODO use MediaFormat to detect all supported video types' extensions
+const hasVideoExt = (filename: string) => path.extname(filename).toLowerCase() === ".mp4";
+
+
 /**
  * Hacky implementation of LipSync that reuses pre-generated video.
  */
-class FakeLipSync implements LipSync {
+class FakeLipSync implements LipSyncAnimator {
   private readonly lipSyncDataDir: string;
 
   /**
@@ -26,11 +30,12 @@ class FakeLipSync implements LipSync {
    * Returns an abitrary lip sync video file that was already generated or fails if none exists.
    * @param _imageFile ignored
    * @param _speechFile ignored
+   * @param _fileKey ignored
    */
-  async lipSync(_imageFile: string, _speechFile: string): Promise<LipSyncResult> {
+  async animate(_imageFile: string, _speechFile: string, _fileKey: string): Promise<LipSyncResult> {
     const files = await fs.readdir(this.lipSyncDataDir, {withFileTypes: true, recursive: true});
-    // STTCPW
-    const aFile: Dirent | undefined = files.find(f => f.isFile() && path.extname(f.name).toLowerCase() === ".mp4");
+    // TODO remove file extension hard-coding
+    const aFile: Dirent | undefined = files.find(f => f.isFile() && hasVideoExt(f.name));
     if (!aFile) {
       return Promise.reject("no lip sync files");
     } else {

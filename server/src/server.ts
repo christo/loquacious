@@ -7,7 +7,7 @@ import {ImageInfo} from "image/ImageInfo";
 import {prescaleImages} from "image/imageOps";
 import {FakeLipSync} from "lipsync/FakeLipSync";
 import {FalSadtalker} from "lipsync/FalSadtalker";
-import type {LipSync, LipSyncResult} from "lipsync/LipSync";
+import type {LipSyncAnimator, LipSyncResult} from "lipsync/LipSyncAnimator";
 import {FakeLlm} from "llm/FakeLlm";
 import {LlamaCppLlm} from "llm/LlamaCppLlm";
 import {type Llm} from 'llm/Llm';
@@ -28,6 +28,7 @@ import type {AudioFile} from "./domain/AudioFile";
 import type {CreatorType} from "./domain/CreatorType";
 import {Message} from "./domain/Message";
 import {Session} from "./domain/Session";
+import type {VideoFile} from "./domain/VideoFile";
 import Agent = Undici.Agent;
 
 // TODO confirm we want connect timeout and not ?"request timeout"
@@ -69,13 +70,13 @@ let llmIndex = 0;
 
 const speechSystems = new SpeechSystems(path.join(PATH_BASE_DATA, "tts"));
 const BASEDIR_LIPSYNC = path.join(PATH_BASE_DATA, "lipsync");
-const LIPSYNCS: LipSync[] = [
+const ANIMATORS: LipSyncAnimator[] = [
   new FalSadtalker(BASEDIR_LIPSYNC),
   new FakeLipSync(BASEDIR_LIPSYNC)
 ]
 let lipsyncIndex = 0;
 
-const lipSync = LIPSYNCS[lipsyncIndex];
+const lipSync = ANIMATORS[lipsyncIndex];
 
 const modes = new Modes();
 
@@ -116,7 +117,7 @@ app.get("/system", async (_req: Request, res: Response) => {
       isFree: speechSystems.current().free()
     },
     lipsync: {
-      systems: LIPSYNCS.map(ls => ls.name()),
+      systems: ANIMATORS.map(ls => ls.name()),
       current: lipSync.name(),
       isFree: lipSync.free()
     },
@@ -205,8 +206,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
             "speech synthesis",
             async () => {
               const ssCreator = await db.findCreator(currentSpeechSystem.getName(), currentSpeechSystem.getMetadata(), true);
-              // TODO get rid of hard-coded mime type here - speech system should provide it?
-              // store in db speech file reference
+              // TODO get rid of hard-coded mime type here - add to SpeechResult or get from SpeechSystem?
               const audioFile: AudioFile = await db.createAudioFile("audio/mp3", ssCreator.id);
               const sr = await currentSpeechSystem.speak(llmMessage.content, `${audioFile.id}`);
 
@@ -220,12 +220,14 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           if (speechFilePath) {
             const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
             try {
-              const lipsyncResult: LipSyncResult = await timed("lipsync", () => {
-                return lipSync.lipSync(portait, speechFilePath!)
-              });
+              const lipsyncCreator = await db.findCreator(lipSync.getName(), lipSync.getMetadata(), true);
+              // TODO get rid of hard-coded mime type here
+              const videoFile: VideoFile = await db.createVideoFile("video/mp4", lipsyncCreator.id);
 
-              // TODO store in db lipsync video file reference
-              // TODO store in db lipsync response linked to video file, portrait and speech response
+              const lipsyncResult: LipSyncResult = await timed("lipsync", () => {
+                return lipSync.animate(portait, speechFilePath!, `${videoFile.id}`);
+              });
+              const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
 
               // TODO return full session graph for enabling replay etc.
               res.json({
@@ -251,7 +253,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               res.status(500).json({error: msg}).end();
             }
           } else {
-            // TODO update front-end to handle missing speech and/or lipsync
             res.json({
               response: {
                 // portrait instance of ImageInfo, input to lipsync
@@ -300,7 +301,7 @@ async function initialiseCreatorTypes() {
   const creators: CreatorType[] = [
     ...LLMS,
     ...speechSystems.systems,
-    ...LIPSYNCS
+    ...ANIMATORS
   ];
   console.log(`ensuring ${creators.length} creator types are in database`);
   await Promise.all(creators.map(async creator => {

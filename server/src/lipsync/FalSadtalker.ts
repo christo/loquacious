@@ -1,6 +1,6 @@
 import {fal, type Result} from "@fal-ai/client";
 import {promises as fs, readFileSync} from "fs";
-import type {LipSync, LipSyncResult} from "lipsync/LipSync";
+import type {LipSyncAnimator, LipSyncResult} from "lipsync/LipSyncAnimator";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
 import path from "path";
@@ -38,7 +38,7 @@ type UrlCache = { [keyOf: string]: string };
 /**
  * Implementation that calls fal.ai service, requires valid FAL_API_KEY in env.
  */
-class FalSadtalker implements LipSync {
+class FalSadtalker implements LipSyncAnimator {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
   private static NAME = "FalSadtalker";
   private readonly dataDir: string;
@@ -87,7 +87,7 @@ class FalSadtalker implements LipSync {
     return this.urlCache[filePath];
   }
 
-  async lipSync(img: string, speech: string): Promise<LipSyncResult> {
+  async animate(img: string, speech: string): Promise<LipSyncResult> {
     const imgUrl = await this.urlFor(img);
     const speechUrl = await this.urlFor(speech);
     const result: Result<{ video: SadTalkerResult }> = await timed("fal run sadtalker",

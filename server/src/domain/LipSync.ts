@@ -1,12 +1,10 @@
-/**
- * Represents the result of running text to speech on a message, producing an audio file.
- */
-export class Tts {
+class LipSync {
   id: number;
   created: Date;
   creatorId: number;
   inputId: number;
   outputId: number;
+
 
   constructor(id: number, created: Date, creatorId: number, inputId: number, outputId: number) {
     this.id = id;
@@ -16,3 +14,5 @@ export class Tts {
     this.outputId = outputId;
   }
 }
+
+export {LipSync};
