@@ -22,7 +22,7 @@ class DisplaySpeechSystem {
 }
 
 /**
- * Type returned from a request to generate speech from text.
+ * Type representing the result of a request to generate speech from text.
  */
 interface SpeechResult {
   filePath: () => string | undefined;
