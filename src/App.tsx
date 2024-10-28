@@ -216,14 +216,14 @@ const App: React.FC = () => {
   // TODO fade-in and fade out for video show and hide
   const showVideo = () => {
     if (videoRef.current) {
-      videoRef.current!.style.visibility = "visible";
+      videoRef.current.style.visibility = "visible";
     } else {
       hideVideo();
     }
   }
   const hideVideo = () => {
     if (videoRef.current) {
-      videoRef.current!.style.visibility = "hidden";
+      videoRef.current.style.visibility = "hidden";
     }
   }
   const imageUrl = () => `${BASE_URL_PORTRAIT}/${images[imageIndex].f}`;
