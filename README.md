@@ -21,18 +21,23 @@ components.
 
 While there are several design choices that are tuned for something like the
 fortune teller character, systems and configuration are expected to work the
-same for a very different character scenario. At the moment animals or 
+same for a very different character scenario. At the moment animals or
 cartoon characters cannot produce lipsync video.
 
 ## Design Principles
 
-It is hoped that this system can operate without a traditional human-operated 
+It is hoped that this system can operate without a traditional human-operated
 media production toolchain or pipeline. So far all media assets are driven by
 code and AI prompts. Adding video production, illustration or any other kind
 of media editing may offer quality benefits or potential time or money savings.
 Nevertheless, exclusively constraining all human development-time input to
 text from a keyboard makes for an interesting exploration and at the moment
 is adopted as a defining feature of this research project.
+
+Non-verbal portrait animation is apparently achievable by using reference video.
+This would violate the above design constraint. Maybe this video could be
+captured from user input - maybe even system-operator user input? Starting to
+feel like a stunt.
 
 ## Character Portrait
 
@@ -50,22 +55,23 @@ Good character portraits seem to have the following features:
 
 * Proportion of the frame that is occupied by the head is between 10% and 30%
 * Background of head is relatively uniform. Any detail here may be subject to
-warping or tearing.
+  warping or tearing.
 * No foreground objects or obstructions should be near the head or face.
-Otherwise they will be warped.
+  Otherwise they will be warped.
 * Body position ideally should look natural if held still indefinitely. Having
-the character's hands on a crystal ball or be hidden somehow makes the expected
-absence of hand gestures less conspicuous.
+  the character's hands on a crystal ball or be hidden somehow makes the
+  expected
+  absence of hand gestures less conspicuous.
 * Face lighting and colour should be most like the training data. Face paint,
-extreme wrinkles, exaggerated features, excessive shadows or extreme postures
-all seem to result in pathalogically bad lip sync results.
+  extreme wrinkles, exaggerated features, excessive shadows or extreme postures
+  all seem to result in pathalogically bad lip sync results.
 * Long hair is sometimes problematic because the head and face are animated
-exclusively inside an inset rectangle which may tear at the edge rather than
-produce natural movement in long hair that may extend beyond the animated
-inset frame. Hair motion is not properly simulated so hairstyles rigidly fixed
-to the head will work best.
+  exclusively inside an inset rectangle which may tear at the edge rather than
+  produce natural movement in long hair that may extend beyond the animated
+  inset frame. Hair motion is not properly simulated so hairstyles rigidly fixed
+  to the head will work best.
 * Image resolution has a dramatic effect on lipsync latency and final quality
-but more experimentation is required to determine sweet spots.
+  but more experimentation is required to determine sweet spots.
 
 ## Speech to Text
 
@@ -80,9 +86,9 @@ Interesting problems:
 * Collaborative handling of transcription errors.
 * Accent tuning.
 * Round-trip pronunciation metadata. The LLM can't hear the speech, only the
-transcription. This may make some interactions terrible unless there is some
-metadata that the STT and TTS can share around pronunciation. Worst case
-scenarios are expected to be ridiculous.
+  transcription. This may make some interactions terrible unless there is some
+  metadata that the STT and TTS can share around pronunciation. Worst case
+  scenarios are expected to be ridiculous.
 
 ## Large Language Model (LLM)
 
@@ -179,14 +185,13 @@ stalling behaviours that likewise do not depend on user input.
 Currently only operated in devmode on MacOS. It should work on any system but
 `MacOsSpeech` will likely fail to execute the child process. Native subsystem
 implementations should detect missing system requirements at boot and show
-up disabled. 
+up disabled.
 
 Database is postgres. `node-pg-migrate` scripts defined in `server/package.json`
 to create tables etc. Production deployment process is yet to be defined.
 
 Current boot-time check of git hash will fail if git is absent. Production
 deployment will have a configured version tag instead.
- 
 
 ## Dependencies
 
@@ -215,6 +220,8 @@ both local and as online API services.
 * speech output
 * settings panel
 * lip sync video output usually works but only for human faces
+* chat history shown like conversation (will probably turn off for when speech input
+  is implemented)
 
 ## TODO
 
@@ -227,7 +234,7 @@ both local and as online API services.
 * [x] identify which LLM and model was used for the text
 * [x] store all interactions in database
 * [ ] design for possible workflow that produces spoken audio in lipsync video
-      directly from text message without intermediate speech audio
+  directly from text message without intermediate speech audio
 * [x] data file tree for generated media assets:
     * `<base>/<type>/<system>/<option>/<tag>_<db-id>.<format>`
     * type: tts, ttt, stv (speech to video), etc.
@@ -528,16 +535,16 @@ and some comments about it.
 * slow speech cadence
 * canned smalltalk
 * pregenerated output for response graph driven by expert system and elaborated
-  by LLM for variety. 
-  * LLM can detect equivalence of phrases and help choose a
-    pregenerated response.
+  by LLM for variety.
+    * LLM can detect equivalence of phrases and help choose a
+      pregenerated response.
 * chunked TTS producing chunked lipsync video
-  * cut LLM output text into paragraphs or sentences
-  * generate individual voice for each fragment
-  * elevenlabs API supports providing preceding and proceeding context
-  * feed multiple speech audio chunks to lipsync in parallel
-  * modify front-end to work with a dynamic queue of video streams played
-    sequentially
+    * cut LLM output text into paragraphs or sentences
+    * generate individual voice for each fragment
+    * elevenlabs API supports providing preceding and proceeding context
+    * feed multiple speech audio chunks to lipsync in parallel
+    * modify front-end to work with a dynamic queue of video streams played
+      sequentially
 * environmental theatrics - externally controlled sound effects, crystal ball,
   etc.
 * crafted stalling and in-character ceremony - e.g. reading tarot cards or "gaze
