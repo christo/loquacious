@@ -12,6 +12,53 @@
     * online audio-only call deployment
     * online remote deployment (e.g. staging/test)
 
+## File References
+
+How should media files integrate with database records? Text messages to and
+from the LLM can be stored directly in the db but the filesystem feels more
+suitable for images, audio and video files.
+
+Linking rows in the database to files can be done by using the db id in the
+filename or by storing the filename in the table.
+
+A query to show the primary view of a conversation would start by fetching the
+session with the sequence of messages for that session. For each message, fetch
+all output chains; all rows with the message as the input and recursively fetch
+each link in the output chain using the previous output as its input.
+
+### File names with db id
+
+Either the row must be inserted before the file is written so the id is known or
+the file is written with a temporary name and renamed according to the db id
+once the row is inserted. If the table is to store file contents metadata like
+duration for audio and video, this cannot be known until the file is written -
+at least for cases where the file is written by an external process.
+
+No extra index is required on the file tables to efficiently look up the row for
+a given file.
+
+### Generated filenames stored in db
+
+The db row can be written with a filename column and the filename can be
+generated independently of the database.
+
+To go from a file to a row, the query might need an index on the filename column
+to avoid inefficient table scan.
+
+## LipSync Combined with TTS
+
+Some services offer to convert text to lipsync rather than being driven by
+speech audio and therefore do not have an intermediate tts or audio record. The
+lipsync database record for these products would need to link to a message
+rather than a tts entry. One way to implement this is to have two foreign key
+columns on lipsync, one for a tts input and one for a message input such that
+all lipsync rows should have exactly one of these columns populated and the
+other should be null.
+
+Because a combined TTS and Lipsync service could have lower total latency than
+executing the two in series, it seems worth redesigning the current db schema
+to support this.
+
 ## system_version
 
 Need to reference code version somehow. Decide if it makes sense to make an
