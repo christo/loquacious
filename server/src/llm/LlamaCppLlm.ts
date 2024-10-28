@@ -19,7 +19,7 @@ class LlamaCppLlm implements Llm {
     this.baseUrl = baseUrl;
     this.openai = new OpenAI({
       baseURL: baseUrl,
-      apiKey: process.env.OPENAI_API_KEY as string,
+      apiKey: "REQURIED_BY_OPENAI_IGNORED_BY_LLAMA_CPP",
     });
   }
 
