@@ -7,9 +7,13 @@
 //  *  https://node-postgres.com/features/types
 
 /**
- * TODO integrate?
+ * TODO integrate type parsing to and from postgres?
  */
 export type Persistent<T> = {
   id: number;
+  /**
+   *
+   * @param prepareValue
+   */
   toPostgres (prepareValue: (value: T) => any): any
 }

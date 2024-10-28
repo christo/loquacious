@@ -347,7 +347,6 @@ class Db {
       const result = await client.query(query, [message, session.id, creator.id]);
       if (result.rowCount === 1) {
         const row = result.rows[0];
-        // TODO
         return new Message(row.id, row.created, row.content, row.creator, row.creator === this.getUserCreator().id);
       } else {
         return Promise.reject("no rows returned from append message query");
