@@ -217,8 +217,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       });
 
       if (llmResponse) {
-        console.log("storing llm response");
-        const llmMessage = await db.createCreatorTypeMessage(session, llmResponse, currentLlm);
+        const llmMessage = await timed(
+          "storing llm response",
+          () => db.createCreatorTypeMessage(session, llmResponse, currentLlm));
         try {
           const speechResult: SpeechResult = await timed<SpeechResult>(
             "speech synthesis",
@@ -247,7 +248,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
 
               // TODO return full session graph for enabling replay etc.
-              res.json(buildResponse(await db.getSessionMessages(session), speechFilePath, lipsyncResult));
+              const finalMessages = (await db.getSessionMessages(session)).map(m => currentSpeechSystem.removePauseCommands(m));
+              res.json(buildResponse(finalMessages, speechFilePath, lipsyncResult));
 
               await lipSync.writeCacheFile();
             } catch (e) {

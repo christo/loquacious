@@ -9,6 +9,7 @@ import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import util from "util";
+import {Message} from "../domain/Message";
 
 import {escapeFilepart, mkDirIfMissing} from "../system/filetoy";
 
@@ -116,6 +117,16 @@ class MacOsSpeech implements SpeechSystem {
     // this implements silent pause for macos say
     // see https://developer.apple.com/library/archive/documentation/mac/pdf/Sound/Speech_Manager.pdf
     return `[[slnc ${msDuration}]]`;
+  }
+
+  removePauseCommands(m: Message): Message {
+    if (m.isFromUser) {
+      return m;
+    } else {
+      // attempt to remove any llm-generated pause commands from the message
+      const strpped = m.content.replaceAll(/\[\[slnc \d+\]\]/g, '');
+      return new Message(m.id, m.created, strpped, m.creatorId, false);
+    }
   }
 
   getMetadata(): string | undefined {

@@ -6,6 +6,7 @@ import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
+import {Message} from "../domain/Message";
 
 import {mkDirIfMissing} from "../system/filetoy";
 
@@ -141,14 +142,15 @@ class ElevenLabsSpeech implements SpeechSystem {
         outStream.on('finish', () => {
           console.log('File writing completed successfully.');
           // hack alert
-          resolve({filePath: () => outFile, tts: ()=>undefined});
+          resolve({filePath: () => outFile, tts: () => undefined});
         });
         audio.pipe(outStream);
       })
 
     } catch (e) {
       console.error("Error while creating voice stream", e);
-      return Promise.reject(e);}
+      return Promise.reject(e);
+    }
   }
 
   private getConfig(): ElevenLabsPartialConfig {
@@ -158,6 +160,16 @@ class ElevenLabsSpeech implements SpeechSystem {
   pauseCommand(msDuration: number): string {
     const sec = (msDuration / 1000).toFixed(1)
     return `<break time="${sec}s" />`;
+  }
+
+  removePauseCommands(m: Message): Message {
+    if (m.isFromUser) {
+      return m;
+    } else {
+      // attempt to remove any llm-generated pause commands from the message
+      const strpped = m.content.replaceAll(/<break\s+time="\d+s"\d*\/>/g, '');
+      return new Message(m.id, m.created, strpped, m.creatorId, false);
+    }
   }
 
   getMetadata(): string | undefined {

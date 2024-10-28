@@ -1,6 +1,7 @@
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem, type SpeechResult} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
+import type {Message} from "../domain/Message";
 
 const SILENT_SUCCESS: SpeechResult = {
   filePath: () => undefined,
@@ -32,6 +33,12 @@ class NoSpeech implements SpeechSystem {
   pauseCommand(msDuration: number): string | null {
     return null;
   }
+
+  removePauseCommands(m: Message): Message {
+    return m;
+  }
+
+
 
   /**
    * Doesn't have any metadata.
