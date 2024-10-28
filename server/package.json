@@ -2,6 +2,7 @@
   "name": "loquacious-server",
   "version": "1.0.0",
   "scripts": {
+    "compile": "tsc -b",
     "start": "ts-node -r tsconfig-paths/register src/server.ts",
     "dev": "nodemon -r tsconfig-paths/register --watch src src/server.ts",
     "migrate:create": "node-pg-migrate --tsconfig ./tsconfig.json --migration-file-language ts create",
