@@ -1,5 +1,6 @@
 import {exec} from 'child_process';
 import ffmpeg from "fluent-ffmpeg";
+import fs from "fs";
 import {type MediaFormat, MF_MP3} from "media";
 import type {PathLike} from "node:fs";
 import path from "path";
@@ -9,10 +10,11 @@ import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import util from "util";
 
-import {mkDirIfMissing} from "../system/filetoy";
+import {escapeFilepart, mkDirIfMissing} from "../system/filetoy";
 
 
 const execPromise = util.promisify(exec);
+const unlinkPromise = util.promisify(fs.unlink);
 
 async function convertAudio(desiredFormat: string, path: string): Promise<string> {
   const finalPath = `${path}.${desiredFormat}`;
@@ -27,7 +29,6 @@ async function convertAudio(desiredFormat: string, path: string): Promise<string
   return finalPath;
 }
 
-const escaped = (x: string) => x.replace(/"/g, '\\"');
 
 const VOICES: Array<CharacterVoice> = [
   new CharacterVoice("Serena (Premium)", "Serena", "Mature English woman, slightly posh"),
@@ -72,19 +73,22 @@ class MacOsSpeech implements SpeechSystem {
     try {
       const voice = VOICES[this.currentIndex];
       const voicePart = voice.name.replaceAll(/[\s\/]/g, '-');
-      const filename = `tts_${basename}_${voicePart}.${this.fileFormat.extensions[0]}`;
+      const filename = `tts_${basename}_${voicePart}`;
       const savePath = path.join(this.dataDir, filename);
       console.log(`savePath: ${savePath}`);
       const aiffFile = `${savePath}.aiff`;
-      let command = `say "${escaped(message)}" -v "${escaped(voice.voiceId)}" -r ${wpm} -o "${aiffFile}"`;
+      let command = `say "${escapeFilepart(message)}" -v "${escapeFilepart(voice.voiceId)}" -r ${wpm} -o "${aiffFile}"`;
       let result: Promise<string>;
       try {
         await execPromise(command);
         let desiredFormat = this.fileFormat.extensions[0];
         try {
           if (desiredFormat !== 'aiff') {
-            // TODO clean up later the converted aiff files
-            result = timed("convert audio format", () => convertAudio(desiredFormat, aiffFile));
+            result = timed("convert audio format", () => convertAudio(desiredFormat, aiffFile)).then(_s => {
+              // shouldn't need await
+              timed("clean up aiff audio", () => unlinkPromise(aiffFile))
+              return _s;
+            });
           } else {
             console.log(`no conversion required for aiff ${savePath}`);
             result = Promise.resolve(savePath);
