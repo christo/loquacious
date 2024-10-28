@@ -235,16 +235,8 @@ both local and as online API services.
     * [x] show other main llm/model options
     * [x] show other speech/voice options
     * [ ] make settings dynamically editable
-* [x] identify which LLM and model was used for the text
-* [x] store all interactions in database
 * [ ] design for possible workflow that produces spoken audio in lipsync video
   directly from text message without intermediate speech audio
-* [x] data file tree for generated media assets:
-    * `<base>/<type>/<system>/<option>/<tag>_<db-id>.<format>`
-    * type: tts, ttt, stv (speech to video), etc.
-    * e.g. `data/tts/elevenlabs/beatrice/xyz_12345.mp3`
-    * db-id: the record that traces the input, system and parameters to other
-      records such as session, timestamps, user prompt, modestate etc.
 * [ ] check out [d-id.com](http://d-id.com) API for lipsync video generation
   [streaming API](https://docs.d-id.com/reference/talks-streams-overview)
   could also be proxied and saved to disk. It also claims to support direct
@@ -278,21 +270,10 @@ both local and as online API services.
           banter
 * [ ] test reference data filetree (better for version control not to require
   database so it can be version controlled)
-* [x] spike fal sadtalker to generate video from picture and speech file
-  https://fal.ai/models/fal-ai/sadtalker/api
-* [x] Q: does it make sense to inform llm in system prompt that output is
-  spoken with a specific system and all formatting should be appropriate
-  for input into that speech system? i.e. no emojis, stage direction etc.
-* [x] get local sadtalker running with conda per github
-* [x] basic database schema
 * [ ] check out multimodal models like LLaVA 1.5 and LLaVA 1.6
     * may work to do both text and vision with the same model?
 * usable cached generated output
 * [ ] pose estimation plan
-* [x] ping-pong chat sequence
-* [x] check how it works on mobile web - sketchy embedded video
-* [x] enumerate LLM backends
-* [x] show chat history
 * [ ] evaluate local AI TTS (better than macos?)
 * [ ] evaluate local speech recognition: e.g. whisper.cpp
 * [ ] evaluate elevenlabs websocket "realtime" streaming:
@@ -314,9 +295,9 @@ both local and as online API services.
       thinking signals, explicit "excuse me a moment while I contemplate your
       words)
 * [x] asking name flow
-    * flexible level of persistance about wanting to know a person's name
-    * calling by name if available
-    * calling by pet names "sweetheart", "darling" etc. - add to system prompt
+    * [x] flexible level of persistance about wanting to know a person's name
+    * [x] calling by name if available
+    * [ ] calling by pet names "sweetheart", "darling" etc. - add to system prompt
 * fault detection
 * individual person recognition (using only recent interactions)
 * functions to know what is happening, what has happened before, state of
@@ -355,8 +336,6 @@ both local and as online API services.
     * if a person asks about an event coming up, we could quip about telling
       their
       future: that they will go to that event
-* [x] file save disk cache
-    * model-specific text in, text out
 * db logging
 * [ ] aggregated system logs
 * [ ] usage stats
