@@ -218,6 +218,12 @@ both local and as online API services.
 
 ## TODO
 
+* [ ] settings panel
+    * [x] show current main llm/model
+    * [x] show current speech system and voice option
+    * [x] show other main llm/model options
+    * [x] show other speech/voice options
+    * [ ] make settings dynamically editable
 * [x] identify which LLM and model was used for the text
 * [x] store all interactions in database
 * [ ] design for possible workflow that produces spoken audio in lipsync video
@@ -267,12 +273,6 @@ both local and as online API services.
   spoken with a specific system and all formatting should be appropriate
   for input into that speech system? i.e. no emojis, stage direction etc.
 * [x] get local sadtalker running with conda per github
-* [ ] settings panel
-    * [x] show current main llm/model
-    * [x] show current speech system and voice option
-    * [x] show other main llm/model options
-    * [x] show other speech/voice options
-    * [ ] make settings dynamically editable
 * [x] basic database schema
 * [ ] check out multimodal models like LLaVA 1.5 and LLaVA 1.6
     * may work to do both text and vision with the same model?
