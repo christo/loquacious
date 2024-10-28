@@ -1,4 +1,4 @@
-import {promises as fs} from "fs";
+import {promises} from "fs";
 import {type MediaFormat, supportedImageTypes} from "media";
 import path from "path";
 import sharp from "sharp";
@@ -18,13 +18,13 @@ export async function prescaleImages(baseDir: string, dimensions: Dim[]) {
     const dimDir = `${baseDir}/${dimension.width}x${dimension.height}`;
     console.log(`prescaling images to ${dimDir}`);
     mkDirIfMissing(dimDir);
-    const files = await fs.readdir(baseDir, {withFileTypes: true});
+    const files = await promises.readdir(baseDir, {withFileTypes: true});
     for (const file of files) {
       if (file.isFile() && extensions.includes(path.extname(file.name).toLowerCase())) {
         // got suitable image file, resize it
         const destFile = path.join(dimDir, file.name);
         // skip if the file already exists
-        fs.access(destFile, fs.constants.R_OK | fs.constants.W_OK).then(null, async () => {
+        promises.access(destFile, promises.constants.R_OK | promises.constants.W_OK).then(null, async () => {
           // resize images to width, preserving aspect ratio
           await sharp(path.join(baseDir, file.name))
             .resize(dimension.width, null)

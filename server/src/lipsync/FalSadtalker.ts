@@ -1,5 +1,5 @@
 import {fal, type Result} from "@fal-ai/client";
-import {promises as fs, readFileSync} from "fs";
+import {promises, readFileSync} from "fs";
 import type {LipSyncAnimator, LipSyncResult} from "lipsync/LipSyncAnimator";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
@@ -11,7 +11,7 @@ import {mkDirIfMissing} from "../system/filetoy";
 
 
 async function readBinaryFile(filePath: string): Promise<File> {
-  const fileBuffer = await fs.readFile(filePath);
+  const fileBuffer = await promises.readFile(filePath);
   const fileName = filePath.split('/').pop()!;
   return new File([fileBuffer], fileName, {type: 'application/octet-stream'});
 }
@@ -110,7 +110,7 @@ class FalSadtalker implements LipSyncAnimator {
 
   async writeCacheFile(): Promise<void> {
     try {
-      return fs.writeFile(this.urlCacheFile, JSON.stringify(this.urlCache), 'utf-8');
+      return promises.writeFile(this.urlCacheFile, JSON.stringify(this.urlCache), 'utf-8');
     } catch (error: unknown) {
       console.error(`Error occurred while writing ${this.urlCacheFile}`, error);
       return Promise.reject(error);

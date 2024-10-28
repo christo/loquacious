@@ -2,7 +2,7 @@ import {fileStream} from "api/mediaStream";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {promises as fs} from 'fs';
+import {promises} from 'fs';
 import {ImageInfo} from "image/ImageInfo";
 import {prescaleImages} from "image/imageOps";
 import {FakeLipSync} from "lipsync/FakeLipSync";
@@ -84,7 +84,7 @@ app.use(express.json());
 
 app.get("/portraits", async (_req: Request, res: Response) => {
   const exts = supportedImageTypes().flatMap(f => f.extensions).map(f => `.${f}`);
-  const allEntries = await fs.readdir(PATH_PORTRAIT, {withFileTypes: true});
+  const allEntries = await promises.readdir(PATH_PORTRAIT, {withFileTypes: true});
   const goodExt = (f: Dirent) => exts.includes(path.extname(f.name).toLowerCase());
   const imgFiles = allEntries.filter(f => f.isFile() && goodExt(f));
   // TODO make ImageInfo relative to web root
