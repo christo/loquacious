@@ -278,32 +278,14 @@ both local and as online API services.
     * may work to do both text and vision with the same model?
 * usable cached generated output
 * [ ] pose estimation plan
-* [ ] ping-pong chat sequence
+* [x] ping-pong chat sequence
 * [x] check how it works on mobile web - sketchy embedded video
 * [x] enumerate LLM backends
-* [ ] show chat history (including cached audio)
+* [x] show chat history
 * [ ] evaluate local AI TTS (better than macos?)
-* [ ] evaluate local speech recognition: e.g. whisper
+* [ ] evaluate local speech recognition: e.g. whisper.cpp
 * [ ] evaluate elevenlabs websocket "realtime" streaming:
   https://elevenlabs.io/docs/api-reference/websockets
-* [ ] generalise backend config options:
-    * type: e.g. text-to-text
-    * role: e.g. deciding what to say. future features like interpreting
-      image-to-text output to build a system prompt which includes self-image
-      might be best done by running a smaller/faster model that isn't good
-      enough
-      to define fortune-teller responses
-    * workflow graph: network of each model in a role as nodes with edges
-      indicating flow of input and output to another model or audio/video output
-* [ ] identify terminal input and output nodes for whole system workflow graph:
-    * audio out
-    * video out (should have embedded video)
-    * stitched together multiple video outs depending on behaviour graph,
-      probably streaming to web client is the best idea
-        * how to handle interruptive transitions?
-    * reference self image(s)
-    * (optional) reference motion video to drive animated video out
-    * user audio in, direct user text in
 * use cached openings for quick-start.
     * many starting inputs could be simply "hello" or other variants
     * after speech-to-text recognises this as a hello input;
@@ -320,7 +302,7 @@ both local and as online API services.
     * need some stalling responses to hide latency (distractions, pondering and
       thinking signals, explicit "excuse me a moment while I contemplate your
       words)
-* asking name flow
+* [x] asking name flow
     * flexible level of persistance about wanting to know a person's name
     * calling by name if available
     * calling by pet names "sweetheart", "darling" etc. - add to system prompt
@@ -362,7 +344,7 @@ both local and as online API services.
     * if a person asks about an event coming up, we could quip about telling
       their
       future: that they will go to that event
-* file save disk cache
+* [x] file save disk cache
     * model-specific text in, text out
 * db logging
 * [ ] aggregated system logs
