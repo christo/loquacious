@@ -7,7 +7,6 @@ export class Run {
   sha1: string;
   deployment: Deployment;
 
-
   constructor(id: number, created: Date, metadata: string, sha1: string, deployment: Deployment) {
     this.id = id;
     this.created = created;
