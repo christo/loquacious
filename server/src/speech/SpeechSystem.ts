@@ -24,7 +24,7 @@ interface SpeechResult {
 }
 
 /**
- * Represents a test to speech system.
+ * Represents a text to speech system.
  */
 interface SpeechSystem extends CreatorService {
 
