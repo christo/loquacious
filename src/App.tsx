@@ -201,8 +201,6 @@ const App: React.FC = () => {
     setResponse(EMPTY_RESPONSE);
   }
 
-  // TODO fix interruptive replay video on keystroke
-
   // submit on enter
   const handleSubmitKey = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
