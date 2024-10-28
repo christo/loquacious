@@ -18,6 +18,9 @@ class DisplaySpeechSystem {
   }
 }
 
+/**
+ * Type returned from a request to generate speech from text.
+ */
 interface SpeechResult {
   filePath: () => string | undefined;
   tts: () => Tts | undefined;
