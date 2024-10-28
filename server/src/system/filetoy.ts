@@ -6,4 +6,7 @@ function mkDirIfMissing(p: string) {
   }
 }
 
-export {mkDirIfMissing};
+const escapeFilepart = (x: string) => x.replace(/"/g, '\\"');
+
+
+export {mkDirIfMissing, escapeFilepart};
