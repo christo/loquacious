@@ -229,6 +229,8 @@ both local and as online API services.
 
 ## TODO
 
+* [ ] move portrait images into server
+  * [ ] serve portrait image from server as static
 * [ ] settings panel
     * [x] show current main llm/model
     * [x] show current speech system and voice option
