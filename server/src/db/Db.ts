@@ -390,7 +390,6 @@ class Db {
    * @param durationMs if optional, database will get -1
    */
   async createAudioFile(mimeType: string, creatorId: number, durationMs: number = -1): Promise<AudioFile> {
-    // TODO review this idea - maybe link to the file the other way instead so we can write the file first?
     const query = `insert into audio (duration_ms, mime_type, creator)
                        values ($1, $2, $3)
                        returning *`;

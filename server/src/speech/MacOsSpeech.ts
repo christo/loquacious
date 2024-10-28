@@ -117,7 +117,7 @@ class MacOsSpeech implements SpeechSystem {
     }
   }
 
-  preferredOutputFormat(): MediaFormat {
+  outputFormat(): MediaFormat {
     return MF_MP3;
   }
 

@@ -87,7 +87,6 @@ app.get("/portraits", async (_req: Request, res: Response) => {
   const allEntries = await promises.readdir(PATH_PORTRAIT, {withFileTypes: true});
   const goodExt = (f: Dirent) => exts.includes(path.extname(f.name).toLowerCase());
   const imgFiles = allEntries.filter(f => f.isFile() && goodExt(f));
-  // TODO make ImageInfo relative to web root
   const imageInfos = await Promise.all(imgFiles.map((de: Dirent) => ImageInfo.fromFile(PATH_PORTRAIT, de.name)));
   res.json(imageInfos);
 });
@@ -203,7 +202,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const mode = modes.getMode();
       const currentSpeechSystem = speechSystems.current();
       let allMessages = mode(messageHistory, currentSpeechSystem);
-      // TODO remove SpeechSystem-specific pause commands from messages when sent to front-end
       let llmResponse: string | null = await timed("text generation", async () => {
         const response = await currentLlm.chat(allMessages);
         return response.message
@@ -218,8 +216,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
             "speech synthesis",
             async () => {
               const ssCreator = await db.findCreator(currentSpeechSystem.getName(), currentSpeechSystem.getMetadata(), true);
-              // TODO get rid of hard-coded mime type here - add to SpeechResult or get from SpeechSystem?
-              const audioFile: AudioFile = await db.createAudioFile("audio/mp3", ssCreator.id);
+              const mimeType = currentSpeechSystem.outputFormat().mimeType;
+              const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
               const sr = await currentSpeechSystem.speak(llmMessage.content, `${audioFile.id}`);
 
               const tts = await db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
@@ -232,10 +230,10 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
             const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
             try {
               const lipsyncCreator = await db.findCreator(lipSync.getName(), lipSync.getMetadata(), true);
-              // TODO get rid of hard-coded mime type here
-              const videoFile: VideoFile = await db.createVideoFile("video/mp4", lipsyncCreator.id);
+              const mimeType = lipSync.outputFormat().mimeType;
+              const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
 
-              const lipsyncResult: LipSyncResult = await timed("lipsync", () => {
+              const lipsyncResult: LipSyncResult = await timed("lipsync animate", () => {
                 return lipSync.animate(portait, speechFilePath!, `${videoFile.id}`);
               });
               const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);

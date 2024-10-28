@@ -34,7 +34,7 @@ interface LipSyncAnimator extends CreatorService {
 
   writeCacheFile(): Promise<void>;
 
-  preferredOutputFormat(): MediaFormat;
+  outputFormat(): MediaFormat;
 }
 
 export type {LipSyncAnimator, LipSyncResult};

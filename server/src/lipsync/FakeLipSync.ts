@@ -73,7 +73,7 @@ class FakeLipSync implements LipSyncAnimator {
     return true;
   }
 
-  preferredOutputFormat(): MediaFormat {
+  outputFormat(): MediaFormat {
     // apparently
     return MF_MP4;
   }

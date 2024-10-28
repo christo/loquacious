@@ -41,7 +41,7 @@ class NoSpeech implements SpeechSystem {
     return m;
   }
 
-  preferredOutputFormat(): MediaFormat {
+  outputFormat(): MediaFormat {
     return MF_MP3;
   }
 

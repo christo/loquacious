@@ -64,7 +64,7 @@ interface SpeechSystem extends CreatorService {
   /**
    * Provide the {@link MediaFormat} of the created audio.
    */
-  preferredOutputFormat(): MediaFormat;
+  outputFormat(): MediaFormat;
 }
 
 export {type SpeechSystem, type SpeechResult, DisplaySpeechSystem};

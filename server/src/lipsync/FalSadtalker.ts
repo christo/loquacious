@@ -138,7 +138,7 @@ class FalSadtalker implements LipSyncAnimator {
     return false;
   }
 
-  preferredOutputFormat(): MediaFormat {
+  outputFormat(): MediaFormat {
     return MF_MP4;
   }
 
