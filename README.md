@@ -198,11 +198,14 @@ deployment will have a configured version tag instead.
 Each service component listed above can have different back end implementations,
 both local and as online API services.
 
+* Running on `macos` (primary devmode), `brew` is advised for installing deps.
 * LM-Studio for the LM-Studio back end
 * OpenAI account for the ChatGPT back end
 * ElevenLabs account for the ElevenLabsVoice, and `brew install mpv`
 * For SystemVoice on `macos`, system command `say` is used. Various voices
-  are assumed to exist
+  are assumed to exist.
+* For converting `aiff` output audio from the `macos` `say` command
+  to `mp3`, `ffmpeg` is required: `brew install ffmpeg`
 * `git` assumed on `$PATH` for devmode version definition. Database tracks each
   boot and run independently
 * SadTalker has been tested for speech audio and image to lip sync video and its
@@ -220,7 +223,8 @@ both local and as online API services.
 * speech output
 * settings panel
 * lip sync video output usually works but only for human faces
-* chat history shown like conversation (will probably turn off for when speech input
+* chat history shown like conversation (will probably turn off for when speech
+  input
   is implemented)
 
 ## TODO
