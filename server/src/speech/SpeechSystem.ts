@@ -13,6 +13,9 @@ class DisplaySpeechSystem {
 
   constructor(name: string, options: Array<CharacterVoice>, isFree: boolean) {
     this.name = name;
+    if (options.length === 0) {
+      throw Error("no options specified");
+    }
     this.options = options;
     this.isFree = isFree;
   }
