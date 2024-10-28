@@ -10,9 +10,8 @@ class LlamaCppLlm implements Llm {
   readonly baseUrl: string | undefined;
   readonly enableHealth = true;
   readonly name = "Llama.cpp-LLM";
-  private openai;
-
   canRun = always;
+  private openai;
 
   /**
    * By default connects to localhost on default llama.cpp port.

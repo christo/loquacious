@@ -42,10 +42,8 @@ class FakeLlm implements Llm {
   readonly baseUrl = undefined;
   readonly name = "FakeLlm"
   readonly enableHealth = false;
-  private currentModelKey = KM_ECHO;
-
   canRun = always;
-
+  private currentModelKey = KM_ECHO;
   private readonly myModels: { [key: string]: FakeModel; } = {
     KM_STATIC: new FakeModel("static", (params: ChatCompletionMessageParam[]) => ({message: "fake chat result"})),
     KM_ECHO: new FakeModel("echo", (params: ChatCompletionMessageParam[]) => {

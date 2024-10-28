@@ -1,8 +1,8 @@
 import {readFileSync} from "fs";
 import OpenAI from "openai";
 import type {Message} from "../domain/Message";
-import {type PromptPart, SimplePromptPart} from "./PromptPart";
 import type {SpeechSystem} from "../speech/SpeechSystem";
+import {type PromptPart, SimplePromptPart} from "./PromptPart";
 
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 const rokosBasiliskSystemPrompt: string = readFileSync("prompts/rokos-basilisk.prompt.txt").toString();

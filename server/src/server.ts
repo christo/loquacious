@@ -10,7 +10,6 @@ import {FalSadtalker} from "lipsync/FalSadtalker";
 import type {LipSyncAnimator, LipSyncResult} from "lipsync/LipSyncAnimator";
 import {FakeLlm} from "llm/FakeLlm";
 import {LlamaCppLlm} from "llm/LlamaCppLlm";
-import {type Llm} from 'llm/Llm';
 import {LmStudioLlm} from "llm/LmStudioLlm";
 import {Modes} from "llm/Modes";
 import {OpenAiLlm} from 'llm/OpenAiLlm';

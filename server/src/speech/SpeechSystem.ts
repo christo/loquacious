@@ -1,10 +1,8 @@
 import type {CharacterVoice} from "speech/CharacterVoice";
 import {SpeechSystemOption} from "speech/SpeechSystems";
-import type {ConfigurableCreator} from "../domain/ConfigurableCreator";
-import type {CreatorType} from "../domain/CreatorType";
 import type {Message} from "../domain/Message";
 import type {Tts} from "../domain/Tts";
-import type {CanRun} from "../system/config";
+import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
 
 /** UI struct for a speech system with its name and all possible options */
@@ -61,6 +59,8 @@ interface SpeechSystem extends CreatorService {
    * @param m the message
    */
   removePauseCommands(m: Message): Message;
+
+  preferredOutputFormat(): MediaFormat;
 }
 
 export {type SpeechSystem, type SpeechResult, DisplaySpeechSystem};

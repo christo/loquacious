@@ -1,5 +1,3 @@
-
-
 // TODO read about types:
 //  * parser https://node-postgres.com/features/queries#types
 //  *  https://github.com/brianc/node-pg-types
@@ -15,5 +13,5 @@ export type Persistent<T> = {
    *
    * @param prepareValue
    */
-  toPostgres (prepareValue: (value: T) => any): any
+  toPostgres(prepareValue: (value: T) => any): any
 }

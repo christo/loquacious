@@ -1,4 +1,3 @@
-import {response} from "express";
 import OpenAI from "openai";
 import {hasEnv} from "../system/config";
 import type {ChatResult, Llm} from "./Llm";
@@ -12,6 +11,7 @@ class OpenAiLlm implements Llm {
   readonly baseUrl = undefined;
   readonly enableHealth = false;
   readonly name = "ChatGPT-LLM";
+  canRun = hasEnv("OPENAI_API_KEY");
   private openai;
   private model: string;
 
@@ -21,8 +21,6 @@ class OpenAiLlm implements Llm {
       apiKey: process.env.OPENAI_API_KEY as string,
     });
   }
-
-  canRun = hasEnv("OPENAI_API_KEY");
 
   async currentModel(): Promise<string> {
     return this.model;

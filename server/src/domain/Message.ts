@@ -1,4 +1,3 @@
-
 class Message {
   id: number;
   created: Date;

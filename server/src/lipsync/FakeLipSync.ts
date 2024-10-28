@@ -1,9 +1,9 @@
 import {promises as fs} from "fs";
+import type {Dirent} from "node:fs";
+import path from "path";
 import {always} from "../system/config";
 import type {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
-import type {Dirent} from "node:fs";
-import path from "path";
 
 // TODO use MediaFormat to detect all supported video types' extensions
 const hasVideoExt = (filename: string) => path.extname(filename).toLowerCase() === ".mp4";
@@ -13,6 +13,7 @@ const hasVideoExt = (filename: string) => path.extname(filename).toLowerCase() =
  * Hacky implementation of LipSync that reuses pre-generated video.
  */
 class FakeLipSync implements LipSyncAnimator {
+  canRun = always;
   private readonly lipSyncDataDir: string;
 
   /**
@@ -22,8 +23,6 @@ class FakeLipSync implements LipSyncAnimator {
   constructor(lipSyncDataDir: string) {
     this.lipSyncDataDir = lipSyncDataDir;
   }
-
-  canRun = always;
 
   name(): string {
     return "Fake-LipSync";

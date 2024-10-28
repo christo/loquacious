@@ -1,15 +1,18 @@
 import {ElevenLabsClient} from "elevenlabs";
 import fs from 'fs';
 import type {PathLike} from "node:fs";
-import path from "path";
+import path, {basename} from "path";
+import {Simulate} from "react-dom/test-utils";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import {Message} from "../domain/Message";
+import {type MediaFormat, MF_MP3} from "../media";
 import {hasEnv} from "../system/config";
 
 import {mkDirIfMissing} from "../system/filetoy";
+import error = Simulate.error;
 
 const VOICES = [
   new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
@@ -82,19 +85,16 @@ type StreamPartialConfig = {
 
 /** Implementation that calls elevenlabs.ai - requires an API key env var. */
 class ElevenLabsSpeech implements SpeechSystem {
-  private currentVoice = 0;
-  private characterVoice = VOICES[this.currentVoice];
-  private readonly name = `ElevenLabs-TTS`;
   client: ElevenLabsClient;
-  private readonly dataDir: string;
-
   readonly display: DisplaySpeechSystem;
-
   /**
    * Requires environment variable ELEVEN_LABS_API_KEY
    */
   canRun = hasEnv("ELEVENLABS_API_KEY");
-
+  private currentVoice = 0;
+  private characterVoice = VOICES[this.currentVoice];
+  private readonly name = `ElevenLabs-TTS`;
+  private readonly dataDir: string;
   /**
    * Partial config wraps the bulk or stream api call parameters but excludes the
    * text because that changes with every invocation.
@@ -161,10 +161,6 @@ class ElevenLabsSpeech implements SpeechSystem {
     }
   }
 
-  private getConfig(): ElevenLabsPartialConfig {
-    return this.partialConfig;
-  }
-
   pauseCommand(msDuration: number): string {
     const sec = (msDuration / 1000).toFixed(1)
     return `<break time="${sec}s" />`;
@@ -200,6 +196,14 @@ class ElevenLabsSpeech implements SpeechSystem {
 
   free(): boolean {
     return false;
+  }
+
+  preferredOutputFormat(): MediaFormat {
+    return MF_MP3;
+  }
+
+  private getConfig(): ElevenLabsPartialConfig {
+    return this.partialConfig;
   }
 }
 

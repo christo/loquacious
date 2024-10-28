@@ -1,4 +1,3 @@
-
 export class Deployment {
   id: number;
   created: Date;

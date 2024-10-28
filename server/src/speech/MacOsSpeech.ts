@@ -51,15 +51,14 @@ const MACOS_SPEECH_SYSTEM_NAME = "MacOs-TTS";
 
 class MacOsSpeech implements SpeechSystem {
   name = MACOS_SPEECH_SYSTEM_NAME;
-  private currentIndex = 0;
   display = new DisplaySpeechSystem(this.getName(), VOICES, this.free());
-  private readonly dataDir: string;
-  private fileFormat: MediaFormat;
-
   /**
    * Only runs on MacOS.
    */
   canRun = isMac;
+  private currentIndex = 0;
+  private readonly dataDir: string;
+  private fileFormat: MediaFormat;
 
   constructor(ttsDataDir: PathLike, fileFormat = MF_MP3) {
     this.dataDir = path.join(ttsDataDir.toString(), "macos");

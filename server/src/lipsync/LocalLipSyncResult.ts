@@ -1,14 +1,14 @@
 import fs from 'fs';
-import {extToFormat} from "../media";
 import type {PathLike} from "node:fs";
 import {basename} from 'path';
+import {extToFormat} from "../media";
 import type {LipSyncResult} from "./LipSyncAnimator";
 
 /**
  * Lip sync result that plays an existing video.
  *
  */
-class LocalLipSyncResult implements LipSyncResult{
+class LocalLipSyncResult implements LipSyncResult {
   private readonly size: number;
   private readonly name: string;
   private readonly contentType: string;

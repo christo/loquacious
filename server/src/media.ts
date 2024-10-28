@@ -1,24 +1,12 @@
-/**
- * @param format
- * @deprecated use MediaFormat instances
- */
-function formatToMimeType(format: SupportedAudioFormat) {
-  switch (format) {
-    case 'aiff':
-      return 'audio/aiff';
-    case 'mp3':
-      return 'audio/mpeg';
-    case 'wav':
-      return 'audio/wav';
-    default:
-      throw new Error(`Unsupported audio format ${format}`);
-  }
-}
-
 const MF_MP3: MediaFormat = {
   extensions: ["mp3"],
   mimeType: "audio/mp3",
   modality: "audio"
+};
+const MF_MP4: MediaFormat = {
+  extensions: ["mp4"],
+  mimeType: "video/mp4",
+  modality: "video"
 };
 const FORMATS: MediaFormat[] = [
   MF_MP3,
@@ -32,11 +20,7 @@ const FORMATS: MediaFormat[] = [
     mimeType: "audio/wav",
     modality: "audio"
   },
-  {
-    extensions: ["mp4"],
-    mimeType: "video/mp4",
-    modality: "video"
-  },
+  MF_MP4,
   {
     extensions: ["jpg", "jpeg"],
     mimeType: "image/jpeg",
@@ -88,10 +72,6 @@ function mimeTypeToFormat(mimeType: string): MediaFormat | undefined {
   return FORMAT_BY_MIME_TYPE[mimeType];
 }
 
-/** @deprecated use MediaFormat instances */
-const TYPE_MP3 = "mp3"
-/** @deprecated use MediaFormat instances */
-const TYPE_DEFAULT = TYPE_MP3;
 
 type MediaFormat = {
   /** All possible file extensions for this format, first is preferred for file generation. */
@@ -100,7 +80,4 @@ type MediaFormat = {
   modality: "image" | "video" | "audio";
 }
 
-
-/** @deprecated use MediaFormat instances */
-export type SupportedAudioFormat = "aiff" | "mp3" | "wav";
-export {TYPE_MP3, TYPE_DEFAULT, MF_MP3, type MediaFormat, extToFormat, mimeTypeToFormat, supportedImageTypes};
+export {MF_MP3, MF_MP4, type MediaFormat, extToFormat, mimeTypeToFormat, supportedImageTypes};

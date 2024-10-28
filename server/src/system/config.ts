@@ -1,8 +1,8 @@
 import {exec} from 'child_process';
+import * as os from 'os';
 import path from "path";
 import {promisify} from 'util';
 import {mkDirIfMissing} from "./filetoy";
-import * as os from 'os';
 
 type Predicate = () => boolean;
 type AsyncPredicate = () => Promise<boolean>;
@@ -45,7 +45,7 @@ const execAsync = promisify(exec);
  */
 async function getCurrentCommitHash(cwd?: string): Promise<string> {
   try {
-    const { stdout } = await execAsync('git rev-parse HEAD', { cwd });
+    const {stdout} = await execAsync('git rev-parse HEAD', {cwd});
     return stdout.trim();
   } catch (error) {
     console.error('Error getting current commit hash:', error);
@@ -58,4 +58,15 @@ type CanRun = {
 }
 
 
-export {ensureDataDirsExist, getCurrentCommitHash, CanRun, isLinux, isMac, isWindows, not, always, hasEnv, type Predicate};
+export {
+  ensureDataDirsExist,
+  getCurrentCommitHash,
+  CanRun,
+  isLinux,
+  isMac,
+  isWindows,
+  not,
+  always,
+  hasEnv,
+  type Predicate
+};
