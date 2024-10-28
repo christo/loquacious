@@ -218,12 +218,11 @@ both local and as online API services.
 
 ## TODO
 
-* [x] save conversation text to db
-* [ ] identify which LLM and model was used for the text
-* [ ] store all interactions in database
+* [x] identify which LLM and model was used for the text
+* [x] store all interactions in database
 * [ ] design for possible workflow that produces spoken audio in lipsync video
       directly from text message without intermediate speech audio
-* [ ] data file tree for generated media assets:
+* [x] data file tree for generated media assets:
     * `<base>/<type>/<system>/<option>/<tag>_<db-id>.<format>`
     * type: tts, ttt, stv (speech to video), etc.
     * e.g. `data/tts/elevenlabs/beatrice/xyz_12345.mp3`
