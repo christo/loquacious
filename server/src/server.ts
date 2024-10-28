@@ -177,27 +177,20 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     try {
       const currentLlm = LLMS[llmIndex];
-      const currentModel = await LLMS[llmIndex].currentModel()
-      const buildResponse = (messages: Message[], speechFilePath: string | undefined, lipsyncResult: LipSyncResult | undefined) => ({
+      const currentModel = await currentLlm.currentModel()
+      const buildResponse = (messages: Message[], speechFilePath?: string, lipsyncResult?: LipSyncResult) => ({
         response: {
-          // portrait instance of ImageInfo, input to lipsync
           portrait: portrait,
-          // text response from llm as string
           messages: messages,
-          // file path to speech audio
           speech: speechFilePath,
-          // instance of LipSyncResult
           lipsync: lipsyncResult,
-          // llm that generated the message
           llm: currentLlm.name,
-          // llm model used
           model: currentModel,
         }
       });
       let session = await getOrCreateSession();
-
       console.log("storing user message");
-      const userMessage = await db.createUserMessage(session, prompt);
+      await db.createUserMessage(session, prompt);
       const messageHistory: Message[] = await db.getSessionMessages(session);
       const mode = modes.getMode();
       const currentSpeechSystem = speechSystems.current();
