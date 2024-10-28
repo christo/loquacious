@@ -260,27 +260,6 @@ both local and as online API services.
           questions deserving of a divinely inspired being will hopefully
           provide cover for the otherwise conspicuous absence of fast-paced
           banter
-* [x] db schema
-    * system prompt versions
-    * expert-system graph
-        * pregenerated low-latency responses with sufficient variation
-          renderings
-        * detection of equivalence matching for short phrases, even as
-          subcomponents
-        * dynamic caching across media production graph:
-            * each text needs multiple voice renderings per voice
-            * each text needs multiple rephrasings
-            * each voice rendering needs multiple lipsync videos per portrait
-        * video segments must return to known origin pose
-        * front-end sequencing of a chain of video segments
-    * modestates
-    * text-to-text: prompts, output, modestate, system, model, datetime,
-      system-parameters
-    * text-to-speech: input, system, options
-    * speech-to-video: input speech, input video (optional), system, options
-    * performance stats
-    * image-to-text: image-ref, image-hash, system, text, system-prompt?,
-      timestamp,
 * [ ] test reference data filetree (better for version control not to require
   database so it can be version controlled)
 * [x] spike fal sadtalker to generate video from picture and speech file
