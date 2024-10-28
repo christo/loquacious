@@ -1,8 +1,7 @@
 import {ElevenLabsClient} from "elevenlabs";
 import fs from 'fs';
 import type {PathLike} from "node:fs";
-import path, {basename} from "path";
-import {Simulate} from "react-dom/test-utils";
+import path from "path";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
@@ -12,7 +11,6 @@ import {type MediaFormat, MF_MP3} from "../media";
 import {hasEnv} from "../system/config";
 
 import {mkDirIfMissing} from "../system/filetoy";
-import error = Simulate.error;
 
 const VOICES = [
   new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
@@ -83,18 +81,23 @@ type StreamPartialConfig = {
   }
 };
 
-/** Implementation that calls elevenlabs.ai - requires an API key env var. */
+/**
+ * Implementation that calls elevenlabs.ai - requires an API key env var.
+ */
 class ElevenLabsSpeech implements SpeechSystem {
   client: ElevenLabsClient;
   readonly display: DisplaySpeechSystem;
+
   /**
    * Requires environment variable ELEVEN_LABS_API_KEY
    */
   canRun = hasEnv("ELEVENLABS_API_KEY");
+
   private currentVoice = 0;
   private characterVoice = VOICES[this.currentVoice];
   private readonly name = `ElevenLabs-TTS`;
   private readonly dataDir: string;
+
   /**
    * Partial config wraps the bulk or stream api call parameters but excludes the
    * text because that changes with every invocation.
