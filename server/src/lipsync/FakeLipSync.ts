@@ -1,6 +1,7 @@
-import {promises as fs} from "fs";
+import {promises} from "fs";
 import type {Dirent} from "node:fs";
 import path from "path";
+import {type MediaFormat, MF_MP4} from "../media";
 import {always} from "../system/config";
 import type {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
@@ -35,7 +36,7 @@ class FakeLipSync implements LipSyncAnimator {
    * @param _fileKey ignored
    */
   async animate(_imageFile: string, _speechFile: string, _fileKey: string): Promise<LipSyncResult> {
-    const files = await fs.readdir(this.lipSyncDataDir, {withFileTypes: true, recursive: true});
+    const files = await promises.readdir(this.lipSyncDataDir, {withFileTypes: true, recursive: true});
     // TODO remove file extension hard-coding
     const aFile: Dirent | undefined = files.find(f => f.isFile() && hasVideoExt(f.name));
     if (!aFile) {
@@ -57,7 +58,7 @@ class FakeLipSync implements LipSyncAnimator {
   /**
    * Unsupported.
    */
-  configure(metadata: string): Promise<void> {
+  configure(_metadata: string): Promise<void> {
     return Promise.reject();
   }
 
@@ -70,6 +71,11 @@ class FakeLipSync implements LipSyncAnimator {
 
   free(): boolean {
     return true;
+  }
+
+  preferredOutputFormat(): MediaFormat {
+    // apparently
+    return MF_MP4;
   }
 
 }

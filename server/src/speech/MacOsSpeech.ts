@@ -14,7 +14,6 @@ import {isMac} from "../system/config";
 
 import {escapeFilepart, mkDirIfMissing} from "../system/filetoy";
 
-
 const execPromise = util.promisify(exec);
 const unlinkPromise = util.promisify(fs.unlink);
 
@@ -116,6 +115,10 @@ class MacOsSpeech implements SpeechSystem {
       console.error('An error occurred during speech synthesis:', error);
       return Promise.reject(error);
     }
+  }
+
+  preferredOutputFormat(): MediaFormat {
+    return MF_MP3;
   }
 
   pauseCommand(msDuration: number): string {

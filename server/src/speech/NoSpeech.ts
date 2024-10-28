@@ -2,6 +2,7 @@ import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import type {Message} from "../domain/Message";
+import {type MediaFormat, MF_MP3} from "../media";
 
 const SILENT_SUCCESS: SpeechResult = {
   filePath: () => undefined,
@@ -38,6 +39,10 @@ class NoSpeech implements SpeechSystem {
 
   removePauseCommands(m: Message): Message {
     return m;
+  }
+
+  preferredOutputFormat(): MediaFormat {
+    return MF_MP3;
   }
 
 
