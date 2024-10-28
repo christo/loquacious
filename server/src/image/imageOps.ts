@@ -2,7 +2,8 @@ import {promises as fs} from "fs";
 import {type MediaFormat, supportedImageTypes} from "media";
 import path from "path";
 import sharp from "sharp";
-import {mkDirIfMissing} from "../system/config";
+
+import {mkDirIfMissing} from "../system/filetoy";
 
 type Dim = {
   width: number,

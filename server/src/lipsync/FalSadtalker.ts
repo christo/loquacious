@@ -4,8 +4,8 @@ import type {LipSync, LipSyncResult} from "lipsync/LipSync";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
 import path from "path";
-import {mkDirIfMissing} from "system/config";
 import {timed} from "system/performance";
+import {mkDirIfMissing} from "../system/filetoy";
 
 
 async function readBinaryFile(filePath: string): Promise<File> {

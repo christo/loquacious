@@ -8,7 +8,8 @@ import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import util from "util";
-import {mkDirIfMissing} from "../system/config";
+
+import {mkDirIfMissing} from "../system/filetoy";
 
 
 const execPromise = util.promisify(exec);
