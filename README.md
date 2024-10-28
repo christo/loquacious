@@ -229,8 +229,13 @@ both local and as online API services.
 
 ## TODO
 
+* [ ] spike speech to text using whisper.cpp
+    * [ ] can run in browser reliably?
+    * [ ] what model?
+    * [ ] is it feasible to stream video to server to capture speech and pose
+      estimation? What can/should be done on the client?
 * [ ] move portrait images into server
-  * [ ] serve portrait image from server as static
+    * [ ] serve portrait image from server as static
 * [ ] settings panel
     * [x] show current main llm/model
     * [x] show current speech system and voice option
@@ -299,7 +304,8 @@ both local and as online API services.
 * [x] asking name flow
     * [x] flexible level of persistance about wanting to know a person's name
     * [x] calling by name if available
-    * [ ] calling by pet names "sweetheart", "darling" etc. - add to system prompt
+    * [ ] calling by pet names "sweetheart", "darling" etc. - add to system
+      prompt
 * fault detection
 * individual person recognition (using only recent interactions)
 * functions to know what is happening, what has happened before, state of
