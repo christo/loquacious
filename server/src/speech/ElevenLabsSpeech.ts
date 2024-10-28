@@ -7,6 +7,7 @@ import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import {Message} from "../domain/Message";
+import {hasEnv} from "../system/config";
 
 import {mkDirIfMissing} from "../system/filetoy";
 
@@ -83,10 +84,17 @@ type StreamPartialConfig = {
 class ElevenLabsSpeech implements SpeechSystem {
   private currentVoice = 0;
   private characterVoice = VOICES[this.currentVoice];
-  readonly name = `ElevenLabs-TTS`;
-  readonly display: DisplaySpeechSystem;
+  private readonly name = `ElevenLabs-TTS`;
   client: ElevenLabsClient;
   private readonly dataDir: string;
+
+  readonly display: DisplaySpeechSystem;
+
+  /**
+   * Requires environment variable ELEVEN_LABS_API_KEY
+   */
+  canRun = hasEnv("ELEVENLABS_API_KEY");
+
   /**
    * Partial config wraps the bulk or stream api call parameters but excludes the
    * text because that changes with every invocation.
@@ -111,7 +119,7 @@ class ElevenLabsSpeech implements SpeechSystem {
     this.dataDir = path.join(ttsDataDir.toString(), "el");
     mkDirIfMissing(this.dataDir);
     this.client = new ElevenLabsClient({});
-    this.display = new DisplaySpeechSystem(this.name, VOICES, this.free())
+    this.display = new DisplaySpeechSystem(this.getName(), VOICES, this.free())
   }
 
   options(): Array<string> {
@@ -140,7 +148,7 @@ class ElevenLabsSpeech implements SpeechSystem {
         });
 
         outStream.on('finish', () => {
-          console.log('File writing completed successfully.');
+          console.log('speech file writing completed successfully.');
           // hack alert
           resolve({filePath: () => outFile, tts: () => undefined});
         });

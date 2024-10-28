@@ -1,6 +1,6 @@
 import type {ChatResult, Llm} from "llm/Llm";
 import OpenAI from "openai";
-import type {ConfigurableCreator} from "../domain/ConfigurableCreator";
+import {always} from "../system/config";
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 import Model = OpenAI.Model;
 
@@ -43,6 +43,8 @@ class FakeLlm implements Llm {
   readonly name = "FakeLlm"
   readonly enableHealth = false;
   private currentModelKey = KM_ECHO;
+
+  canRun = always;
 
   private readonly myModels: { [key: string]: FakeModel; } = {
     KM_STATIC: new FakeModel("static", (params: ChatCompletionMessageParam[]) => ({message: "fake chat result"})),

@@ -5,6 +5,7 @@ import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
 import path from "path";
 import {timed} from "system/performance";
+import {hasEnv} from "../system/config";
 import {mkDirIfMissing} from "../system/filetoy";
 
 
@@ -50,7 +51,9 @@ class FalSadtalker implements LipSyncAnimator {
     still_mode: false,             // whether to use few head movements
     preprocess: "full",            // crop, extcrop, resize, full, extfull
   };
-  private urlCacheFile: string;
+  private readonly urlCacheFile: string;
+
+  canRun = hasEnv("FAL_API_KEY")
 
   /**
    * Constructor.

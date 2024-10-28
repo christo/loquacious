@@ -25,13 +25,13 @@ class SpeechSystemOption {
   /** Returns a compact string representation of a {@link SpeechSystem} and its current option. */
   descriptor() {
     const desc = this.description ? ` (${this.description})` : "";
-    return `${this.system.name}/${this.optionName}${desc}`;
+    return `${this.system.getName()}/${this.optionName}${desc}`;
   }
 
   /** Display object represending a speech system and its configured option */
   safeObject() {
     return {
-      system: this.system.name,
+      system: this.system.getName(),
       optionKey: this.optionKey,
       optionName: this.optionName,
       description: this.descriptor(),
@@ -56,7 +56,7 @@ class SpeechSystems {
       new ElevenLabsSpeech(this.baseDir),
       new MacOsSpeech(this.baseDir),
       new NoSpeech(),
-    ]
+    ].filter(s => s.canRun())
   }
 
   current() {
@@ -64,7 +64,7 @@ class SpeechSystems {
   }
 
   byName(name: string): SpeechSystem {
-    const maybeFound: SpeechSystem | undefined = this.systems.find(s => s.name == name);
+    const maybeFound: SpeechSystem | undefined = this.systems.find(s => s.getName() === name);
     if (maybeFound) {
       return maybeFound;
     } else {

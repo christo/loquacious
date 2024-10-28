@@ -1,4 +1,5 @@
 import {promises as fs} from "fs";
+import {always} from "../system/config";
 import type {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
 import type {Dirent} from "node:fs";
@@ -21,6 +22,8 @@ class FakeLipSync implements LipSyncAnimator {
   constructor(lipSyncDataDir: string) {
     this.lipSyncDataDir = lipSyncDataDir;
   }
+
+  canRun = always;
 
   name(): string {
     return "Fake-LipSync";

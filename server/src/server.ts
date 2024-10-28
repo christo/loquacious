@@ -54,18 +54,12 @@ const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 
 ensureDataDirsExist(process.env.DATA_DIR!);
 
-const LM_STUDIO_BACKEND: Llm = new LmStudioLlm();
-const OPEN_AI_BACKEND: Llm = new OpenAiLlm();
-const LLAMA_CPP_BACKEND: Llm = new LlamaCppLlm();
-
-const FAKE_LLM: Llm = new FakeLlm();
-
 const LLMS = [
-  OPEN_AI_BACKEND,
-  LLAMA_CPP_BACKEND,
-  LM_STUDIO_BACKEND,
-  FAKE_LLM
-]
+  new OpenAiLlm(),
+  new LlamaCppLlm(),
+  new LmStudioLlm(),
+  new FakeLlm()
+].filter(s => s.canRun())
 let llmIndex = 0;
 
 const speechSystems = new SpeechSystems(path.join(PATH_BASE_DATA, "tts"));
@@ -73,7 +67,7 @@ const BASEDIR_LIPSYNC = path.join(PATH_BASE_DATA, "lipsync");
 const ANIMATORS: LipSyncAnimator[] = [
   new FalSadtalker(BASEDIR_LIPSYNC),
   new FakeLipSync(BASEDIR_LIPSYNC)
-]
+].filter(s => s.canRun())
 let lipsyncIndex = 0;
 
 const lipSync = ANIMATORS[lipsyncIndex];

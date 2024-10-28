@@ -1,5 +1,6 @@
 import {response} from "express";
 import OpenAI from "openai";
+import {hasEnv} from "../system/config";
 import type {ChatResult, Llm} from "./Llm";
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 import Model = OpenAI.Model;
@@ -20,6 +21,8 @@ class OpenAiLlm implements Llm {
       apiKey: process.env.OPENAI_API_KEY as string,
     });
   }
+
+  canRun = hasEnv("OPENAI_API_KEY");
 
   async currentModel(): Promise<string> {
     return this.model;

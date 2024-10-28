@@ -1,5 +1,6 @@
 import type {ChatResult, Llm} from "llm/Llm";
 import OpenAI from "openai";
+import {always} from "../system/config";
 import Model = OpenAI.Model;
 
 /**
@@ -10,6 +11,8 @@ class LlamaCppLlm implements Llm {
   readonly enableHealth = true;
   readonly name = "Llama.cpp-LLM";
   private openai;
+
+  canRun = always;
 
   /**
    * By default connects to localhost on default llama.cpp port.

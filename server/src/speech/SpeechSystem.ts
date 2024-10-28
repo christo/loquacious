@@ -4,6 +4,8 @@ import type {ConfigurableCreator} from "../domain/ConfigurableCreator";
 import type {CreatorType} from "../domain/CreatorType";
 import type {Message} from "../domain/Message";
 import type {Tts} from "../domain/Tts";
+import type {CanRun} from "../system/config";
+import type {CreatorService} from "../system/CreatorService";
 
 /** UI struct for a speech system with its name and all possible options */
 class DisplaySpeechSystem {
@@ -26,8 +28,12 @@ interface SpeechResult {
 /**
  * Represents a test to speech system.
  */
-interface SpeechSystem extends CreatorType, ConfigurableCreator {
-  name: string; // TODO migrate this to CreatorType#getName() function
+interface SpeechSystem extends CreatorService {
+
+  /**
+   * @deprecated TODO migrate this to CreatorType#getName() function
+   */
+  //name: string;
 
   /**
    * Generates spoken audio for message and returns relative filepath to audio from data base dir.

@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import {always} from "../system/config";
 import type {ChatResult, Llm} from "./Llm";
 import Model = OpenAI.Model;
 
@@ -7,6 +8,8 @@ class LmStudioLlm implements Llm {
   readonly enableHealth = false;
   readonly name = "LM-Studio-LLM";
   private openai;
+
+  canRun = always;
 
   constructor(baseUrl = "http://localhost:1234/v1") {
     this.baseUrl = baseUrl;

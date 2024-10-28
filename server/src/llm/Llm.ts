@@ -1,6 +1,5 @@
 import OpenAI from "openai";
-import type {ConfigurableCreator} from "../domain/ConfigurableCreator";
-import type {CreatorType} from "../domain/CreatorType";
+import type {CreatorService} from "../system/CreatorService";
 import Model = OpenAI.Model;
 
 /**
@@ -15,7 +14,7 @@ type ChatResult = {
  * Large Language Model service.
  * Can do chat completions. May have multiple models that can be dynamically selected.
  */
-interface Llm extends CreatorType, ConfigurableCreator {
+interface Llm extends CreatorService {
   /** Unique service name */
   name: string,
   baseUrl: string | undefined,

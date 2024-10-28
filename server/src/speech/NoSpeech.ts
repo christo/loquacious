@@ -2,6 +2,8 @@ import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem, type SpeechResult} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import type {Message} from "../domain/Message";
+import type {Predicate} from "../system/config";
+import {always} from "../system/config";
 
 const SILENT_SUCCESS: SpeechResult = {
   filePath: () => undefined,
@@ -12,11 +14,14 @@ const SILENT_SUCCESS: SpeechResult = {
  * Does not make sound or generate audio files.
  */
 class NoSpeech implements SpeechSystem {
+  canRun() {
+    return true;
+  }
 
   readonly name = "NoSpeech";
   private onlyOptions = [new CharacterVoice("silence", "silence", "is golden")];
 
-  readonly display = new DisplaySpeechSystem(this.name, this.onlyOptions, this.free());
+  readonly display = new DisplaySpeechSystem(this.getName(), this.onlyOptions, this.free());
 
   options(): Array<string> {
     return this.onlyOptions.map(x => x.voiceId);

@@ -2,6 +2,23 @@ import {exec} from 'child_process';
 import path from "path";
 import {promisify} from 'util';
 import {mkDirIfMissing} from "./filetoy";
+import * as os from 'os';
+
+type Predicate = () => boolean;
+type AsyncPredicate = () => Promise<boolean>;
+
+const always = () => true;
+
+const isMac = () => os.platform() === 'darwin';
+
+const isLinux = () => os.platform() === 'linux';
+
+const isWindows = () => os.platform() === 'win32';
+
+const not = (p: Predicate) => () => !p();
+
+const hasEnv = (param: string) => () => process.env[param] !== undefined && process.env[param].length > 0;
+
 
 /**
  * @deprecated - each service should make their own
@@ -36,5 +53,9 @@ async function getCurrentCommitHash(cwd?: string): Promise<string> {
   }
 }
 
+type CanRun = {
+  canRun: Predicate;
+}
 
-export {ensureDataDirsExist, getCurrentCommitHash};
+
+export {ensureDataDirsExist, getCurrentCommitHash, CanRun, isLinux, isMac, isWindows, not, always, hasEnv, type Predicate};

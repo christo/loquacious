@@ -1,5 +1,6 @@
 import type {ConfigurableCreator} from "../domain/ConfigurableCreator";
 import type {CreatorType} from "../domain/CreatorType";
+import type {CreatorService} from "../system/CreatorService";
 
 /**
  * Output of calling {@LipSync} to generate a video.
@@ -18,7 +19,7 @@ type LipSyncResult = {
 /**
  * Service that can create animation video from portrait image and speech audio.
  */
-interface LipSyncAnimator extends CreatorType, ConfigurableCreator {
+interface LipSyncAnimator extends CreatorService {
 
   /** Unique name for the service. */
   name(): string;

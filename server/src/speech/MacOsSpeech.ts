@@ -10,6 +10,7 @@ import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import util from "util";
 import {Message} from "../domain/Message";
+import {isMac} from "../system/config";
 
 import {escapeFilepart, mkDirIfMissing} from "../system/filetoy";
 
@@ -51,9 +52,14 @@ const MACOS_SPEECH_SYSTEM_NAME = "MacOs-TTS";
 class MacOsSpeech implements SpeechSystem {
   name = MACOS_SPEECH_SYSTEM_NAME;
   private currentIndex = 0;
-  display = new DisplaySpeechSystem(this.name, VOICES, this.free());
+  display = new DisplaySpeechSystem(this.getName(), VOICES, this.free());
   private readonly dataDir: string;
   private fileFormat: MediaFormat;
+
+  /**
+   * Only runs on MacOS.
+   */
+  canRun = isMac;
 
   constructor(ttsDataDir: PathLike, fileFormat = MF_MP3) {
     this.dataDir = path.join(ttsDataDir.toString(), "macos");
