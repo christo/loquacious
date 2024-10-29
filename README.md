@@ -250,6 +250,7 @@ both local and as online API services.
   elevenlabs integration so could do speech and lipsync video in one API call.
 * [ ] check [Synthesia](https://www.synthesia.io/features/avatars) for lip sync
 * [ ] check [Hey Gen](https://www.heygen.com/interactive-avatar) for lip sync
+* [ ] some kind of background process to put audio and video durations in db 
 * design character persona and interaction workflow such that potentially long
   latency responses are normalised within the theatric context.
     * expert-system graph of cached and precalculated fast responses or stalling
