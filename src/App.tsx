@@ -213,7 +213,6 @@ const App: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
-  // TODO fade-in and fade out for video show and hide
   const showVideo = () => {
     if (videoRef.current) {
       videoRef.current.style.opacity = "1";
