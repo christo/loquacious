@@ -8,11 +8,7 @@ import {prescaleImages} from "image/imageOps";
 import {FakeLipSync} from "lipsync/FakeLipSync";
 import {FalSadtalker} from "lipsync/FalSadtalker";
 import type {LipSyncAnimator, LipSyncResult} from "lipsync/LipSyncAnimator";
-import {FakeLlm} from "llm/FakeLlm";
-import {LlamaCppLlm} from "llm/LlamaCppLlm";
-import {LmStudioLlm} from "llm/LmStudioLlm";
 import {Modes} from "llm/Modes";
-import {OpenAiLlm} from 'llm/OpenAiLlm';
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
@@ -28,6 +24,7 @@ import type {CreatorType} from "./domain/CreatorType";
 import {Message} from "./domain/Message";
 import {Session} from "./domain/Session";
 import type {VideoFile} from "./domain/VideoFile";
+import LlmService from "./llm/LlmService";
 import Agent = Undici.Agent;
 
 // TODO confirm we want connect timeout and not ?"request timeout"
@@ -53,13 +50,7 @@ const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 
 ensureDataDirsExist(process.env.DATA_DIR!);
 
-const LLMS = [
-  new OpenAiLlm(),
-  new LlamaCppLlm(),
-  new LmStudioLlm(),
-  new FakeLlm()
-].filter(s => s.canRun())
-let llmIndex = 0;
+const LLMS = new LlmService()
 
 const speechSystems = new SpeechSystems(path.join(PATH_BASE_DATA, "tts"));
 const BASEDIR_LIPSYNC = path.join(PATH_BASE_DATA, "lipsync");
@@ -98,10 +89,10 @@ app.get("/system", async (_req: Request, res: Response) => {
       options: modes.allModes()
     },
     llmMain: {
-      name: LLMS[llmIndex].name,
-      models: await LLMS[llmIndex].models(),
-      currentModel: await LLMS[llmIndex].currentModel(),
-      isFree: LLMS[llmIndex].free()
+      name: LLMS.current().name,
+      models: await LLMS.current().models(),
+      currentModel: await LLMS.current().currentModel(),
+      isFree: LLMS.current().free()
     },
     speech: {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
@@ -116,7 +107,7 @@ app.get("/system", async (_req: Request, res: Response) => {
     runtime: {
       run: db.getRun()
     },
-    health: await systemHealth(LLMS, llmIndex)
+    health: await systemHealth(LLMS.current())
   });
 });
 
@@ -176,7 +167,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({error: 'No prompt provided'});
   } else {
     try {
-      const currentLlm = LLMS[llmIndex];
+      const currentLlm = LLMS.current();
       const currentModel = await currentLlm.currentModel()
       const buildResponse = (messages: Message[], speechFilePath?: string, lipsyncResult?: LipSyncResult) => ({
         response: {
@@ -273,7 +264,7 @@ app.get('/video', async (req: Request, res: Response) => fileStream(req.query.fi
 
 async function initialiseCreatorTypes() {
   const creators: CreatorType[] = [
-    ...LLMS,
+    ...LLMS.all(),
     ...speechSystems.systems,
     ...ANIMATORS
   ];
@@ -295,7 +286,7 @@ app.listen(port, async () => {
   // TODO remove host hard-coding
   console.log(`Server is running on http://localhost:${port}`);
 
-  const llm = LLMS[llmIndex];
+  const llm = LLMS.current();
   console.log(`LLM Health check: ${llm.enableHealth ? "enabled" : "disabled"}`);
   console.log(`LLM back end: ${llm.name} at URL: ${(llm.baseUrl)}`);
   console.log(`LLM current model: ${await llm.currentModel()}`);
