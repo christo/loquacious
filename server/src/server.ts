@@ -5,9 +5,7 @@ import express, {Request, Response} from 'express';
 import {promises} from 'fs';
 import {ImageInfo} from "image/ImageInfo";
 import {prescaleImages} from "image/imageOps";
-import {FakeLipSync} from "lipsync/FakeLipSync";
-import {FalSadtalker} from "lipsync/FalSadtalker";
-import type {LipSyncAnimator, LipSyncResult} from "lipsync/LipSyncAnimator";
+import type {LipSyncResult} from "lipsync/LipSyncAnimator";
 import {Modes} from "llm/Modes";
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
@@ -24,6 +22,7 @@ import type {CreatorType} from "./domain/CreatorType";
 import {Message} from "./domain/Message";
 import {Session} from "./domain/Session";
 import type {VideoFile} from "./domain/VideoFile";
+import AnimatorServices from "./lipsync/AnimatorServices";
 import LlmService from "./llm/LlmService";
 import Agent = Undici.Agent;
 
@@ -53,14 +52,7 @@ ensureDataDirsExist(process.env.DATA_DIR!);
 const LLMS = new LlmService()
 
 const speechSystems = new SpeechSystems(path.join(PATH_BASE_DATA, "tts"));
-const BASEDIR_LIPSYNC = path.join(PATH_BASE_DATA, "lipsync");
-const ANIMATORS: LipSyncAnimator[] = [
-  new FalSadtalker(BASEDIR_LIPSYNC),
-  new FakeLipSync(BASEDIR_LIPSYNC)
-].filter(s => s.canRun())
-let lipsyncIndex = 0;
-
-const lipSync = ANIMATORS[lipsyncIndex];
+const ANIMATORS = new AnimatorServices(PATH_BASE_DATA);
 
 const modes = new Modes();
 
@@ -100,9 +92,9 @@ app.get("/system", async (_req: Request, res: Response) => {
       isFree: speechSystems.current().free()
     },
     lipsync: {
-      systems: ANIMATORS.map(ls => ls.name()),
-      current: lipSync.name(),
-      isFree: lipSync.free()
+      systems: ANIMATORS.all().map(ls => ls.name()),
+      current: ANIMATORS.current().name(),
+      isFree: ANIMATORS.current().free()
     },
     runtime: {
       run: db.getRun()
@@ -169,6 +161,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     try {
       const currentLlm = LLMS.current();
       const currentModel = await currentLlm.currentModel()
+      const currentSpeech = speechSystems.current();
+      const currentAnimator = ANIMATORS.current();
       const buildResponse = (messages: Message[], speechFilePath?: string, lipsyncResult?: LipSyncResult) => ({
         response: {
           portrait: portrait,
@@ -184,8 +178,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       await db.createUserMessage(session, prompt);
       const messageHistory: Message[] = await db.getSessionMessages(session);
       const mode = modes.getMode();
-      const currentSpeechSystem = speechSystems.current();
-      let allMessages = mode(messageHistory, currentSpeechSystem);
+      let allMessages = mode(messageHistory, currentSpeech);
       let llmResponse: string | null = await timed("text generation", async () => {
         const response = await currentLlm.chat(allMessages);
         return response.message
@@ -199,10 +192,10 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           const speechResult: SpeechResult = await timed<SpeechResult>(
             "speech synthesis",
             async () => {
-              const ssCreator = await db.findCreator(currentSpeechSystem.getName(), currentSpeechSystem.getMetadata(), true);
-              const mimeType = currentSpeechSystem.outputFormat().mimeType;
+              const ssCreator = await db.findCreator(currentSpeech.getName(), currentSpeech.getMetadata(), true);
+              const mimeType = currentSpeech.outputFormat().mimeType;
               const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
-              const sr = await currentSpeechSystem.speak(llmMessage.content, `${audioFile.id}`);
+              const sr = await currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
 
               const tts = await db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
               return {...sr, tts: () => tts} as SpeechResult;
@@ -213,21 +206,21 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           if (speechFilePath) {
             const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
             try {
-              const lipsyncCreator = await db.findCreator(lipSync.getName(), lipSync.getMetadata(), true);
-              const mimeType = lipSync.outputFormat().mimeType;
+              const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
+              const mimeType = currentAnimator.outputFormat().mimeType;
               const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
 
               const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
                 const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
                 console.log(`created lipsync id ${lipsync.id}`);
-                return lipSync.animate(portait, speechFilePath!, `${videoFile.id}`);
+                return currentAnimator.animate(portait, speechFilePath!, `${videoFile.id}`);
               });
 
               // TODO return full session graph for enabling replay etc.
-              const finalMessages = (await db.getSessionMessages(session)).map(m => currentSpeechSystem.removePauseCommands(m));
+              const finalMessages = (await db.getSessionMessages(session)).map(m => currentSpeech.removePauseCommands(m));
               res.json(buildResponse(finalMessages, speechFilePath, lipsyncResult));
 
-              await lipSync.writeCacheFile();
+              await currentAnimator.writeCacheFile();
             } catch (e) {
               const msg = "lipsync generation failed";
               console.error(msg, e);
@@ -266,7 +259,7 @@ async function initialiseCreatorTypes() {
   const creators: CreatorType[] = [
     ...LLMS.all(),
     ...speechSystems.systems,
-    ...ANIMATORS
+    ...ANIMATORS.all()
   ];
   console.log(`ensuring ${creators.length} creator types are in database`);
   await Promise.all(creators.map(async creator => {
@@ -294,5 +287,5 @@ app.listen(port, async () => {
   console.log(`LLM available models (${models.length}):`);
   models.forEach(m => console.log(`   ${m.id}`));
   console.log(`Current Speech System: ${speechSystems.current().currentOption().descriptor()}`);
-  console.log(`Current LipSync: ${lipSync.name()}`);
+  console.log(`Current LipSync: ${ANIMATORS.current().name()}`);
 });
