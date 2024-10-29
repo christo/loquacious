@@ -19,7 +19,7 @@ const unlinkPromise = util.promisify(fs.unlink);
 
 async function convertAudio(desiredFormat: string, path: string): Promise<string> {
   const finalPath = `${path}.${desiredFormat}`;
-  console.log(`using ffmpeg to convert ${path} to ${desiredFormat} in ${finalPath}`);
+  // console.log(`using ffmpeg to convert ${path} to ${desiredFormat} in ${finalPath}`);
   await new Promise<void>((resolve, reject) => {
     ffmpeg(path)
       .toFormat(desiredFormat)
@@ -80,7 +80,6 @@ class MacOsSpeech implements SpeechSystem {
       const voicePart = voice.name.replaceAll(/[\s\/]/g, '-');
       const filename = `tts_${basename}_${voicePart}`;
       const savePath = path.join(this.dataDir, filename);
-      console.log(`savePath: ${savePath}`);
       const aiffFile = `${savePath}.aiff`;
       let command = `say "${escapeFilepart(message)}" -v "${escapeFilepart(voice.voiceId)}" -r ${wpm} -o "${aiffFile}"`;
       let result: Promise<string>;
