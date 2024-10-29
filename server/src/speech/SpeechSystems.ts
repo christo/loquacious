@@ -63,6 +63,7 @@ class SpeechSystems {
     return this.systems[this.currentSystemIndex];
   }
 
+  // noinspection JSUnusedGlobalSymbols
   byName(name: string): SpeechSystem {
     const maybeFound: SpeechSystem | undefined = this.systems.find(s => s.getName() === name);
     if (maybeFound) {
