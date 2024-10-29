@@ -230,6 +230,7 @@ both local and as online API services.
 ## TODO
 
 * [ ] spike speech to text using whisper.cpp
+    * [ ] command line listening to microphone
     * [ ] can run in browser reliably?
     * [ ] what model?
     * [ ] is it feasible to stream video to server to capture speech and pose
