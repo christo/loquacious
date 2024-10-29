@@ -38,6 +38,10 @@ const FORMATS: MediaFormat[] = [
   }
 ]
 
+function supportedVideoTypes(): MediaFormat[] {
+  return FORMATS.filter(f => f.modality === "video")
+}
+
 function supportedImageTypes(): MediaFormat[] {
   return FORMATS.filter(f => f.modality === "image")
 }
@@ -80,4 +84,4 @@ type MediaFormat = {
   modality: "image" | "video" | "audio";
 }
 
-export {MF_MP3, MF_MP4, type MediaFormat, extToFormat, mimeTypeToFormat, supportedImageTypes};
+export {MF_MP3, MF_MP4, type MediaFormat, extToFormat, mimeTypeToFormat, supportedImageTypes, supportedVideoTypes};
