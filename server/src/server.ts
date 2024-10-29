@@ -226,10 +226,11 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               const mimeType = lipSync.outputFormat().mimeType;
               const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
 
-              const lipsyncResult: LipSyncResult = await timed("lipsync animate", () => {
+              const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
+                const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
+                console.log(`created lipsync id ${lipsync.id}`);
                 return lipSync.animate(portait, speechFilePath!, `${videoFile.id}`);
               });
-              const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
 
               // TODO return full session graph for enabling replay etc.
               const finalMessages = (await db.getSessionMessages(session)).map(m => currentSpeechSystem.removePauseCommands(m));
