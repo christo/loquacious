@@ -242,6 +242,11 @@ both local and as online API services.
     * [x] show other main llm/model options
     * [x] show other speech/voice options
     * [ ] make settings dynamically editable
+* [ ] read about postgres types 
+    * parser https://node-postgres.com/features/queries#types
+    * https://github.com/brianc/node-pg-types
+    * https://node-postgres.com/features/types#strings-by-default
+    * https://node-postgres.com/features/types
 * [ ] design for possible workflow that produces spoken audio in lipsync video
   directly from text message without intermediate speech audio
 * [ ] check out [d-id.com](http://d-id.com) API for lipsync video generation
