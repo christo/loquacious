@@ -1,28 +1,68 @@
 # Loquacious
 
-AI face-to-face chat experiment.
+AI face-to-face fortune teller chat experiment.
 
-At this stage, this is a feasibility investigation to see how a face-to-face
-video chat can be assembled using various AI models. Components can be
-swapped for alternatives which is especially useful for quality and performance
-testing.
+![Fortune Teller Portrait](public/img/608x800/chromosundrift_Face-on_cinematic_photograph_with_short_depth__ba393071-d195-4b59-9f43-56515b64cb26_0.png)
 
-The prototype scenario is a fortune teller character, physically installed as an
-interactive feature, decorated like a fortune teller's booth or tent. The key
-hardware is focused on a computer with a webcam or potentially any device
-capable of doing a video call.
+## Project Status
 
-The idea is that punters come and interact with the fortune teller in a natural
+* Minimal web application front-end, REST back end
+* LLM integration for reasonable fortune teller interaction text,
+  implementations:
+    * OpenAI / Chat GPT
+    * [llama.cpp](https://github.com/ggerganov/llama.cpp) (open source)
+    * [lm-studio](https://lmstudio.ai/) (lovely open source UI wrapper for
+      llama.cpp)
+* Text To Speech (TTS) integration with [ElevenLabs](https://elevenlabs.ai/) and
+  MacOS native speech synthesis.
+* Lip sync animated video generation from single portrait image and speech audio
+  with [sadtalker](https://github.com/OpenTalker/sadtalker) (open source)
+  __CURRENTLY WAY TOO SLOW__ running either on 1x H100 at
+  [fal.ai](https://fal.ai/) or MacOS running 64Gb M1 Max Apple Silicon.
+* Postgres database for storing and tracing all interactions and intermediate
+  media assets.
+* Audio and Video capture is not currently implemented, nor is Speech To Text
+  (STT), vision via image-to-text or pose estimation for situational awareness.
+  The user can currently type text into a chat-like text box and the
+  conversation history is shown in the UI.
+* Basic system admin panel is revealed by clicking a subtle sprocket icon near
+  the top left corner of the main view.
+* Desktop Chrome is the only browser currently used in testing. Mobile browsers
+  are kept in mind and might even mostly work.
+
+At this _proof-of-concept_ stage, the project is a feasibility study to see how
+a face-to-face video chat can be assembled using various AI models. Components
+can be swapped for alternatives which is especially useful for quality and
+performance testing.
+
+This application is hoped to produce a usable tech demo but equally likely may
+be abandoned if heavy engineering or custom model training is required to make
+it fun to use.
+
+The prototype scenario is a fortune teller character, envisioned to be a
+physical interactive installation, decorated like a fortune teller's booth or
+tent. The key hardware is focused on a computer with a webcam or potentially any
+device capable of doing a video call.
+
+The idea is that punters come to interact with the fortune teller in a natural
 conversation workflow, typical of a fortune-teller. Depending on the details
-this would include all such services: clairvoyant, astrologer, tarot reader etc.
+this could include any such services: clairvoyant, astrologer, tarot reader etc.
 
-The fortune teller character is entirely automatic, built with the following
-components.
+The fortune teller character is entirely automatic, built from components
+relying on available machine learning models and online services. A
+fully-offline option is a stretch goal although it seems likely to require
+unjustified additional engineering and an unfortunate quality compromise.
 
 While there are several design choices that are tuned for something like the
 fortune teller character, systems and configuration are expected to work the
-same for a very different character scenario. At the moment animals or
-cartoon characters cannot produce lipsync video.
+same for a very different character scenario. Most product engineering engaged
+with this feature set is focused on customer service use cases. At the moment
+animals or cartoon characters are out of scope since lipsync video models
+currently under consideration were not trained on these faces and the result is
+a blurry mess. A simpler, traditional animation framework may be more suitable
+for animating these. Semi-realistic painterly human portraits do work OK.
+
+The documents here are a bit disorganised and verbose. See also:
 
 * [general notes](notes.md)
 * [database schema notes](db-schema.md)
@@ -47,37 +87,43 @@ could be more independent of system code.
 
 ## Character Portrait
 
-The first thing a user sees when interacting with the system contains a portrait
-of a fortune teller. Various text-to-image generative systems have been used to
+The first thing a user sees when interacting with the system is a portrait of a
+fortune teller. Various text-to-image generative systems have been used to
 create make these characters at design time although in theory, this could be
 created on demand. In a full realisation of such a system, the character may be
 gently animated in a suitable waiting state like a meditative trance.
 
 Various design alternatives include making the installation like a portal or
 magic mirror through which the character could be summoned akin to a kind of
-cosmic video conference call.
+cosmic zoom call.
 
 Good character portraits seem to have the following features:
 
-* Proportion of the frame that is occupied by the head is between 10% and 30%
+* Portrait aspect ratio is the focus of testing and design but landscape should
+  probably work just fine.
+* Proportion of the frame that is occupied by the head is between 10% and 30% of
+  the shortest edge of the image.
 * Background of head is relatively uniform. Any detail here may be subject to
   warping or tearing.
 * No foreground objects or obstructions should be near the head or face.
   Otherwise they will be warped.
 * Body position ideally should look natural if held still indefinitely. Having
   the character's hands on a crystal ball or be hidden somehow makes the
-  expected
-  absence of hand gestures less conspicuous.
+  anticipated absence of hand gestures less conspicuous.
 * Face lighting and colour should be most like the training data. Face paint,
   extreme wrinkles, exaggerated features, excessive shadows or extreme postures
   all seem to result in pathalogically bad lip sync results.
 * Long hair is sometimes problematic because the head and face are animated
-  exclusively inside an inset rectangle which may tear at the edge rather than
-  produce natural movement in long hair that may extend beyond the animated
-  inset frame. Hair motion is not properly simulated so hairstyles rigidly fixed
-  to the head will work best.
+  exclusively inside an inset rectangle which will tear at the edge rather than
+  produce natural movement in long hair, jewellery or headware that extends
+  beyond the animated inset frame. Hair motion is not properly simulated so
+  hairstyles rigidly fixed to the head will work best.
 * Image resolution has a dramatic effect on lipsync latency and final quality
   but more experimentation is required to determine sweet spots.
+
+Within the system it is feasible to use face detection and image-to-image models
+to evaluate and modify user-provided portraits although only basic downscaling
+is currently implemented.
 
 ## Speech to Text
 
