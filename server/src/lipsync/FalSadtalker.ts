@@ -79,10 +79,7 @@ class FalSadtalker implements LipSyncAnimator {
   }
 
   async urlFor(filePath: string): Promise<string> {
-    const fileUrl = this.urlCache[filePath];
-    if (fileUrl) {
-      console.log(`URL found in cache for ${filePath}`);
-    } else {
+    if (!this.urlCache[filePath]) {
       await timed(`fal upload ${filePath.split(path.sep).pop()}`, async () => {
         this.urlCache[filePath] = await fal.storage.upload(await readBinaryFile(filePath));
       });
@@ -90,22 +87,27 @@ class FalSadtalker implements LipSyncAnimator {
     return this.urlCache[filePath];
   }
 
-  async animate(img: string, speech: string): Promise<LipSyncResult> {
+  async animate(img: string, speech: string, filekey: string): Promise<LipSyncResult> {
     const imgUrl = await this.urlFor(img);
-    const speechUrl = await this.urlFor(speech);
-    const result: Result<{ video: SadTalkerResult }> = await timed("fal run sadtalker",
+    // don't bother caching speech, reuse is vanishingly rare
+    const speechUrl = await fal.storage.upload(await readBinaryFile(speech));
+    const result: Result<{ video: SadTalkerResult }> = await timed(
+      "fal run sadtalker",
       async () => {
         return await fal.run(FalSadtalker.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl))
       }
     );
-    return timed("fal sadtalker video download", async () => {
-      const r = result.data.video;
-      const videoDownload = await fetch(r.url);
-      const buffer = await videoDownload.arrayBuffer();
-      const downloadedVideo = path.join(this.dataDir, r.file_name);
-      writeFileSync(downloadedVideo, Buffer.from(buffer));
-      return new SadTalkerResult(r.url, r.content_type, r.file_name, r.file_size, downloadedVideo);
-    });
+    return timed(
+      "fal sadtalker video download",
+      async () => {
+        const r = result.data.video;
+        const videoDownload = await fetch(r.url);
+        const buffer = await videoDownload.arrayBuffer();
+        const filename = `falst_${filekey}_${(r.file_name)}`;
+        const filepath = path.join(this.dataDir, filename);
+        writeFileSync(filepath, Buffer.from(buffer));
+        return new SadTalkerResult(r.url, r.content_type, filename, r.file_size, filepath);
+      });
   }
 
   async writeCacheFile(): Promise<void> {
