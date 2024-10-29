@@ -302,7 +302,9 @@ both local and as online API services.
     * [ ] plan stream from browser microphone
     * [ ] decide how to do it with video being processed by pose estimation
     * [ ] can run in browser reliably?
-    * [ ] what model? `models/ggml-large-v3.bin` is very good, try smaller
+    * [x] test large model `models/ggml-large-v3.bin` is very good
+    * [ ] test medium model
+    * [ ] test small model
     * [ ] is it feasible to stream video to server to capture speech and pose
       estimation? What can/should be done on the client?
 * [ ] move portrait images into server
