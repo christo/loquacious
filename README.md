@@ -294,14 +294,15 @@ both local and as online API services.
 ## TODO
 
 * [ ] spike speech to text using whisper.cpp
-    * [ ] command line transcription listening to microphone
-    * [ ] understand how server works
-    * [ ] can server be used from loquacious app?
-    * [ ] hook up server to front-end
-    * [ ] build stream from browser microphone
+    * [ ] streaming command line transcription listening to microphone
+    * [x] understand how server works - not streaming
+    * [x] can server be used from loquacious app? - No.
+    * [ ] check [smart-whisper](https://www.npmjs.com/package/smart-whisper)
+    * [ ] run from dev server using local audio capture
+    * [ ] plan stream from browser microphone
     * [ ] decide how to do it with video being processed by pose estimation
     * [ ] can run in browser reliably?
-    * [ ] what model?
+    * [ ] what model? `models/ggml-large-v3.bin` is very good, try smaller
     * [ ] is it feasible to stream video to server to capture speech and pose
       estimation? What can/should be done on the client?
 * [ ] move portrait images into server
