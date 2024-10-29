@@ -28,7 +28,6 @@ export function streamFromPath(filePath: string, res: Response) {
     res.setHeader('Content-Type', mimeType);
     const pathParts = filePath.split(path.sep);
     res.setHeader('Content-Disposition', `attachment; filename="${pathParts[pathParts.length - 1]}"`);
-    console.log(`attempting to send ${format.modality} file for path ${filePath}`);
     pipeline(readStream, res, (err) => {
       if (err && err.code === "ENOENT") {
         die(res, "file not found", 404);
