@@ -98,7 +98,7 @@ Various design alternatives include making the installation like a portal or
 magic mirror through which the character could be summoned akin to a kind of
 cosmic zoom call.
 
-Good character portraits seem to have the following features:
+Suitable character portraits seem to have the following features:
 
 * Portrait aspect ratio is the focus of testing and design but landscape should
   probably work just fine.
@@ -134,7 +134,9 @@ LLM.
 Interesting problems:
 
 * Voice isolation
-* Distinguishing ambient speech from conversational address.
+* Distinguishing ambient speech from conversational address. A good mic and
+  careful speaker placement would go a long way here. A second microphone could
+  be used to add the ability to react to realistic ethical eavesdropping.
 * Interruption and speaking over.
 * Collaborative handling of transcription errors.
 * Accent tuning.
@@ -172,21 +174,22 @@ Although there are various ways to accomplish an animated character who is
 visibly speaking the generated speech, reasonable quality can be achieved using
 a model to convert a portait image and the speech audio into a video of that
 character speaking the words. A 3D model that is rigged for speech and gestures
-could also be used but both design-time and runtime components would be divegent
-from the current design. The generated video is sent to the screen to
+could also be used but both design-time and runtime components would be
+divergent from the current plan. The generated video is sent to the screen to
 present to the user as final output.
 
 ## Session Modes
 
-The fortune teller would initially in a waiting state until a customer arrives.
-Their arrival would trigger an introductory mode of interaction with a distinct
-system prompt. The fortune teller would invite the customer to sit down and they
-would introduce themselves. Once this is done, the primary chat interaction can
-start. The session could be interrupted somehow and a return to the waiting
-state is expected until a new customer arrives. These sessions should maintain a
-history of the interactions, tracking the customer's name and chat history.
-Detection of mode transitions and the establishment of a new session with a new
-empty chat history can be done in part with pose estimation of video input.
+The fortune teller would initially be in a waiting state until a customer
+arrives. Their arrival would trigger an introductory mode of interaction with a
+distinct system prompt. The fortune teller would invite the customer to sit down
+and they would introduce themselves. Once this is done, the primary chat
+interaction can start. The session could be interrupted somehow and a return to
+the waiting state is expected until a new customer arrives. These sessions
+should maintain a history of the interactions, tracking the customer's name and
+chat history. Detection of mode transitions and the establishment of a new
+session with a new empty chat history can be done in part with pose estimation
+of video input.
 
 ## Pose Estimation for Scenario Awareness
 
@@ -195,27 +198,31 @@ video as estimated human poses can be used to detect an approaching customer for
 the fortune teller or to detect untimely interruptions to a session. Hand-coded
 heuristics could be used for detecting approach and sitting behaviour and each
 would need some kind of calibration depending on the physical layout of the
-booth with respect to the camera position.
+booth with respect to the camera position. Alternately, a setup mode could have
+a target zone overlay within which the customer chair is positioned. Some kind
+of autocalibration could be acomplished by correlating measured pose positions
+when addressed speech is detected.
 
 ## Image to Text
 
 In order to facilitate more life-like interactions of two humans who can see
-each other and may naturally interact about each other's appearance, a model
-that can describe the contents of an image can be used to provide the fortune
-teller a description of the person she is speaking to. During the introductory
-mode the fortune teller might compliment the customer on thier outfit or some
-other in-character smalltalk that references their appearance.
+each other and may naturally refer to each other's appearance, a model that can
+describe the contents of an image can be used to provide the fortune teller a
+description of the person she is speaking to. During the introductory mode the
+fortune teller might compliment the customer on thier outfit or some other
+in-character smalltalk that references their appearance.
 
 The fortune teller's own portrait can also be used as input to the image-to-text
-system for any given portait image so that any reference made to their
+system for any given portait image so that any reference made to their own
 appearance can be responded to naturally and in-character. The same system might
 also be used to evaluate the dynamic generation of a fresh fortune-teller
 portrait.
 
-The physical deployment scenario can also be fed to the image-to-text system and
-it's possible that the LLM is provided the resulting description to better
-understand what the customer might be referring to in conversation or to, for
-example, invite the customer to help themselves to tea or snacks.
+The physical deployment scenario captured by a third-person camera, set back
+from the booth can also be fed to the image-to-text system and it's possible
+that the LLM is provided the resulting description to better understand what the
+customer might be referring to in conversation or to, for example, invite the
+customer to help themselves to tea or snacks.
 
 ## Non-verbal Animation
 
@@ -223,28 +230,32 @@ Video sequences may be generated to make the character more life-like when it
 is not speaking. These can be categorised and used appropriately.
 
 * Q: How to generate gesture animations for the character?
+* Q: Could a character-design mode be worth adding where image, voice and
+  gesture capture is configured?
 * Q: Could these videos be used as additional video input to lipsync?
 
 ## Expert System
 
 A traditional expert system can be used to get very low-latency intepretation of
-what to do under a moderate set of anticipated situations and to choose from a
-variety of pregenerated "canned" introductory video outputs. These can be used
-ot hide latency in the full interactive workflow along with various in-character
-stalling behaviours that likewise do not depend on user input.
+what to do under a moderate set of anticipated situations and conversational
+openers, to choose from a variety of pregenerated "canned" introductory video
+outputs. These can be used to hide latency in the full interactive workflow
+along with various in-character stalling behaviours that likewise do not depend
+on user input.
 
 # System Design
 
 Currently only operated in devmode on MacOS. It should work on any system but
-`MacOsSpeech` will likely fail to execute the child process. Native subsystem
-implementations should detect missing system requirements at boot and show
-up disabled.
+`MacOsSpeech` will not show up. Native subsystem implementations should detect
+missing system requirements at boot and show up disabled. Likewise, if a
+component implementation is missing a required API key set in the `.env` file,
+this component will not be registered at boot time.
 
 Database is postgres. `node-pg-migrate` scripts defined in `server/package.json`
 to create tables etc. Production deployment process is yet to be defined.
 
 Current boot-time check of git hash will fail if git is absent. Production
-deployment will have a configured version tag instead.
+deployment is expected to have a configured version tag instead.
 
 ## Dependencies
 
@@ -266,19 +277,19 @@ both local and as online API services.
   required `Anaconda`, `ffmpeg` and various python packages. Instructions in the
   SadTalker repo are terse and insufficient as a small custom patch to one of
   the Python package's source code was required after some googling.
+* Whisper.cpp is currently being evaluated for user voice transcription.
 
 ## Features
 
 * shows image of character
+* settings panel
 * can choose a different character image from set found on disk
 * text input
 * text output
 * speech output
-* settings panel
 * lip sync video output usually works but only for human faces
 * chat history shown like conversation (will probably turn off for when speech
-  input
-  is implemented)
+  input is implemented)
 
 ## TODO
 
@@ -379,7 +390,7 @@ both local and as online API services.
     * before fortune-teller sees an approaching person
     * detect when a person tentatively appraoches but does not trigger start
     * detect when multiple people stand gingerly nearby
-    * consider second camera trained on entrance
+    * consider second camera trained on whole scene or entrance
 * using pose-estimation, detect when a person approaches, describe what they
   look like etc.
     * detect if they are in an engaged mode or just looking
