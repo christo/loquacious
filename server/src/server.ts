@@ -155,10 +155,21 @@ async function getOrCreateSession(): Promise<Session> {
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const {prompt, portrait} = req.body;
   console.log(`chat request for portrait ${portrait.f} with prompt ${prompt}`);
+
+  const failable = (name: string, thunk: () => Promise<void>) => {
+    try {
+      thunk();
+    } catch (e) {
+      const msg = `${name} failed`;
+      console.error(msg, e);
+      res.status(500).json({error: msg}).end();
+    }
+  }
+
   if (!prompt) {
     res.status(400).json({error: 'No prompt provided'});
   } else {
-    try {
+    failable("loquacious chat", async () => {
       const currentLlm = LLMS.current();
       const currentModel = await currentLlm.currentModel()
       const currentSpeech = speechSystems.current();
@@ -188,7 +199,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         const llmMessage = await timed(
           "storing llm response",
           () => db.createCreatorTypeMessage(session, llmResponse, currentLlm));
-        try {
+
+        failable("speech generation", async () => {
           const speechResult: SpeechResult = await timed<SpeechResult>(
             "speech synthesis",
             async () => {
@@ -205,14 +217,13 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           const speechFilePath = speechResult.filePath();
           if (speechFilePath) {
             const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
-            try {
+            failable("lipsync generation", async () => {
               const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
               const mimeType = currentAnimator.outputFormat().mimeType;
               const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
 
               const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
                 const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
-                console.log(`created lipsync id ${lipsync.id}`);
                 return currentAnimator.animate(portait, speechFilePath!, `${videoFile.id}`);
               });
 
@@ -221,26 +232,18 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               res.json(buildResponse(finalMessages, speechFilePath, lipsyncResult));
 
               await currentAnimator.writeCacheFile();
-            } catch (e) {
-              const msg = "lipsync generation failed";
-              console.error(msg, e);
-              res.status(500).json({error: msg}).end();
-            }
+
+            })
+
           } else {
             res.json(buildResponse(await db.getSessionMessages(session), undefined, undefined));
           }
-        } catch (e) {
-          const msg = "speech generation failed";
-          console.error(msg, e);
-          res.status(500).json({error: msg}).end();
-        }
+
+        });
       } else {
         res.status(500).json({error: 'No message in response'});
       }
-    } catch (error) {
-      console.error('Error performing loquacious chat:', error);
-      res.status(500);
-    }
+    });
   }
 });
 
