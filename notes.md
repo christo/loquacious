@@ -9,7 +9,7 @@ Some seem to be geared towards "offline" processes that produce assets for rigge
 
 Some require video input as a kind of setup-time calibration of how the lips should move. I wouldn't be surprised if this results in better quality. Sometimes mere image+speech to video will render horrific teeth and obvious morphing/tearing at the edge of the rectangular peephole inside which the face alone is animated. I'm prepared to be practical on this.
 
-My testing suggests that lip sync is possibly the slowest part so far. I'm testing with a single portrait image and an audio file containing only speech. Depending on the resolution of the image, the length of the speech and the quality settings, using the open source "sadtalker" model running on http://fal.ai/ it can take up to a minute to generate 10-20s of video and it costs about 1-10c. I'm confident I can probably speed that up by 10x with some tricks but that is still way off ideal figures of 1-1.5s end to end turnaround. Not to mention those tricks may amount to weeks of coding and testing.
+My testing suggests that lip sync is possibly the slowest part so far. I'm testing with a single portrait image and an audio file containing only speech. Depending on the resolution of the image, the length of the speech and the quality settings, using the open source "sadtalker" model running on [fal.ai](http://fal.ai/) it can take up to a minute to generate 10-20s of video and it costs about 1-10c. I'm confident I can probably speed that up by 10x with some tricks but that is still way off ideal figures of 1-1.5s end to end turnaround. Not to mention those tricks may amount to weeks of coding and testing.
 
 ## QUALITY & LATENCY EXPECTATIONS
 
