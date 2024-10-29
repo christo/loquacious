@@ -14,6 +14,8 @@ const ROLE_SYSTEM = 'system';
 const ROLE_USER = 'user';
 const ROLE_ASSISTANT = 'assistant';
 
+type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
+
 /**
  * Converts a {@link Message} to the expected OpenAI API type.
  * @param m the message.
@@ -21,7 +23,7 @@ const ROLE_ASSISTANT = 'assistant';
 const messageToOpenAi = (m: Message) => ({
   role: m.isFromUser ? ROLE_USER : ROLE_ASSISTANT,
   content: m.content
-}) as OpenAI.Chat.Completions.ChatCompletionMessageParam;
+}) as OpenAIMsg;
 
 /**
  * Two-sided conversation, next step initiated by the given prompt, rendered for the given {@link SpeechSystem}.
@@ -29,7 +31,7 @@ const messageToOpenAi = (m: Message) => ({
  * @param messageHistory the possibly two way conversation until now
  * @param ss the speech system being used
  */
-const chatModeMessages = (messageHistory: Message[], ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] => {
+const chatModeMessages = (messageHistory: Message[], ss: SpeechSystem): OpenAIMsg[] => {
   console.log("chat mode function");
   const systemParts = [
     dateTimePrompt(),
@@ -75,7 +77,7 @@ const pauseInstructions = (ss: SpeechSystem): PromptPart => {
  * @param chatHistory currently ignored.
  * @param ss speech system to render for.
  */
-const inviteModeMessages = (chatHistory: Message[], ss: SpeechSystem): OpenAI.Chat.Completions.ChatCompletionMessageParam[] => {
+const inviteModeMessages = (chatHistory: Message[], ss: SpeechSystem): OpenAIMsg[] => {
   console.log("invite mode function");
   const systemPrompt = [
     dateTimePrompt(),
@@ -88,7 +90,7 @@ const inviteModeMessages = (chatHistory: Message[], ss: SpeechSystem): OpenAI.Ch
 };
 
 /** Function each mode implements differently which supplies parameters for a chat completion request. */
-type ChatPrepper = (chatHistory: Message[], ss: SpeechSystem) => OpenAI.Chat.Completions.ChatCompletionMessageParam[];
+type ChatPrepper = (chatHistory: Message[], ss: SpeechSystem) => OpenAIMsg[];
 
 /** Map mode names to their chat functions. */
 interface ModeMap {

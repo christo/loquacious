@@ -3,6 +3,8 @@ import OpenAI from "openai";
 import {always} from "../system/config";
 import Model = OpenAI.Model;
 
+type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
+
 /**
  * Connects to an already running llama.cpp process with an OpenAI API implementation.
  */
@@ -35,7 +37,7 @@ class LlamaCppLlm implements Llm {
     return j.data;
   }
 
-  async chat(messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): Promise<ChatResult> {
+  async chat(messages: OpenAIMsg[]): Promise<ChatResult> {
     const response = await this.openai.chat.completions.create({
       model: "no-idea-is_model-ignored",
       messages: messages

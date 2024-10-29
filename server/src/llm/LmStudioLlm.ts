@@ -3,6 +3,8 @@ import {always} from "../system/config";
 import type {ChatResult, Llm} from "./Llm";
 import Model = OpenAI.Model;
 
+type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
+
 class LmStudioLlm implements Llm {
   readonly baseUrl: string | undefined;
   readonly enableHealth = false;
@@ -39,7 +41,7 @@ class LmStudioLlm implements Llm {
     return j.data;
   }
 
-  async chat(messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): Promise<ChatResult> {
+  async chat(messages: OpenAIMsg[]): Promise<ChatResult> {
     const model = (await this.models())[0].id;
     const response = await this.openai.chat.completions.create({
       model: model,
