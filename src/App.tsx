@@ -52,8 +52,8 @@ function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
     });
   }, []);
   return <Box className="portraitContainer">
-    <video className="portrait" ref={videoRef} src={videoSrc} preload="auto"/>
-    <img className="portrait" ref={imgRef} alt="portrait of a fortune teller" src={src}/>
+    <video className="portrait" style={{transition: 'none'}} ref={videoRef} src={videoSrc} preload="auto"/>
+    <img className="portrait" ref={imgRef} alt="portrait" src={src}/>
   </Box>
 
 }
@@ -62,7 +62,7 @@ function renderMessage(m: Message) {
   const sx = {
     fontFamily: '"Libre Baskerville", serif',
     fontWeight: 400,
-    fontStyle: "normal"
+    fontStyle: "bold"
   };
 
   if (m.isFromUser) {
@@ -216,14 +216,16 @@ const App: React.FC = () => {
   // TODO fade-in and fade out for video show and hide
   const showVideo = () => {
     if (videoRef.current) {
-      videoRef.current.style.visibility = "visible";
+      videoRef.current.style.opacity = "1";
+      videoRef.current.style.transition = "none";
     } else {
       hideVideo();
     }
   }
   const hideVideo = () => {
     if (videoRef.current) {
-      videoRef.current.style.visibility = "hidden";
+      videoRef.current.style.transition = "opacity: 1.5s ease-in-out";
+      videoRef.current.style.opacity = "0";
     }
   }
   const imageUrl = () => `${BASE_URL_PORTRAIT}/${images[imageIndex].f}`;
