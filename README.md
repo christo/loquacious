@@ -24,20 +24,26 @@ fortune teller character, systems and configuration are expected to work the
 same for a very different character scenario. At the moment animals or
 cartoon characters cannot produce lipsync video.
 
+* [general notes](notes.md)
+* [database schema notes](db-schema.md)
+
 ## Design Principles
 
 It is hoped that this system can operate without a traditional human-operated
-media production toolchain or pipeline. So far all media assets are driven by
-code and AI prompts. Adding video production, illustration or any other kind
-of media editing may offer quality benefits or potential time or money savings.
-Nevertheless, exclusively constraining all human development-time input to
-text from a keyboard makes for an interesting exploration and at the moment
-is adopted as a defining feature of this research project.
+media production toolchain or pipeline. No video shooting or editing. So far all
+media assets are driven by code and AI prompts. Adding video production,
+illustration or any other kind of media editing may offer quality benefits or
+potential time or money savings. Nevertheless, exclusively constraining all
+human development-time input to text from a keyboard makes for an interesting
+exploration and at the moment is adopted as a defining feature of this research
+project.
 
 Non-verbal portrait animation is apparently achievable by using reference video.
 This would violate the above design constraint. Maybe this video could be
-captured from user input - maybe even system-operator user input? Starting to
-feel like a stunt.
+captured from user input - maybe even system-operator user input? Given that
+user video capture is intended for core functionality, it may be interesting to
+provide gesture demonstration input as a design-time feature. Character design
+could be more independent of system code.
 
 ## Character Portrait
 
@@ -230,7 +236,12 @@ both local and as online API services.
 ## TODO
 
 * [ ] spike speech to text using whisper.cpp
-    * [ ] command line listening to microphone
+    * [ ] command line transcription listening to microphone
+    * [ ] understand how server works
+    * [ ] can server be used from loquacious app?
+    * [ ] hook up server to front-end
+    * [ ] build stream from browser microphone
+    * [ ] decide how to do it with video being processed by pose estimation
     * [ ] can run in browser reliably?
     * [ ] what model?
     * [ ] is it feasible to stream video to server to capture speech and pose
@@ -243,7 +254,7 @@ both local and as online API services.
     * [x] show other main llm/model options
     * [x] show other speech/voice options
     * [ ] make settings dynamically editable
-* [ ] read about postgres types 
+* [ ] read about postgres types
     * parser https://node-postgres.com/features/queries#types
     * https://github.com/brianc/node-pg-types
     * https://node-postgres.com/features/types#strings-by-default
@@ -256,7 +267,7 @@ both local and as online API services.
   elevenlabs integration so could do speech and lipsync video in one API call.
 * [ ] check [Synthesia](https://www.synthesia.io/features/avatars) for lip sync
 * [ ] check [Hey Gen](https://www.heygen.com/interactive-avatar) for lip sync
-* [ ] some kind of background process to put audio and video durations in db 
+* [ ] some kind of background process to put audio and video durations in db
 * design character persona and interaction workflow such that potentially long
   latency responses are normalised within the theatric context.
     * expert-system graph of cached and precalculated fast responses or stalling
@@ -430,7 +441,7 @@ Currently zero tests!
     * camera audio/video capture codec support
     * consider non-web components for production installation (tradeoffs?)
 * [ ] what about full mobile web app with mic & camera?
-    * [x] basic feasibility - works ok but testing is horrible
+    * [x] basic feasibility - works OK but testing is horrible
     * [ ] how to get dev console or logs etc. from ios chrome
     * [ ] might ios safari work better than ios chrome?
     * [ ] test android chrome
