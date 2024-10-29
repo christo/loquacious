@@ -26,10 +26,6 @@ class FakeModel implements Model {
   }
 }
 
-const KM_STATIC: string = "static";
-const KM_ECHO: string = "echo";
-const KM_CLOCK: string = "clock";
-
 function dateTimeMessage() {
   const now = new Date();
   return `The date is ${now.toLocaleDateString()} and the time is ${now.toLocaleTimeString()}`;
@@ -43,17 +39,17 @@ class FakeLlm implements Llm {
   readonly name = "FakeLlm"
   readonly enableHealth = false;
   canRun = always;
-  private currentModelKey = KM_ECHO;
+  private currentModelKey = "echo";
   private readonly myModels: { [key: string]: FakeModel; } = {
-    KM_STATIC: new FakeModel("static", (params: ChatCompletionMessageParam[]) => ({message: "fake chat result"})),
-    KM_ECHO: new FakeModel("echo", (params: ChatCompletionMessageParam[]) => {
+    static: new FakeModel("static", (params: ChatCompletionMessageParam[]) => ({message: "fake chat result"})),
+    echo: new FakeModel("echo", (params: ChatCompletionMessageParam[]) => {
       try {
         return {message: (params!.filter(mp => mp.role === "user")!.pop())!.content.toString()!}
       } catch (err) {
         return {message: `I tried to be fake but I failed. Here's how it went down: ${err}`}
       }
     }),
-    KM_CLOCK: new FakeModel("static", (params: ChatCompletionMessageParam[]) => ({message: dateTimeMessage()})),
+    clock: new FakeModel("clock", (params: ChatCompletionMessageParam[]) => ({message: dateTimeMessage()})),
   }
 
   chat(_params: ChatCompletionMessageParam[]): Promise<ChatResult> {
