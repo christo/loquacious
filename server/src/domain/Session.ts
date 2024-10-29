@@ -22,6 +22,6 @@ export class Session implements Persistent<Session> {
   }
 
   toPostgres(prepareValue: (value: Session) => any): any {
-    // TODO implement this correctly.
+    // currently unimplemented
   }
 }

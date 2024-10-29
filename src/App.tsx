@@ -189,7 +189,6 @@ const App: React.FC = () => {
       const data = await result.json();
       setResponse(data.response || EMPTY_RESPONSE);
     } catch (error) {
-      // TODO signal error in frontend
       console.error('Error fetching chat response:', error);
       setResponse(EMPTY_RESPONSE);
     } finally {
