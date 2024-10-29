@@ -6,9 +6,10 @@ import {always} from "../system/config";
 import type {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
 
-// TODO use MediaFormat to detect all supported video types' extensions
-const hasVideoExt = (filename: string) => path.extname(filename).toLowerCase() === ".mp4";
 
+function hasVideoExt(filename: string) {
+  return MF_MP4.extensions.includes(path.extname(filename).toLowerCase());
+}
 
 /**
  * Hacky implementation of LipSync that reuses pre-generated video.
@@ -22,6 +23,7 @@ class FakeLipSync implements LipSyncAnimator {
    * @param lipSyncDataDir where to put the video files.
    */
   constructor(lipSyncDataDir: string) {
+    // because this reuses other lipsync videos it doesn't have its own subdir
     this.lipSyncDataDir = lipSyncDataDir;
   }
 
@@ -37,12 +39,11 @@ class FakeLipSync implements LipSyncAnimator {
    */
   async animate(_imageFile: string, _speechFile: string, _fileKey: string): Promise<LipSyncResult> {
     const files = await promises.readdir(this.lipSyncDataDir, {withFileTypes: true, recursive: true});
-    // TODO remove file extension hard-coding
     const aFile: Dirent | undefined = files.find(f => f.isFile() && hasVideoExt(f.name));
     if (!aFile) {
       return Promise.reject("no lip sync files");
     } else {
-      return Promise.resolve(new LocalLipSyncResult(path.join(this.lipSyncDataDir, aFile.name)));
+      return Promise.resolve(new LocalLipSyncResult(path.join(aFile.parentPath, aFile.name)));
     }
   }
 
