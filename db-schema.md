@@ -1,5 +1,8 @@
 # Database Schema Design
 
+Note this is a guide, the real design may diverge and this is not currently
+fully implemented anyway.
+
 * everything has a db id
 * file references may be done in either direction; either the filename contains
   the database id or there is a column to capture filename. Large media files
