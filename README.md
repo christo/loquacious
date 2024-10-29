@@ -2,7 +2,7 @@
 
 AI face-to-face fortune teller chat experiment.
 
-![Fortune Teller Portrait](public/img/608x800/chromosundrift_Face-on_cinematic_photograph_with_short_depth__ba393071-d195-4b59-9f43-56515b64cb26_0.png)
+![Fortune Teller Portrait](public/img/chromosundrift_Face-on_cinematic_photograph_with_short_depth__ba393071-d195-4b59-9f43-56515b64cb26_0.png)
 
 ## Project Status
 
