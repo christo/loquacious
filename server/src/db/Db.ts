@@ -178,7 +178,6 @@ class Db {
           console.log(`Loaded ${deploymentName} deployment`);
           let row = result.rows[0];
           const deployment = new Deployment(row.id, row.created, row.name, row.metadata);
-          console.log(`inserting Run in db`);
           result = await client.query(qCreateRun, [sha1, deployment.id]);
           if (result.rowCount === 1) {
             row = result.rows[0];
@@ -288,7 +287,6 @@ class Db {
                        returning *`
         const createResult = await client.query(query, [name, metadata]);
         if (createResult && createResult.rowCount === 1) {
-          console.log(`creating creator ${name}`);
           await client.query("commit");
           return Promise.resolve(createResult.rows[0] as Creator);
         } else {
@@ -296,7 +294,6 @@ class Db {
           return Promise.reject("could not create creator")
         }
       } else if (result.rowCount === 1) {
-        console.log(`found creator ${name}`);
         await client.query("commit");
         return Promise.resolve(result.rows[0] as Creator);
       } else {
