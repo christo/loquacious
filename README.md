@@ -56,13 +56,14 @@ unjustified additional engineering and an unfortunate quality compromise.
 While there are several design choices that are tuned for something like the
 fortune teller character, systems and configuration are expected to work the
 same for a very different character scenario. Most product engineering engaged
-with this feature set is focused on customer service use cases. At the moment
-animals or cartoon characters are out of scope since lipsync video models
-currently under consideration were not trained on these faces and the result is
-a blurry mess. A simpler, traditional animation framework may be more suitable
-for animating these. Semi-realistic painterly human portraits do work OK.
+with this feature set is focused on customer service use cases and pumping out
+endless explainer videos. I'm not that guy. At the moment animals or cartoon
+characters are out of scope since lipsync video models currently under
+consideration were not trained on these faces and the result is a blurry mess. A
+simpler, traditional animation framework may be more suitable for animating
+these. Semi-realistic painterly human portraits do work OK.
 
-The documents here are a bit disorganised and verbose. See also:
+The documents here are a bit disorganised and quite verbose. See also:
 
 * [general notes](notes.md)
 * [database schema notes](db-schema.md)
