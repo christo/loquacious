@@ -208,12 +208,10 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               const mimeType = currentSpeech.outputFormat().mimeType;
               const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
               const sr = await currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
-
               const tts = await db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
               return {...sr, tts: () => tts} as SpeechResult;
             }
           );
-
           const speechFilePath = speechResult.filePath();
           if (speechFilePath) {
             const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
@@ -221,7 +219,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
               const mimeType = currentAnimator.outputFormat().mimeType;
               const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
-
               const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
                 const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
                 return currentAnimator.animate(portait, speechFilePath!, `${videoFile.id}`);
@@ -230,15 +227,11 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               // TODO return full session graph for enabling replay etc.
               const finalMessages = (await db.getSessionMessages(session)).map(m => currentSpeech.removePauseCommands(m));
               res.json(buildResponse(finalMessages, speechFilePath, lipsyncResult));
-
               await currentAnimator.writeCacheFile();
-
             })
-
           } else {
             res.json(buildResponse(await db.getSessionMessages(session), undefined, undefined));
           }
-
         });
       } else {
         res.status(500).json({error: 'No message in response'});
