@@ -42,7 +42,7 @@ export function fileStream(filename: string | undefined, res: Response) {
   if (!filename) {
     res.status(404).json({message: "No filename given"});
   } else {
-    console.log(`got request for file ${filename}`);
+    // console.log(`got request for file ${filename}`);
     streamFromPath(filename, res);
   }
 }
