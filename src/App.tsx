@@ -102,7 +102,7 @@ function ChatHistory({children, messages}: { children: ReactNode, messages: Mess
         if (chatHistory.current) {
             chatHistory.current.scrollIntoView({behavior: "smooth", inline: "end"})
         }
-    });
+    }, []);
     return <Box ref={chatHistory} sx={{
         display: "flex",
         flexDirection: "column",
