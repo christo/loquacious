@@ -1,3 +1,4 @@
+
 const MF_MP3: MediaFormat = {
   extensions: ["mp3"],
   mimeType: "audio/mp3",
@@ -75,7 +76,6 @@ function extToFormat(fpe: string): MediaFormat | undefined {
 function mimeTypeToFormat(mimeType: string): MediaFormat | undefined {
   return FORMAT_BY_MIME_TYPE[mimeType];
 }
-
 
 type MediaFormat = {
   /** All possible file extensions for this format, first is preferred for file generation. */
