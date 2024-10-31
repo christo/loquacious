@@ -1,7 +1,7 @@
-import {Box, CircularProgress, Typography} from "@mui/material";
+import {Box, CircularProgress, styled, TextField, Typography} from "@mui/material";
 import {marked} from 'marked';
 import OpenAI from "openai";
-import React, {type MutableRefObject, type ReactNode, useEffect, useRef, useState} from 'react';
+import React, {KeyboardEventHandler, type MutableRefObject, type ReactNode, useEffect, useRef, useState} from 'react';
 import "./App.css";
 import {Message} from "../server/src/domain/Message.ts";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
@@ -68,8 +68,7 @@ function renderMessage(m: Message) {
         fontFamily: '"Libre Baskerville", serif',
         fontWeight: 400,
         fontStyle: "bold",
-        borderRadius: 1,
-        padding: "0.8rem 1rem",
+        padding: "0.5rem 1rem",
         maxWidth: "max(26rem, 45%)",
         boxShadow: "5px 10px 10px #00000033",
     };
@@ -77,7 +76,7 @@ function renderMessage(m: Message) {
         ...sx,
         alignSelf: "end",
         borderRadius: "1rem 1rem 0 1rem",
-        backgroundColor: "rgba(18,120,164,0.8)",
+        backgroundColor: "rgba(110,18,164,0.8)",
     };
     const system = {
         ...sx,
@@ -108,7 +107,8 @@ function ChatHistory({children, messages}: { children: ReactNode, messages: Mess
         flexDirection: "column",
         alignItems: "start",
         maxHeight: "18rem",
-        gap: "0.2em",
+        paddingTop: "2rem",
+        gap: "0.2rem",
         overflow: "scroll"
     }}>
         {messages.map(renderMessage)}
@@ -151,21 +151,41 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
         }
     }, [response])
 
-    return <Box sx={{
+    return <Box id="chCont" sx={{
         fontSize: "small",
-        padding: "1em",
+        padding: "0 1rem",
         margin: 0,
         width: "100%",
         height: "100%",
         zIndex: 40,
         display: "flex",
         flexDirection: "column-reverse",
-        maskImage: "linear-gradient(to bottom, transparent 0%, white 15%)",
+        maskImage: "linear-gradient(to bottom, transparent 0%, white 19%)",
         overflow: "scroll"
     }}>
         <ChatHistory messages={response.messages}>.</ChatHistory>
     </Box>;
 }
+
+const ChatInput = styled(TextField)({
+    backgroundColor: "black",
+    color: "white",
+    '& .MuiOutlinedInput-input': {},
+    '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+            backgroundColor: "#333",
+            opacity: 0.5,
+            border: 'none',  // Remove default border
+        },
+        '&:hover fieldset': {
+            border: 'none',  // Remove border on hover
+        },
+        '&.Mui-focused fieldset': {
+            backgroundColor: "black",
+            border: 'none',  // Remove border on focus
+        },
+    },
+});
 
 const App: React.FC = () => {
 
@@ -181,7 +201,7 @@ const App: React.FC = () => {
     const [response, setResponse] = useState<ChatResponse>(EMPTY_RESPONSE);
     const [loading, setLoading] = useState(false);
     const [images, setImages] = useState<ImageInfo[]>([]);
-
+    const inputRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         try {
             fetch(`//${location.hostname}:${SERVER_PORT}/portraits`).then(result => {
@@ -197,7 +217,7 @@ const App: React.FC = () => {
 
     const [imageIndex, setImageIndex] = useState(DEFAULT_PORTRAIT);
 
-    const handleSubmit = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleSubmit = async (e: React.KeyboardEvent) => {
         e.preventDefault();
         if (!prompt.trim()) {
             return;
@@ -213,7 +233,10 @@ const App: React.FC = () => {
         setResponse(anticipatedResponse);
         setLoading(true);
         setPrompt("");
-        e.currentTarget.blur();
+        const input = inputRef.current?.querySelector('textarea');
+        if (input) {
+            input.blur();
+        }
         try {
             const result = await fetch(`//${location.hostname}:${SERVER_PORT}/api/chat`, {
                 method: 'POST',
@@ -241,10 +264,9 @@ const App: React.FC = () => {
     }
 
     // submit on enter
-    const handleSubmitKey = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleSubmitKey: KeyboardEventHandler<HTMLElement> = async (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault(); // Prevent default Enter behavior (new line)
-
             await handleSubmit(e); // Submit the form
         }
     };
@@ -300,18 +322,23 @@ const App: React.FC = () => {
             }}>
                 <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
                               hideVideo={hideVideo}/>
-                <Box sx={{
+                <Box component="form" sx={{
                     position: "sticky",
                     bottom: 0,
                     left: 0,
                     zIndex: 100
                 }}>
-                    <form id="prompt">
-          <textarea value={prompt} placeholder="Welcome, seeker"
-                    onChange={(e) => setPrompt(e.target.value)}
-                    onKeyDown={handleSubmitKey} {...{disabled: loading}}
-          />
-                    </form>
+                    <ChatInput
+                        ref={inputRef}
+                        hiddenLabel
+                        multiline
+                        margin="none"
+                        value={prompt}
+                        maxRows={4}
+                        {...{disabled: loading}}
+                        fullWidth
+                        onKeyDown={handleSubmitKey}
+                        onChange={e => setPrompt(e.target.value)}/>
                 </Box>
             </Box>
         </Box>
