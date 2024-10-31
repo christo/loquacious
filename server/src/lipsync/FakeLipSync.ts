@@ -1,15 +1,11 @@
 import {promises} from "fs";
 import type {Dirent} from "node:fs";
 import path from "path";
-import {type MediaFormat, MF_MP4} from "../media";
+import {hasVideoExt, type MediaFormat, MF_MP4} from "../media";
 import {always} from "../system/config";
 import type {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
 
-
-function hasVideoExt(filename: string) {
-  return MF_MP4.extensions.includes(path.extname(filename).toLowerCase());
-}
 
 /**
  * Hacky implementation of LipSync that reuses pre-generated video.
