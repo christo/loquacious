@@ -293,6 +293,16 @@ both local and as online API services.
 
 ## TODO
 
+* [ ] settings panel
+    * [x] show current main llm/model
+    * [x] show current speech system and voice option
+    * [x] show other main llm/model options
+    * [x] show other speech/voice options
+    * [ ] make settings panel input components
+      * [ ] handle settings for each system module isomorphically
+    * [ ] make settings dynamically editable
+* [ ] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect
+  user approach
 * [ ] spike speech to text using whisper.cpp
     * [ ] streaming command line transcription listening to microphone
     * [x] understand how server works - not streaming
@@ -309,12 +319,6 @@ both local and as online API services.
       estimation? What can/should be done on the client?
 * [ ] move portrait images into server
     * [ ] serve portrait image from server as static
-* [ ] settings panel
-    * [x] show current main llm/model
-    * [x] show current speech system and voice option
-    * [x] show other main llm/model options
-    * [x] show other speech/voice options
-    * [ ] make settings dynamically editable
 * [ ] read about postgres types
     * parser https://node-postgres.com/features/queries#types
     * https://github.com/brianc/node-pg-types
