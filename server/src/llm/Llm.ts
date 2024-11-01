@@ -15,8 +15,6 @@ type ChatResult = {
  * Can do chat completions. May have multiple models that can be dynamically selected.
  */
 interface Llm extends CreatorService {
-  /** Unique service name */
-  name: string,
   baseUrl: string | undefined,
   enableHealth: boolean,
   models: () => Promise<Array<Model>>

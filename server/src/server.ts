@@ -81,7 +81,7 @@ app.get("/system", async (_req: Request, res: Response) => {
       options: modes.allModes()
     },
     llmMain: {
-      name: LLMS.current().name,
+      name: LLMS.current().getName(),
       models: await LLMS.current().models(),
       currentModel: await LLMS.current().currentModel(),
       isFree: LLMS.current().free()
@@ -180,7 +180,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           messages: messages,
           speech: speechFilePath,
           lipsync: lipsyncResult,
-          llm: currentLlm.name,
+          llm: currentLlm.getName(),
           model: currentModel,
         }
       });
@@ -279,7 +279,7 @@ app.listen(port, async () => {
 
   const llm = LLMS.current();
   console.log(`LLM Health check: ${llm.enableHealth ? "enabled" : "disabled"}`);
-  console.log(`LLM back end: ${llm.name} at URL: ${(llm.baseUrl)}`);
+  console.log(`LLM back end: ${llm.getName()} at URL: ${(llm.baseUrl)}`);
   console.log(`LLM current model: ${await llm.currentModel()}`);
   const models = await llm.models();
   console.log(`LLM available models (${models.length}):`);

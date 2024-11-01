@@ -36,7 +36,7 @@ function dateTimeMessage() {
  */
 class FakeLlm implements Llm {
   readonly baseUrl = undefined;
-  readonly name = "FakeLlm"
+  private readonly name = "FakeLlm"
   readonly enableHealth = false;
   canRun = always;
   private currentModelKey = "echo";

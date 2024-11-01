@@ -11,7 +11,7 @@ type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 class LlamaCppLlm implements Llm {
   readonly baseUrl: string | undefined;
   readonly enableHealth = true;
-  readonly name = "Llama.cpp-LLM";
+  private readonly name = "Llama.cpp-LLM";
   canRun = always;
   private openai;
 

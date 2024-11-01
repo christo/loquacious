@@ -8,7 +8,7 @@ type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 class LmStudioLlm implements Llm {
   readonly baseUrl: string | undefined;
   readonly enableHealth = false;
-  readonly name = "LM-Studio-LLM";
+  private readonly name = "LM-Studio-LLM";
   canRun = always;
   private openai;
 
