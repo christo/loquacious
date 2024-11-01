@@ -13,9 +13,8 @@ import {hasEnv} from "../system/config";
 import {mkDirIfMissing} from "../system/filetoy";
 
 const VOICES = [
-  new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
-  new CharacterVoice("Tarini - Expressive & Cheerful Narrator", "Tarini", "Indian woman +"),
   new CharacterVoice("Vidhi - Young & Bold", "Vidhi", "Expressive Indian woman +"),
+  new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
   new CharacterVoice("Alicia - Warm, expressive, posh, old British female", "Alicia", "Warm posh English older woman ++"),
   new CharacterVoice("Nicole", "Nicole", "Young American woman, whispering, ASMR"),
   new CharacterVoice("Agatha", "Agatha", "English older woman, thin"),
@@ -46,6 +45,7 @@ const VOICES = [
   new CharacterVoice("Mampai", "Mampai", "African woman"),
   new CharacterVoice("Mistress Valerie", "Valerie", "English middle-aged posh woman"),
   new CharacterVoice("Victoria, Queen of England", "Victoria", "Posh English woman"),
+  new CharacterVoice("Tarini - Expressive & Cheerful Narrator", "Tarini", "Indian woman - not enough variety"),
   // not current:
   /*
   new CharacterVoice("Diana - Upbeat and Clear", "Vashti", "Indian woman"),
@@ -85,7 +85,7 @@ type StreamPartialConfig = {
  * Implementation that calls elevenlabs.ai - requires an API key env var.
  */
 class ElevenLabsSpeech implements SpeechSystem {
-  client: ElevenLabsClient;
+  private client: ElevenLabsClient;
   readonly display: DisplaySpeechSystem;
 
   /**
