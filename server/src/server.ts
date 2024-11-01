@@ -49,13 +49,10 @@ const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 
 ensureDataDirsExist(process.env.DATA_DIR!);
 
-const LLMS = new LlmService()
-
+const llms = new LlmService()
 const speechSystems = new SpeechSystems(path.join(PATH_BASE_DATA, "tts"));
-const ANIMATORS = new AnimatorServices(PATH_BASE_DATA);
-
+const animators = new AnimatorServices(PATH_BASE_DATA);
 const modes = new Modes();
-
 const db = new Db(10);
 
 const app = express();
@@ -74,6 +71,19 @@ app.get("/portraits", async (_req: Request, res: Response) => {
   res.json(imageInfos);
 });
 
+/**
+ * Modify current system settings.
+ */
+app.post("/system", async (req: Request, res: Response) => {
+  // mode
+  // llmMain
+  // TODO implement
+  res.status(500).end();
+});
+
+/**
+ * Get current system settings.
+ */
 app.get("/system", async (_req: Request, res: Response) => {
   res.json({
     mode: {
@@ -81,14 +91,14 @@ app.get("/system", async (_req: Request, res: Response) => {
       options: modes.allModes()
     },
     llm: {
-      current: LLMS.current().getName(),
-      options: LLMS.all().map(llm => ({name: llm.getName()}))},
+      current: llms.current().getName(),
+      options: llms.all().map(llm => ({name: llm.getName()}))},
     // TODO deprecate, use common interface for all modules, update front-end
     llmMain: {
-      name: LLMS.current().getName(),
-      models: await LLMS.current().models(),
-      currentModel: await LLMS.current().currentModel(),
-      isFree: LLMS.current().free()
+      name: llms.current().getName(),
+      models: await llms.current().models(),
+      currentModel: await llms.current().currentModel(),
+      isFree: llms.current().free()
     },
     speech: {
       systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
@@ -96,15 +106,14 @@ app.get("/system", async (_req: Request, res: Response) => {
       isFree: speechSystems.current().free()
     },
     lipsync: {
-      systems: ANIMATORS.all().map(ls => ls.getName()),
-      current: ANIMATORS.current().getName(),
-      isFree: ANIMATORS.current().free()
+      systems: animators.all().map(ls => ls.getName()),
+      current: animators.current().getName(),
+      isFree: animators.current().free()
     },
     runtime: {
-      run: db.getRun(),
-      session: await db.currentSession()
+      run: db.getRun()
     },
-    health: await systemHealth(LLMS.current())
+    health: await systemHealth(llms.current())
   });
 });
 
@@ -175,10 +184,10 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({error: 'No prompt provided'});
   } else {
     failable("loquacious chat", async () => {
-      const currentLlm = LLMS.current();
+      const currentLlm = llms.current();
       const currentModel = await currentLlm.currentModel()
       const currentSpeech = speechSystems.current();
-      const currentAnimator = ANIMATORS.current();
+      const currentAnimator = animators.current();
       const buildResponse = (messages: Message[], speechFilePath?: string, lipsyncResult?: LipSyncResult) => ({
         response: {
           portrait: portrait,
@@ -260,9 +269,9 @@ app.get('/video', async (req: Request, res: Response) => fileStream(req.query.fi
 
 async function initialiseCreatorTypes() {
   const creators: CreatorType[] = [
-    ...LLMS.all(),
+    ...llms.all(),
     ...speechSystems.systems,
-    ...ANIMATORS.all()
+    ...animators.all()
   ];
   console.log(`ensuring ${creators.length} creator types are in database`);
   await Promise.all(creators.map(async creator => {
@@ -282,7 +291,7 @@ app.listen(port, async () => {
   // TODO remove host hard-coding
   console.log(`Server is running on http://localhost:${port}`);
 
-  const llm = LLMS.current();
+  const llm = llms.current();
   console.log(`LLM Health check: ${llm.enableHealth ? "enabled" : "disabled"}`);
   console.log(`LLM back end: ${llm.getName()} at URL: ${(llm.baseUrl)}`);
   console.log(`LLM current model: ${await llm.currentModel()}`);
@@ -290,5 +299,5 @@ app.listen(port, async () => {
   console.log(`LLM available models (${models.length}):`);
   models.forEach(m => console.log(`   ${m.id}`));
   console.log(`Current Speech System: ${speechSystems.current().currentOption().descriptor()}`);
-  console.log(`Current LipSync: ${ANIMATORS.current().getName()}`);
+  console.log(`Current LipSync: ${animators.current().getName()}`);
 });
