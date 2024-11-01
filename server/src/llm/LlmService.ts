@@ -6,7 +6,7 @@ import {OpenAiLlm} from "./OpenAiLlm";
 
 class LlmService {
 
-  private llms: Llm[];
+  private readonly llms: Llm[];
   private llmIndex = 0;
 
   constructor() {
