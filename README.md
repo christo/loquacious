@@ -293,6 +293,24 @@ both local and as online API services.
 
 ## TODO
 
+* [ ] pose estimation
+  * detect when a person approaches, describe what they look like etc.
+  * detect if they are in an engaged mode or just looking
+  * invite them to sit down and chat
+  * enter introductory mode
+  * on-demand camera contents description
+      * how many fingers am I holding up?
+      * this is my friend jane
+      * does my ass look big in this
+  * periodic pose estimation to detect mode state transitions
+  * pose estimation calibration
+      * if camera moves or scene changes, need to mark engagement zone in
+        camera field
+      * lighting
+      * pose estimation and video frame grab integration
+  * possible whole-scene photo input
+      * it may help the LLM if it can see not only what it looks like but what
+        the actual current deployment scene looks like
 * [ ] settings panel
     * [x] show current main llm/model
     * [x] show current speech system and voice option
@@ -317,8 +335,14 @@ both local and as online API services.
     * [ ] test small model
     * [ ] is it feasible to stream video to server to capture speech and pose
       estimation? What can/should be done on the client?
-* [ ] move portrait images into server
-    * [ ] serve portrait image from server as static
+* [ ] system ui
+  * [ ] manual pose calibration
+  * [ ] autocalibration of pose estimation using vision system
+  * [ ] character design ui
+  * [ ] choose portrait, upload portrait, choose voice (specify speech system), name etc.
+  * [ ] possibly capture gesture animation using pose estimation?
+  * [ ] move portrait images into server
+  * [ ] serve portrait image from server as static
 * [ ] read about postgres types
     * parser https://node-postgres.com/features/queries#types
     * https://github.com/brianc/node-pg-types
@@ -363,7 +387,6 @@ both local and as online API services.
 * [ ] check out multimodal models like LLaVA 1.5 and LLaVA 1.6
     * may work to do both text and vision with the same model?
 * usable cached generated output
-* [ ] pose estimation plan
 * [ ] evaluate local AI TTS (better than macos?)
 * [ ] evaluate local speech recognition: e.g. whisper.cpp
 * [ ] evaluate elevenlabs websocket "realtime" streaming:
@@ -398,26 +421,6 @@ both local and as online API services.
     * detect when a person tentatively appraoches but does not trigger start
     * detect when multiple people stand gingerly nearby
     * consider second camera trained on whole scene or entrance
-* using pose-estimation, detect when a person approaches, describe what they
-  look like etc.
-    * detect if they are in an engaged mode or just looking
-    * invite them to sit down and chat
-    * enter introductory mode
-    * on-demand camera contents description
-        * how many fingers am I holding up?
-        * this is my friend jane
-        * does my ass look big in this
-    * periodic pose estimation to detect mode state transitions
-    * pose estimation calibration
-        * if camera moves or scene changes, need to mark engagement zone in
-          camera
-          field
-        * lighting
-        * pose estimation and video frame grab integration
-    * possible whole-scene photo input
-        * it may help the LLM if it can see not only what it looks like but what
-          the
-          actual current deployment scene looks like?
 * Per-deployment configuration needs to know:
     * event details, maybe including whole schedule of events
     * VIPs
