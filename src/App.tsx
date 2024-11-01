@@ -159,7 +159,8 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
                     const audio = new Audio(audioUrl);
                     audio.play();
                 });
-            } else {
+            } else if (response.llm) {
+                // no llm no response at all
                 console.log("no speech or video in response");
             }
         }
