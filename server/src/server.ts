@@ -97,7 +97,8 @@ app.get("/system", async (_req: Request, res: Response) => {
       isFree: ANIMATORS.current().free()
     },
     runtime: {
-      run: db.getRun()
+      run: db.getRun(),
+      session: await db.currentSession()
     },
     health: await systemHealth(LLMS.current())
   });
