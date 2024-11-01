@@ -85,17 +85,18 @@ type StreamPartialConfig = {
  * Implementation that calls elevenlabs.ai - requires an API key env var.
  */
 class ElevenLabsSpeech implements SpeechSystem {
+  private static NAME = `ElevenLabs-TTS`;
+
   private client: ElevenLabsClient;
+
   readonly display: DisplaySpeechSystem;
 
   /**
    * Requires environment variable ELEVEN_LABS_API_KEY
    */
   canRun = hasEnv("ELEVENLABS_API_KEY");
-
   private currentVoice = 0;
   private characterVoice = VOICES[this.currentVoice];
-  private readonly name = `ElevenLabs-TTS`;
   private readonly dataDir: string;
 
   /**
@@ -139,10 +140,10 @@ class ElevenLabsSpeech implements SpeechSystem {
     const outFile = path.join(this.dataDir, outFilename);
     try {
       const audio = await timed("elevenlabs generate speech",
-        () => this.client.generate({
-          text: message,
-          ...(this.getConfig().config)
-        } as ElevenLabsClient.GeneratAudioBulk));
+          () => this.client.generate({
+            text: message,
+            ...(this.getConfig().config)
+          } as ElevenLabsClient.GeneratAudioBulk));
       const outStream = fs.createWriteStream(outFile);
       return new Promise<SpeechResult>((resolve, reject) => {
         outStream.on('error', (err) => {
@@ -185,7 +186,7 @@ class ElevenLabsSpeech implements SpeechSystem {
   }
 
   getName(): string {
-    return this.name;
+    return ElevenLabsSpeech.NAME;
   }
 
   configure(metadata: string): Promise<void> {
