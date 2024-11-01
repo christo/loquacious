@@ -53,8 +53,8 @@ class SpeechSystems {
   constructor(baseDir: PathLike) {
     this.baseDir = baseDir;
     this.systems = [
-      new MacOsSpeech(this.baseDir),
       new ElevenLabsSpeech(this.baseDir),
+      new MacOsSpeech(this.baseDir),
       new NoSpeech(),
     ].filter(s => s.canRun())
   }
