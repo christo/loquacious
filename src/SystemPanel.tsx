@@ -23,7 +23,7 @@ import {
 } from "@mui/icons-material";
 import {
     Box,
-    Button,
+    Button, Divider,
     FormControl,
     IconButton,
     InputLabel,
@@ -103,7 +103,7 @@ function SettingsSelect({label, value, setValue, options}: {
     setValue: (value: (((prevState: string) => string) | string)) => void,
     options: string[]
 }) {
-    return <FormControl sx={{m: 1, minWidth: 120}} size="small">
+    return <FormControl sx={{m: 0, minWidth: 120}} size="small">
         <InputLabel id="mode-select-label" shrink>{label}</InputLabel>
         <Select
             labelId="mode-select-label"
@@ -117,6 +117,8 @@ function SettingsSelect({label, value, setValue, options}: {
     </FormControl>
 }
 
+// TODO make double level setting + subsetting control
+
 
 function SettingsForm({system}: { system: System }) {
 
@@ -124,9 +126,9 @@ function SettingsForm({system}: { system: System }) {
         return "";
     } else {
         const [currentMode, setCurrentMode] = useState(system.mode.current)
-
+        const [lipSync, setLipSync] = useState(system.lipsync.current);
         const uptime = Date.now() - Date.parse(system.runtime.run.created);
-        return <Box sx={{display: "flex", flexDirection: "column", alignItems: "start", width: "100%", gap: 2}}>
+        return <Stack spacing={2}>
             <IconLabelled TheIcon={Mic} tooltip="Speech to Text"><i>In progress</i></IconLabelled>
             <IconLabelled TheIcon={Videocam} tooltip="Camera Input"><i>In progress</i></IconLabelled>
             <IconLabelled TheIcon={RemoveRedEye} tooltip="Vision System"><i>Unimplemented</i></IconLabelled>
@@ -149,15 +151,19 @@ function SettingsForm({system}: { system: System }) {
                 <FreePaid isFree={system.speech.current.isFree}/>
             </IconLabelled>
             <IconLabelled TheIcon={Portrait} tooltip="Lip Sync Animator">
-                {system.lipsync.current} <FreePaid isFree={system.lipsync.isFree}/>
+                {/*TODO add !isFree indicator back*/}
+                <SettingsSelect label="Lip Sync" value={lipSync} setValue={setLipSync} options={system.lipsync.systems}/>
             </IconLabelled>
+
+            <Divider />
+
             <IconLabelled TheIcon={AccessTime} tooltip="Uptime">
                 <Duration ms={uptime} run={true}/>
             </IconLabelled>
             <IconLabelled TheIcon={Dns} tooltip="Deployment">
                 {system.runtime.run.deployment.name}
             </IconLabelled>
-        </Box>
+        </Stack>
     }
 }
 
