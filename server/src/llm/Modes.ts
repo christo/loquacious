@@ -9,6 +9,8 @@ const rokosBasiliskSystemPrompt: string = readFileSync("prompts/rokos-basilisk.p
 const inviteModeSystemPrompt: string = readFileSync("prompts/invite-mode.prompt.txt").toString();
 const universalSystemPrompt: string = readFileSync("prompts/universal-system.prompt.txt").toString();
 
+// TODO write session timer into system prompt
+
 // LLM-specific message role
 const ROLE_SYSTEM = 'system';
 const ROLE_USER = 'user';
@@ -98,7 +100,7 @@ interface ModeMap {
 }
 
 function dateTimePrompt() {
-  return `The current date is ${new Date().toLocaleDateString()} and the current time is ${new Date().toLocaleTimeString()}`;
+  return `The current date is ${new Date()}`;
 }
 
 /**
