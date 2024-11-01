@@ -74,7 +74,7 @@ class FalSadtalker implements LipSyncAnimator {
     });
   }
 
-  name(): string {
+  getName(): string {
     return FalSadtalker.NAME;
   }
 
@@ -121,10 +121,6 @@ class FalSadtalker implements LipSyncAnimator {
 
   getMetadata(): string | undefined {
     return JSON.stringify(this.sadtalkerConfig);
-  }
-
-  getName(): string {
-    return this.name();
   }
 
   configure(metadata: string): Promise<void> {

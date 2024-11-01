@@ -21,12 +21,6 @@ type LipSyncResult = {
 interface LipSyncAnimator extends CreatorService {
 
   /**
-   * Unique name for the service.
-   * TODO migrate to getName()
-   */
-  name(): string;
-
-  /**
    * Generate a video animating the given portrait image to speak the given spoken audio.
    * Save it in the correctly configured data directory and return a LipSyncResult for it.
    * @param imageFile

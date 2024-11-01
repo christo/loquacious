@@ -288,7 +288,9 @@ class Db {
         const createResult = await client.query(query, [name, metadata]);
         if (createResult && createResult.rowCount === 1) {
           await client.query("commit");
-          return Promise.resolve(createResult.rows[0] as Creator);
+          const row = createResult.rows[0];
+          // TODO need instance of specific creator service?
+          return Promise.resolve(new Creator(row.id, row.name, true, row.metadata));
         } else {
           await client.query("rollback");
           return Promise.reject("could not create creator")

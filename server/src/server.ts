@@ -80,6 +80,10 @@ app.get("/system", async (_req: Request, res: Response) => {
       current: modes.current(),
       options: modes.allModes()
     },
+    llm: {
+      current: LLMS.current().getName(),
+      options: LLMS.all().map(llm => ({name: llm.getName()}))},
+    // TODO deprecate, use common interface for all modules, update front-end
     llmMain: {
       name: LLMS.current().getName(),
       models: await LLMS.current().models(),
@@ -92,8 +96,8 @@ app.get("/system", async (_req: Request, res: Response) => {
       isFree: speechSystems.current().free()
     },
     lipsync: {
-      systems: ANIMATORS.all().map(ls => ls.name()),
-      current: ANIMATORS.current().name(),
+      systems: ANIMATORS.all().map(ls => ls.getName()),
+      current: ANIMATORS.current().getName(),
       isFree: ANIMATORS.current().free()
     },
     runtime: {
@@ -286,5 +290,5 @@ app.listen(port, async () => {
   console.log(`LLM available models (${models.length}):`);
   models.forEach(m => console.log(`   ${m.id}`));
   console.log(`Current Speech System: ${speechSystems.current().currentOption().descriptor()}`);
-  console.log(`Current LipSync: ${ANIMATORS.current().name()}`);
+  console.log(`Current LipSync: ${ANIMATORS.current().getName()}`);
 });

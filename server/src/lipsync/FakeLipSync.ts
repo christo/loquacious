@@ -23,7 +23,7 @@ class FakeLipSync implements LipSyncAnimator {
     this.lipSyncDataDir = lipSyncDataDir;
   }
 
-  name(): string {
+  getName(): string {
     return "Fake-LipSync";
   }
 
@@ -46,10 +46,6 @@ class FakeLipSync implements LipSyncAnimator {
   /** Not supported or required. */
   getMetadata(): string | undefined {
     return undefined;
-  }
-
-  getName(): string {
-    return this.name();
   }
 
   /**

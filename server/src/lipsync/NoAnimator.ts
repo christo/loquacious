@@ -14,10 +14,6 @@ class NoAnimator implements LipSyncAnimator {
         return undefined;
     }
 
-    getName(): string {
-        return "No Animator";
-    }
-
     animate(_imageFile: string, _speechFile: string, _fileKey: string): Promise<LipSyncResult> {
         return Promise.reject();
     }
@@ -26,7 +22,7 @@ class NoAnimator implements LipSyncAnimator {
         return Promise.resolve();
     }
 
-    name(): string {
+    getName(): string {
         return "No LipSync";
     }
 
