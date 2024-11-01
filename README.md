@@ -293,7 +293,9 @@ both local and as online API services.
 
 ## TODO
 
-* [ ] pose estimation
+* [ ] pose estimation using tensorflow/MoveNet or mediapipe/pose
+  * [ ] spike pose estimation and seamless audio/video streaming to server
+  * pose estimation on client - assumes stable camera (can we detect camera motion?) 
   * detect when a person approaches, describe what they look like etc.
   * detect if they are in an engaged mode or just looking
   * invite them to sit down and chat
