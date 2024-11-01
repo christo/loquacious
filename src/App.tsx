@@ -126,28 +126,42 @@ type CompResponseProps = {
 
 function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponseProps) {
     const video = response.lipsync?.videoPath;
+    const speech = response.speech;
+
+    // TODO test lipsync and speech without video
+    const fetchMedia = (av: "audio" | "video", handleBlob: (blob: Blob) => void) => {
+        const url = `//${location.hostname}:${SERVER_PORT}/${av}?file=${video}`;
+        fetch(url).then(response => {
+            if (!response.ok) {
+                throw `network response for ${av} was crap`;
+            } else {
+                return response.blob();
+            }
+        }).then(handleBlob).catch(error => {
+            console.error('Fetch-o-Error:', error);
+        });
+    }
 
     useEffect(() => {
         if (video) {
-            const url = `//${location.hostname}:${SERVER_PORT}/video?file=${video}`;
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw "network response for video was crap";
-                    } else {
-                        return response.blob();
-                    }
-                }).then(blob => {
+            fetchMedia("video", blob => {
                 videoRef.current!.src = URL.createObjectURL(blob);
                 showVideo();
                 // noinspection JSIgnoredPromiseFromCall
                 videoRef.current!.play();
-            }).catch(error => {
-                console.error('Fetch-o-Error:', error);
             });
         } else {
-            // may be a success result with no lipsync
             hideVideo();
+            if (speech) {
+                // no video, only speech
+                fetchMedia("audio", blob => {
+                    const audioUrl = URL.createObjectURL(blob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                });
+            } else {
+                console.log("no speech or video in response");
+            }
         }
     }, [response])
 
