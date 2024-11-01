@@ -20,7 +20,10 @@ type LipSyncResult = {
  */
 interface LipSyncAnimator extends CreatorService {
 
-  /** Unique name for the service. */
+  /**
+   * Unique name for the service.
+   * TODO migrate to getName()
+   */
   name(): string;
 
   /**
