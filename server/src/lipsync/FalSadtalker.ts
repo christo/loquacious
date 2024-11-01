@@ -42,7 +42,7 @@ type UrlCache = { [keyOf: string]: string };
  */
 class FalSadtalker implements LipSyncAnimator {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
-  private static NAME = "FalSadtalker";
+  private readonly name = "FalSadtalker";
   canRun = hasEnv("FAL_API_KEY")
   private readonly dataDir: string;
   private readonly urlCache: UrlCache;
@@ -75,7 +75,7 @@ class FalSadtalker implements LipSyncAnimator {
   }
 
   getName(): string {
-    return FalSadtalker.NAME;
+    return this.name;
   }
 
   async urlFor(filePath: string): Promise<string> {
