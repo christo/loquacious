@@ -23,7 +23,7 @@ class NoAnimator implements LipSyncAnimator {
     }
 
     getName(): string {
-        return "No LipSync";
+        return "No Animator";
     }
 
     outputFormat(): MediaFormat | undefined {
