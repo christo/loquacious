@@ -126,8 +126,8 @@ class ElevenLabsSpeech implements SpeechSystem {
     this.display = new DisplaySpeechSystem(this.getName(), VOICES, this.free())
   }
 
-  options(): Array<string> {
-    return VOICES.map(v => v.voiceId);
+  options() {
+    return VOICES.map(v => new SpeechSystemOption(this, v.voiceId, v.name, v.description));
   }
 
   currentOption(): SpeechSystemOption {

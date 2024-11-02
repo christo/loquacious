@@ -44,7 +44,7 @@ interface SpeechSystem extends CreatorService {
   /**
    * Unique key for each option.
    */
-  options: () => Array<string>;
+  options: () => Array<SpeechSystemOption>;
 
   /**
    * Command for inserting a speech of this duration or null if no such command exists

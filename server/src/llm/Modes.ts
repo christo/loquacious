@@ -114,6 +114,9 @@ class Modes {
     this.modeMap = {} as ModeMap;
     this.modeMap["invite"] = inviteModeMessages;
     this.modeMap["chat"] = chatModeMessages;
+    this.modeMap["attract"] = inviteModeMessages;
+    this.modeMap["warmup"] = inviteModeMessages;
+    this.modeMap["admin"] = inviteModeMessages;
   }
 
   getMode(): ChatPrepper {

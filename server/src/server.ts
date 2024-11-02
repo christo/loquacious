@@ -88,27 +88,39 @@ app.get("/system", async (_req: Request, res: Response) => {
   res.json({
     mode: {
       current: modes.current(),
-      options: modes.allModes()
+      all: modes.allModes()
     },
     llm: {
+      // TODO make all others like this
       current: llms.current().getName(),
-      options: llms.all().map(llm => ({name: llm.getName()}))},
-    // TODO deprecate, use common interface for all modules, update front-end
-    llmMain: {
-      name: llms.current().getName(),
-      models: await llms.current().models(),
-      currentModel: await llms.current().currentModel(),
+      all: llms.all().map(llm => llm.getName()),
+      options: await llms.current().models(),
+      currentOption: await llms.current().currentModel(),
       isFree: llms.current().free()
     },
-    speech: {
-      systems: speechSystems.systems.map((s: SpeechSystem) => s.display),
-      current: speechSystems.current().currentOption().safeObject(),
-      isFree: speechSystems.current().free()
+    tts: {
+      current: speechSystems.current().getName(),
+      all: speechSystems.systems.map(ss => ss.getName()),
+      currentOption: speechSystems.current().currentOption(),
+      options: speechSystems.current().options(),
+      isFree: speechSystems.current().free(),
     },
     lipsync: {
-      systems: animators.all().map(ls => ls.getName()),
+      all: animators.all().map(ls => ls.getName()),
       current: animators.current().getName(),
       isFree: animators.current().free()
+    },
+    pose: {
+      current: "MediaPipe",
+      all: ["MediaPipe", "MoveNet"]
+    },
+    vision: {
+      current: "Claude 3.5 Sonnet (New)",
+      all: ["Claude 3.5 Sonnet (New)", "ChatGPT", "LM-Studio", "llama.cpp", "fal.ai Florence 2 Large"]
+    },
+    stt: {
+      current: "whisper.cpp",
+      all: ["whisper.cpp", "OpenAI Whisper", "fal.ai something"]
     },
     runtime: {
       run: db.getRun()

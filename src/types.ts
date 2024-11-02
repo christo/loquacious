@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import type {CharacterVoice} from "../server/src/speech/CharacterVoice.ts";
 import Model = OpenAI.Model;
+import {SpeechSystemOption} from "../server/src/speech/SpeechSystems.ts";
 
 type PerfStat = {
   seconds: number,
@@ -25,23 +26,29 @@ type SpeechSystemDisplay = {
     options: CharacterVoice
   }
 }
+export type Module = {
+  current: string,
+  all: string[],
+  isFree: boolean
+}
 export type System = {
   mode: {
     current: string,
-    options: string[],
+    all: string[], // TODO rename to all
   },
-  llmMain: {
-    name: string,
-    models: Model[],
-    currentModel: string,
-    isFree: boolean
+  llm: Module & {
+    options: Model[],
+    currentOption: string,
+  },
+  tts: Module & {
+    options: SpeechSystemOption[],
+    currentOption: SpeechSystemOption,
   },
   speech: SpeechSystemDisplay,
-  lipsync: {
-    systems: string[],
-    current: string
-    isFree: boolean
-  },
+  lipsync: Module,
+  pose: Module,
+  vision: Module,
+  stt: Module,
   runtime: {
     run: {
       id: number,

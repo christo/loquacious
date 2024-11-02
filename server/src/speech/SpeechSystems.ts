@@ -10,32 +10,34 @@ import {type SpeechSystem} from "speech/SpeechSystem";
  * audio post-processing, speaking rate etc.
  */
 class SpeechSystemOption {
-  system: SpeechSystem;
+  systemName: string;
   optionKey: string;
   optionName: string;
   description?: string
+  isFree: boolean;
 
   constructor(system: SpeechSystem, key: string, name: string, description?: string) {
-    this.system = system;
+    this.systemName = system.getName();
     this.optionKey = key;
     this.optionName = name;
     this.description = description;
+    this.isFree = system.free();
   }
 
   /** Returns a compact string representation of a {@link SpeechSystem} and its current option. */
   descriptor() {
     const desc = this.description ? ` (${this.description})` : "";
-    return `${this.system.getName()}/${this.optionName}${desc}`;
+    return `${this.systemName}/${this.optionName}${desc}`;
   }
 
   /** Display object represending a speech system and its configured option */
   safeObject() {
     return {
-      system: this.system.getName(),
+      system: this.systemName,
       optionKey: this.optionKey,
       optionName: this.optionName,
       description: this.descriptor(),
-      isFree: this.system.free()
+      isFree: this.isFree
     };
   }
 }

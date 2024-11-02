@@ -70,8 +70,8 @@ class MacOsSpeech implements SpeechSystem {
     return new SpeechSystemOption(this, v.voiceId, v.description);
   }
 
-  options(): Array<string> {
-    return VOICES.map(v => v.voiceId);
+  options(): Array<SpeechSystemOption> {
+    return VOICES.map(v => new SpeechSystemOption(this, v.voiceId, v.name, v.description));
   }
 
   async speak(message: string, basename: string): Promise<SpeechResult> {

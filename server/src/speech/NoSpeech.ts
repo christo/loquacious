@@ -14,19 +14,19 @@ const SILENT_SUCCESS: SpeechResult = {
  */
 class NoSpeech implements SpeechSystem {
   readonly name = "NoSpeech";
-  private onlyOptions = [new CharacterVoice("silence", "silence", "is golden")];
-  readonly display = new DisplaySpeechSystem(this.getName(), this.onlyOptions, this.free());
+  private onlyOption = [new CharacterVoice("silence", "silence", "is golden")];
+  readonly display = new DisplaySpeechSystem(this.getName(), this.onlyOption, this.free());
 
   canRun() {
     return true;
   }
 
-  options(): Array<string> {
-    return this.onlyOptions.map(x => x.voiceId);
+  options(): Array<SpeechSystemOption> {
+    return this.onlyOption.map(v => new SpeechSystemOption(this, v.voiceId, v.name, v.description));
   }
 
   currentOption(): SpeechSystemOption {
-    return new SpeechSystemOption(this, this.onlyOptions[0].voiceId, this.onlyOptions[0].description);
+    return new SpeechSystemOption(this, this.onlyOption[0].voiceId, this.onlyOption[0].description);
   }
 
   speak(_message: string, _filename: string): Promise<SpeechResult> {
