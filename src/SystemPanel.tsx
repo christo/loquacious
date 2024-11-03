@@ -41,8 +41,6 @@ import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import type {HealthError, SystemSummary} from "../server/src/types.ts";
 
 type ESet<T> = (value: (((prevState: T) => T) | T)) => void;
-type StringSet = ESet<string>;
-
 function ShowError({error}: { error: HealthError }) {
   return (<Typography color="error"><Error fontSize="large"/>{error.message}</Typography>);
 }
@@ -104,7 +102,7 @@ function FreePaid({isFree}: { isFree: boolean }) {
 function SettingsSelect({label, value, setValue, options}: {
   label: string,
   value: string,
-  setValue: StringSet,
+  setValue: ESet<string>,
   options: string[]
 }) {
   if (!options) {
@@ -129,7 +127,7 @@ function SettingsSelect({label, value, setValue, options}: {
 
 // noinspection JSUnusedLocalSymbols
 // @ts-ignore
-function ModeButton({mode, currentMode, setCurrentMode}: {mode: string, currentMode: string, setCurrentMode: StringSet}) {
+function ModeButton({mode, currentMode, setCurrentMode}: {mode: string, currentMode: string, setCurrentMode: ESet<string>}) {
   return <Button
       onClick={() => {setCurrentMode(mode)}}
       size="small"
