@@ -38,6 +38,7 @@ import {
 import React, {type ReactNode, useEffect, useState} from "react";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import type {HealthError, SystemSummary} from "../server/src/types.ts";
+import {Duration} from "./Duration.tsx";
 
 type ESet<T> = (value: T) => void;
 
@@ -62,36 +63,6 @@ function IconLabelled({TheIcon, tooltip, children}: {
     <Tooltip title={tooltip}><TheIcon fontSize="small" sx={{mr: 1}}/></Tooltip>
     <Box sx={{display: "flex", flexDirection: "row", alignItems: "center"}}>{children}</Box>
   </Stack>
-}
-
-/**
- * Formats to hh:mm:ss or mm:ss
- * if run is true, increment the time each second
- */
-function Duration({ms, className, run = false}: { ms: number, className?: string, run: boolean }) {
-  const [elapsed, setElapsed] = useState(ms);
-  if (run) {
-    useEffect(() => {
-      const timer = setInterval(() => {
-        setElapsed((prev) => prev + 1000);
-      }, 1000);
-
-      return () => clearInterval(timer); // Cleanup interval on component unmount
-    }, []);
-  }
-  className = !className ? "" : className;
-  let t = Math.floor(elapsed / 1000);
-  const hours = Math.floor(t / 3600);
-  t -= hours * 3600;
-  const mins = Math.floor(t / 60);
-  t -= mins * 60;
-  const secs = t;
-  const pad = (n: number) => ('0' + n).slice(-2);
-  if (hours > 0) {
-    return <span className={className}>{pad(hours)}:{pad(mins)}:{pad(secs)}</span>
-  } else {
-    return <span className={className}>{pad(mins)}:{pad(secs)}</span>;
-  }
 }
 
 function FreePaid({isFree}: { isFree: boolean }) {
