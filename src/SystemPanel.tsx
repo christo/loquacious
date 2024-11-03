@@ -99,7 +99,11 @@ function SettingsSelect({label, value, setValue, options}: {
 
 // noinspection JSUnusedLocalSymbols
 // @ts-ignore
-function ModeButton({mode, currentMode, setCurrentMode}: {mode: string, currentMode: string, setCurrentMode: ESet<string>}) {
+function ModeButton({mode, currentMode, setCurrentMode}: {
+  mode: string,
+  currentMode: string,
+  setCurrentMode: ESet<string>
+}) {
   return <Button
       onClick={() => {setCurrentMode(mode)}}
       size="small"
@@ -108,12 +112,12 @@ function ModeButton({mode, currentMode, setCurrentMode}: {mode: string, currentM
       key={`mb_${mode}`}>{mode}</Button>
 }
 
-function SettingsForm({system}: { system: SystemSummary }) {
+function SettingsForm({system, postSettings}: { system: SystemSummary, postSettings: (value: any) => void }) {
 
   if (system === null) {
     return "";
   } else {
-    const [currentMode, setCurrentMode] = useState(system.mode.current)
+    const [currentMode, _setCurrentMode] = useState(system.mode.current)
     const [currentLlm, setCurrentLlm] = useState(system.llm.current);
     const [currentModel, setCurrentModel] = useState(system.llm.currentOption);
     const [currentTts, setCurrentTts] = useState(system.tts.current);
@@ -125,14 +129,14 @@ function SettingsForm({system}: { system: SystemSummary }) {
     // we expect all dates to be in default json-serialised iso format
     const uptime = Date.now() - Date.parse(system.runtime.run.created);
 
-    const setMode: ESet<string> = (value: string)=> {
-      console.log(`TODO post partial system object and reload with result ${value}`);
-      setCurrentMode(value);
+    const setMode: ESet<string> = (newMode: string) => {
+      //_setCurrentMode(newMode);
+      postSettings({mode: newMode});
     }
 
     return <Stack spacing={2}>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">
-          <SettingsSelect label={"Mode"} value={currentMode} setValue={setMode} options={system.mode.all}/>
+        <SettingsSelect label={"Mode"} value={currentMode} setValue={setMode} options={system.mode.all}/>
       </IconLabelled>
 
       <IconLabelled TheIcon={Mic} tooltip="Speech to Text">
@@ -262,23 +266,36 @@ function SessionControl({serverPort, resetResponse}: { serverPort: number, reset
 function SettingsPanel(props: SettingsProps) {
   const [settings, setSettings] = useState<any>(null);
 
-  useEffect(() => {
+  function doFetch(init?: RequestInit) {
     try {
-      fetch(`//${location.hostname}:${props.serverPort}/system`).then(result => {
+      fetch(`//${location.hostname}:${props.serverPort}/system`, init).then(result => {
         result.json().then(data => {
+          console.log("setting settings");
           setSettings(data || null);
         });
       });
     } catch (e) {
       console.error(e);
     }
-  }, []);
+  }
+
+  useEffect(() => doFetch(), []);
+
+  const postSettings = async (partial: any) => {
+    doFetch({
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(partial)
+    });
+  }
 
   return <Box
       sx={{p: 2, display: "flex", flexDirection: "column", width: "100%", gap: 1, alignItems: "left"}}>
     <Typography variant="h4">loquacious</Typography>
     {props.images?.length > 0 && <ImageChooser {...props} />}
-    <SettingsForm system={settings}/>
+    <SettingsForm system={settings} postSettings={postSettings}/>
     <Status system={settings}/>
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
   </Box>

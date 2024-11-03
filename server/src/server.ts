@@ -77,20 +77,20 @@ app.get("/portraits", async (_req: Request, res: Response) => {
  * Returns the new system summary
  */
 app.post("/system/", async (req: Request, res: Response) => {
-  // TODO implement update and error handling
-  const {system} = req.body;
-
-  const keys = Object.getOwnPropertyNames(system);
-  for (const k of keys) {
-    switch (k) {
-      case "mode":
-          modes.setMode(system[k]);
-      break;
-      default:
-        console.log(`system setting update for ${k} not implemented`);
+  console.dir({reqBody: req.body});
+  await failable(res, "update system settings", async () => {
+    const keys = Object.getOwnPropertyNames(req.body);
+    for (const k of keys) {
+      switch (k) {
+        case "mode":
+          modes.setMode(req.body[k]);
+          break;
+        default:
+          console.log(`system setting update for ${k} not implemented`);
+      }
     }
-  }
-  res.json(await getSystem());
+    res.json(await getSystem());
+  });
 });
 
 async function getSystem() {
@@ -153,14 +153,11 @@ app.get("/system", async (_req: Request, res: Response) => {
  * Front end request for a new session.
  */
 app.put("/session", async (_req: Request, res: Response) => {
-  try {
+  await failable(res, "creating new session", async () => {
     await db.finishCurrentSession();
     const session = await db.createSession();
     res.json(session);
-  } catch (error) {
-    console.error('Error creating a new session:', error);
-    res.status(500).end();
-  }
+  });
 });
 
 app.get('/session', async (_req: Request, res: Response) => {
@@ -172,7 +169,7 @@ app.get('/session', async (_req: Request, res: Response) => {
 })
 
 app.get('/api/chat', async (_req: Request, res: Response) => {
-  try {
+  await failable(res, "get chat", async () => {
     const session = await getOrCreateSession()
     const messages = await db.getSessionMessages(session);
     res.json({
@@ -181,9 +178,7 @@ app.get('/api/chat', async (_req: Request, res: Response) => {
         messages: messages
       }
     });
-  } catch (e) {
-    res.status(500).end();
-  }
+  });
 });
 
 /**
@@ -197,25 +192,25 @@ async function getOrCreateSession(): Promise<Session> {
   }
 }
 
+const failable = async (res: Response, name: string, thunk: () => Promise<void>) => {
+  try {
+    return await thunk();
+  } catch (e) {
+    const msg = `${name} failed`;
+    console.error(msg, e);
+    res.status(500).json({error: msg}).end();
+  }
+}
+
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const {prompt, portrait} = req.body;
   console.log(`chat request for portrait ${portrait.f} with prompt ${prompt}`);
 
-  const failable = (name: string, thunk: () => Promise<void>) => {
-    try {
-      thunk();
-    } catch (e) {
-      const msg = `${name} failed`;
-      console.error(msg, e);
-      res.status(500).json({error: msg}).end();
-    }
-  }
-
   if (!prompt) {
     res.status(400).json({error: 'No prompt provided'});
   } else {
-    failable("loquacious chat", async () => {
+    await failable(res, "loquacious chat", async () => {
       const currentLlm = llms.current();
       const currentModel = await currentLlm.currentModel()
       const currentSpeech = speechSystems.current();
@@ -245,7 +240,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         const llmMessage = await timed("storing llm response",
             () => db.createCreatorTypeMessage(session, llmResponse, currentLlm));
 
-        failable("speech generation", async () => {
+        await failable(res, "speech generation", async () => {
           const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
               async () => {
                 const ssCreator = await db.findCreator(currentSpeech.getName(), currentSpeech.getMetadata(), true);
@@ -259,7 +254,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           const speechFilePath = speechResult.filePath();
           if (speechFilePath) {
             const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
-            failable("lipsync generation", async () => {
+            await failable(res, "lipsync generation", async () => {
               const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
               const mimeType = currentAnimator.outputFormat()?.mimeType;
               if (!mimeType) {
