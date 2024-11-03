@@ -1,6 +1,6 @@
 import type {Llm} from "llm/Llm";
 import os from "os";
-import type LlmService from "../llm/LlmService";
+import {HealthError, HealthStatus, MemSpec, PerfStat, SystemSummary} from "../types.ts";
 
 const formatBytes = (bytes: number) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -11,66 +11,65 @@ const formatBytes = (bytes: number) => {
   return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
 };
 
-async function systemHealth(llm: Llm) {
-  const totalMem = os.totalmem();
-  const freeMem = os.freemem();
-  let tttHealth: any = {message: "disabled"};
+const mkPerfStat = (seconds: number, measure: string)=> {
+  return {
+    seconds: seconds,
+    measure: measure,
+    mean: -1,
+    median: -1,
+    p80: -1,
+    p90: -1,
+    worst: -1,
+    best: -1,
+    count: -1
+
+  }
+};
+
+const mkMemSpec = (mem: number): MemSpec => ({
+  bytes: mem,
+  formatted: formatBytes(mem)
+});
+
+type MessageOrError = {
+  message: string | undefined,
+  error: HealthError | undefined,
+};
+
+async function systemHealth(llm: Llm): Promise<HealthStatus> {
+
+  // TODO fix this wonky type
+  let msgOrError: MessageOrError = {
+    message: "disabled",
+    error: undefined
+  };
   if (llm.enableHealth) {
     try {
       const r = await fetch(`${(llm.baseUrl)}/health`, {});
-      tttHealth = await r.json();
+      msgOrError = await r.json(); // TODO can we trust this will construc the right type?
     } catch (error) {
-      tttHealth = {"error": `Health check failed ${error}`};
+      msgOrError = {
+        message: undefined,
+        error: {
+          message: `Health check failed ${error}`,
+          code: 666,
+          type: "wtf do I put here?"
+        }
+      };
     }
   }
 
-  return {
-    freeMem: {
-      bytes: freeMem,
-      formatted: formatBytes(freeMem)
-    },
-    totalMem: {
-      bytes: totalMem,
-      formatted: formatBytes(totalMem),
-    },
-    tttHealth: tttHealth,
+  const healthStatus: HealthStatus = {
+    freeMem: mkMemSpec(os.freemem()),
+    totalMem: mkMemSpec(os.totalmem()),
+    ...msgOrError,
     perf: [
-      {
-        seconds: 60,
-        measure: "stv",
-        mean: -1,
-        median: -1,
-        p80: -1,
-        p90: -1,
-        worst: -1,
-        best: -1,
-        count: -1
-
-      },
-      {
-        seconds: 600,
-        measure: "stv",
-        mean: -1,
-        median: -1,
-        p80: -1,
-        p90: -1,
-        worst: -1,
-        best: -1,
-        count: -1
-      },
-      {
-        seconds: 6000,
-        measure: "stv",
-        mean: -1,
-        median: -1,
-        p80: -1,
-        p90: -1,
-        worst: -1,
-        best: -1,
-        count: -1
-      }
+      mkPerfStat(60, "stv"),
+      mkPerfStat(600, "stv"),
+      mkPerfStat(6000, "stv"),
     ]
   };
+  return healthStatus;
 }
 
 export {systemHealth};

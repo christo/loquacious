@@ -38,7 +38,7 @@ import {
 } from "@mui/material";
 import React, {type ReactNode, useEffect, useState} from "react";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
-import type {HealthError, System} from "./types.ts";
+import type {HealthError, SystemSummary} from "../server/src/types.ts";
 
 type ESet<T> = (value: (((prevState: T) => T) | T)) => void;
 type StringSet = ESet<string>;
@@ -138,7 +138,7 @@ function ModeButton({mode, currentMode, setCurrentMode}: {mode: string, currentM
       key={`mb_${mode}`}>{mode}</Button>
 }
 
-function SettingsForm({system}: { system: System }) {
+function SettingsForm({system}: { system: SystemSummary }) {
 
   if (system === null) {
     return "";
@@ -152,6 +152,7 @@ function SettingsForm({system}: { system: System }) {
     const [currentPoseSystem, setCurrentPoseSystem] = useState(system.pose.current);
     const [currentStt, setCurrentStt] = useState(system.stt.current);
     const [currentVision, setCurrentVision] = useState(system.vision.current);
+    // TODO type has a date, but via JSON are these parsed automatically?
     const uptime = Date.now() - Date.parse(system.runtime.run.created);
     return <Stack spacing={2}>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">
@@ -223,7 +224,7 @@ function SettingsForm({system}: { system: System }) {
   }
 }
 
-function Status({system}: { system: System }) {
+function Status({system}: { system: SystemSummary }) {
   if (system == null) {
     return <p>...</p>
   } else {

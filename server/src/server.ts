@@ -10,7 +10,7 @@ import {Modes} from "llm/Modes";
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
-import type {SpeechResult, SpeechSystem} from "speech/SpeechSystem";
+import type {SpeechResult} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
 import {ensureDataDirsExist, getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
@@ -24,6 +24,7 @@ import {Session} from "./domain/Session";
 import type {VideoFile} from "./domain/VideoFile";
 import AnimatorServices from "./lipsync/AnimatorServices";
 import LlmService from "./llm/LlmService";
+import {RunInfo, SystemSummary} from "./types";
 import Agent = Undici.Agent;
 
 // TODO confirm we want connect timeout and not ?"request timeout"
@@ -74,7 +75,7 @@ app.get("/portraits", async (_req: Request, res: Response) => {
 /**
  * Modify current system settings.
  */
-app.post("/system", async (req: Request, res: Response) => {
+app.post("/system", async (_req: Request, res: Response) => {
   // mode
   // llmMain
   // TODO implement
@@ -85,7 +86,7 @@ app.post("/system", async (req: Request, res: Response) => {
  * Get current system settings.
  */
 app.get("/system", async (_req: Request, res: Response) => {
-  res.json({
+  const system: SystemSummary = {
     mode: {
       current: modes.current(),
       all: modes.allModes()
@@ -112,21 +113,25 @@ app.get("/system", async (_req: Request, res: Response) => {
     },
     pose: {
       current: "MediaPipe",
-      all: ["MediaPipe", "MoveNet"]
+      all: ["MediaPipe", "MoveNet"],
+      isFree: true
     },
     vision: {
       current: "Claude 3.5 Sonnet (New)",
-      all: ["Claude 3.5 Sonnet (New)", "ChatGPT", "LM-Studio", "llama.cpp", "fal.ai Florence 2 Large"]
+      all: ["Claude 3.5 Sonnet (New)", "ChatGPT", "LM-Studio", "llama.cpp", "fal.ai Florence 2 Large"],
+      isFree: false,
     },
     stt: {
       current: "whisper.cpp",
-      all: ["whisper.cpp", "OpenAI Whisper", "fal.ai something"]
+      all: ["whisper.cpp", "OpenAI Whisper", "fal.ai something"],
+      isFree: true
     },
     runtime: {
-      run: db.getRun()
+      run: new RunInfo(db.getRun())
     },
     health: await systemHealth(llms.current())
-  });
+  };
+  res.json(system);
 });
 
 /**
@@ -248,7 +253,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               } else {
                 const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
                 const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
+                  // TODO code smells...
                   const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
+                  console.log(`lipsync db id: ${lipsync.id}`);
                   return currentAnimator.animate(portait, speechFilePath!, `${videoFile.id}`);
                 });
                 // TODO return full session graph for enabling replay etc.
