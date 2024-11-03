@@ -119,7 +119,7 @@ class Modes {
     this.modeMap["admin"] = inviteModeMessages;
   }
 
-  getMode(): ChatPrepper {
+  getChatPrepper(): ChatPrepper {
     return this.modeMap[this.currentMode];
   }
 
@@ -129,6 +129,24 @@ class Modes {
 
   allModes(): string[] {
     return Object.keys(this.modeMap);
+  }
+
+  /**
+   * Attempt to set mode to the given mode, returns actual mode.
+   * @param mode
+   * @return on success the requested mode, on failure, the unchanged mode.
+   */
+  setMode(mode: string): string {
+    if (this.currentMode !== mode) {
+      const allModes = this.allModes();
+      if (allModes.includes(mode)) {
+        console.log(`setting mode to ${mode}`);
+        this.currentMode = mode;
+      } else {
+        console.warn(`requested unknown mode ${mode} - must be one of [${allModes.join(", ")}].`);
+      }
+    }
+    return this.currentMode;
   }
 }
 

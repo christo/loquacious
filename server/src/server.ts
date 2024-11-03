@@ -73,19 +73,27 @@ app.get("/portraits", async (_req: Request, res: Response) => {
 });
 
 /**
- * Modify current system settings.
+ * Modify current system settings - body should be partial SystemSummary.
+ * Returns the new system summary
  */
-app.post("/system", async (_req: Request, res: Response) => {
-  // mode
-  // llmMain
-  // TODO implement
-  res.status(500).end();
+app.post("/system/", async (req: Request, res: Response) => {
+  // TODO implement update and error handling
+  const {system} = req.body;
+
+  const keys = Object.getOwnPropertyNames(system);
+  for (const k of keys) {
+    switch (k) {
+      case "mode":
+          modes.setMode(system[k]);
+      break;
+      default:
+        console.log(`system setting update for ${k} not implemented`);
+    }
+  }
+  res.json(await getSystem());
 });
 
-/**
- * Get current system settings.
- */
-app.get("/system", async (_req: Request, res: Response) => {
+async function getSystem() {
   const system: SystemSummary = {
     mode: {
       current: modes.current(),
@@ -131,7 +139,14 @@ app.get("/system", async (_req: Request, res: Response) => {
     },
     health: await systemHealth(llms.current())
   };
-  res.json(system);
+  return system;
+}
+
+/**
+ * Get current system settings.
+ */
+app.get("/system", async (_req: Request, res: Response) => {
+  res.json(await getSystem());
 });
 
 /**
@@ -219,7 +234,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       console.log("storing user message");
       await db.createUserMessage(session, prompt);
       const messageHistory: Message[] = await db.getSessionMessages(session);
-      const mode = modes.getMode();
+      const mode = modes.getChatPrepper();
       let allMessages = mode(messageHistory, currentSpeech);
       let llmResponse: string | null = await timed("text generation", async () => {
         const response = await currentLlm.chat(allMessages);

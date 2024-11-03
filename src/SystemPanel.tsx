@@ -23,7 +23,6 @@ import {
 import {
   Box,
   Button,
-  ButtonGroup,
   Divider,
   FormControl,
   IconButton,
@@ -40,7 +39,8 @@ import React, {type ReactNode, useEffect, useState} from "react";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import type {HealthError, SystemSummary} from "../server/src/types.ts";
 
-type ESet<T> = (value: (((prevState: T) => T) | T)) => void;
+type ESet<T> = (value: T) => void;
+
 function ShowError({error}: { error: HealthError }) {
   return (<Typography color="error"><Error fontSize="large"/>{error.message}</Typography>);
 }
@@ -108,6 +108,7 @@ function SettingsSelect({label, value, setValue, options}: {
   if (!options) {
     throw `no options for ${label}`
   }
+
   return <FormControl sx={{m: 0, minWidth: 120}} size="small">
     <InputLabel id="mode-select-label" shrink>{label}</InputLabel>
     <Select
@@ -150,16 +151,17 @@ function SettingsForm({system}: { system: SystemSummary }) {
     const [currentPoseSystem, setCurrentPoseSystem] = useState(system.pose.current);
     const [currentStt, setCurrentStt] = useState(system.stt.current);
     const [currentVision, setCurrentVision] = useState(system.vision.current);
-    // TODO type has a date, but via JSON are these parsed automatically?
+    // we expect all dates to be in default json-serialised iso format
     const uptime = Date.now() - Date.parse(system.runtime.run.created);
+
+    const setMode: ESet<string> = (value: string)=> {
+      console.log(`TODO post partial system object and reload with result ${value}`);
+      setCurrentMode(value);
+    }
+
     return <Stack spacing={2}>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">
-
-        {/*TODO */}
-        <ButtonGroup variant="outlined" aria-label="Basic button group">
-          <SettingsSelect label={"Mode"} value={currentMode} setValue={setCurrentMode} options={system.mode.all}/>
-        </ButtonGroup>
-
+          <SettingsSelect label={"Mode"} value={currentMode} setValue={setMode} options={system.mode.all}/>
       </IconLabelled>
 
       <IconLabelled TheIcon={Mic} tooltip="Speech to Text">
@@ -176,7 +178,7 @@ function SettingsForm({system}: { system: SystemSummary }) {
       {/*<IconLabelled TheIcon={Face3} tooltip="Self-image"><i>Unimplemented</i></IconLabelled>*/}
 
       <IconLabelled TheIcon={AccessibilityNew} tooltip="Motion Capture">
-        <SettingsSelect label="MoCap" value={currentPoseSystem} setValue={setCurrentPoseSystem}
+        <SettingsSelect label="Mocap" value={currentPoseSystem} setValue={setCurrentPoseSystem}
                         options={system.pose.all}/>
       </IconLabelled>
 
