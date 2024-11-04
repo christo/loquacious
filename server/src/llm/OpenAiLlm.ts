@@ -49,8 +49,6 @@ class OpenAiLlm implements Llm {
       model: this.model,
       messages: messages
     });
-    // hacky opportunistic method to passively correct any failed model configuration request in config
-    //this.model = response.model;
     return {message: response.choices[0]?.message?.content as (string | null)} as ChatResult;
   }
 
