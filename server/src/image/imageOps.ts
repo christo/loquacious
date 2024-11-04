@@ -4,13 +4,9 @@ import path from "path";
 import sharp from "sharp";
 
 import {mkDirIfMissing} from "../system/filetoy";
+import {Dimension} from "./Dimension";
 
-type Dim = {
-  width: number,
-  height: number
-}
-
-export async function prescaleImages(baseDir: string, dimensions: Dim[]) {
+export async function prescaleImages(baseDir: string, dimensions: Dimension[]) {
   const extensions: string[] = supportedImageTypes()
     .flatMap((f: MediaFormat) => f.extensions)
     .map((e: string) => `.${e}`);
@@ -35,4 +31,3 @@ export async function prescaleImages(baseDir: string, dimensions: Dim[]) {
   }
 }
 
-export type {Dim};
