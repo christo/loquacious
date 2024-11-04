@@ -96,23 +96,6 @@ function SettingsSelect({label, value, setValue, options}: {
   </FormControl>
 }
 
-// TODO make a double level control: setting + subsetting
-
-// noinspection JSUnusedLocalSymbols
-// @ts-ignore
-function ModeButton({mode, currentMode, setCurrentMode}: {
-  mode: string,
-  currentMode: string,
-  setCurrentMode: ESet<string>
-}) {
-  return <Button
-      onClick={() => {setCurrentMode(mode)}}
-      size="small"
-      color={mode === currentMode ? "secondary" : "primary"}
-      variant={mode === currentMode ? "contained" : "outlined"}
-      key={`mb_${mode}`}>{mode}</Button>
-}
-
 function SettingsForm({system, postSettings}: { system: SystemSummary, postSettings: (value: any) => void }) {
 
   if (system === null) {
