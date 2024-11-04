@@ -98,6 +98,7 @@ app.post("/system/", async (req: Request, res: Response) => {
 
 async function getSystem() {
   const system: SystemSummary = {
+    asAt: new Date(),
     mode: {
       current: modes.current(),
       all: modes.allModes()

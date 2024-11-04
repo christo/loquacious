@@ -96,92 +96,91 @@ function SettingsSelect({label, value, setValue, options}: {
   </FormControl>
 }
 
-function SettingsForm({system, postSettings}: { system: SystemSummary, postSettings: (value: any) => void }) {
+function SettingsForm({system, postSettings}: {
+  system: SystemSummary,
+  postSettings: (kv: { [keyof: string]: string }) => Promise<void>
+}) {
 
   if (system === null) {
     return "";
   } else {
-    const [currentMode, setCurrentMode] = useState(system.mode.current)
-    const [currentLlm, setCurrentLlm] = useState(system.llm.current);
-    const [currentModel, setCurrentModel] = useState(system.llm.currentOption);
-    const [currentTts, setCurrentTts] = useState(system.tts.current);
-    const [currentVoice, setCurrentVoice] = useState(system.tts.currentOption.optionName);
-    const [lipSync, setLipSync] = useState(system.lipsync.current);
-    const [currentPoseSystem, setCurrentPoseSystem] = useState(system.pose.current);
-    const [currentStt, setCurrentStt] = useState(system.stt.current);
-    const [currentVision, setCurrentVision] = useState(system.vision.current);
     // we expect all dates to be in default json-serialised iso format
     const uptime = Date.now() - Date.parse(system.runtime.run.created);
 
-    const updater = (key: string, setter: ESet<string>) => {
-      return (newValue: string) => {
-        setter(newValue);
+    /**
+     * Slightly too clever, constructs an update function for posting setting change for the given key
+     * and setState function.
+     * @param key
+     * @return promise for chaining
+     */
+    const updater = (key: string): (newValue: string) => Promise<void> => {
+      return async (newValue: string): Promise<void> => {
         const kv: { [keyof: string]: string } = {};
         kv[key] = newValue;
-        postSettings(kv);
-      }
+        return postSettings(kv)
+      };
     }
 
     return <Stack spacing={2}>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">
         <SettingsSelect
             label={"Mode"}
-            value={currentMode}
-            setValue={updater("mode", setCurrentMode)}
+            value={system.mode.current}
+            setValue={updater("mode")}
             options={system.mode.all}/>
       </IconLabelled>
 
       <IconLabelled TheIcon={Mic} tooltip="Speech to Text">
         <SettingsSelect
             label={"STT"}
-            value={currentStt}
-            setValue={updater("stt", setCurrentStt)}
+            value={system.stt.current}
+            setValue={updater("stt")}
             options={system.stt.all}/>
       </IconLabelled>
 
       {/*<IconLabelled TheIcon={Videocam} tooltip="Camera Input"><i>In progress</i></IconLabelled>*/}
 
       <IconLabelled TheIcon={RemoveRedEye} tooltip="Vision System">
-        <SettingsSelect label={"Vision"} value={currentVision} setValue={setCurrentVision}
+        <SettingsSelect label={"Vision"} value={system.vision.current} setValue={updater("vision")}
                         options={system.vision.all}/>
       </IconLabelled>
       {/*<IconLabelled TheIcon={Face3} tooltip="Self-image"><i>Unimplemented</i></IconLabelled>*/}
 
       <IconLabelled TheIcon={AccessibilityNew} tooltip="Motion Capture">
-        <SettingsSelect label="Mocap" value={currentPoseSystem} setValue={setCurrentPoseSystem}
+        <SettingsSelect label="Mocap" value={system.pose.current} setValue={updater("pose")}
                         options={system.pose.all}/>
       </IconLabelled>
 
       <IconLabelled TheIcon={QuestionAnswer} tooltip="LLM">
         <SettingsSelect
             label="LLM"
-            value={currentLlm}
-            setValue={updater("llm", setCurrentLlm)}
+            value={system.llm.current}
+            setValue={updater("llm")}
             options={system.llm.all}/>
         <FreePaid isFree={system.llm.isFree}/>
       </IconLabelled>
 
       <IconLabelled TheIcon={School} tooltip="Model">
         <SettingsSelect label="Model"
-                        value={currentModel}
-                        setValue={setCurrentModel}
+                        value={system.llm.currentOption}
+                        setValue={updater("llm_model")}
                         options={system.llm.options.map(m => m.id)}/>
       </IconLabelled>
       <IconLabelled TheIcon={Campaign} tooltip="Speech System">
         <SettingsSelect label="Speech"
-                        value={currentTts}
-                        setValue={setCurrentTts}
+                        value={system.tts.current}
+                        setValue={updater("tts")}
                         options={system.tts.all}/>
         <FreePaid isFree={system.tts.isFree}/>
       </IconLabelled>
       <IconLabelled TheIcon={RecordVoiceOver} tooltip="Voice">
         <SettingsSelect label="Voice"
-                        value={currentVoice}
-                        setValue={setCurrentVoice}
+                        value={system.tts.currentOption.optionName}
+                        setValue={updater("tts_voice")}
                         options={system.tts.options.map(sso => sso.optionName)}/>
       </IconLabelled>
       <IconLabelled TheIcon={Portrait} tooltip="Lip Sync Animator">
-        <SettingsSelect label="Lip Sync" value={lipSync} setValue={setLipSync}
+        <SettingsSelect label="Lip Sync" value={system.lipsync.current} setValue={updater("lipsync")}
                         options={system.lipsync.all}/>
         <FreePaid isFree={system.lipsync.isFree}/>
       </IconLabelled>
@@ -191,7 +190,6 @@ function SettingsForm({system, postSettings}: { system: SystemSummary, postSetti
       <IconLabelled TheIcon={AccessTime} tooltip="Uptime">
         <Duration ms={uptime} run={true}/>
       </IconLabelled>
-
     </Stack>;
   }
 }
@@ -330,7 +328,14 @@ interface SystemPanelProps {
   resetResponse: () => void,
 }
 
-export function SystemPanel({appTitle, images, setImageIndex, imageIndex, serverPort, resetResponse}: SystemPanelProps) {
+export function SystemPanel({
+                              appTitle,
+                              images,
+                              setImageIndex,
+                              imageIndex,
+                              serverPort,
+                              resetResponse
+                            }: SystemPanelProps) {
   // ESC toggles drawer
   useEffect(() => {
     let handleKeyDown = (e: KeyboardEvent) => {
@@ -355,7 +360,8 @@ export function SystemPanel({appTitle, images, setImageIndex, imageIndex, server
     </IconButton>
     <SwipeableDrawer sx={{opacity: 0.9, m: 0}} open={drawerOpen} onClose={toggleDrawer(false)}
                      onOpen={toggleDrawer(false)}>
-      <SettingsPanel appTitle={appTitle} images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort}
+      <SettingsPanel appTitle={appTitle} images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}
+                     serverPort={serverPort}
                      resetResponse={resetResponse}/>
     </SwipeableDrawer>
   </Box>
