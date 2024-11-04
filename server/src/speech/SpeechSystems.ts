@@ -56,8 +56,8 @@ class SpeechSystems {
   constructor(baseDir: PathLike) {
     this.baseDir = baseDir;
     this.systems = [
-      new MacOsSpeech(this.baseDir),
       new ElevenLabsSpeech(this.baseDir),
+      new MacOsSpeech(this.baseDir),
       new NoSpeech(),
     ].filter(s => s.canRun())
   }
@@ -72,7 +72,7 @@ class SpeechSystems {
     if (maybeFound) {
       return maybeFound;
     } else {
-      throw Error(`No speech system with name "${name}" found.`);
+      throw Error(`No currently runnable speech system with name "${name}" found.`);
     }
   }
 
