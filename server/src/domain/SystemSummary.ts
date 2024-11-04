@@ -1,5 +1,5 @@
-import {SpeechSystemOption} from "../speech/SpeechSystems.ts";
-import {RunInfo} from "./RunInfo.ts";
+import {SpeechSystemOption} from "../speech/SpeechSystems";
+import {RunInfo} from "./RunInfo";
 import OpenAI from "openai";
 import Model = OpenAI.Model;
 

@@ -9,7 +9,6 @@
     "outDir": "./dist",
     "baseUrl": "./src",
     "esModuleInterop": true,
-    "allowImportingTsExtensions": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "strict": true,

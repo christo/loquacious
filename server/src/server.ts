@@ -25,8 +25,8 @@ import type {VideoFile} from "./domain/VideoFile";
 import AnimatorServices from "./lipsync/AnimatorServices";
 import LlmService from "./llm/LlmService";
 import Agent = Undici.Agent;
-import {RunInfo} from "./domain/RunInfo.ts";
-import {SystemSummary} from "./domain/SystemSummary.ts";
+import {RunInfo} from "./domain/RunInfo";
+import {SystemSummary} from "./domain/SystemSummary";
 
 // TODO confirm we want connect timeout and not ?"request timeout"
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));

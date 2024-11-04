@@ -1,4 +1,4 @@
-import {Run} from "./Run.ts";
+import {Run} from "./Run";
 
 /**
  * Like {@link Run} with ISO serialised dates.
