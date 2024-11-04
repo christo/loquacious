@@ -37,3 +37,21 @@ body {
     min-height: 100vh;
 }
 
+/* prociono-regular - latin */
+@font-face {
+    font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Prociono';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/public/fonts/prociono-v26-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* princess-sofia-regular - latin */
+@font-face {
+    font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Princess Sofia';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/public/fonts/princess-sofia-v25-latin_latin-ext-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
