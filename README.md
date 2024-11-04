@@ -323,6 +323,10 @@ both local and as online API services.
         the actual current deployment scene looks like
 * [ ] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect
   user approach
+* [ ] implement settings presets - depends on server-configured character portraits
+  * [ ] portrait image
+  * [ ] character voice (implies TTS system-specific)
+  * [ ] fill out feature idea for runtime system prompt design
 * [ ] spike speech to text using whisper.cpp
     * [ ] streaming command line transcription listening to microphone
     * [x] understand how server works - not streaming
