@@ -29,7 +29,6 @@ import {SystemSummary} from "./domain/SystemSummary";
 import {Dimension} from "./image/Dimension";
 import Agent = Undici.Agent;
 
-// TODO confirm we want connect timeout and not ?"request timeout"
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
 
 // Load environment variables
