@@ -13,9 +13,10 @@ import {hasEnv} from "../system/config";
 import {mkDirIfMissing} from "../system/filetoy";
 
 const VOICES = [
-  new CharacterVoice("Vidhi - Young & Bold", "Vidhi", "Expressive Indian woman +"),
-  new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
+  new CharacterVoice("Andromeda - warm and lovely", "Andromeda", "Posh English woman, mid tones (5)"),
   new CharacterVoice("Alicia - Warm, expressive, posh, old British female", "Alicia", "Warm posh English older woman ++"),
+  new CharacterVoice("Charlotte", "Charlotte", "Wise young woman, light Swedish accent"),
+  new CharacterVoice("Vidhi - Young & Bold", "Vidhi", "Expressive Indian woman (3)"),
   new CharacterVoice("Nicole", "Nicole", "Young American woman, whispering, ASMR"),
   new CharacterVoice("Agatha", "Agatha", "English older woman, thin"),
   new CharacterVoice("Lily", "Lily", "English woman, young, London"),
@@ -26,7 +27,6 @@ const VOICES = [
   new CharacterVoice("Old Osirion Woman - Timeless, Mystical, Nurturing", "Anne", "Neutral English woman"),
   new CharacterVoice("Ky9j3wxFbp3dSAdrkOEv", "Hex", "Middle-aged Northern English woman with moderate tone"),
   new CharacterVoice("Sigrid - solemn, raspy, wise", "Sigrid", "English, slightly posh older woman +"),
-  new CharacterVoice("Andromeda - warm and lovely", "Andromeda", "Posh English woman, mid tones"),
   new CharacterVoice("Emily", "Emily", "Meditation, American woman"),
   new CharacterVoice("Jacqui Griffin", "Jacqui", "Australian woman, reasonably broad accent"),
   new CharacterVoice("Dorothy", "Dorothy", "English woman, slightly South Eastern"),
