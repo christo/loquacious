@@ -35,7 +35,7 @@ type FalSadtalkerInvocation = {
   input: { source_image_url: string, driven_audio_url: string } & FalSadtalkerInput
 };
 
-type UrlCache = { [keyOf: string]: string };
+type UrlCache = { [keyof: string]: string };
 
 /**
  * Implementation that calls fal.ai service, requires valid FAL_API_KEY in env.
