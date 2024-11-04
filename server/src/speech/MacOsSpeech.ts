@@ -164,11 +164,7 @@ class MacOsSpeech implements SpeechSystem {
         found = true;
       }
     }
-    if (found) {
-      return Promise.resolve();
-    } else {
-      return Promise.reject();
-    }
+    return found ? Promise.resolve() : Promise.reject();
   }
 
   free(): boolean {
