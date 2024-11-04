@@ -394,7 +394,7 @@ both local and as online API services.
     * may work to do both text and vision with the same model?
 * usable cached generated output
 * [ ] evaluate local AI TTS (better than macos?)
-* [ ] evaluate local speech recognition: e.g. whisper.cpp
+* [x] evaluate local speech recognition: e.g. whisper.cpp
 * [ ] evaluate elevenlabs websocket "realtime" streaming:
   https://elevenlabs.io/docs/api-reference/websockets
 * use cached openings for quick-start.
