@@ -289,7 +289,6 @@ class Db {
         if (createResult && createResult.rowCount === 1) {
           await client.query("commit");
           const row = createResult.rows[0];
-          // TODO need instance of specific creator service?
           return Promise.resolve(new Creator(row.id, row.name, true, row.metadata));
         } else {
           await client.query("rollback");
