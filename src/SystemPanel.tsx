@@ -47,6 +47,7 @@ function ShowError({error}: { error: HealthError }) {
 }
 
 interface SettingsProps {
+  appTitle: string;
   images: ImageInfo[];
   imageIndex: number;
   serverPort: number;
@@ -263,6 +264,19 @@ function SessionControl({serverPort, resetResponse}: { serverPort: number, reset
   return <Button sx={{mt: 2}} disabled={inFlight} variant="outlined" onClick={newSession}>New Session</Button>;
 }
 
+function AppTitle(props: { appTitle: string }) {
+  return <Typography variant="h4" sx={{
+    fontFamily: "\"Princess Sofia\", cursive",
+    fontWeight: 400,
+    fontStyle: "normal",
+    color: "#e5ae38",
+    textShadow: "-1px -1px 0 rgba(255, 200, 200, 0.8), 0px 2px 5px rgba(0, 0, 0, 0.8)",
+    letterSpacing: "0",
+    textAlign: "center",
+    fontSize: 64,
+  }}>{props.appTitle}</Typography>;
+}
+
 function SettingsPanel(props: SettingsProps) {
   const [settings, setSettings] = useState<any>(null);
 
@@ -293,7 +307,7 @@ function SettingsPanel(props: SettingsProps) {
 
   return <Box
       sx={{p: 2, display: "flex", flexDirection: "column", width: "100%", gap: 1, alignItems: "left"}}>
-    <Typography variant="h4">loquacious</Typography>
+    <AppTitle appTitle={props.appTitle}/>
     {props.images?.length > 0 && <ImageChooser {...props} />}
     <SettingsForm system={settings} postSettings={postSettings}/>
     <Status system={settings}/>
@@ -302,6 +316,7 @@ function SettingsPanel(props: SettingsProps) {
 }
 
 interface SystemPanelProps {
+  appTitle: string,
   images: ImageInfo[],
   setImageIndex: (value: (((prevState: number) => number) | number)) => void,
   imageIndex: number,
@@ -309,7 +324,7 @@ interface SystemPanelProps {
   resetResponse: () => void,
 }
 
-export function SystemPanel({images, setImageIndex, imageIndex, serverPort, resetResponse}: SystemPanelProps) {
+export function SystemPanel({appTitle, images, setImageIndex, imageIndex, serverPort, resetResponse}: SystemPanelProps) {
   // ESC toggles drawer
   useEffect(() => {
     let handleKeyDown = (e: KeyboardEvent) => {
@@ -334,7 +349,7 @@ export function SystemPanel({images, setImageIndex, imageIndex, serverPort, rese
     </IconButton>
     <SwipeableDrawer sx={{opacity: 0.9, m: 0}} open={drawerOpen} onClose={toggleDrawer(false)}
                      onOpen={toggleDrawer(false)}>
-      <SettingsPanel images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort}
+      <SettingsPanel appTitle={appTitle} images={images} imageIndex={imageIndex} setImageIndex={setImageIndex} serverPort={serverPort}
                      resetResponse={resetResponse}/>
     </SwipeableDrawer>
   </Box>

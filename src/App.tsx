@@ -1,42 +1,16 @@
-import {Box, CircularProgress, styled, TextField, Typography} from "@mui/material";
-import {marked} from 'marked';
-import OpenAI from "openai";
-import React, {KeyboardEventHandler, type MutableRefObject, type ReactNode, useEffect, useRef, useState} from 'react';
+import {Box, CircularProgress} from "@mui/material";
+import React, {KeyboardEventHandler, type MutableRefObject, useEffect, useRef, useState} from 'react';
 import "./App.css";
 import {Message} from "../server/src/domain/Message.ts";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import {SystemPanel} from "./SystemPanel.tsx";
-import Model = OpenAI.Model;
+import {ChatContainer, ChatResponse} from "./ChatHistory.tsx";
+import {ChatInput} from "./ChatInput.tsx";
 
 const DEFAULT_PORTRAIT = 0;
 // const BASE_URL_PORTRAIT = "/img/1080x1920";
 const BASE_URL_PORTRAIT = "/img/608x800";
 const SERVER_PORT = 3001;
-
-type ChatResponse = {
-    messages: Message[];
-    speech: string | undefined;
-    llm: string | undefined;
-    model: Model | undefined;
-    lipsync: {
-        content_type: string;
-        file_name: "string";
-        file_size: number,
-        videoPath: string;
-    } | undefined;
-}
-
-/**
- * Converts Markdown to HTML.
- * @param markdown
- */
-function mdToHtml(markdown: string | undefined) {
-    if (markdown) {
-        return marked.parse(markdown);
-    } else {
-        return "";
-    }
-}
 
 function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
     src: string,
@@ -63,59 +37,6 @@ function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
     </Box>
 }
 
-function renderMessage(m: Message) {
-    const sx = {
-        fontFamily: '"Libre Baskerville", serif',
-        fontWeight: 400,
-        fontStyle: "bold",
-        padding: "0.5rem 1rem",
-        maxWidth: "max(26rem, 45%)",
-        boxShadow: "5px 10px 10px #00000033",
-    };
-    const user = {
-        ...sx,
-        alignSelf: "end",
-        borderRadius: "1rem 1rem 0 1rem",
-        backgroundColor: "rgba(110,18,164,0.8)",
-    };
-    const system = {
-        ...sx,
-        backgroundColor: "rgba(44, 58, 58, 0.8)",
-        borderRadius: "1rem 1rem 1rem 0",
-    }
-
-    if (m.isFromUser) {
-        return <Typography sx={user} key={`ch_${m.id}`}>
-            {m.content}
-        </Typography>;
-    } else {
-        return <Typography sx={system} key={`ch_${m.id}`}
-                           dangerouslySetInnerHTML={{__html: mdToHtml(m.content)}}
-        />;
-    }
-}
-
-function ChatHistory({children, messages}: { children: ReactNode, messages: Message[] }) {
-    const chatHistory = useRef<HTMLElement | null>(null)
-    useEffect(() => {
-        if (chatHistory.current) {
-            chatHistory.current.scrollIntoView({behavior: "smooth", inline: "end"})
-        }
-    }, []);
-    return <Box ref={chatHistory} sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "start",
-        maxHeight: "18rem",
-        paddingTop: "2rem",
-        gap: "0.2rem",
-        overflow: "scroll"
-    }}>
-        {messages.map(renderMessage)}
-        {children}
-    </Box>;
-}
-
 type CompResponseProps = {
     response: ChatResponse,
     loading: boolean,
@@ -124,10 +45,17 @@ type CompResponseProps = {
     showVideo: () => void;
 }
 
+/**
+ * Composite response component. Includes chat history, and either audio or video.
+ * @param response
+ * @param videoRef
+ * @param hideVideo
+ * @param showVideo
+ * @constructor
+ */
 function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponseProps) {
     const video = response.lipsync?.videoPath;
     const speech = response.speech;
-
     // TODO test lipsync and speech without video
     const fetchMedia = (av: "audio" | "video", handleBlob: (blob: Blob) => void) => {
         const url = `//${location.hostname}:${SERVER_PORT}/${av}?file=${video}`;
@@ -168,41 +96,8 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
         }
     }, [response])
 
-    return <Box id="chCont" sx={{
-        fontSize: "small",
-        padding: "0 1rem",
-        margin: 0,
-        width: "100%",
-        height: "100%",
-        zIndex: 40,
-        display: "flex",
-        flexDirection: "column-reverse",
-        maskImage: "linear-gradient(to bottom, transparent 0%, white 19%)",
-        overflow: "scroll"
-    }}>
-        <ChatHistory messages={response.messages}>.</ChatHistory>
-    </Box>;
+    return <ChatContainer messages={response.messages}/>;
 }
-
-const ChatInput = styled(TextField)({
-    backgroundColor: "black",
-    color: "white",
-    '& .MuiOutlinedInput-input': {},
-    '& .MuiOutlinedInput-root': {
-        '& fieldset': {
-            backgroundColor: "#333",
-            opacity: 0.5,
-            border: 'none',  // Remove default border
-        },
-        '&:hover fieldset': {
-            border: 'none',  // Remove border on hover
-        },
-        '&.Mui-focused fieldset': {
-            backgroundColor: "black",
-            border: 'none',  // Remove border on focus
-        },
-    },
-});
 
 const App: React.FC = () => {
 
@@ -319,7 +214,7 @@ const App: React.FC = () => {
                 <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={imageUrl()}
                           hideVideo={hideVideo}/>)
             }
-            <SystemPanel images={images} setImageIndex={setImageIndex} imageIndex={imageIndex} serverPort={SERVER_PORT}
+            <SystemPanel appTitle="Loquacious" images={images} setImageIndex={setImageIndex} imageIndex={imageIndex} serverPort={SERVER_PORT}
                          resetResponse={resetResponse}/>
             {loading && <CircularProgress size="2rem" color="secondary"
                                           sx={{
