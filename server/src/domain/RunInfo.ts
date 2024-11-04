@@ -16,7 +16,6 @@ class RunInfo {
   }
 
   constructor(run: Run) {
-    // TODO this manual shovelling bothers me
     this.id = run.id;
     this.created = run.created.toISOString();
     this.metadata = run.metadata;
