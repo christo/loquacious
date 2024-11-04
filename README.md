@@ -9,7 +9,7 @@ AI face-to-face fortune teller chat experiment.
 * Minimal web application front-end, REST back end
 * LLM integration for reasonable fortune teller interaction text,
   implementations:
-    * OpenAI / Chat GPT
+    * OpenAI / ChatGPT
     * [llama.cpp](https://github.com/ggerganov/llama.cpp) (open source)
     * [lm-studio](https://lmstudio.ai/) (lovely open source UI wrapper for
       llama.cpp)
@@ -412,7 +412,7 @@ both local and as online API services.
     * need a mechanism to decide if a short response is warranted
     * need some stalling responses to hide latency (distractions, pondering and
       thinking signals, explicit "excuse me a moment while I contemplate your
-      words)
+      words")
 * [x] asking name flow
     * [x] flexible level of persistance about wanting to know a person's name
     * [x] calling by name if available
