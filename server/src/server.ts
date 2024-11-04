@@ -24,9 +24,10 @@ import {Session} from "./domain/Session";
 import type {VideoFile} from "./domain/VideoFile";
 import AnimatorServices from "./lipsync/AnimatorServices";
 import LlmService from "./llm/LlmService";
-import Agent = Undici.Agent;
 import {RunInfo} from "./domain/RunInfo";
 import {SystemSummary} from "./domain/SystemSummary";
+import {Dimension} from "./image/Dimension";
+import Agent = Undici.Agent;
 
 // TODO confirm we want connect timeout and not ?"request timeout"
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
@@ -34,14 +35,16 @@ setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
 // Load environment variables
 dotenv.config();
 
+const BASE_WEB_ROOT = "../public"
 /** file path relative to server module root */
 const BASE_PATH_PORTRAIT = "../public/img";
-const PORTRAIT_DIMS = [
+const PORTRAIT_DIMS: Dimension[] = [
   {width: 608, height: 800},
   {width: 1080, height: 1920}
 ];
 const dimIndex = 0;
-const PATH_PORTRAIT = `../public/img/${PORTRAIT_DIMS[dimIndex].width}x${PORTRAIT_DIMS[dimIndex].height}`;
+const portraitBaseUrl = `/img/${PORTRAIT_DIMS[dimIndex].width}x${PORTRAIT_DIMS[dimIndex].height}`;
+const PATH_PORTRAIT = `../public${portraitBaseUrl}`;
 console.log(`path portrait: ${PATH_PORTRAIT}`)
 
 if (!process.env.DATA_DIR) {
@@ -50,14 +53,13 @@ if (!process.env.DATA_DIR) {
 const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 
 const llms = new LlmService()
-const speechSystems = new SpeechSystems(path.join(PATH_BASE_DATA, "tts"));
+const speechSystems = new SpeechSystems(PATH_BASE_DATA);
 const animators = new AnimatorServices(PATH_BASE_DATA);
 const modes = new Modes();
-const db = new Db(10);
+const db = new Db( process.env.DB_POOL_SIZE ? parseInt(process.env.DB_POOL_SIZE, 10) : 10);
 
 const app = express();
 const port = process.env.PORT || 3001;
-
 
 app.use(cors());
 app.use(express.json());
@@ -68,7 +70,10 @@ app.get("/portraits", async (_req: Request, res: Response) => {
   const goodExt = (f: Dirent) => exts.includes(path.extname(f.name).toLowerCase());
   const imgFiles = allEntries.filter(f => f.isFile() && goodExt(f));
   const imageInfos = await Promise.all(imgFiles.map((de: Dirent) => ImageInfo.fromFile(PATH_PORTRAIT, de.name)));
-  res.json(imageInfos);
+  res.json({
+    dimension: PORTRAIT_DIMS[dimIndex],
+    images: imageInfos
+  });
 });
 
 app.get("/portrait/:portraitname", async (req: Request, res: Response) => {

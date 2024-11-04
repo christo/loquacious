@@ -39,6 +39,7 @@ import React, {type ReactNode, useEffect, useState} from "react";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import {Duration} from "./Duration.tsx";
 import {HealthError, SystemSummary} from "../server/src/domain/SystemSummary.ts";
+import {Dimension} from "../server/src/image/Dimension";
 
 type ESet<T> = (value: T) => void;
 
@@ -48,6 +49,7 @@ function ShowError({error}: { error: HealthError }) {
 
 interface SettingsProps {
   appTitle: string;
+  dimension: Dimension | null;
   images: ImageInfo[];
   imageIndex: number;
   serverPort: number;
@@ -55,7 +57,7 @@ interface SettingsProps {
   resetResponse: () => void;
 }
 
-function IconLabelled({TheIcon, tooltip, children}: {
+function WithIcon({TheIcon, tooltip, children}: {
   TheIcon: SvgIconComponent,
   tooltip: string,
   children: ReactNode
@@ -82,12 +84,13 @@ function SettingsSelect({label, value, setValue, options}: {
   }
 
   return <FormControl sx={{m: 0, minWidth: 120}} size="small">
-    <InputLabel id="mode-select-label" shrink>{label}</InputLabel>
+    <InputLabel id={`${label}-select-label`} shrink>{label}</InputLabel>
     <Select
-        labelId="mode-select-label"
-        id="mode-select"
+        labelId={`${label}-select-label`}
+        id={`${label}-select`}
         value={value}
-        label="{label}"
+        variant="outlined"
+        label={label}
         autoWidth
         onChange={(event: SelectChangeEvent) => setValue(event.target.value)}
     >
@@ -122,75 +125,83 @@ function SettingsForm({system, postSettings}: {
     }
 
     return <Stack spacing={2}>
-      <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">
+      <WithIcon TheIcon={AccountTree} tooltip="Interaction Modes">
         <SettingsSelect
             label={"Mode"}
             value={system.mode.current}
             setValue={updater("mode")}
             options={system.mode.all}/>
-      </IconLabelled>
+      </WithIcon>
 
-      <IconLabelled TheIcon={Mic} tooltip="Speech to Text">
+      <WithIcon TheIcon={Mic} tooltip="Speech to Text">
         <SettingsSelect
             label={"STT"}
             value={system.stt.current}
             setValue={updater("stt")}
             options={system.stt.all}/>
-      </IconLabelled>
+      </WithIcon>
 
       {/*<IconLabelled TheIcon={Videocam} tooltip="Camera Input"><i>In progress</i></IconLabelled>*/}
 
-      <IconLabelled TheIcon={RemoveRedEye} tooltip="Vision System">
+      <WithIcon TheIcon={RemoveRedEye} tooltip="Vision System">
         <SettingsSelect label={"Vision"} value={system.vision.current} setValue={updater("vision")}
                         options={system.vision.all}/>
-      </IconLabelled>
+      </WithIcon>
       {/*<IconLabelled TheIcon={Face3} tooltip="Self-image"><i>Unimplemented</i></IconLabelled>*/}
 
-      <IconLabelled TheIcon={AccessibilityNew} tooltip="Motion Capture">
+      <WithIcon TheIcon={AccessibilityNew} tooltip="Motion Capture">
         <SettingsSelect label="Mocap" value={system.pose.current} setValue={updater("pose")}
                         options={system.pose.all}/>
-      </IconLabelled>
+      </WithIcon>
 
-      <IconLabelled TheIcon={QuestionAnswer} tooltip="LLM">
+      <WithIcon TheIcon={QuestionAnswer} tooltip="LLM">
         <SettingsSelect
             label="LLM"
             value={system.llm.current}
             setValue={updater("llm")}
             options={system.llm.all}/>
         <FreePaid isFree={system.llm.isFree}/>
-      </IconLabelled>
+      </WithIcon>
 
-      <IconLabelled TheIcon={School} tooltip="Model">
+      <WithIcon TheIcon={School} tooltip="Model">
         <SettingsSelect label="Model"
                         value={system.llm.currentOption}
                         setValue={updater("llm_option")}
                         options={system.llm.options.map(m => m.id)}/>
-      </IconLabelled>
-      <IconLabelled TheIcon={Campaign} tooltip="Speech System">
+      </WithIcon>
+      <WithIcon TheIcon={Campaign} tooltip="Speech System">
         <SettingsSelect label="Speech"
                         value={system.tts.current}
                         setValue={updater("tts")}
                         options={system.tts.all}/>
         <FreePaid isFree={system.tts.isFree}/>
-      </IconLabelled>
-      <IconLabelled TheIcon={RecordVoiceOver} tooltip="Voice">
+      </WithIcon>
+      <WithIcon TheIcon={RecordVoiceOver} tooltip="Voice">
         <SettingsSelect label="Voice"
                         value={system.tts.currentOption.optionName}
                         setValue={updater("tts_option")}
                         options={system.tts.options.map(sso => sso.optionName)}/>
-      </IconLabelled>
-      <IconLabelled TheIcon={Portrait} tooltip="Lip Sync Animator">
+      </WithIcon>
+      <WithIcon TheIcon={Portrait} tooltip="Lip Sync Animator">
         <SettingsSelect label="Lip Sync" value={system.lipsync.current} setValue={updater("lipsync")}
                         options={system.lipsync.all}/>
         <FreePaid isFree={system.lipsync.isFree}/>
-      </IconLabelled>
+      </WithIcon>
 
       <Divider/>
 
-      <IconLabelled TheIcon={AccessTime} tooltip="Uptime">
+      <WithIcon TheIcon={AccessTime} tooltip="Uptime">
         <Duration ms={uptime} run={true}/>
-      </IconLabelled>
+      </WithIcon>
     </Stack>;
+  }
+}
+
+function ScaleDimension(props: { dimension: Dimension | null }) {
+  if (props.dimension) {
+    return <Typography>{props.dimension.width}x{props.dimension.height}</Typography>
+  } else {
+    return null;
   }
 }
 
@@ -198,25 +209,25 @@ function SettingsForm({system, postSettings}: {
  * Non-editable status information about the system.
  * @param system
  */
-function Status({system}: { system: SystemSummary }) {
+function Status({system}: { system: SystemSummary}) {
   if (system == null) {
     return <p>...</p>
   } else {
     const health = system.health;
     return (<Stack gap={1}>
-      <IconLabelled TheIcon={Dns} tooltip="Deployment">
+      <WithIcon TheIcon={Dns} tooltip="Deployment">
         {system.runtime.run.deployment.name}
-      </IconLabelled>
+      </WithIcon>
       {health.error ? <ShowError error={health.error}/> : ""}
-      <IconLabelled TheIcon={MonitorHeart} tooltip="Health">{health.message || "Health unknown"}</IconLabelled>
-      <IconLabelled TheIcon={Memory} tooltip="System RAM">
+      <WithIcon TheIcon={MonitorHeart} tooltip="Health">{health.message || "Health unknown"}</WithIcon>
+      <WithIcon TheIcon={Memory} tooltip="System RAM">
         {health.freeMem.formatted} free of {health.totalMem.formatted}
-      </IconLabelled>
+      </WithIcon>
     </Stack>);
   }
 }
 
-function PortraitChooser({images, imageIndex, setImageIndex}: SettingsProps) {
+function PortraitChooser({images, imageIndex, setImageIndex, dimension}: SettingsProps) {
   const imgShift = (delta: number) => {
     return () => {
       if (images.length === 0) {
@@ -239,9 +250,9 @@ function PortraitChooser({images, imageIndex, setImageIndex}: SettingsProps) {
       </IconButton>
     </Box>
     <Box>
-      <IconLabelled TheIcon={AspectRatio} tooltip="Character Portrait Dimensions">
-        {portraitWidth} x {portraitHeight}
-      </IconLabelled>
+      <WithIcon TheIcon={AspectRatio} tooltip="Character Portrait Dimensions">
+        {portraitWidth} x {portraitHeight} (<ScaleDimension dimension={dimension}/>)
+      </WithIcon>
     </Box>
   </Box>
 }
@@ -313,13 +324,14 @@ function SettingsPanel(props: SettingsProps) {
     <AppTitle appTitle={props.appTitle}/>
     {props.images?.length > 0 && <PortraitChooser {...props} />}
     {system && <SettingsForm system={system} postSettings={postSettings}/>}
-    {system && <Status system={system}/>}
+    {system && <Status system={system} />}
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
   </Stack>
 }
 
 interface SystemPanelProps {
   appTitle: string,
+  dimension: Dimension | null,
   images: ImageInfo[],
   setImageIndex: (value: (((prevState: number) => number) | number)) => void,
   imageIndex: number,
@@ -330,6 +342,7 @@ interface SystemPanelProps {
 export function SystemPanel({
                               appTitle,
                               images,
+                              dimension,
                               setImageIndex,
                               imageIndex,
                               serverPort,
@@ -360,7 +373,7 @@ export function SystemPanel({
     <SwipeableDrawer sx={{opacity: 0.9, m: 0}} open={drawerOpen} onClose={toggleDrawer(false)}
                      onOpen={toggleDrawer(false)}>
       <SettingsPanel appTitle={appTitle} images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}
-                     serverPort={serverPort}
+                     serverPort={serverPort} dimension={dimension}
                      resetResponse={resetResponse}/>
     </SwipeableDrawer>
   </Box>

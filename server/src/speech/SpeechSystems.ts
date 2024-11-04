@@ -3,6 +3,7 @@ import {ElevenLabsSpeech} from "speech/ElevenLabsSpeech";
 import {MacOsSpeech} from "speech/MacOsSpeech";
 import {NoSpeech} from "speech/NoSpeech";
 import {type SpeechSystem} from "speech/SpeechSystem";
+import path from "path";
 
 /**
  * Represents a choosable option within a specific speech system. Options are represented by unique strings that
@@ -53,8 +54,8 @@ class SpeechSystems {
   private currentSystemIndex = 0;
   private readonly baseDir: PathLike;
 
-  constructor(baseDir: PathLike) {
-    this.baseDir = baseDir;
+  constructor(baseDir: string) {
+    this.baseDir = path.join(baseDir, "tts");
     this.systems = [
       new ElevenLabsSpeech(this.baseDir),
       new MacOsSpeech(this.baseDir),

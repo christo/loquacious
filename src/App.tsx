@@ -1,15 +1,16 @@
 import {Box, CircularProgress} from "@mui/material";
 import React, {KeyboardEventHandler, type MutableRefObject, useEffect, useRef, useState} from 'react';
 import "./App.css";
-import {Message} from "../server/src/domain/Message.ts";
-import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
+import {Message} from "../server/src/domain/Message";
+import {type ImageInfo} from "../server/src/image/ImageInfo";
 import {SystemPanel} from "./SystemPanel.tsx";
 import {ChatContainer, ChatResponse} from "./ChatHistory.tsx";
 import {ChatInput} from "./ChatInput.tsx";
+import type {Dimension} from "../server/src/image/Dimension"
 
 const DEFAULT_PORTRAIT = 0;
 // const BASE_URL_PORTRAIT = "/img/1080x1920";
-const BASE_URL_PORTRAIT = "/img/608x800";
+const BASE_URL_PORTRAIT = "/img/608x800"; // TODO get from server
 const SERVER_PORT = 3001;
 
 function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
@@ -113,12 +114,14 @@ const App: React.FC = () => {
     const [response, setResponse] = useState<ChatResponse>(EMPTY_RESPONSE);
     const [loading, setLoading] = useState(false);
     const [images, setImages] = useState<ImageInfo[]>([]);
+    const [dimension, setDimension] = useState<Dimension | null>(null);
     const inputRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         try {
             fetch(`//${location.hostname}:${SERVER_PORT}/portraits`).then(result => {
                 result.json().then(data => {
-                    setImages(data || null);
+                    setImages(data?.images || null);
+                    setDimension(data?.dimension || null)
                 });
             });
         } catch (e) {
@@ -215,7 +218,7 @@ const App: React.FC = () => {
                           hideVideo={hideVideo}/>)
             }
             <SystemPanel appTitle="Loquacious" images={images} setImageIndex={setImageIndex} imageIndex={imageIndex} serverPort={SERVER_PORT}
-                         resetResponse={resetResponse}/>
+                         resetResponse={resetResponse} dimension={dimension}/>
             {loading && <CircularProgress size="2rem" color="secondary"
                                           sx={{
                                               position: "absolute",
