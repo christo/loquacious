@@ -182,7 +182,6 @@ function SettingsForm({system, postSettings}: { system: SystemSummary, postSetti
                         options={system.tts.options.map(sso => sso.optionName)}/>
       </IconLabelled>
       <IconLabelled TheIcon={Portrait} tooltip="Lip Sync Animator">
-        {/*TODO add !isFree indicator back*/}
         <SettingsSelect label="Lip Sync" value={lipSync} setValue={setLipSync}
                         options={system.lipsync.all}/>
         <FreePaid isFree={system.lipsync.isFree}/>
