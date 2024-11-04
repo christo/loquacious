@@ -113,12 +113,6 @@ function SettingsForm({system, postSettings}: { system: SystemSummary, postSetti
     // we expect all dates to be in default json-serialised iso format
     const uptime = Date.now() - Date.parse(system.runtime.run.created);
 
-    // const setMode: ESet<string> = (newMode: string) => {
-    //   setCurrentMode(newMode);
-    //   postSettings({mode: newMode});
-    // }
-
-
     const updater = (key: string, setter: ESet<string>) => {
       return (newValue: string) => {
         setter(newValue);
@@ -128,16 +122,21 @@ function SettingsForm({system, postSettings}: { system: SystemSummary, postSetti
       }
     }
 
-    const setMode = updater("mode", setCurrentMode);
-
     return <Stack spacing={2}>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">
-        <SettingsSelect label={"Mode"} value={currentMode} setValue={setMode} options={system.mode.all}/>
+        <SettingsSelect
+            label={"Mode"}
+            value={currentMode}
+            setValue={updater("mode", setCurrentMode)}
+            options={system.mode.all}/>
       </IconLabelled>
 
       <IconLabelled TheIcon={Mic} tooltip="Speech to Text">
-        <SettingsSelect label={"STT"} value={currentStt} setValue={setCurrentStt}
-                        options={system.stt.all}/>
+        <SettingsSelect
+            label={"STT"}
+            value={currentStt}
+            setValue={updater("stt", setCurrentStt)}
+            options={system.stt.all}/>
       </IconLabelled>
 
       {/*<IconLabelled TheIcon={Videocam} tooltip="Camera Input"><i>In progress</i></IconLabelled>*/}
@@ -154,9 +153,14 @@ function SettingsForm({system, postSettings}: { system: SystemSummary, postSetti
       </IconLabelled>
 
       <IconLabelled TheIcon={QuestionAnswer} tooltip="LLM">
-        <SettingsSelect label="LLM" value={currentLlm} setValue={setCurrentLlm} options={system.llm.all}/>
+        <SettingsSelect
+            label="LLM"
+            value={currentLlm}
+            setValue={updater("llm", setCurrentLlm)}
+            options={system.llm.all}/>
         <FreePaid isFree={system.llm.isFree}/>
       </IconLabelled>
+
       <IconLabelled TheIcon={School} tooltip="Model">
         <SettingsSelect label="Model"
                         value={currentModel}
@@ -283,6 +287,7 @@ function SettingsPanel(props: SettingsProps) {
     try {
       fetch(`//${location.hostname}:${props.serverPort}/system`, init).then(result => {
         result.json().then(data => {
+          // TODO figure out how to make this re-render update the fine-grained states in SettingsForm
           setSystem(data || null);
         });
       });
@@ -297,7 +302,7 @@ function SettingsPanel(props: SettingsProps) {
    * Takes a kv-pair object representing a subset of settings changes, e.g. {mode: "invite"}
    * @param partial
    */
-  const postSettings = async (partial: any) => {
+  const postSettings = async (partial: { [keyof: string]: string }) => {
     doFetch({
       method: 'POST',
       headers: {

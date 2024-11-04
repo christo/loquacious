@@ -149,7 +149,7 @@ class Modes {
    * @param mode
    * @return on success the requested mode, on failure, the unchanged mode.
    */
-  setMode(mode: string): string {
+  setCurrent(mode: string): string {
     if (this.currentMode !== mode) {
       const allModes = this.allModes();
       if (allModes.includes(mode)) {

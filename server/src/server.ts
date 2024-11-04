@@ -81,10 +81,13 @@ app.post("/system/", async (req: Request, res: Response) => {
   await failable(res, "update system settings", async () => {
     const keys = Object.getOwnPropertyNames(req.body);
     for (const k of keys) {
+      const value = req.body[k];
       switch (k) {
         case "mode":
-          modes.setMode(req.body[k]);
+          modes.setCurrent(value);
           break;
+        case "llm":
+          llms.setCurrent(value);
         default:
           console.log(`system setting update for ${k} not implemented`);
       }

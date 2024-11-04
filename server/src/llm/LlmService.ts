@@ -25,6 +25,14 @@ class LlmService {
   all() {
     return [...this.llms];
   }
+
+  setCurrent(value: string) {
+    for (let i = 0; i < this.llms.length; i++) {
+      if(this.llms[i].getName() === value) {
+        this.llmIndex = i;
+      }
+    }
+  }
 }
 
 export default LlmService;
