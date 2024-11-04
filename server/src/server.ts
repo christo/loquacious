@@ -12,7 +12,7 @@ import type {Dirent} from "node:fs";
 import * as path from 'path';
 import type {SpeechResult} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
-import {ensureDataDirsExist, getCurrentCommitHash} from "system/config";
+import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
 import {systemHealth} from "system/SystemStatus";
 import Undici, {setGlobalDispatcher} from "undici";
@@ -49,8 +49,6 @@ if (!process.env.DATA_DIR) {
 }
 const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 
-ensureDataDirsExist(process.env.DATA_DIR!);
-
 const llms = new LlmService()
 const speechSystems = new SpeechSystems(path.join(PATH_BASE_DATA, "tts"));
 const animators = new AnimatorServices(PATH_BASE_DATA);
@@ -75,7 +73,7 @@ app.get("/portraits", async (_req: Request, res: Response) => {
 
 app.get("/portrait/:portraitname", async (req: Request, res: Response) => {
   const portraitname = req.params.portraitname;
-
+  // TODO finish implementation
 })
 
 /**
