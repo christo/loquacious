@@ -285,7 +285,6 @@ function SettingsPanel(props: SettingsProps) {
     try {
       fetch(`//${location.hostname}:${props.serverPort}/system`, init).then(result => {
         result.json().then(data => {
-          // TODO figure out how to make this re-render update the fine-grained states in SettingsForm
           setSystem(data || null);
         });
       });
