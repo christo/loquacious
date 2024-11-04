@@ -199,7 +199,7 @@ function SettingsForm({system, postSettings}: {
 
 function ScaleDimension(props: { dimension: Dimension | null }) {
   if (props.dimension) {
-    return <Typography>{props.dimension.width}x{props.dimension.height}</Typography>
+    return <Typography>{props.dimension.width} x {props.dimension.height}</Typography>
   } else {
     return null;
   }
