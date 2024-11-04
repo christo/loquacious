@@ -37,9 +37,9 @@ function mdToHtml(markdown: string | undefined) {
  */
 function renderMessage(m: Message) {
   const sx = {
-    fontFamily: '"Libre Baskerville", serif',
+    fontFamily: '"Prociono", serif',
     fontWeight: 400,
-    fontStyle: "bold",
+    fontStyle: "normal",
     padding: "0.5rem 1rem",
     maxWidth: "max(26rem, 45%)",
     boxShadow: "5px 10px 10px #00000033",
