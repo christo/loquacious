@@ -50,7 +50,7 @@ type SystemSummary = {
   },
   llm: Module & {
     options: Model[],
-    currentOption: string, // TODO change type to Model
+    currentOption: string,
   },
   tts: OptionedModule<SpeechSystemOption>,
   lipsync: Module,
