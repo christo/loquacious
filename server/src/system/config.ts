@@ -1,8 +1,6 @@
 import {exec} from 'child_process';
 import * as os from 'os';
-import path from "path";
 import {promisify} from 'util';
-import {mkDirIfMissing} from "./filetoy";
 
 type Predicate = () => boolean;
 type AsyncPredicate = () => Promise<boolean>;
@@ -18,23 +16,6 @@ const isWindows = () => os.platform() === 'win32';
 const not = (p: Predicate) => () => !p();
 
 const hasEnv = (param: string) => () => process.env[param] !== undefined && process.env[param].length > 0;
-
-
-/**
- * @deprecated - each service should make their own
- * @param dataDir
- */
-function ensureDataDirsExist(dataDir: string) {
-  for (const d of [
-    "tts",
-    "vision",
-    "stt",
-    "lipsync"
-  ]) {
-    const p = path.join(dataDir, d);
-    mkDirIfMissing(p);
-  }
-}
 
 const execAsync = promisify(exec);
 
@@ -59,7 +40,6 @@ type CanRun = {
 
 
 export {
-  ensureDataDirsExist,
   getCurrentCommitHash,
   CanRun,
   isLinux,
