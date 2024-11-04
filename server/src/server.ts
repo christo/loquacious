@@ -24,8 +24,9 @@ import {Session} from "./domain/Session";
 import type {VideoFile} from "./domain/VideoFile";
 import AnimatorServices from "./lipsync/AnimatorServices";
 import LlmService from "./llm/LlmService";
-import {RunInfo, SystemSummary} from "./types";
 import Agent = Undici.Agent;
+import {RunInfo} from "./domain/RunInfo.ts";
+import {SystemSummary} from "./domain/SystemSummary.ts";
 
 // TODO confirm we want connect timeout and not ?"request timeout"
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
@@ -71,6 +72,11 @@ app.get("/portraits", async (_req: Request, res: Response) => {
   const imageInfos = await Promise.all(imgFiles.map((de: Dirent) => ImageInfo.fromFile(PATH_PORTRAIT, de.name)));
   res.json(imageInfos);
 });
+
+app.get("/portrait/:portraitname", async (req: Request, res: Response) => {
+  const portraitname = req.params.portraitname;
+
+})
 
 /**
  * Modify current system settings - body should be partial SystemSummary.

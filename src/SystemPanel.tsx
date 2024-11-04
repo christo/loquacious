@@ -37,8 +37,8 @@ import {
 } from "@mui/material";
 import React, {type ReactNode, useEffect, useState} from "react";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
-import type {HealthError, SystemSummary} from "../server/src/types.ts";
 import {Duration} from "./Duration.tsx";
+import {HealthError, SystemSummary} from "../server/src/domain/SystemSummary.ts";
 
 type ESet<T> = (value: T) => void;
 

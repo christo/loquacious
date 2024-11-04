@@ -1,6 +1,6 @@
 import type {Llm} from "llm/Llm";
 import os from "os";
-import {HealthError, HealthStatus, MemSpec, PerfStat, SystemSummary} from "../types.ts";
+import {HealthError, HealthStatus, MemSpec, PerfStat, SystemSummary} from "../domain/SystemSummary.ts";
 
 const formatBytes = (bytes: number) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
