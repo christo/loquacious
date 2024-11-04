@@ -304,6 +304,7 @@ both local and as online API services.
 * [ ] pose estimation using tensorflow/MoveNet or mediapipe/pose
   * [ ] spike pose estimation and seamless audio/video streaming to server
   * pose estimation on client - assumes stable camera (can we detect camera motion?) 
+  * [ ] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect user approach
   * detect when a person approaches, describe what they look like etc.
   * detect if they are in an engaged mode or just looking
   * invite them to sit down and chat
@@ -321,8 +322,7 @@ both local and as online API services.
   * possible whole-scene photo input
       * it may help the LLM if it can see not only what it looks like but what
         the actual current deployment scene looks like
-* [ ] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect
-  user approach
+
 * [ ] implement settings presets - depends on server-configured character portraits
   * [ ] portrait image
   * [ ] character voice (implies TTS system-specific)
