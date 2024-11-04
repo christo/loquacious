@@ -101,7 +101,7 @@ function SettingsForm({system, postSettings}: { system: SystemSummary, postSetti
   if (system === null) {
     return "";
   } else {
-    const [currentMode, _setCurrentMode] = useState(system.mode.current)
+    const [currentMode, setCurrentMode] = useState(system.mode.current)
     const [currentLlm, setCurrentLlm] = useState(system.llm.current);
     const [currentModel, setCurrentModel] = useState(system.llm.currentOption);
     const [currentTts, setCurrentTts] = useState(system.tts.current);
@@ -113,10 +113,22 @@ function SettingsForm({system, postSettings}: { system: SystemSummary, postSetti
     // we expect all dates to be in default json-serialised iso format
     const uptime = Date.now() - Date.parse(system.runtime.run.created);
 
-    const setMode: ESet<string> = (newMode: string) => {
-      //_setCurrentMode(newMode);
-      postSettings({mode: newMode});
+    // const setMode: ESet<string> = (newMode: string) => {
+    //   setCurrentMode(newMode);
+    //   postSettings({mode: newMode});
+    // }
+
+
+    const updater = (key: string, setter: ESet<string>) => {
+      return (newValue: string) => {
+        setter(newValue);
+        const kv: { [keyof: string]: string } = {};
+        kv[key] = newValue;
+        postSettings(kv);
+      }
     }
+
+    const setMode = updater("mode", setCurrentMode);
 
     return <Stack spacing={2}>
       <IconLabelled TheIcon={AccountTree} tooltip="Interaction Modes">
@@ -175,29 +187,34 @@ function SettingsForm({system, postSettings}: { system: SystemSummary, postSetti
       <IconLabelled TheIcon={AccessTime} tooltip="Uptime">
         <Duration ms={uptime} run={true}/>
       </IconLabelled>
-      <IconLabelled TheIcon={Dns} tooltip="Deployment">
-        {system.runtime.run.deployment.name}
-      </IconLabelled>
+
     </Stack>;
   }
 }
 
+/**
+ * Non-editable status information about the system.
+ * @param system
+ */
 function Status({system}: { system: SystemSummary }) {
   if (system == null) {
     return <p>...</p>
   } else {
     const health = system.health;
-    return (<Box sx={{display: "flex", flexDirection: "column", alignItems: "start", width: "100%", gap: 1}}>
+    return (<Stack gap={1}>
+      <IconLabelled TheIcon={Dns} tooltip="Deployment">
+        {system.runtime.run.deployment.name}
+      </IconLabelled>
       {health.error ? <ShowError error={health.error}/> : ""}
       <IconLabelled TheIcon={MonitorHeart} tooltip="Health">{health.message || "Health unknown"}</IconLabelled>
       <IconLabelled TheIcon={Memory} tooltip="System RAM">
         {health.freeMem.formatted} free of {health.totalMem.formatted}
       </IconLabelled>
-    </Box>);
+    </Stack>);
   }
 }
 
-function ImageChooser({images, imageIndex, setImageIndex}: SettingsProps) {
+function PortraitChooser({images, imageIndex, setImageIndex}: SettingsProps) {
   const imgShift = (delta: number) => {
     return () => {
       if (images.length === 0) {
@@ -260,14 +277,13 @@ function AppTitle(props: { appTitle: string }) {
 }
 
 function SettingsPanel(props: SettingsProps) {
-  const [settings, setSettings] = useState<any>(null);
+  const [system, setSystem] = useState<SystemSummary | null>(null);
 
   function doFetch(init?: RequestInit) {
     try {
       fetch(`//${location.hostname}:${props.serverPort}/system`, init).then(result => {
         result.json().then(data => {
-          console.log("setting settings");
-          setSettings(data || null);
+          setSystem(data || null);
         });
       });
     } catch (e) {
@@ -277,6 +293,10 @@ function SettingsPanel(props: SettingsProps) {
 
   useEffect(() => doFetch(), []);
 
+  /**
+   * Takes a kv-pair object representing a subset of settings changes, e.g. {mode: "invite"}
+   * @param partial
+   */
   const postSettings = async (partial: any) => {
     doFetch({
       method: 'POST',
@@ -287,14 +307,13 @@ function SettingsPanel(props: SettingsProps) {
     });
   }
 
-  return <Box
-      sx={{p: 2, display: "flex", flexDirection: "column", width: "100%", gap: 1, alignItems: "left"}}>
+  return <Stack gap={1} sx={{p: 2}}>
     <AppTitle appTitle={props.appTitle}/>
-    {props.images?.length > 0 && <ImageChooser {...props} />}
-    <SettingsForm system={settings} postSettings={postSettings}/>
-    <Status system={settings}/>
+    {props.images?.length > 0 && <PortraitChooser {...props} />}
+    {system && <SettingsForm system={system} postSettings={postSettings}/>}
+    {system && <Status system={system}/>}
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
-  </Box>
+  </Stack>
 }
 
 interface SystemPanelProps {
