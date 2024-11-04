@@ -199,7 +199,7 @@ const App: React.FC = () => {
     }
     const hideVideo = () => {
         if (videoRef.current) {
-            videoRef.current.style.transition = "opacity: 1.5s ease-in-out";
+            videoRef.current.style.transition = "opacity: 1.5s ease-in-out"; // does not work
             videoRef.current.style.opacity = "0";
         }
     }
