@@ -31,6 +31,14 @@ class LlamaCppLlm implements Llm {
     return "whatevs";
   }
 
+  /**
+   * No implementation of model choice for this Llm system.
+   * @param _value
+   */
+  setCurrentOption(_value: string): Promise<void> {
+    return Promise.reject(`${this.name}: Cannot change models.`);
+  }
+
   async models(): Promise<Array<Model>> {
     const response = await fetch(`${this.baseUrl}/models`);
     const j = await response.json();

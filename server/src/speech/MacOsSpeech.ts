@@ -67,11 +67,22 @@ class MacOsSpeech implements SpeechSystem {
 
   currentOption(): SpeechSystemOption {
     const v = VOICES[this.currentIndex];
-    return new SpeechSystemOption(this, v.voiceId, v.description);
+    return new SpeechSystemOption(this, v.voiceId, v.name, v.description);
   }
 
   options(): Array<SpeechSystemOption> {
     return VOICES.map(v => new SpeechSystemOption(this, v.voiceId, v.name, v.description));
+  }
+
+  setCurrentOption(value: string): Promise<void> {
+    for (let i = 0; i < VOICES.length; i++) {
+      if (VOICES[i].name === value) {
+        this.currentIndex = i;
+        console.log(`${this.name} setting voice to ${value}`);
+        return Promise.resolve();
+      }
+    }
+    return Promise.reject(`${this.name}: No known voice ${value}`);
   }
 
   async speak(message: string, basename: string): Promise<SpeechResult> {

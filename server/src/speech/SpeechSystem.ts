@@ -46,10 +46,16 @@ interface SpeechSystem extends CreatorService {
    */
   options: () => Array<SpeechSystemOption>;
 
+  setCurrentOption: (value: string) => Promise<void>;
+
   /**
    * Command for inserting a speech of this duration or null if no such command exists
    */
   pauseCommand: (msDuration: number) => string | null;
+
+  /**
+   * Current voice for the speech system.
+   */
   currentOption: () => SpeechSystemOption;
   display: DisplaySpeechSystem;
 

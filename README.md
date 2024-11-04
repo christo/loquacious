@@ -293,14 +293,14 @@ both local and as online API services.
 
 ## TODO
 
-* [ ] settings panel
+* [x] settings panel
   * [x] show current main llm/model
   * [x] show current speech system and voice option
   * [x] show other main llm/model options
   * [x] show other speech/voice options
   * [x] make settings panel input components
     * [x] handle settings for each system module isomorphically
-  * [ ] make settings dynamically editable
+  * [x] make settings dynamically editable
 * [ ] pose estimation using tensorflow/MoveNet or mediapipe/pose
   * [ ] spike pose estimation and seamless audio/video streaming to server
   * pose estimation on client - assumes stable camera (can we detect camera motion?) 

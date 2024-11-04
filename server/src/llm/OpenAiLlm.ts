@@ -26,6 +26,19 @@ class OpenAiLlm implements Llm {
     return this.model;
   }
 
+  async setCurrentOption(value: string): Promise<void> {
+    const models = await this.models();
+    for (let i = 0; i < models.length; i++) {
+      if (models[i].id === value) {
+        // TODO filter out available models that are incapable of working with a system prompt
+        this.model = value;
+        console.log(`${this.name}: setting model to ${value}`);
+        return Promise.resolve();
+      }
+    }
+    return Promise.reject(`${this.name}: No known model ${value}`);
+  }
+
   async models(): Promise<Array<Model>> {
     let modelsPage = await this.openai.models.list();
     return modelsPage.data as Array<Model>;

@@ -30,7 +30,9 @@ class SpeechSystemOption {
     return `${this.systemName}/${this.optionName}${desc}`;
   }
 
-  /** Display object represending a speech system and its configured option */
+  /**
+   * Display object represending a speech system and its configured option
+   */
   safeObject() {
     return {
       system: this.systemName,
@@ -51,12 +53,11 @@ class SpeechSystems {
   private currentSystemIndex = 0;
   private readonly baseDir: PathLike;
 
-
   constructor(baseDir: PathLike) {
     this.baseDir = baseDir;
     this.systems = [
-      new ElevenLabsSpeech(this.baseDir),
       new MacOsSpeech(this.baseDir),
+      new ElevenLabsSpeech(this.baseDir),
       new NoSpeech(),
     ].filter(s => s.canRun())
   }
@@ -72,6 +73,16 @@ class SpeechSystems {
       return maybeFound;
     } else {
       throw Error(`No speech system with name "${name}" found.`);
+    }
+  }
+
+  async setCurrent(value: string) {
+    for (let i = 0; i < this.systems.length; i++) {
+      if (this.systems[i].getName() === value) {
+        console.log(`Setting speech system to ${value}`);
+        this.currentSystemIndex = i;
+        return;
+      }
     }
   }
 }

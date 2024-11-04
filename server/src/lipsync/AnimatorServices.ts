@@ -22,6 +22,14 @@ class AnimatorServices {
   all(): LipSyncAnimator[] {
     return [...this.animators];
   }
+
+  setCurrent(value: string) {
+    for (let i = 0; i < this.animators.length; i++) {
+      if (this.animators[i].getName() === value) {
+        this.lipsyncIndex = i;
+      }
+    }
+  }
 }
 
 export default AnimatorServices;

@@ -30,6 +30,7 @@ class LlmService {
     for (let i = 0; i < this.llms.length; i++) {
       if(this.llms[i].getName() === value) {
         this.llmIndex = i;
+        console.log(`changing LLM system to ${value}`);
       }
     }
   }

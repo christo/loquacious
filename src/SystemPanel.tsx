@@ -163,7 +163,7 @@ function SettingsForm({system, postSettings}: {
       <IconLabelled TheIcon={School} tooltip="Model">
         <SettingsSelect label="Model"
                         value={system.llm.currentOption}
-                        setValue={updater("llm_model")}
+                        setValue={updater("llm_option")}
                         options={system.llm.options.map(m => m.id)}/>
       </IconLabelled>
       <IconLabelled TheIcon={Campaign} tooltip="Speech System">
@@ -176,7 +176,7 @@ function SettingsForm({system, postSettings}: {
       <IconLabelled TheIcon={RecordVoiceOver} tooltip="Voice">
         <SettingsSelect label="Voice"
                         value={system.tts.currentOption.optionName}
-                        setValue={updater("tts_voice")}
+                        setValue={updater("tts_option")}
                         options={system.tts.options.map(sso => sso.optionName)}/>
       </IconLabelled>
       <IconLabelled TheIcon={Portrait} tooltip="Lip Sync Animator">

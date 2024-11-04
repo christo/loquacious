@@ -35,6 +35,14 @@ class LmStudioLlm implements Llm {
     }
   }
 
+  /**
+   * Currently does nothing.
+   * @param value
+   */
+  setCurrentOption(value: string): Promise<void> {
+    return Promise.reject(`${this.name}: Cannot change models.`);
+  }
+
   async models(): Promise<Array<Model>> {
     const response = await fetch(`${this.baseUrl}/models`);
     const j = await response.json();

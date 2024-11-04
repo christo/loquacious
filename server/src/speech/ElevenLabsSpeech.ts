@@ -96,7 +96,6 @@ class ElevenLabsSpeech implements SpeechSystem {
    */
   canRun = hasEnv("ELEVENLABS_API_KEY");
   private currentVoice = 0;
-  private characterVoice = VOICES[this.currentVoice];
   private readonly dataDir: string;
 
   /**
@@ -104,10 +103,10 @@ class ElevenLabsSpeech implements SpeechSystem {
    * text because that changes with every invocation.
    * @private
    */
-  private partialConfig: ElevenLabsPartialConfig = {
+  private partialConfig: () => ElevenLabsPartialConfig = () => ({
     type: "bulk",
     config: {
-      voice: this.characterVoice.voiceId,
+      voice: VOICES[this.currentVoice].voiceId,
       output_format: "mp3_44100_128",
       model_id: "eleven_multilingual_v2",
       voice_settings: {
@@ -117,7 +116,7 @@ class ElevenLabsSpeech implements SpeechSystem {
         use_speaker_boost: true
       }
     }
-  };
+  });
 
   constructor(ttsDataDir: PathLike) {
     this.dataDir = path.join(ttsDataDir.toString(), "el");
@@ -135,8 +134,19 @@ class ElevenLabsSpeech implements SpeechSystem {
     return new SpeechSystemOption(this, currentVoice.voiceId, currentVoice.name, currentVoice.description);
   }
 
+  setCurrentOption(value: string): Promise<void> {
+    for (let i = 0; i < VOICES.length; i++) {
+      if (VOICES[i].name === value) {
+        this.currentVoice = i;
+        console.log(`${this.getName()} setting voice to ${value}`);
+        return Promise.resolve();
+      }
+    }
+    return Promise.reject(`didn't find voice option ${value}`);
+  }
+
   async speak(message: string, basename: string): Promise<SpeechResult> {
-    const outFilename = `el_tts_${basename}_${this.characterVoice.name.replaceAll(/\s\//g, '-')}.mp3`;
+    const outFilename = `el_tts_${basename}_${VOICES[this.currentVoice].name.replaceAll(/\s\//g, '-')}.mp3`;
     const outFile = path.join(this.dataDir, outFilename);
     try {
       const audio = await timed("elevenlabs generate speech",
@@ -191,7 +201,9 @@ class ElevenLabsSpeech implements SpeechSystem {
 
   configure(metadata: string): Promise<void> {
     try {
-      this.partialConfig = JSON.parse(metadata);
+      // hack! rewriting the function here smells
+      const partialConfig = JSON.parse(metadata);
+      this.partialConfig = () => partialConfig;
       return Promise.resolve();
     } catch (error) {
       return Promise.reject(error);
@@ -207,7 +219,7 @@ class ElevenLabsSpeech implements SpeechSystem {
   }
 
   private getConfig(): ElevenLabsPartialConfig {
-    return this.partialConfig;
+    return this.partialConfig();
   }
 }
 

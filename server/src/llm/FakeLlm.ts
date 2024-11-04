@@ -60,6 +60,16 @@ class FakeLlm implements Llm {
     return Promise.resolve(this.myModels[this.currentModelKey].id);
   }
 
+  setCurrentOption(value: string): Promise<void> {
+    for (let m of Object.keys(this.myModels)) {
+      if (m === value) {
+        this.currentModelKey = m;
+        return Promise.resolve();
+      }
+    }
+    return Promise.reject(`${this.name}: Unknown model: ${value}`);
+  }
+
   models(): Promise<Array<Model>> {
     return Promise.resolve(Object.values(this.myModels));
   }

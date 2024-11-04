@@ -77,7 +77,6 @@ app.get("/portraits", async (_req: Request, res: Response) => {
  * Returns the new system summary
  */
 app.post("/system/", async (req: Request, res: Response) => {
-  console.dir({reqBody: req.body});
   await failable(res, "update system settings", async () => {
     const keys = Object.getOwnPropertyNames(req.body);
     for (const k of keys) {
@@ -88,6 +87,19 @@ app.post("/system/", async (req: Request, res: Response) => {
           break;
         case "llm":
           llms.setCurrent(value);
+          break;
+        case "llm_option":
+          await llms.current().setCurrentOption(value);
+          break;
+        case "tts":
+          await speechSystems.setCurrent(value);
+          break;
+        case "tts_option":
+          await speechSystems.current().setCurrentOption(value);
+          break;
+        case "lipsync":
+          animators.setCurrent(value);
+          break;
         default:
           console.log(`system setting update for ${k} not implemented`);
       }
