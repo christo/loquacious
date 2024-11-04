@@ -1,6 +1,9 @@
 import {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
 import {MediaFormat} from "../media";
 
+/**
+ * Animator that doesn't animate.
+ */
 class NoAnimator implements LipSyncAnimator {
     canRun(): boolean {
         return true;
