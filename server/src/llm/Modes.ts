@@ -44,7 +44,7 @@ const chatModeMessages = (messageHistory: Message[], ss: SpeechSystem): OpenAIMs
   ];
   if (messageHistory.length === 0) {
     console.error("message history was empty");
-    // TODO do this whenever the last message was from system.
+    // imagine timer-based interjection prompt if last message from system, mode is chat and time gap > x
     systemParts.push("There is an awkward gap in the conversation. You say something next.");
     return [
       {role: ROLE_SYSTEM, content: systemParts.join("\\n\\n")},
@@ -91,8 +91,21 @@ const inviteModeMessages = (chatHistory: Message[], ss: SpeechSystem): OpenAIMsg
   return [{role: ROLE_SYSTEM, content: systemPrompt}];
 };
 
-/** Function each mode implements differently which supplies parameters for a chat completion request. */
+/**
+ * Function for building LLM prompt from chatHistory and relevant config to get a Message properly formatted for
+ * the speech system. Each mode implements differently which supplies parameters for a chat completion request.
+ */
 type ChatPrepper = (chatHistory: Message[], ss: SpeechSystem) => OpenAIMsg[];
+
+// Future consideration: abstract an LLM Request Config rather than directly passing SpeechSystem
+// so that tactical instructions about things like putting in pauses are fed to the ChatPrepper
+// implementation.
+// Also, Message instances have baked speech syntax inside and the speech system used is not directly recorded in
+// the database. It is recoverable from the session graph but perhaps it would be better to instruct pauses to be
+// inserted in some other arbitrary format and these are late-bound for the speech system active at call time. This
+// facilitates re-rendering stored interaction graphs which is useful for quality control, auditing and reference when
+// designing improvements. Alternately output text could be received as structured data with spoken content sequences,
+// pauses and possibly even gesture instructions if these are developed in future.
 
 /** Map mode names to their chat functions. */
 interface ModeMap {
