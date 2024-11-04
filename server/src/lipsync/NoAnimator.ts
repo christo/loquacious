@@ -34,7 +34,6 @@ class NoAnimator implements LipSyncAnimator {
         return Promise.resolve();
     }
 
-
 }
 
 export {NoAnimator};

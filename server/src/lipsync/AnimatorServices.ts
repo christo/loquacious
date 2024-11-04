@@ -2,6 +2,7 @@ import path from "path";
 import {FakeLipSync} from "./FakeLipSync";
 import {FalSadtalker} from "./FalSadtalker";
 import type {LipSyncAnimator} from "./LipSyncAnimator";
+import {NoAnimator} from "./NoAnimator";
 
 class AnimatorServices {
   private readonly animators: LipSyncAnimator[];
@@ -11,7 +12,8 @@ class AnimatorServices {
     const basedirLipsync = path.join(basedir, "lipsync");
     this.animators = [
       new FalSadtalker(basedirLipsync),
-      new FakeLipSync(basedirLipsync)
+      new FakeLipSync(basedirLipsync),
+      new NoAnimator()
     ].filter(s => s.canRun())
   }
 
