@@ -174,12 +174,11 @@ const App: React.FC = () => {
         }
     };
 
-    const resetResponse = () => {
-        setResponse(EMPTY_RESPONSE);
-    }
+    const resetResponse = () => setResponse(EMPTY_RESPONSE)
 
     // submit on enter
     const handleSubmitKey: KeyboardEventHandler<HTMLElement> = async (e) => {
+        // shift enter is newline
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault(); // Prevent default Enter behavior (new line)
             await handleSubmit(e); // Submit the form
