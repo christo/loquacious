@@ -1,5 +1,5 @@
 import {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
-import {MediaFormat, MF_MP4} from "../media";
+import {MediaFormat} from "../media";
 
 class NoAnimator implements LipSyncAnimator {
     canRun(): boolean {
