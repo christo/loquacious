@@ -293,6 +293,14 @@ both local and as online API services.
 
 ## TODO
 
+* [ ] settings panel
+  * [x] show current main llm/model
+  * [x] show current speech system and voice option
+  * [x] show other main llm/model options
+  * [x] show other speech/voice options
+  * [x] make settings panel input components
+    * [x] handle settings for each system module isomorphically
+  * [ ] make settings dynamically editable
 * [ ] pose estimation using tensorflow/MoveNet or mediapipe/pose
   * [ ] spike pose estimation and seamless audio/video streaming to server
   * pose estimation on client - assumes stable camera (can we detect camera motion?) 
@@ -313,14 +321,6 @@ both local and as online API services.
   * possible whole-scene photo input
       * it may help the LLM if it can see not only what it looks like but what
         the actual current deployment scene looks like
-* [ ] settings panel
-    * [x] show current main llm/model
-    * [x] show current speech system and voice option
-    * [x] show other main llm/model options
-    * [x] show other speech/voice options
-    * [ ] make settings panel input components
-      * [ ] handle settings for each system module isomorphically
-    * [ ] make settings dynamically editable
 * [ ] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect
   user approach
 * [ ] spike speech to text using whisper.cpp
