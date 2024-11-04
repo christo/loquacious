@@ -37,15 +37,15 @@ dotenv.config();
 
 const BASE_WEB_ROOT = "../public"
 /** file path relative to server module root */
-const BASE_PATH_PORTRAIT = "../public/img";
+const BASE_PATH_PORTRAIT = `${BASE_WEB_ROOT}/img`;
 const PORTRAIT_DIMS: Dimension[] = [
   {width: 608, height: 800},
   {width: 1080, height: 1920}
 ];
 const dimIndex = 0;
-const portraitBaseUrl = `/img/${PORTRAIT_DIMS[dimIndex].width}x${PORTRAIT_DIMS[dimIndex].height}`;
-const PATH_PORTRAIT = `../public${portraitBaseUrl}`;
-console.log(`path portrait: ${PATH_PORTRAIT}`)
+const portraitBaseUrl = () => `/img/${PORTRAIT_DIMS[dimIndex].width}x${PORTRAIT_DIMS[dimIndex].height}`;
+const pathPortrait = () => `${BASE_WEB_ROOT}${portraitBaseUrl()}`;
+console.log(`path portrait: ${pathPortrait()}`)
 
 if (!process.env.DATA_DIR) {
   console.error("ensure environment variable DATA_DIR is set");
@@ -66,11 +66,12 @@ app.use(express.json());
 
 app.get("/portraits", async (_req: Request, res: Response) => {
   const exts = supportedImageTypes().flatMap(f => f.extensions).map(f => `.${f}`);
-  const allEntries = await promises.readdir(PATH_PORTRAIT, {withFileTypes: true});
+  const allEntries = await promises.readdir(pathPortrait(), {withFileTypes: true});
   const goodExt = (f: Dirent) => exts.includes(path.extname(f.name).toLowerCase());
   const imgFiles = allEntries.filter(f => f.isFile() && goodExt(f));
-  const imageInfos = await Promise.all(imgFiles.map((de: Dirent) => ImageInfo.fromFile(PATH_PORTRAIT, de.name)));
+  const imageInfos = await Promise.all(imgFiles.map((de: Dirent) => ImageInfo.fromFile(pathPortrait(), de.name)));
   res.json({
+    portraitBaseUrl: portraitBaseUrl(),
     dimension: PORTRAIT_DIMS[dimIndex],
     images: imageInfos
   });
@@ -278,7 +279,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           );
           const speechFilePath = speechResult.filePath();
           if (speechFilePath) {
-            const portait = path.join(PATH_PORTRAIT, portrait.f).toString();
+            const portait = path.join(pathPortrait(), portrait.f).toString();
             await failable(res, "lipsync generation", async () => {
               const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
               const mimeType = currentAnimator.outputFormat()?.mimeType;

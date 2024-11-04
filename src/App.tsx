@@ -9,8 +9,6 @@ import {ChatInput} from "./ChatInput.tsx";
 import type {Dimension} from "../server/src/image/Dimension"
 
 const DEFAULT_PORTRAIT = 0;
-// const BASE_URL_PORTRAIT = "/img/1080x1920";
-const BASE_URL_PORTRAIT = "/img/608x800"; // TODO get from server
 const SERVER_PORT = 3001;
 
 function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
@@ -115,13 +113,15 @@ const App: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [images, setImages] = useState<ImageInfo[]>([]);
     const [dimension, setDimension] = useState<Dimension | null>(null);
+    const [portraitBaseUrl, setPortraitBaseUrl] = useState<string | null>(null);
     const inputRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         try {
             fetch(`//${location.hostname}:${SERVER_PORT}/portraits`).then(result => {
                 result.json().then(data => {
                     setImages(data?.images || null);
-                    setDimension(data?.dimension || null)
+                    setDimension(data?.dimension || null);
+                    setPortraitBaseUrl(data?.portraitBaseUrl || null);
                 });
             });
         } catch (e) {
@@ -203,7 +203,7 @@ const App: React.FC = () => {
             videoRef.current.style.opacity = "0";
         }
     }
-    const imageUrl = () => `${BASE_URL_PORTRAIT}/${images[imageIndex].f}`;
+    const imageUrl = () => `${portraitBaseUrl!}/${images[imageIndex].f}`;
     return (
         <Box sx={{
             padding: 0,
