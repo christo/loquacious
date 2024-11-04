@@ -157,7 +157,9 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
                 fetchMedia("audio", blob => {
                     const audioUrl = URL.createObjectURL(blob);
                     const audio = new Audio(audioUrl);
-                    audio.play();
+                    audio.play().catch(reason => {
+                        console.error("Audio play failure", reason)
+                    });
                 });
             } else if (response.llm) {
                 // no llm no response at all
