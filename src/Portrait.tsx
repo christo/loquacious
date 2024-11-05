@@ -6,7 +6,7 @@ export function Portrait({src, imgRef, videoRef, videoSrc, hideVideo}: {
   imgRef: MutableRefObject<HTMLImageElement | null>,
   videoRef: MutableRefObject<HTMLVideoElement | null>,
   videoSrc: string | undefined,
-  hideVideo: () => void
+  hideVideo: () => void,
 }) {
   useEffect(() => {
     videoRef.current!.addEventListener('ended', () => {
