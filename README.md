@@ -3,6 +3,7 @@
 AI face-to-face fortune teller chat experiment.
 
 ![Fortune Teller Portrait](public/img/syprium_una_bruja_haciendo_un_conjuro._A_old_fat_woman._Realist_9ad8fdcc-55ac-4852-93e7-d6e3677f3b94.png)
+
 ## Project Status
 
 * Minimal web application front-end, REST back end
@@ -647,3 +648,8 @@ and some comments about it.
 * test native OS speech recognition
 * low latency
 * sentiment, emotion detection etc.
+
+## Acknowledgements
+
+* [google-webfont-helper](https://gwfh.mranftl.com/fonts) cool tool for downloading google fonts in
+  `.woff2` format
