@@ -282,14 +282,14 @@ function SessionControl({serverPort, resetResponse}: { serverPort: number, reset
 
 function AppTitle(props: { appTitle: string }) {
   return <Typography variant="h4" sx={{
-    fontFamily: "\"Princess Sofia\", cursive",
-    fontWeight: 400,
+    fontFamily: "\"Cinzel\", cursive",
+    fontWeight: 500,
     fontStyle: "normal",
-    color: "#e5ae38",
-    textShadow: "-1px -1px 0 rgba(255, 200, 200, 0.8), 0px 2px 5px rgba(0, 0, 0, 0.8)",
-    letterSpacing: "0",
+    color: "#ffffff",
+    textShadow: "0 0 5px rgba(255, 0, 200, 0.7), 0 0 8px rgba(180, 0, 200, 0.4)",
+    letterSpacing: "4pt",
     textAlign: "center",
-    fontSize: 64,
+    fontSize: 30,
   }}>{props.appTitle}</Typography>;
 }
 
