@@ -35,11 +35,12 @@ import {
   Tooltip,
   Typography
 } from "@mui/material";
-import React, {type ReactNode, useEffect, useState} from "react";
+import React, {MouseEventHandler, MutableRefObject, type ReactNode, useEffect, useRef, useState} from "react";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import {Duration} from "./Duration.tsx";
 import {HealthError, SystemSummary} from "../server/src/domain/SystemSummary.ts";
 import {Dimension} from "../server/src/image/Dimension";
+import {PoseSystem} from "./PoseSystem.ts";
 
 type ESet<T> = (value: T) => void;
 
@@ -49,6 +50,8 @@ function ShowError({error}: { error: HealthError }) {
 
 interface SettingsProps {
   appTitle: string;
+  poseSystem: PoseSystem;
+  imgRef: MutableRefObject<HTMLImageElement | null>;
   dimension: Dimension | null;
   images: ImageInfo[];
   imageIndex: number;
@@ -227,7 +230,7 @@ function Status({system}: { system: SystemSummary}) {
   }
 }
 
-function PortraitChooser({images, imageIndex, setImageIndex, dimension}: SettingsProps) {
+function PortraitChooser({images, imageIndex, setImageIndex, dimension, poseSystem}: SettingsProps) {
   const imgShift = (delta: number) => {
     return () => {
       if (images.length === 0) {
@@ -235,6 +238,7 @@ function PortraitChooser({images, imageIndex, setImageIndex, dimension}: Setting
       }
       let newValue = (imageIndex + delta + images.length) % images.length;
       setImageIndex(newValue);
+      poseSystem.resetCanvas();
     };
   }
   const portraitWidth = images[imageIndex].w;
@@ -326,11 +330,30 @@ function SettingsPanel(props: SettingsProps) {
     {system && <SettingsForm system={system} postSettings={postSettings}/>}
     {system && <Status system={system} />}
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
+    <DetectFaceButton poseSystem={props.poseSystem} imgRef={props. imgRef} zIndex={100}/>
   </Stack>
+}
+
+function DetectFaceButton({poseSystem, imgRef, zIndex}: { poseSystem: PoseSystem, imgRef: React.MutableRefObject<HTMLImageElement | null>, zIndex: number }) {
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const handleClick: MouseEventHandler = async (e) => {
+    if (imgRef.current) {
+      e.preventDefault();
+      if (canvasRef.current) {
+        poseSystem.resetCanvas();
+        canvasRef.current = null;
+      }
+      canvasRef.current = await poseSystem.attachFaceToImage(imgRef.current, zIndex)
+    }
+  }
+  return <Button variant="outlined" color="secondary" onClick={handleClick}>Detect Face</Button>;
 }
 
 interface SystemPanelProps {
   appTitle: string,
+  poseSystem: PoseSystem,
+  imgRef: MutableRefObject<HTMLImageElement | null>,
   dimension: Dimension | null,
   images: ImageInfo[],
   setImageIndex: (value: (((prevState: number) => number) | number)) => void,
@@ -339,7 +362,8 @@ interface SystemPanelProps {
   resetResponse: () => void,
 }
 
-export function SystemPanel({
+export function SystemPanel({ imgRef,
+                              poseSystem,
                               appTitle,
                               images,
                               dimension,
@@ -373,7 +397,7 @@ export function SystemPanel({
     <SwipeableDrawer sx={{opacity: 0.9, m: 0}} open={drawerOpen} onClose={toggleDrawer(false)}
                      onOpen={toggleDrawer(false)}>
       <SettingsPanel appTitle={appTitle} images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}
-                     serverPort={serverPort} dimension={dimension}
+                     serverPort={serverPort} dimension={dimension} poseSystem={poseSystem} imgRef={imgRef}
                      resetResponse={resetResponse}/>
     </SwipeableDrawer>
   </Box>

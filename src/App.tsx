@@ -1,7 +1,6 @@
-import {Box, Button, CircularProgress} from "@mui/material";
+import {Box, CircularProgress} from "@mui/material";
 import React, {
   KeyboardEventHandler,
-  MouseEventHandler,
   type MutableRefObject,
   useEffect,
   useRef,
@@ -19,8 +18,8 @@ import {PoseSystem} from "./PoseSystem.ts";
 
 const DEFAULT_PORTRAIT = 0;
 const SERVER_PORT = 3001;
-
 const poseSystem = new PoseSystem();
+
 
 type CompResponseProps = {
   response: ChatResponse,
@@ -84,25 +83,7 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
   return <ChatContainer messages={response.messages}/>;
 }
 
-function PoseButton({imgRef, zIndex}: { imgRef: React.MutableRefObject<HTMLImageElement | null>, zIndex: number }) {
-
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const handleClick: MouseEventHandler = async (e) => {
-    if (imgRef.current) {
-      e.preventDefault();
-      if (canvasRef.current) {
-        canvasRef.current = null;
-        poseSystem.resetCanvas();
-      }
-      await poseSystem.attachPoseToImage(imgRef.current, zIndex, (c) => canvasRef.current = c)
-    }
-  }
-  return <Button sx={{position: "absolute", top: 120, right: 20, zIndex: zIndex + 1}} variant="contained"
-                 color="secondary" onClick={handleClick}>Detect Pose</Button>;
-}
-
 const App: React.FC = () => {
-  console.log("App Booting");
   const EMPTY_RESPONSE: ChatResponse = {
     messages: [],
     speech: undefined,
@@ -217,13 +198,13 @@ const App: React.FC = () => {
         width: "100dvw",
         height: "100dvh"
       }} component="div">
-        <PoseButton imgRef={imgRef} zIndex={900}/>
+
         {images.length > 0 && (
             <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={imageUrl()}
                       hideVideo={hideVideo}/>)
         }
         <SystemPanel appTitle="Loquacious" images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}
-                     serverPort={SERVER_PORT}
+                     serverPort={SERVER_PORT} poseSystem={poseSystem} imgRef={imgRef}
                      resetResponse={resetResponse} dimension={dimension}/>
         {loading && <CircularProgress size="2rem" color="secondary"
                                       sx={{
