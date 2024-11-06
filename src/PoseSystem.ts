@@ -8,8 +8,12 @@ import {
 
 class PoseSystem {
 
+  /**
+   * WasmFileset that holds GPU or CPU inference bundle. Accessed through {@link #getVision()}
+   */
   private vision: any;
   private canvas: HTMLCanvasElement | null = null;
+  private faceDrawingUtils: DrawingUtils | null = null;
 
   async getPoseFromImage(numPoses: 1 | 2) {
     return this.getPose(numPoses, "IMAGE");
@@ -26,6 +30,10 @@ class PoseSystem {
     });
   }
 
+  /**
+   * Internal lazy-initialising getter for the vision WasmFileset.
+   * @private
+   */
   private async getVision() {
     if (!this.vision) {
       this.vision = await FilesetResolver.forVisionTasks("/node_modules/@mediapipe/tasks-vision/wasm");
@@ -57,52 +65,55 @@ class PoseSystem {
     const canvas = this.overlayCanvas(image, zIndex);
 
     image.parentNode!.appendChild(canvas);
+    // TODO use setOption to use GPU context - see jsdoc for DrawingUtils
     const drawingUtils = new DrawingUtils((canvas.getContext("2d"))!);
     for (const landmarks of faceLandmarkerResult.faceLandmarks) {
       drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_TESSELATION,
-          { color: "rgba(114,192,58,0.71)", lineWidth: 1, fillColor: "rgba(0, 200, 0, 0.3)" },
+          {color: "rgba(114,192,58,0.71)", lineWidth: 1},
       );
       drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
-          { color: "#5fa15f" }
+          {color: "#5fa15f"}
       );
       drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW,
-          { color: "#20a820" }
+          {color: "#20a820"}
       );
       drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_LEFT_EYE,
-          { color: "#5fa15f" }
+          {color: "#5fa15f"}
       );
       drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW,
-          { color: "#20a820" }
+          {color: "#20a820"}
       );
       drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
-          { color: "#95b01a" }
+          {color: "#95b01a"}
       );
       drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, {
-        color: "#b63232"
+        lineWidth: 4,
+        color: "#e16507"
       });
       drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS,
-          { color: "#5fa15f" }
+          {color: "#5fa15f"}
       );
       drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS,
-          { color: "#5fa15f" }
+          {color: "#5fa15f"}
       );
     }
+    this.faceDrawingUtils = drawingUtils;
     return canvas;
   }
 
@@ -148,9 +159,16 @@ class PoseSystem {
     });
   }
 
+  /**
+   * Removes any previously attached canvas element and attempts to free up resources used.
+   */
   resetCanvas() {
     if (this.canvas) {
       this.canvas.remove();
+    }
+    if (this.faceDrawingUtils) {
+      this.faceDrawingUtils.close();
+      this.faceDrawingUtils = null;
     }
   }
 }
