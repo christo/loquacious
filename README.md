@@ -9,10 +9,10 @@ AI face-to-face fortune teller chat experiment.
 * Minimal web application front-end, REST back end
 * LLM integration for reasonable fortune teller interaction text,
   implementations:
-    * OpenAI / ChatGPT
-    * [llama.cpp](https://github.com/ggerganov/llama.cpp) (open source)
-    * [lm-studio](https://lmstudio.ai/) (lovely open source UI wrapper for
-      llama.cpp)
+  * OpenAI / ChatGPT
+  * [llama.cpp](https://github.com/ggerganov/llama.cpp) (open source)
+  * [lm-studio](https://lmstudio.ai/) (lovely open source UI wrapper for
+    llama.cpp)
 * Text To Speech (TTS) integration with [ElevenLabs](https://elevenlabs.ai/) and
   MacOS native speech synthesis.
 * Lip sync animated video generation from single portrait image and speech audio
@@ -302,49 +302,51 @@ both local and as online API services.
     * [x] handle settings for each system module isomorphically
   * [x] make settings dynamically editable
 * [ ] pose estimation and vision using mediapipe
-  * [x] pose estimation of portrait 
+  * [x] pose estimation of portrait
   * [x] download all mediapipe resources for offline operation
-    * [x] WasmFileset with base url in web app, use vite build step to copy npm dep from `node_modules` - check how vite lifecycle works here (plugin or ?)
-  * [ ] face estimation of portrait 
+    * [x] WasmFileset with base url in web app, use vite build step to copy npm dep from
+      `node_modules` - check how vite lifecycle works here (plugin or ?)
+  * [ ] face estimation of portrait
   * [ ] spike pose estimation and seamless audio/video streaming to server
-  * pose estimation on client - assumes stable camera (can we detect camera motion?) 
-  * [ ] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect user approach
+  * pose estimation on client - assumes stable camera (can we detect camera motion?)
+  * [ ] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect user
+    approach
   * detect when a person approaches, describe what they look like etc.
   * detect if they are in an engaged mode or just looking
   * invite them to sit down and chat
   * enter introductory mode
   * on-demand camera contents description
-      * how many fingers am I holding up?
-      * this is my friend jane
-      * does my ass look big in this
+    * how many fingers am I holding up?
+    * this is my friend jane
+    * does my ass look big in this
   * periodic pose estimation to detect mode state transitions
   * pose estimation calibration
-      * if camera moves or scene changes, need to mark engagement zone in
-        camera field
-      * lighting
-      * pose estimation and video frame grab integration
+    * if camera moves or scene changes, need to mark engagement zone in
+      camera field
+    * lighting
+    * pose estimation and video frame grab integration
   * possible whole-scene photo input
-      * it may help the LLM if it can see not only what it looks like but what
-        the actual current deployment scene looks like
+    * it may help the LLM if it can see not only what it looks like but what
+      the actual current deployment scene looks like
 
 * [ ] implement settings presets - depends on server-configured character portraits
   * [ ] portrait image
   * [ ] character voice (implies TTS system-specific)
   * [ ] fill out feature idea for runtime system prompt design
 * [ ] spike speech to text using whisper.cpp
-    * [ ] streaming command line transcription listening to microphone
-    * [x] understand how server works - not streaming
-    * [x] can server be used from loquacious app? - No.
-    * [ ] check [smart-whisper](https://www.npmjs.com/package/smart-whisper)
-    * [ ] run from dev server using local audio capture
-    * [ ] plan stream from browser microphone
-    * [ ] decide how to do it with video being processed by pose estimation
-    * [ ] can run in browser reliably?
-    * [x] test large model `models/ggml-large-v3.bin` is very good
-    * [ ] test medium model
-    * [ ] test small model
-    * [ ] is it feasible to stream video to server to capture speech and pose
-      estimation? What can/should be done on the client?
+  * [ ] streaming command line transcription listening to microphone
+  * [x] understand how server works - not streaming
+  * [x] can server be used from loquacious app? - No.
+  * [ ] check [smart-whisper](https://www.npmjs.com/package/smart-whisper)
+  * [ ] run from dev server using local audio capture
+  * [ ] plan stream from browser microphone
+  * [ ] decide how to do it with video being processed by pose estimation
+  * [ ] can run in browser reliably?
+  * [x] test large model `models/ggml-large-v3.bin` is very good
+  * [ ] test medium model
+  * [ ] test small model
+  * [ ] is it feasible to stream video to server to capture speech and pose
+    estimation? What can/should be done on the client?
 * [ ] system ui
   * [ ] manual pose calibration
   * [ ] autocalibration of pose estimation using vision system
@@ -354,10 +356,10 @@ both local and as online API services.
   * [ ] move portrait images into server
   * [ ] serve portrait image from server as static
 * [ ] read about postgres types
-    * parser https://node-postgres.com/features/queries#types
-    * https://github.com/brianc/node-pg-types
-    * https://node-postgres.com/features/types#strings-by-default
-    * https://node-postgres.com/features/types
+  * parser https://node-postgres.com/features/queries#types
+  * https://github.com/brianc/node-pg-types
+  * https://node-postgres.com/features/types#strings-by-default
+  * https://node-postgres.com/features/types
 * [ ] design for possible workflow that produces spoken audio in lipsync video
   directly from text message without intermediate speech audio
 * [ ] check out [d-id.com](http://d-id.com) API for lipsync video generation
@@ -369,85 +371,85 @@ both local and as online API services.
 * [ ] some kind of background process to put audio and video durations in db
 * design character persona and interaction workflow such that potentially long
   latency responses are normalised within the theatric context.
-    * expert-system graph of cached and precalculated fast responses or stalling
-      performances
-    * small LLM for fast detection of sentiment or context that can be
-      appropriately stalled.
-    * important goddess persona might imply momentus long latency interactions
-      because she doesn't deal with trivialities of an everyday nature
-    * absent-minded old character may provide cover for more explicit stalling
-    * guided interactions that request long inputs that are expected to deserve
-      long-pondering behaviour before any strict indication of comprehension or
-      an answering response is expected.
-        * e.g. if a fortune teller asks you to dig deep into your heart to ask a
-          question of significance, it is OK to theatrically consult the crystal
-          ball before finally providing a response
-        * the character should indulge in slow, high-ceremony behaviour such
-          that high latency responses are less likely to break
-          suspension-of-disbelief
-        * if the user is directed to speak slowly or can be asked to engage in
-          ceremony too, then the expected cadence can better fit the high
-          latency limitations of the system.
-        * shepherding the user away from fast banter towards deeply contemplated
-          questions deserving of a divinely inspired being will hopefully
-          provide cover for the otherwise conspicuous absence of fast-paced
-          banter
+  * expert-system graph of cached and precalculated fast responses or stalling
+    performances
+  * small LLM for fast detection of sentiment or context that can be
+    appropriately stalled.
+  * important goddess persona might imply momentus long latency interactions
+    because she doesn't deal with trivialities of an everyday nature
+  * absent-minded old character may provide cover for more explicit stalling
+  * guided interactions that request long inputs that are expected to deserve
+    long-pondering behaviour before any strict indication of comprehension or
+    an answering response is expected.
+    * e.g. if a fortune teller asks you to dig deep into your heart to ask a
+      question of significance, it is OK to theatrically consult the crystal
+      ball before finally providing a response
+    * the character should indulge in slow, high-ceremony behaviour such
+      that high latency responses are less likely to break
+      suspension-of-disbelief
+    * if the user is directed to speak slowly or can be asked to engage in
+      ceremony too, then the expected cadence can better fit the high
+      latency limitations of the system.
+    * shepherding the user away from fast banter towards deeply contemplated
+      questions deserving of a divinely inspired being will hopefully
+      provide cover for the otherwise conspicuous absence of fast-paced
+      banter
 * [ ] test reference data filetree (better for version control not to require
   database so it can be version controlled)
 * [ ] check out multimodal models like LLaVA 1.5 and LLaVA 1.6
-    * may work to do both text and vision with the same model?
+  * may work to do both text and vision with the same model?
 * usable cached generated output
 * [ ] evaluate local AI TTS (better than macos?)
 * [ ] evaluate elevenlabs websocket "realtime" streaming:
   https://elevenlabs.io/docs/api-reference/websockets
 * use cached openings for quick-start.
-    * many starting inputs could be simply "hello" or other variants
-    * after speech-to-text recognises this as a hello input;
-    * the greeting is normalised ("hello there" is the same as "well hello"
-      etc.)
-    * possibly split off from subsequent speech, such as "hello ... what is your
-      name?", each could be separately cached, maybe recognition and
-      normalisation
-      could be done with a LLM?
-    * response text can be randomly selected from cached set
-    * response text tts should be cached (need many versions of small responses
-      like "yes!" "yes of course!" etc.)
-    * need a mechanism to decide if a short response is warranted
-    * need some stalling responses to hide latency (distractions, pondering and
-      thinking signals, explicit "excuse me a moment while I contemplate your
-      words")
+  * many starting inputs could be simply "hello" or other variants
+  * after speech-to-text recognises this as a hello input;
+  * the greeting is normalised ("hello there" is the same as "well hello"
+    etc.)
+  * possibly split off from subsequent speech, such as "hello ... what is your
+    name?", each could be separately cached, maybe recognition and
+    normalisation
+    could be done with a LLM?
+  * response text can be randomly selected from cached set
+  * response text tts should be cached (need many versions of small responses
+    like "yes!" "yes of course!" etc.)
+  * need a mechanism to decide if a short response is warranted
+  * need some stalling responses to hide latency (distractions, pondering and
+    thinking signals, explicit "excuse me a moment while I contemplate your
+    words")
 * [x] asking name flow
-    * [x] flexible level of persistance about wanting to know a person's name
-    * [x] calling by name if available
-    * [ ] calling by pet names "sweetheart", "darling" etc. - add to system
-      prompt
+  * [x] flexible level of persistance about wanting to know a person's name
+  * [x] calling by name if available
+  * [ ] calling by pet names "sweetheart", "darling" etc. - add to system
+    prompt
 * fault detection
 * individual person recognition (using only recent interactions)
 * functions to know what is happening, what has happened before, state of
   system, configuration etc.
 * attract mode
-    * before fortune-teller sees an approaching person
-    * detect when a person tentatively appraoches but does not trigger start
-    * detect when multiple people stand gingerly nearby
-    * consider second camera trained on whole scene or entrance
+  * before fortune-teller sees an approaching person
+  * detect when a person tentatively appraoches but does not trigger start
+  * detect when multiple people stand gingerly nearby
+  * consider second camera trained on whole scene or entrance
 * Per-deployment configuration needs to know:
-    * event details, maybe including whole schedule of events
-    * VIPs
-    * permanent physical layout and scene design details (red tablecloth,
-      crystal
-      ball, vase of flowers etc.)
-    * if a person asks about an event coming up, we could quip about telling
-      their
-      future: that they will go to that event
+  * event details, maybe including whole schedule of events
+  * VIPs
+  * permanent physical layout and scene design details (red tablecloth,
+    crystal
+    ball, vase of flowers etc.)
+  * if a person asks about an event coming up, we could quip about telling
+    their
+    future: that they will go to that event
 * db logging
 * [ ] aggregated system logs
 * [ ] usage stats
 * [ ] performance log
-    * [ ] recent performance, best, worst, 80th percentile
+  * [ ] recent performance, best, worst, 80th percentile
 * [ ] attempt to read body language and facial expressions
-    * stands as if to leave
-    * expresses emotion
-        * evaluate if it may have been in response to something that was said
+  * stands as if to leave
+  * expresses emotion
+    * evaluate if it may have been in response to something that was said
 * [ ] authenticated web user with http session
 * [ ] multiple concurrent sessions
 
@@ -498,44 +500,44 @@ Currently zero tests!
 ### Scene Ideas
 
 * fortune teller
-    * crystal ball, scrying bowl, casting bones, tarot cards
-    * circus variant
+  * crystal ball, scrying bowl, casting bones, tarot cards
+  * circus variant
 * character from ancient mythology
 * philosopher child
 * buddha kitten (animating animal faces doesn't work on sadtalker)
 * creator clone - self description and explanation of how it works
-    * expert on self and how it works
-    * can converse in this mode as a general assistant but with identity stuff
-      in system prompt
-    * clone my voice
-    * use my image to drive animation
+  * expert on self and how it works
+  * can converse in this mode as a general assistant but with identity stuff
+    in system prompt
+  * clone my voice
+  * use my image to drive animation
 
 ### Deployment Targets
 
 * dev mode laptop-only
-    * use laptop camera, mic, speakers etc.
+  * use laptop camera, mic, speakers etc.
 * [ ] macos comparison test: chrome, chromium, safari, firefox
-    * camera audio/video capture codec support
-    * consider non-web components for production installation (tradeoffs?)
+  * camera audio/video capture codec support
+  * consider non-web components for production installation (tradeoffs?)
 * [ ] what about full mobile web app with mic & camera?
-    * [x] basic feasibility - works OK but testing is horrible
-    * [ ] how to get dev console or logs etc. from ios chrome
-    * [ ] might ios safari work better than ios chrome?
-    * [ ] test android chrome
+  * [x] basic feasibility - works OK but testing is horrible
+  * [ ] how to get dev console or logs etc. from ios chrome
+  * [ ] might ios safari work better than ios chrome?
+  * [ ] test android chrome
 * specific mic and speaker alternative
 * docker containers with underlying GPU resource detection
 * remote API configuration
-    * local replacements on case-by-case
-    * multi-machine Deployment
-    * fully hosted online variant
+  * local replacements on case-by-case
+  * multi-machine Deployment
+  * fully hosted online variant
 * external effect control additions - physical lighting in theatrical scene for
   extra drama (e.g. flickering lamps)
 * full production deployment design:
-    * needs to be described in system prompt
-    * could it be a zoltar like booth, hamming up the artificiality of the
-      fortune teller?
-    * vertical TV?
-    * could it be a traditional fortune-teller table setting?
+  * needs to be described in system prompt
+  * could it be a zoltar like booth, hamming up the artificiality of the
+    fortune teller?
+  * vertical TV?
+  * could it be a traditional fortune-teller table setting?
 * maybe make it like it's a video call to a real person?
 
 ### Character Definition Workflow
@@ -545,13 +547,13 @@ in various ways.
 
 * reference portrait
 * reference pose video graph
-    * interconnected animations are edges, fixed poses are nodes
-    * a graph may give nonlinear, realistic animations that are sufficiently
-      polished
+  * interconnected animations are edges, fixed poses are nodes
+  * a graph may give nonlinear, realistic animations that are sufficiently
+    polished
 * voice model
 * vocal fx chain
-    * pre-lip sync (e.g. speaking speed)
-    * post-lip sync (e.g. reverb, re-pitch)
+  * pre-lip sync (e.g. speaking speed)
+  * post-lip sync (e.g. reverb, re-pitch)
 
 For pose variations for example, the tweening between each pose may need to be
 precomputed so that a generated pose reference video can be fed to a lip-sync
@@ -597,18 +599,18 @@ and some comments about it.
 ### Memory and Local Knowledge
 
 * What is the physical deployment scenario
-    * festival
-    * party/event
+  * festival
+  * party/event
 * Reference material for important people known to all at event
-    * Host / hostess
-    * Schedule of events
+  * Host / hostess
+  * Schedule of events
 * Memory of people seen in previous sessions
 * Self-knowledge narrative
 * Meta-understanding
-    * does not break character or betray that it is an AI
-    * is not willing to break character by sharing unlikely expert knowledge
-    * if, say, asked about quantum physics, summarily describes vague references
-      remaining in character
+  * does not break character or betray that it is an AI
+  * is not willing to break character by sharing unlikely expert knowledge
+  * if, say, asked about quantum physics, summarily describes vague references
+    remaining in character
 
 ### Text to Speech
 
@@ -622,15 +624,15 @@ and some comments about it.
 * canned smalltalk
 * pregenerated output for response graph driven by expert system and elaborated
   by LLM for variety.
-    * LLM can detect equivalence of phrases and help choose a
-      pregenerated response.
+  * LLM can detect equivalence of phrases and help choose a
+    pregenerated response.
 * chunked TTS producing chunked lipsync video
-    * cut LLM output text into paragraphs or sentences
-    * generate individual voice for each fragment
-    * elevenlabs API supports providing preceding and proceeding context
-    * feed multiple speech audio chunks to lipsync in parallel
-    * modify front-end to work with a dynamic queue of video streams played
-      sequentially
+  * cut LLM output text into paragraphs or sentences
+  * generate individual voice for each fragment
+  * elevenlabs API supports providing preceding and proceeding context
+  * feed multiple speech audio chunks to lipsync in parallel
+  * modify front-end to work with a dynamic queue of video streams played
+    sequentially
 * environmental theatrics - externally controlled sound effects, crystal ball,
   etc.
 * crafted stalling and in-character ceremony - e.g. reading tarot cards or "gaze
@@ -640,7 +642,7 @@ and some comments about it.
   Prepare a restatement of initial part of input while rendering full response.
   May need to break response into consideration/reflection/contemplation segment
   which is calculated not to depend on the real response and the stripped-back
-  core response which does.
+  core response which does.¬
 
 ### Speech to Text
 
