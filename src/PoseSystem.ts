@@ -1,7 +1,5 @@
 import {DrawingUtils, FilesetResolver, PoseLandmarker, PoseLandmarkerResult} from "@mediapipe/tasks-vision";
 
-
-
 class PoseSystem {
 
   private poseLandmarker: PoseLandmarker | null = null;
@@ -10,7 +8,7 @@ class PoseSystem {
   async getPoseLandmarker() {
 
     if (!this.poseLandmarker) {
-      const vision= await FilesetResolver.forVisionTasks("/node_modules/@mediapipe/tasks-vision/wasm");
+      const vision = await FilesetResolver.forVisionTasks("/node_modules/@mediapipe/tasks-vision/wasm");
       const poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: `/models/pose_landmarker_heavy.task`,
@@ -24,7 +22,7 @@ class PoseSystem {
     return this.poseLandmarker;
   }
 
-  async attachPoseToImage(image: HTMLImageElement, zIndex: number, callback:(c:HTMLCanvasElement) => void) {
+  async attachPoseToImage(image: HTMLImageElement, zIndex: number, callback: (c: HTMLCanvasElement) => void) {
     const pm = await this.getPoseLandmarker();
     pm.detect(image, (result: PoseLandmarkerResult) => {
       this.canvas = document.createElement("canvas");
@@ -56,6 +54,6 @@ class PoseSystem {
       this.canvas.remove();
     }
   }
- }
+}
 
 export {PoseSystem};
