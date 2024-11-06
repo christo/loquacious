@@ -63,8 +63,4 @@ type SystemSummary = {
   health: HealthStatus,
 
 }
-export type {SystemSummary, Module, OptionedModule};
-export {HealthStatus};
-export {MemSpec};
-export {PerfStat};
-export {HealthError};
+export type {SystemSummary, Module, OptionedModule, HealthStatus, MemSpec, PerfStat, HealthError};
