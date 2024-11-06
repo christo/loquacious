@@ -4,10 +4,10 @@ import {
   AccountTree,
   ArrowCircleLeft,
   ArrowCircleRight,
-  AspectRatio,
+  AspectRatio, AutoMode,
   Campaign,
   Dns,
-  Error,
+  Error, Face3, Face3Outlined,
   Memory,
   Mic,
   MonetizationOn,
@@ -22,8 +22,8 @@ import {
 } from "@mui/icons-material";
 import {
   Box,
-  Button,
-  Divider,
+  Checkbox,
+  Divider, Fab,
   FormControl,
   IconButton,
   InputLabel,
@@ -35,7 +35,7 @@ import {
   Tooltip,
   Typography
 } from "@mui/material";
-import React, {MouseEventHandler, MutableRefObject, type ReactNode, useEffect, useRef, useState} from "react";
+import React, {MutableRefObject, type ReactNode, useEffect, useRef, useState} from "react";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import {Duration} from "./Duration.tsx";
 import {HealthError, SystemSummary} from "../server/src/domain/SystemSummary.ts";
@@ -150,7 +150,6 @@ function SettingsForm({system, postSettings}: {
         <SettingsSelect label={"Vision"} value={system.vision.current} setValue={updater("vision")}
                         options={system.vision.all}/>
       </WithIcon>
-      {/*<IconLabelled TheIcon={Face3} tooltip="Self-image"><i>Unimplemented</i></IconLabelled>*/}
 
       <WithIcon TheIcon={AccessibilityNew} tooltip="Motion Capture">
         <SettingsSelect label="Mocap" value={system.pose.current} setValue={updater("pose")}
@@ -276,8 +275,11 @@ function SessionControl({serverPort, resetResponse}: { serverPort: number, reset
       });
     });
   }
-
-  return <Button sx={{mt: 2}} disabled={inFlight} variant="outlined" onClick={newSession}>New Session</Button>;
+  return <Fab size="medium" variant="extended" aria-label="new session" sx={{mt: 2}} onClick={newSession} disabled={inFlight}>
+    <AutoMode sx={{ mr: 1 }} />
+    New Session
+  </Fab>
+  //return <Button sx={{mt: 2}} disabled={inFlight} variant="outlined" endIcon={<AutoMode />} onClick={newSession}>New Session</Button>;
 }
 
 function AppTitle(props: { appTitle: string }) {
@@ -330,34 +332,42 @@ function SettingsPanel(props: SettingsProps) {
     {system && <SettingsForm system={system} postSettings={postSettings}/>}
     {system && <Status system={system}/>}
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
-    <DetectFaceButton poseSystem={props.poseSystem} imgRef={props.imgRef} zIndex={100}/>
+    <PoseControl poseSystem={props.poseSystem} imgRef={props.imgRef} zIndex={100}/>
   </Stack>
 }
 
-function DetectFaceButton({poseSystem, imgRef, zIndex}: {
+/**
+ * Control for turning on or off portrait face detection.
+ *
+ * @param poseSystem to control the generation of face detection
+ * @param imgRef the reference to the portrait
+ * @param zIndex for the overlay canvas to draw, should be on top of the image.
+ */
+function PoseControl({poseSystem, imgRef, zIndex}: {
   poseSystem: PoseSystem,
   imgRef: React.MutableRefObject<HTMLImageElement | null>,
   zIndex: number
 }) {
 
-  const [label, setLabel] = useState("Detect Face")
-
+  const [checked, setChecked] = React.useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const handleClick: MouseEventHandler = async (e) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (imgRef.current) {
-      e.preventDefault();
+      setChecked(e.target.checked);
       if (canvasRef.current) {
         poseSystem.resetCanvas();
         canvasRef.current = null;
-        setLabel("Detect Face");
       } else {
         canvasRef.current = await poseSystem.attachFaceToImage(imgRef.current, zIndex);
-        setLabel("Face Off");
       }
     }
   }
 
-  return <Button variant="outlined" color="secondary" onClick={handleClick}>{label}</Button>
+  return <Box alignSelf="end"><Checkbox
+      checked={checked} color="success"
+      icon={<Face3Outlined />} inputProps={{ 'aria-label': 'controlled' }}
+      checkedIcon={<Face3 />} onChange={handleChange}
+  /></Box>
 }
 
 interface SystemPanelProps {
