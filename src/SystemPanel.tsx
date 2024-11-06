@@ -212,7 +212,7 @@ function ScaleDimension(props: { dimension: Dimension | null }) {
  * Non-editable status information about the system.
  * @param system
  */
-function Status({system}: { system: SystemSummary}) {
+function Status({system}: { system: SystemSummary }) {
   if (system == null) {
     return <p>...</p>
   } else {
@@ -328,13 +328,19 @@ function SettingsPanel(props: SettingsProps) {
     <AppTitle appTitle={props.appTitle}/>
     {props.images?.length > 0 && <PortraitChooser {...props} />}
     {system && <SettingsForm system={system} postSettings={postSettings}/>}
-    {system && <Status system={system} />}
+    {system && <Status system={system}/>}
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
-    <DetectFaceButton poseSystem={props.poseSystem} imgRef={props. imgRef} zIndex={100}/>
+    <DetectFaceButton poseSystem={props.poseSystem} imgRef={props.imgRef} zIndex={100}/>
   </Stack>
 }
 
-function DetectFaceButton({poseSystem, imgRef, zIndex}: { poseSystem: PoseSystem, imgRef: React.MutableRefObject<HTMLImageElement | null>, zIndex: number }) {
+function DetectFaceButton({poseSystem, imgRef, zIndex}: {
+  poseSystem: PoseSystem,
+  imgRef: React.MutableRefObject<HTMLImageElement | null>,
+  zIndex: number
+}) {
+
+  const [label, setLabel] = useState("Detect Face")
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const handleClick: MouseEventHandler = async (e) => {
@@ -343,11 +349,15 @@ function DetectFaceButton({poseSystem, imgRef, zIndex}: { poseSystem: PoseSystem
       if (canvasRef.current) {
         poseSystem.resetCanvas();
         canvasRef.current = null;
+        setLabel("Detect Face");
+      } else {
+        canvasRef.current = await poseSystem.attachFaceToImage(imgRef.current, zIndex);
+        setLabel("Face Off");
       }
-      canvasRef.current = await poseSystem.attachFaceToImage(imgRef.current, zIndex)
     }
   }
-  return <Button variant="outlined" color="secondary" onClick={handleClick}>Detect Face</Button>;
+
+  return <Button variant="outlined" color="secondary" onClick={handleClick}>{label}</Button>
 }
 
 interface SystemPanelProps {
@@ -362,7 +372,8 @@ interface SystemPanelProps {
   resetResponse: () => void,
 }
 
-export function SystemPanel({ imgRef,
+export function SystemPanel({
+                              imgRef,
                               poseSystem,
                               appTitle,
                               images,

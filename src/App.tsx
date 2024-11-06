@@ -121,6 +121,7 @@ const App: React.FC = () => {
     if (!prompt.trim()) {
       return;
     }
+    poseSystem.resetCanvas();
     const anticipatedMessg = new Message(-1, new Date(), prompt, -1, true);
     const anticipatedResponse: ChatResponse = {
       messages: [...response.messages, anticipatedMessg],

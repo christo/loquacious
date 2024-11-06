@@ -54,10 +54,64 @@ class PoseSystem {
   async attachFaceToImage(image: HTMLImageElement, zIndex: number): Promise<HTMLCanvasElement> {
     const faceLandmarkerResult = (await this.getFaceFromImage(1)).detect(image);
     this.resetCanvas();
+    const canvas = this.overlayCanvas(image, zIndex);
+
+    image.parentNode!.appendChild(canvas);
+    const drawingUtils = new DrawingUtils((canvas.getContext("2d"))!);
+    for (const landmarks of faceLandmarkerResult.faceLandmarks) {
+      drawingUtils.drawConnectors(
+          landmarks,
+          FaceLandmarker.FACE_LANDMARKS_TESSELATION,
+          { color: "rgba(114,192,58,0.71)", lineWidth: 1, fillColor: "rgba(0, 200, 0, 0.3)" },
+      );
+      drawingUtils.drawConnectors(
+          landmarks,
+          FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
+          { color: "#5fa15f" }
+      );
+      drawingUtils.drawConnectors(
+          landmarks,
+          FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW,
+          { color: "#20a820" }
+      );
+      drawingUtils.drawConnectors(
+          landmarks,
+          FaceLandmarker.FACE_LANDMARKS_LEFT_EYE,
+          { color: "#5fa15f" }
+      );
+      drawingUtils.drawConnectors(
+          landmarks,
+          FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW,
+          { color: "#20a820" }
+      );
+      drawingUtils.drawConnectors(
+          landmarks,
+          FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
+          { color: "#95b01a" }
+      );
+      drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, {
+        color: "#b63232"
+      });
+      drawingUtils.drawConnectors(
+          landmarks,
+          FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS,
+          { color: "#5fa15f" }
+      );
+      drawingUtils.drawConnectors(
+          landmarks,
+          FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS,
+          { color: "#5fa15f" }
+      );
+    }
+    return canvas;
+  }
+
+
+  private overlayCanvas(image: HTMLImageElement, zIndex: number) {
     this.canvas = document.createElement("canvas") as HTMLCanvasElement;
     this.canvas.setAttribute("class", "canvas");
-    this.canvas.setAttribute("width", image.naturalWidth + "px");
-    this.canvas.setAttribute("height", image.naturalHeight + "px");
+    this.canvas.setAttribute("width", image.naturalWidth * 2 + "px");
+    this.canvas.setAttribute("height", image.naturalHeight * 2 + "px");
     const imstyle = image.computedStyleMap();
     this.canvas.setAttribute("style", `position: absolute;
         left: ${imstyle.get("left")};
@@ -67,58 +121,8 @@ class PoseSystem {
         z-index: ${zIndex};
         object-fit: ${imstyle.get("object-fit")};
         object-position: ${imstyle.get("object-position")};`)
-
-    image.parentNode!.appendChild(this.canvas);
-    const ctx = this.canvas.getContext("2d");
-    const drawingUtils = new DrawingUtils(ctx!);
-    for (const landmarks of faceLandmarkerResult.faceLandmarks) {
-      drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_TESSELATION,
-          { color: "#C0C0C070", lineWidth: 1 }
-      );
-      drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
-          { color: "#FF3030" }
-      );
-      drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW,
-          { color: "#FF3030" }
-      );
-      drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_LEFT_EYE,
-          { color: "#30FF30" }
-      );
-      drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW,
-          { color: "#30FF30" }
-      );
-      drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
-          { color: "#E0E0E0" }
-      );
-      drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, {
-        color: "#E0E0E0"
-      });
-      drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS,
-          { color: "#FF3030" }
-      );
-      drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS,
-          { color: "#30FF30" }
-      );
-    }
     return this.canvas;
   }
-
 
   /**
    * Attaches the standard pose markers to the given image at the given zIndex, calling the given callback
@@ -130,22 +134,9 @@ class PoseSystem {
   async attachPoseToImage(image: HTMLImageElement, zIndex: number, callback: (c: HTMLCanvasElement) => void) {
     const pm = await this.getPoseFromImage(1);
     pm.detect(image, (result: PoseLandmarkerResult) => {
-      this.canvas = document.createElement("canvas");
-      this.canvas.setAttribute("width", `${image.width}px`);
-      this.canvas.setAttribute("height", `${image.height}px`);
-      const imstyle = image.computedStyleMap();
-      this.canvas.setAttribute("style", `position: absolute;
-        left: ${imstyle.get("left")};
-        top: ${imstyle.get("top")};
-        width: ${imstyle.get("width")};
-        height: ${imstyle.get("height")};
-        z-index: ${zIndex};
-        object-fit: ${imstyle.get("object-fit")};
-        object-position: ${imstyle.get("object-position")};`
-      );
-      image.parentNode!.appendChild(this.canvas);
-      const canvasCtx = this.canvas.getContext("2d");
-      const drawingUtils = new DrawingUtils(canvasCtx!);
+      const canvas = this.overlayCanvas(image, zIndex);
+      image.parentNode!.appendChild(canvas);
+      const drawingUtils = new DrawingUtils((canvas.getContext("2d"))!);
       for (const landmark of result.landmarks) {
         drawingUtils.drawLandmarks(landmark, {
           radius: (data) => DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1)
@@ -153,7 +144,7 @@ class PoseSystem {
         drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
       }
       // TODO rewrite as Promise
-      callback(this.canvas);
+      callback(canvas);
     });
   }
 
