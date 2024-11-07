@@ -354,7 +354,7 @@ function SettingsPanel(props: SettingsProps) {
 }
 
 /**
- * Controls for turning on or off vision system capabilities.
+ * Controls for turning on or off subsystem capabilities.
  *
  * @param poseSystem to control the generation of face detection
  * @param imgRef the reference to the portrait
