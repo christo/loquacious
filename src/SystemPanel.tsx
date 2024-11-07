@@ -6,38 +6,23 @@ import {
   ArrowCircleRight,
   AspectRatio,
   AutoMode,
-  BugReport,
-  BugReportOutlined,
   Campaign,
-  Diversity2,
-  Diversity2Outlined,
   Dns,
   Error,
-  Face3,
-  Face3Outlined,
   Memory,
   Mic,
   MonetizationOn,
   MonitorHeart,
-  Person,
-  PersonOff,
   Portrait,
   QuestionAnswer,
   RecordVoiceOver,
   RemoveRedEye,
   School,
-  SensorOccupied,
-  SensorOccupiedOutlined,
-  Sensors,
-  SensorsOff,
   Settings,
-  SpeakerNotes,
-  SpeakerNotesOff,
   type SvgIconComponent,
 } from "@mui/icons-material";
 import {
   Box,
-  Checkbox,
   Divider,
   Fab,
   FormControl,
@@ -51,12 +36,13 @@ import {
   Tooltip,
   Typography
 } from "@mui/material";
-import React, {MutableRefObject, type ReactNode, useEffect, useRef, useState} from "react";
+import React, {MutableRefObject, type ReactNode, useEffect, useState} from "react";
 import {type ImageInfo} from "../server/src/image/ImageInfo.ts";
 import {Duration} from "./Duration.tsx";
 import {HealthError, SystemSummary} from "../server/src/domain/SystemSummary.ts";
 import {Dimension} from "../server/src/image/Dimension";
 import {PoseSystem} from "./PoseSystem.ts";
+import {SubsystemControls} from "./SubsystemControls.tsx";
 
 type ESet<T> = (value: T) => void;
 
@@ -351,103 +337,6 @@ function SettingsPanel(props: SettingsProps) {
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
     <SubsystemControls poseSystem={props.poseSystem} imgRef={props.imgRef}/>
   </Stack>
-}
-
-/**
- * Controls for turning on or off subsystem capabilities.
- *
- * @param poseSystem to control the generation of face detection
- * @param imgRef reference to the portrait
- */
-function SubsystemControls({poseSystem, imgRef}: {
-  poseSystem: PoseSystem,
-  imgRef: React.MutableRefObject<HTMLImageElement | null>,
-}) {
-
-  const [workflowIcons, setWorkflowIcons] = React.useState(false);
-  const [textChat, setTextChat] = React.useState(false);
-  const [debugOverlay, setDebugOverlay] = React.useState(false);
-  const [portraitAnalysis, setPortraitAnalysis] = React.useState(false);
-  const [punterDetector, setPunterDetector] = React.useState(false);
-  const [punterVision, setPunterVision] = React.useState(false);
-  const [autoCalibration, setAutoCalibration] = React.useState(false);
-
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  const handleWorkflowIconsCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setWorkflowIcons(e.target.checked);
-    // TODO make shit happen
-  }
-  const handleTextChatCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTextChat(e.target.checked);
-    // TODO make shit happen
-  }
-  const handleDebugCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDebugOverlay(e.target.checked);
-    // TODO make shit happen
-  }
-  const handlePortraitCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (imgRef.current) {
-      const canvasZIndex = parseInt(imgRef.current.style.zIndex, 10) + 1;
-      setPortraitAnalysis(e.target.checked);
-      if (canvasRef.current) {
-        poseSystem.resetCanvas();
-        canvasRef.current = null;
-      } else {
-        canvasRef.current = await poseSystem.attachFaceToImage(imgRef.current, canvasZIndex);
-      }
-    }
-  }
-  const handlePunterDetectorCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPunterDetector(e.target.checked);
-    // TODO make shit happen
-  }
-  const handlePunterVisionCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPunterVision(e.target.checked);
-    // TODO make shit happen
-  }
-  const handleAutoCalibrationCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAutoCalibration(e.target.checked);
-    // TODO make shit happen
-  }
-
-  return <Box alignSelf="end">
-    <Tooltip title="Workflow Sigils">
-      <Checkbox checked={workflowIcons} color="success"
-                icon={<Diversity2Outlined/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<Diversity2/>} onChange={handleWorkflowIconsCheck}/>
-    </Tooltip>
-    <Tooltip title="Text Chat">
-      <Checkbox checked={textChat} color="success"
-                icon={<SpeakerNotesOff/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<SpeakerNotes/>} onChange={handleTextChatCheck}/>
-    </Tooltip>
-    <Tooltip title="Debug Overlay">
-      <Checkbox checked={debugOverlay} color="success"
-                icon={<BugReportOutlined/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<BugReport/>} onChange={handleDebugCheck}/>
-    </Tooltip>
-    <Tooltip title="Auto Calibration">
-      <Checkbox checked={autoCalibration} color="success"
-                icon={<SensorsOff/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<Sensors/>} onChange={handleAutoCalibrationCheck}/>
-    </Tooltip>
-    <Tooltip title="Punter Detection">
-      <Checkbox checked={punterDetector} color="success"
-                icon={<SensorOccupiedOutlined/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<SensorOccupied/>} onChange={handlePunterDetectorCheck}/>
-    </Tooltip>
-    <Tooltip title="Punter Vision">
-      <Checkbox checked={punterVision} color="success"
-                icon={<PersonOff/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<Person/>} onChange={handlePunterVisionCheck}/>
-    </Tooltip>
-    <Tooltip title="Self-Portrait Analysis">
-      <Checkbox checked={portraitAnalysis} color="success"
-                icon={<Face3Outlined/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<Face3/>} onChange={handlePortraitCheck}/>
-    </Tooltip>
-  </Box>
 }
 
 interface SystemPanelProps {
