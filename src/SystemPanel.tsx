@@ -343,7 +343,7 @@ function SettingsPanel(props: SettingsProps) {
     {system && <SettingsForm system={system} postSettings={postSettings}/>}
     {system && <Status system={system}/>}
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
-    <PoseControl poseSystem={props.poseSystem} imgRef={props.imgRef}/>
+    <SubsystemControls poseSystem={props.poseSystem} imgRef={props.imgRef}/>
   </Stack>
 }
 
@@ -353,7 +353,7 @@ function SettingsPanel(props: SettingsProps) {
  * @param poseSystem to control the generation of face detection
  * @param imgRef the reference to the portrait
  */
-function PoseControl({poseSystem, imgRef}: {
+function SubsystemControls({poseSystem, imgRef}: {
   poseSystem: PoseSystem,
   imgRef: React.MutableRefObject<HTMLImageElement | null>,
 }) {
