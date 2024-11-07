@@ -357,7 +357,7 @@ function SettingsPanel(props: SettingsProps) {
  * Controls for turning on or off subsystem capabilities.
  *
  * @param poseSystem to control the generation of face detection
- * @param imgRef the reference to the portrait
+ * @param imgRef reference to the portrait
  */
 function SubsystemControls({poseSystem, imgRef}: {
   poseSystem: PoseSystem,
@@ -373,7 +373,6 @@ function SubsystemControls({poseSystem, imgRef}: {
   const [autoCalibration, setAutoCalibration] = React.useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
 
   const handleWorkflowIconsCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setWorkflowIcons(e.target.checked);
@@ -417,11 +416,12 @@ function SubsystemControls({poseSystem, imgRef}: {
       <Checkbox checked={workflowIcons} color="success"
                 icon={<Diversity2Outlined/>} inputProps={{'aria-label': 'controlled'}}
                 checkedIcon={<Diversity2/>} onChange={handleWorkflowIconsCheck}/>
-    </Tooltip> <Tooltip title="Text Chat">
-    <Checkbox checked={textChat} color="success"
-              icon={<SpeakerNotesOff/>} inputProps={{'aria-label': 'controlled'}}
-              checkedIcon={<SpeakerNotes/>} onChange={handleTextChatCheck}/>
-  </Tooltip>
+    </Tooltip>
+    <Tooltip title="Text Chat">
+      <Checkbox checked={textChat} color="success"
+                icon={<SpeakerNotesOff/>} inputProps={{'aria-label': 'controlled'}}
+                checkedIcon={<SpeakerNotes/>} onChange={handleTextChatCheck}/>
+    </Tooltip>
     <Tooltip title="Debug Overlay">
       <Checkbox checked={debugOverlay} color="success"
                 icon={<BugReportOutlined/>} inputProps={{'aria-label': 'controlled'}}
