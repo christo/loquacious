@@ -5,8 +5,12 @@ import {
   ArrowCircleLeft,
   ArrowCircleRight,
   AspectRatio,
-  AutoMode, BugReport, BugReportOutlined,
+  AutoMode,
+  BugReport,
+  BugReportOutlined,
   Campaign,
+  Diversity2,
+  Diversity2Outlined,
   Dns,
   Error,
   Face3,
@@ -14,7 +18,7 @@ import {
   Memory,
   Mic,
   MonetizationOn,
-  MonitorHeart, MoreVert, MoreVertOutlined,
+  MonitorHeart,
   Person,
   PersonOff,
   Portrait,
@@ -26,7 +30,9 @@ import {
   SensorOccupiedOutlined,
   Sensors,
   SensorsOff,
-  Settings, SpeakerNotes, SpeakerNotesOff,
+  Settings,
+  SpeakerNotes,
+  SpeakerNotesOff,
   type SvgIconComponent,
 } from "@mui/icons-material";
 import {
@@ -409,13 +415,13 @@ function SubsystemControls({poseSystem, imgRef}: {
   return <Box alignSelf="end">
     <Tooltip title="Workflow Sigils">
       <Checkbox checked={workflowIcons} color="success"
-                icon={<MoreVertOutlined/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<MoreVert/>} onChange={handleWorkflowIconsCheck}/>
-    </Tooltip>    <Tooltip title="Text Chat">
-      <Checkbox checked={textChat} color="success"
-                icon={<SpeakerNotesOff/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<SpeakerNotes/>} onChange={handleTextChatCheck}/>
-    </Tooltip>
+                icon={<Diversity2Outlined/>} inputProps={{'aria-label': 'controlled'}}
+                checkedIcon={<Diversity2/>} onChange={handleWorkflowIconsCheck}/>
+    </Tooltip> <Tooltip title="Text Chat">
+    <Checkbox checked={textChat} color="success"
+              icon={<SpeakerNotesOff/>} inputProps={{'aria-label': 'controlled'}}
+              checkedIcon={<SpeakerNotes/>} onChange={handleTextChatCheck}/>
+  </Tooltip>
     <Tooltip title="Debug Overlay">
       <Checkbox checked={debugOverlay} color="success"
                 icon={<BugReportOutlined/>} inputProps={{'aria-label': 'controlled'}}
