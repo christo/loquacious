@@ -111,7 +111,6 @@ const App: React.FC = () => {
     } catch (e) {
       console.error('Error fetching portraits', e);
     }
-
   }, []);
 
   const [imageIndex, setImageIndex] = useState(DEFAULT_PORTRAIT);
