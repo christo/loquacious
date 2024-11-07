@@ -293,15 +293,6 @@ both local and as online API services.
 
 ## TODO
 
-* [x] settings panel
-  * [x] show current main llm/model
-  * [x] show current speech system and voice option
-  * [x] show other main llm/model options
-  * [x] show other speech/voice options
-  * [x] make settings panel input components
-    * [x] handle settings for each system module isomorphically
-  * [x] make settings dynamically editable
-  * [x] add subsystem checkbox controls
 * [ ] add websocket streaming status updates so workflow orchestration status is visible via icons
 * [ ] pose estimation and vision using mediapipe
   * [x] pose estimation of portrait
