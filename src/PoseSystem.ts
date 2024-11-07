@@ -1,7 +1,7 @@
 import {
   DrawingUtils,
   FaceLandmarker,
-  FilesetResolver,
+  FilesetResolver, ObjectDetector,
   PoseLandmarker,
   PoseLandmarkerResult
 } from "@mediapipe/tasks-vision";
@@ -18,6 +18,7 @@ class PoseSystem {
   private vision: any;
   private canvas: HTMLCanvasElement | null = null;
   private faceDrawingUtils: DrawingUtils | null = null;
+  private objectDetector: ObjectDetector | null = null;
 
   async getPoseFromImage(numPoses: 1 | 2) {
     return this.getPose(numPoses, "IMAGE");
@@ -32,6 +33,34 @@ class PoseSystem {
       runningMode: runningMode,
       numPoses: numPoses
     });
+  }
+
+
+  /**
+   * Detects people in the frame of the given vision input.
+   * @param runningMode
+   * @param canvas the canvas to bind to
+   */
+  async personDetect(runningMode: RunningMode): Promise<ObjectDetector> {
+    // models downloaded from https://ai.google.dev/edge/mediapipe/solutions/vision/object_detector
+    // various quantizations, input shape dimensions, memory impact and performance
+    if (!this.objectDetector) {
+      // expensive - only construct once
+      this.objectDetector = await ObjectDetector.createFromOptions(await this.getVision(), {
+        baseOptions: {
+          // lite2_float32 published latency for Pixel 6 GPU: 41.15ms CPU: 197.98ms
+          modelAssetPath: `/models/efficientdet_lite2_float32.tflite`,
+          delegate: "GPU",
+        },
+        // values here are trained label categories as listed in `/public/models/object_detector_labelmap.txt`
+        categoryAllowlist: [OBJ_PERSON],
+        scoreThreshold: 0.5, // 0.5 seems good on first approximation
+        maxResults: 5,       // max number of people to detect
+        runningMode: runningMode
+      });
+      await this.objectDetector.setOptions({ runningMode: runningMode });
+    }
+    return this.objectDetector;
   }
 
   /**

@@ -15,6 +15,7 @@ import {ChatInput} from "./ChatInput.tsx";
 import type {Dimension} from "../server/src/image/Dimension"
 import {Portrait} from "./Portrait.tsx";
 import {PoseSystem} from "./PoseSystem.ts";
+import {VideoCamera} from "./VideoCamera.tsx";
 
 const DEFAULT_PORTRAIT = 0;
 const SERVER_PORT = 3001;
@@ -232,6 +233,7 @@ const App: React.FC = () => {
         }}>
           <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
                         hideVideo={hideVideo}/>
+          <VideoCamera poseSystem={poseSystem}/>
           <Box component="form" sx={{
             position: "sticky",
             bottom: 0,
