@@ -41,7 +41,9 @@ export function SubsystemControls({poseSystem, imgRef}: {
 
   const handleWorkflowIconsCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setWorkflowIcons(e.target.checked);
-    // TODO make shit happen
+    // TODO turn on workflow icons:
+    //  * add esoteric svg icons vertically down the RHS of the page indicating which stages of the ai orchestration
+    //    have completed
   }
   const handleTextChatCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setTextChat(e.target.checked);
