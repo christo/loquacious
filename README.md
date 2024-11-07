@@ -301,6 +301,8 @@ both local and as online API services.
   * [x] make settings panel input components
     * [x] handle settings for each system module isomorphically
   * [x] make settings dynamically editable
+  * [x] add subsystem checkbox controls
+* [ ] add websocket streaming status updates so workflow orchestration status is visible via icons
 * [ ] pose estimation and vision using mediapipe
   * [x] pose estimation of portrait
   * [x] download all mediapipe resources for offline operation
