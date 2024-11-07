@@ -2,10 +2,8 @@ html, body, textarea {
     box-sizing: border-box;
 }
 
-img.portrait {
-    z-index: 2;
-}
 
+/** applies to video and img elements */
 .portrait {
     position: absolute;
     top: 0;
@@ -14,5 +12,6 @@ img.portrait {
     height: 100%;
     object-fit: cover;
     object-position: top;
+    box-shadow: inset 0 0 30px 30px rgba(0,0,0,0.4);
 }
 
