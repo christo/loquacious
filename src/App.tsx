@@ -207,12 +207,16 @@ const App: React.FC = () => {
         <SystemPanel appTitle="Loquacious" images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}
                      serverPort={SERVER_PORT} poseSystem={poseSystem} imgRef={imgRef}
                      resetResponse={resetResponse} dimension={dimension}/>
-        {loading && <CircularProgress size="2rem" color="secondary"
+        {loading && <CircularProgress size="3rem" color="secondary"
                                       sx={{
                                         position: "absolute",
                                         zIndex: 500,
                                         top: "2rem",
-                                        right: "2rem"
+                                        right: "2rem",
+                                        p: 1,
+                                        borderRadius: "100%",
+                                        backgroundColor: "rgba(0, 0, 0, 0.25)",
+                                        boxShadow: "0 0 9px 9px rgba(0, 0, 0, 0.25)",
                                       }}/>}
         <Box sx={{
           position: "absolute",
