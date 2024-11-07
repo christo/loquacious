@@ -6,6 +6,10 @@ import {
   PoseLandmarkerResult
 } from "@mediapipe/tasks-vision";
 
+type RunningMode = "IMAGE" | "VIDEO";
+
+const OBJ_PERSON = "person";
+
 class PoseSystem {
 
   /**
@@ -19,7 +23,7 @@ class PoseSystem {
     return this.getPose(numPoses, "IMAGE");
   }
 
-  async getPose(numPoses: 1 | 2 = 1, runningMode: "IMAGE" | "VIDEO" = "IMAGE") {
+  async getPose(numPoses: 1 | 2 = 1, runningMode: RunningMode = "IMAGE") {
     return await PoseLandmarker.createFromOptions(await this.getVision(), {
       baseOptions: {
         modelAssetPath: `/models/pose_landmarker_heavy.task`,
@@ -48,7 +52,7 @@ class PoseSystem {
   }
 
   /** Gets a face landmarker */
-  async getFace(numFaces: 1 | 2 = 1, runningMode: "IMAGE" | "VIDEO" = "IMAGE") {
+  async getFace(numFaces: 1 | 2 = 1, runningMode: RunningMode = "IMAGE") {
     return await FaceLandmarker.createFromOptions(await this.getVision(), {
       baseOptions: {
         modelAssetPath: `/models/face_landmarker.task`,
