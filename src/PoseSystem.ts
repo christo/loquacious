@@ -45,6 +45,7 @@ class PoseSystem {
     return this.getFace(numFaces, "IMAGE");
   }
 
+  /** Gets a face landmarker */
   async getFace(numFaces: 1 | 2 = 1, runningMode: "IMAGE" | "VIDEO" = "IMAGE") {
     return await FaceLandmarker.createFromOptions(await this.getVision(), {
       baseOptions: {
