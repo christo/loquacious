@@ -24,8 +24,10 @@ import {
  * @param poseSystem to control the generation of face detection
  * @param imgRef reference to the portrait
  */
-export function SubsystemControls({poseSystem, imgRef}: {
+export function SubsystemControls({poseSystem, imgRef, punterDetection, setPunterDetection}: {
   poseSystem: PoseSystem,
+  punterDetection: boolean,
+  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void,
   imgRef: React.MutableRefObject<HTMLImageElement | null>,
 }) {
 
@@ -33,7 +35,7 @@ export function SubsystemControls({poseSystem, imgRef}: {
   const [textChat, setTextChat] = React.useState(false);
   const [debugOverlay, setDebugOverlay] = React.useState(false);
   const [portraitAnalysis, setPortraitAnalysis] = React.useState(false);
-  const [punterDetector, setPunterDetector] = React.useState(false);
+
   const [punterVision, setPunterVision] = React.useState(false);
   const [autoCalibration, setAutoCalibration] = React.useState(false);
 
@@ -66,7 +68,7 @@ export function SubsystemControls({poseSystem, imgRef}: {
     }
   }
   const handlePunterDetectorCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPunterDetector(e.target.checked);
+    setPunterDetection(e.target.checked);
     // TODO make shit happen
   }
   const handlePunterVisionCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +102,7 @@ export function SubsystemControls({poseSystem, imgRef}: {
                 checkedIcon={<Sensors/>} onChange={handleAutoCalibrationCheck}/>
     </Tooltip>
     <Tooltip title="Punter Detection">
-      <Checkbox checked={punterDetector} color="success"
+      <Checkbox checked={punterDetection} color="success"
                 icon={<SensorOccupiedOutlined/>} inputProps={{'aria-label': 'controlled'}}
                 checkedIcon={<SensorOccupied/>} onChange={handlePunterDetectorCheck}/>
     </Tooltip>

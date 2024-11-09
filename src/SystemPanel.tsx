@@ -60,6 +60,8 @@ interface SettingsProps {
   serverPort: number;
   setImageIndex: (i: number) => void;
   resetResponse: () => void;
+  punterDetection: boolean;
+  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void
 }
 
 function WithIcon({TheIcon, tooltip, children}: {
@@ -335,7 +337,7 @@ function SettingsPanel(props: SettingsProps) {
     {system && <SettingsForm system={system} postSettings={postSettings}/>}
     {system && <Status system={system}/>}
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
-    <SubsystemControls poseSystem={props.poseSystem} imgRef={props.imgRef}/>
+    <SubsystemControls poseSystem={props.poseSystem} imgRef={props.imgRef} punterDetection={props.punterDetection} setPunterDetection={props.setPunterDetection}/>
   </Stack>
 }
 
@@ -349,6 +351,8 @@ interface SystemPanelProps {
   imageIndex: number,
   serverPort: number,
   resetResponse: () => void,
+  punterDetection: boolean,
+  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void
 }
 
 export function SystemPanel({
@@ -360,7 +364,9 @@ export function SystemPanel({
                               setImageIndex,
                               imageIndex,
                               serverPort,
-                              resetResponse
+                              resetResponse,
+                              punterDetection,
+                              setPunterDetection
                             }: SystemPanelProps) {
   // ESC toggles drawer
   useEffect(() => {
@@ -388,7 +394,9 @@ export function SystemPanel({
                      onOpen={toggleDrawer(false)}>
       <SettingsPanel appTitle={appTitle} images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}
                      serverPort={serverPort} dimension={dimension} poseSystem={poseSystem} imgRef={imgRef}
-                     resetResponse={resetResponse}/>
+                     resetResponse={resetResponse}
+                     punterDetection={punterDetection} setPunterDetection={setPunterDetection}
+      />
     </SwipeableDrawer>
   </Box>
 }

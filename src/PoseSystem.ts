@@ -69,6 +69,7 @@ class PoseSystem {
    */
   private async getVision() {
     if (!this.vision) {
+      console.log("Vision system loading");
       // vite transforms this module path reference for us
       // TODO confirm this resolves properly in production
       this.vision = await FilesetResolver.forVisionTasks("/node_modules/@mediapipe/tasks-vision/wasm");

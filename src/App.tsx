@@ -1,11 +1,5 @@
-import {Box, CircularProgress} from "@mui/material";
-import React, {
-  KeyboardEventHandler,
-  type MutableRefObject,
-  useEffect,
-  useRef,
-  useState
-} from 'react';
+import {Box, CircularProgress, Stack} from "@mui/material";
+import React, {KeyboardEventHandler, type MutableRefObject, useEffect, useRef, useState} from 'react';
 import "./App.css";
 import {Message} from "../server/src/domain/Message";
 import {type ImageInfo} from "../server/src/image/ImageInfo";
@@ -15,12 +9,13 @@ import {ChatInput} from "./ChatInput.tsx";
 import type {Dimension} from "../server/src/image/Dimension"
 import {Portrait} from "./Portrait.tsx";
 import {PoseSystem} from "./PoseSystem.ts";
-import {VideoCamera} from "./VideoCamera.tsx";
+import {poseConsumer, VideoCamera, VisionConsumer} from "./VideoCamera.tsx";
+import {Detection} from "@mediapipe/tasks-vision";
+import {Boy} from "@mui/icons-material";
 
 const DEFAULT_PORTRAIT = 0;
 const SERVER_PORT = 3001;
 const poseSystem = new PoseSystem();
-
 
 type CompResponseProps = {
   response: ChatResponse,
@@ -96,6 +91,20 @@ const Spinner = () => {
                              backgroundColor: "rgba(0, 0, 0, 0.25)",
                              boxShadow: "0 0 9px 9px rgba(0, 0, 0, 0.25)",
                            }}/>;
+}
+
+function PunterDetectIcons({people}:{people: Detection[]}) {
+  return  <Stack sx={{justifyItems: "end"}}>
+    {people?.map((_: Detection, i: number) => {
+      return <Boy
+          key={`dpersoni_${i}`}
+          color="warning"
+          fontSize="large"
+          sx={{p: 0, m: 1, backgroundColor: "#000", borderRadius: "100%"}}
+      />;
+    })}
+  </Stack>
+      ;
 }
 
 const App: React.FC = () => {
@@ -202,6 +211,17 @@ const App: React.FC = () => {
     }
   }
 
+  const [punterDetection, setPunterDetection] = useState(true);
+  const [people, setPeople] = useState<Detection[]>([]);
+
+  const tempVc: VisionConsumer[] = [];
+  if (punterDetection) {
+    tempVc.push(poseConsumer(poseSystem, setPeople));
+  }
+  // TODO add each consumer based on config
+
+  // @ts-ignore
+  const [visionConsumers, setVisionConsumers] = useState<VisionConsumer[]>(tempVc);
 
   const imageUrl = () => `${portraitBaseUrl!}/${images[imageIndex].f}`;
   return (
@@ -220,7 +240,9 @@ const App: React.FC = () => {
         }
         <SystemPanel appTitle="Loquacious" images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}
                      serverPort={SERVER_PORT} poseSystem={poseSystem} imgRef={imgRef}
-                     resetResponse={resetResponse} dimension={dimension}/>
+                     resetResponse={resetResponse} dimension={dimension}
+                     punterDetection={punterDetection} setPunterDetection={setPunterDetection}
+        />
         {loading && <Spinner/>}
         <Box sx={{
           position: "absolute",
@@ -233,7 +255,13 @@ const App: React.FC = () => {
         }}>
           <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
                         hideVideo={hideVideo}/>
-          <VideoCamera poseSystem={poseSystem}/>
+
+          { // TODO change to punterDetection && debugOverlay (?) setting
+            (punterDetection && <PunterDetectIcons people={people}/>)
+          }
+
+          <VideoCamera consumers={visionConsumers}/>
+
           <Box component="form" sx={{
             position: "sticky",
             bottom: 0,

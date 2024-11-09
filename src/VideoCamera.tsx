@@ -8,10 +8,6 @@ interface VideoCameraProps {
   poseSystem: PoseSystem
 }
 
-/**
- * When the last video frame was read.
- */
-let lastVideoTime = -1;
 
 /**
  * A predicate for a {@link Detection} that return true iff the
@@ -48,12 +44,92 @@ Q: do we need to estimate velocity over n frames in order to make assertions abo
 Q: how relevant is object constancy at all? We want a new session if the user swaps with another.
 Q: what time parameters should we use? Frame times are not guaranteed to be consistent.
 
-TODO: set up an empirical test suite to find coefficients for flexible approach and departure detection
+TODO: set up an empirical test suite to find coefficients for flexible approach and departure detection;
+  use the assumption that approach vector is colinear with the centroid of the camera frustrum
 TODO: investigate "scene change" and "camera move" detection using vision-enabled LLM
  */
 
-function VideoCamera({poseSystem}: VideoCameraProps) {
+type VisionConsumer = {
+  consumeVideo: (video: HTMLVideoElement, startTimeMs: number, deltaMs: number) => Promise<void>,
+  consumeImage: (image: HTMLImageElement) => Promise<void>,
+}
+
+/**
+ * Single on-page video camera component that subscribed to by the given consumers.
+ * @param consumers each will be passed the video on each frame update.
+ */
+function VideoCamera({consumers}: { consumers: VisionConsumer[] }) {
+  const camRef: MutableRefObject<HTMLVideoElement | null> = useRef(null);
+  const [lastVideoTime, setLastVideoTime] = useState(-1);
+
+  useEffect(() => {
+    if (camRef.current !== null) {
+
+      async function readVideoFrame() {
+        let startTimeMs = performance.now();
+        if (camRef.current!.currentTime !== lastVideoTime) {
+          setLastVideoTime(camRef.current!.currentTime);
+          await Promise.all(consumers.map(c => c.consumeVideo(camRef.current!, startTimeMs, startTimeMs - lastVideoTime)));
+        }
+        window.requestAnimationFrame(readVideoFrame);
+      }
+
+      // seemingly need to attach video stream to an html element which probably binds to gpu context
+      // and enables gpu model to access the video frame
+      navigator.mediaDevices.getUserMedia({video: true})
+          .then(function (stream) {
+            camRef.current!.srcObject = stream;
+            camRef.current!.addEventListener("loadeddata", readVideoFrame);
+          })
+          .catch((err) => {
+            // camRef will simply not be set
+            console.error(`webcam error: `, err);
+          });
+    }
+  }, []);
+
+  return <Box sx={{mb: 150, justifyItems: "center", flexDirection: "column"}}>
+    <Box sx={{visibility: "hidden"}}>
+      <video ref={camRef} autoPlay playsInline></video>
+    </Box>
+  </Box>
+}
+
+function poseConsumer(poseSystem: PoseSystem, setPeople: (d: Detection[]) => void) {
+  return {
+    async consumeImage(image: HTMLImageElement): Promise<void> {
+      const od =  await poseSystem.personDetect("VIDEO");
+      const detections = od.detect(image)
+      const ds = detections.detections;
+      setPeople(ds);
+      return Promise.resolve();
+    },
+    async consumeVideo(video: HTMLVideoElement, startTimeMs: number, _deltaMs: number): Promise<void> {
+      const od = await poseSystem.personDetect("VIDEO");
+      const detections = od.detectForVideo(video, startTimeMs);
+      const ds = detections.detections;
+      setPeople(ds);
+    }
+  } as VisionConsumer;
+}
+
+function VideoCameraBridge({poseSystem}: VideoCameraProps) {
   const [people, setPeople] = useState<Detection[]>([]);
+  const pc = poseConsumer(poseSystem, setPeople);
+  return <Box sx={{justifyItems: "center", flexDirection: "column"}}>
+    <Typography variant="h1"
+                sx={{fontWeight: 800, textShadow: "0 0 10px rgba(0, 0, 0, 0.8)"}}>{people?.length}</Typography>
+    <VideoCamera consumers={[pc]}/>
+  </Box>
+}
+
+/**
+ * @deprecated use {@link VideoCamera}
+ * @param poseSystem
+ */
+function VideoCameraOld({poseSystem}: VideoCameraProps) {
+  const [people, setPeople] = useState<Detection[]>([]);
+  const [lastVideoTime, setLastVideoTime] = useState(-1);
   const camRef: MutableRefObject<HTMLVideoElement | null> = useRef(null);
   useEffect(() => {
     console.log("VideoCamera calling useEffect()")
@@ -63,7 +139,7 @@ function VideoCamera({poseSystem}: VideoCameraProps) {
         async function readVideoFrame() {
           let startTimeMs = performance.now();
           if (camRef.current!.currentTime !== lastVideoTime) {
-            lastVideoTime = camRef.current!.currentTime;
+            setLastVideoTime(camRef.current!.currentTime);
             const detections = od.detectForVideo(camRef.current!, startTimeMs);
             //console.log(detections.detections.length);
             const ds = detections.detections;
@@ -96,4 +172,4 @@ function VideoCamera({poseSystem}: VideoCameraProps) {
   </Box>
 }
 
-export {VideoCamera};
+export {VideoCameraOld, VideoCamera, VideoCameraBridge, poseConsumer, type VisionConsumer, type VideoCameraProps};
