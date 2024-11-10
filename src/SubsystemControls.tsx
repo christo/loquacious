@@ -19,7 +19,19 @@ import {
 } from "@mui/icons-material";
 
 /**
- * Options with their State setters.
+ * Convenience alias for React useState setter function.
+ */
+type StateSetter<T> = (value: (((prevState: T) => T) | T)) => void;
+
+type InputHandler = (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+
+const bindCheckbox =
+    (setter: StateSetter<boolean>): InputHandler =>
+        async (e) => setter(e.target.checked);
+
+
+/**
+ * Options with their {@link StateSetter StateSetters}.
  */
 interface SubsystemOptions {
   punterDetection: boolean;
@@ -28,6 +40,8 @@ interface SubsystemOptions {
   setDebugOverlay: (value: (((prevState: boolean) => boolean) | boolean)) => void;
   showChat: boolean;
   setShowChat: (value: (((prevState: boolean) => boolean) | boolean)) => void;
+  punterVision: boolean;
+  setPunterVision: (value: (((prevState: boolean) => boolean) | boolean)) => void;
 }
 
 interface SubsystemControlsProps extends SubsystemOptions {
@@ -35,8 +49,6 @@ interface SubsystemControlsProps extends SubsystemOptions {
   imgRef: React.MutableRefObject<HTMLImageElement | null>,
 }
 
-type StateSetter<T> = (value: (((prevState: T) => T) | T)) => void;
-type AsyncBoxChecker = (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
 
 /**
  * Controls for turning on or off subsystem capabilities.
@@ -47,30 +59,26 @@ type AsyncBoxChecker = (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>
  * @param setPunterDetection setter for punterDetection
  * @param debugOverlay whether developer-level detail info is shown on screen
  * @param setDebugOverlay setter for debugOverlay
- * @param showChat
- * @param setShowChat
+ * @param showChat whether to show text chat
+ * @param setShowChat setter for showChat
+ * @param punterVision whether to use vision model to reason about detected users
+ * @param setPunterVision setter for punterVision
  */
 function SubsystemControls({
                              poseSystem,
                              imgRef,
-                             punterDetection,
-                             setPunterDetection,
-                             debugOverlay,
-                             setDebugOverlay,
-                             showChat,
-                             setShowChat,
+                             punterDetection, setPunterDetection,
+                             debugOverlay, setDebugOverlay,
+                             showChat, setShowChat,
+                             punterVision, setPunterVision,
                            }: SubsystemControlsProps) {
 
   const [workflowIcons, setWorkflowIcons] = React.useState(false);
-  const [portraitAnalysis, setPortraitAnalysis] = React.useState(false);
-
-  const [punterVision, setPunterVision] = React.useState(false);
   const [autoCalibration, setAutoCalibration] = React.useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const bindCheckbox = (setter: StateSetter<boolean>): AsyncBoxChecker => async (e) => setter(e.target.checked);
-
+  const [portraitAnalysis, setPortraitAnalysis] = React.useState(false);
   const handlePortraitCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (imgRef.current) {
       const canvasZIndex = parseInt(imgRef.current.style.zIndex, 10) + 1;
