@@ -39,6 +39,8 @@ interface SubsystemOptions {
   setPunterVision: StateSetter<boolean>;
   autoCalibration: boolean;
   setAutoCalibration: StateSetter<boolean>;
+  workflowIcons: boolean;
+  setWorkflowIcons: StateSetter<boolean>;
 }
 
 interface SubsystemControlsProps extends SubsystemOptions {
@@ -63,6 +65,8 @@ interface SubsystemControlsProps extends SubsystemOptions {
  * @param setPunterVision setter for punterVision
  * @param autoCalibration whether to automatically tune vision-based mode transition trigger conditions
  * @param setAutoCalibration setter for autoCalibration
+ * @param workflowIcons whether to show "sigils" indicating state of orchestration workflow
+ * @param setWorkflowIcons setter for workflowIcons
  */
 function SubsystemControls({
                              poseSystem,
@@ -72,9 +76,9 @@ function SubsystemControls({
                              showChat, setShowChat,
                              punterVision, setPunterVision,
                              autoCalibration, setAutoCalibration,
+                             workflowIcons, setWorkflowIcons,
                            }: SubsystemControlsProps) {
 
-  const [workflowIcons, setWorkflowIcons] = React.useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 

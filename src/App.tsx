@@ -222,6 +222,7 @@ const App: React.FC = () => {
   const [punterVision, setPunterVision] = useState(true);
   const [showChat, setShowChat] = useState(true);
   const [autoCalibration, setAutoCalibration] = useState(true);
+  const [workflowIcons, setWorkflowIcons] = React.useState(true);
 
   const [people, setPeople] = useState<Detection[]>([]);
 
@@ -257,6 +258,7 @@ const App: React.FC = () => {
                      showChat={showChat} setShowChat={setShowChat}
                      punterVision={punterVision} setPunterVision={setPunterVision}
                      autoCalibration={autoCalibration} setAutoCalibration={setAutoCalibration}
+                     workflowIcons={workflowIcons} setWorkflowIcons={setWorkflowIcons}
         />
         {loading && <Spinner/>}
         <Box sx={{

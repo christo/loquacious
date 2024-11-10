@@ -52,8 +52,6 @@ function ShowError({error}: { error: HealthError }) {
 
 interface SettingsProps extends SubsystemControlsProps {
   appTitle: string;
-  poseSystem: PoseSystem;
-  imgRef: MutableRefObject<HTMLImageElement | null>;
   dimension: Dimension | null;
   images: ImageInfo[];
   imageIndex: number;
