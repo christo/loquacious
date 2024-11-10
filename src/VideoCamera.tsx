@@ -3,8 +3,9 @@ import {PoseSystem} from "./PoseSystem.ts";
 import {MutableRefObject, useEffect, useRef, useState} from "react";
 import {Detection} from "@mediapipe/tasks-vision";
 
+// noinspection JSUnusedLocalSymbols
 /**
- * A predicate for a {@link Detection} that return true iff the
+ * A predicate for a {@link Detection} that return true iff the object is judged closer than a tuning threshold
  * @param d
  */
 // @ts-ignore
@@ -12,7 +13,9 @@ const isClose = (d: Detection): boolean => {
   // Temporarily use width of bounding box as approximation of proximity
   // due to landscape cropping in camera frustrum with expected orientation,
   // height is less likely to be indicative. Can get fancier as required.
+
   // TODO get rid of hard-coded width here - autocalibrate with full vision model
+  //   this is resolution dependent
   return (d.boundingBox !== undefined && d.boundingBox.width > 160);
 };
 
