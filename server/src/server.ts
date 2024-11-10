@@ -347,8 +347,7 @@ app.listen(port, async () => {
   await initialiseCreatorTypes();
 
   await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
-  // TODO remove host hard-coding
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 
   const llm = llms.current();
   console.log(`LLM Health check: ${llm.enableHealth ? "enabled" : "disabled"}`);
