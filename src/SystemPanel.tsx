@@ -42,7 +42,7 @@ import {Duration} from "./Duration.tsx";
 import {HealthError, SystemSummary} from "../server/src/domain/SystemSummary.ts";
 import {Dimension} from "../server/src/image/Dimension";
 import {PoseSystem} from "./PoseSystem.ts";
-import {SubsystemControls} from "./SubsystemControls.tsx";
+import {SubsystemControls, SubsystemOptions} from "./SubsystemControls.tsx";
 
 type ESet<T> = (value: T) => void;
 
@@ -350,7 +350,7 @@ function SettingsPanel(props: SettingsProps) {
   </Stack>
 }
 
-interface SystemPanelProps {
+interface SystemPanelProps extends SubsystemOptions {
   appTitle: string,
   poseSystem: PoseSystem,
   imgRef: MutableRefObject<HTMLImageElement | null>,
@@ -360,26 +360,9 @@ interface SystemPanelProps {
   imageIndex: number,
   serverPort: number,
   resetResponse: () => void,
-  punterDetection: boolean,
-  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void,
-  debugOverlay: boolean,
-  setDebugOverlay: (value: (((prevState: boolean) => boolean) | boolean)) => void
 }
 
-export function SystemPanel({
-                              imgRef,
-                              poseSystem,
-                              appTitle,
-                              images,
-                              dimension,
-                              setImageIndex,
-                              imageIndex,
-                              serverPort,
-                              resetResponse,
-                              punterDetection,
-                              setPunterDetection,
-    debugOverlay, setDebugOverlay,
-                            }: SystemPanelProps) {
+export function SystemPanel(props: SystemPanelProps) {
   // ESC toggles drawer
   useEffect(() => {
     let handleKeyDown = (e: KeyboardEvent) => {
@@ -402,14 +385,12 @@ export function SystemPanel({
     <IconButton aria-label="settings" size="large" onClick={toggleDrawer(true)}>
       <Settings fontSize="inherit" sx={{opacity: 0.2}}/>
     </IconButton>
-    <SwipeableDrawer sx={{opacity: 0.9, m: 0}} open={drawerOpen} onClose={toggleDrawer(false)}
-                     onOpen={toggleDrawer(false)}>
-      <SettingsPanel appTitle={appTitle} images={images} imageIndex={imageIndex} setImageIndex={setImageIndex}
-                     serverPort={serverPort} dimension={dimension} poseSystem={poseSystem} imgRef={imgRef}
-                     resetResponse={resetResponse}
-                     punterDetection={punterDetection} setPunterDetection={setPunterDetection}
-                     debugOverlay={debugOverlay} setDebugOverlay={setDebugOverlay}
-      />
+    <SwipeableDrawer
+        sx={{opacity: 0.9, m: 0}}
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
+        onOpen={toggleDrawer(false)}>
+      <SettingsPanel {...props}/>
     </SwipeableDrawer>
   </Box>
 }

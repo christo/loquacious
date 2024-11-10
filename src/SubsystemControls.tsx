@@ -19,6 +19,21 @@ import {
 } from "@mui/icons-material";
 
 /**
+ * Options with their State setters.
+ */
+interface SubsystemOptions {
+  punterDetection: boolean;
+  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void;
+  debugOverlay: boolean;
+  setDebugOverlay: (value: (((prevState: boolean) => boolean) | boolean)) => void;
+}
+
+interface SubsystemControlsProps extends SubsystemOptions {
+  poseSystem: PoseSystem,
+  imgRef: React.MutableRefObject<HTMLImageElement | null>,
+}
+
+/**
  * Controls for turning on or off subsystem capabilities.
  *
  * @param poseSystem to control the generation of face detection
@@ -28,14 +43,14 @@ import {
  * @param debugOverlay whether developer-level detail info is shown on screen
  * @param setDebugOverlay setter for debugOverlay
  */
-export function SubsystemControls({poseSystem, imgRef, punterDetection, setPunterDetection, debugOverlay, setDebugOverlay}: {
-  poseSystem: PoseSystem,
-  punterDetection: boolean,
-  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void,
-  debugOverlay: boolean,
-  setDebugOverlay: (value: (((prevState: boolean) => boolean) | boolean)) => void,
-  imgRef: React.MutableRefObject<HTMLImageElement | null>,
-}) {
+function SubsystemControls({
+                                    poseSystem,
+                                    imgRef,
+                                    punterDetection,
+                                    setPunterDetection,
+                                    debugOverlay,
+                                    setDebugOverlay
+                                  }: SubsystemControlsProps) {
 
   const [workflowIcons, setWorkflowIcons] = React.useState(false);
   const [textChat, setTextChat] = React.useState(false);
@@ -123,3 +138,5 @@ export function SubsystemControls({poseSystem, imgRef, punterDetection, setPunte
     </Tooltip>
   </Box>
 }
+
+export {type SubsystemOptions, SubsystemControls};
