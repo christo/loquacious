@@ -34,7 +34,7 @@ AI face-to-face fortune teller chat experiment.
     at some point.
 * Audio input streaming is not currently implemented, nor is Speech To Text
   (STT), vision via image-to-text.
-  The user can currently type text into a chat-like text box and the
+* The user can currently type text into a chat-like text box and the
   conversation history is shown in the UI.
 * Basic system admin panel is revealed by clicking a subtle sprocket icon near
   the top left corner of the main view.
