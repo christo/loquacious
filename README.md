@@ -299,6 +299,7 @@ both local and as online API services.
 
 * [ ] spike websocket - have more than one? keep existing endpoints for integration ease
 * [ ] add websocket streaming status updates so workflow orchestration status is visible via icons
+* [ ] shoot project status screencast
 * [ ] pose estimation and vision using mediapipe
   * [x] pose estimation of portrait
   * [x] download all mediapipe resources for offline operation
