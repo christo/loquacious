@@ -267,6 +267,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       });
 
       if (llmResponse) {
+        // this nested chain of calls needs to be a pre-wired modular production line
         const llmMessage = await timed("storing llm response",
             () => db.createCreatorTypeMessage(session, llmResponse, currentLlm));
 
