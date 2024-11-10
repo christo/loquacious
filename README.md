@@ -310,7 +310,7 @@ both local and as online API services.
   * invite them to sit down and chat
   * enter introductory mode
   * on-demand camera contents description
-    * e.g. how many fingers am I holding up? (see gesture training mediapipe examples) 
+    * e.g. how many fingers am I holding up? (see gesture training mediapipe examples)
     * this is my friend jane (if multi-punter, how to know who is speaking!?)
     * does my ass look big in this
   * periodic pose estimation to detect mode state transitions
@@ -319,14 +319,11 @@ both local and as online API services.
       camera field
     * lighting
     * pose estimation and video frame grab integration
-  * possible whole-scene photo input
-    * it may help the LLM if it can see not only what it looks like but what
-      the actual current deployment scene looks like
-* [ ] punter identity persistence
+      [ ] punter identity persistence
   * is this person the same person as checkpoint x?
   * use as input to interruption mode trigger
   * incorporate possible multi-person session, tag-team people who have witnessed interaction
-    with ai already - note this means session can have multiple punter identities (think through) 
+    with ai already - note this means session can have multiple punter identities (think through)
 * [ ] have I met this person before in a previous session?
 * [ ] name and bio reference retrieval for people (stretch) - first hand data / ext data
 * [ ] implement settings presets - depends on server-configured character portraits
@@ -423,6 +420,7 @@ both local and as online API services.
   * [x] calling by name if available
   * [ ] calling by pet names "sweetheart", "darling" etc. - add to system
     prompt
+  * avoid assumption that we are talking to a single person
 * fault detection
 * individual person recognition (using only recent interactions)
 * functions to know what is happening, what has happened before, state of
@@ -436,11 +434,9 @@ both local and as online API services.
   * event details, maybe including whole schedule of events
   * VIPs
   * permanent physical layout and scene design details (red tablecloth,
-    crystal
-    ball, vase of flowers etc.)
+    crystal ball, vase of flowers etc.)
   * if a person asks about an event coming up, we could quip about telling
-    their
-    future: that they will go to that event
+    their future: that they will go to that event
 * db logging
 * [ ] aggregated system logs
 * [ ] usage stats
@@ -453,7 +449,15 @@ both local and as online API services.
 * [ ] authenticated web user with http session
 * [ ] multiple concurrent sessions
 
-### Test Suite
+## Future Ideas
+
+Not proper TODOs.
+
+* possible whole-scene photo input from secondary camera (option)
+  * it may help the LLM if it can see not only what it looks like but what
+    the actual current deployment scene looks like
+
+## Test Suite
 
 Currently zero tests!
 
@@ -466,7 +470,7 @@ Currently zero tests!
 * LLM evaluation of response to test inputs looking for specific features or to
   ensure certain absences (manually review these assessments)
 
-### Modes
+## Modes
 
 * Attract Mode - Nobody is engaged, but someone might see us before we see them
 * Invite Mode - Somebody is detected but they have not engaged. They can
@@ -497,7 +501,7 @@ Currently zero tests!
   interactions informing current one (though next time they could be
   aggregated))
 
-### Scene Ideas
+## Scene Ideas
 
 * fortune teller
   * crystal ball, scrying bowl, casting bones, tarot cards
@@ -512,7 +516,7 @@ Currently zero tests!
   * clone my voice
   * use my image to drive animation
 
-### Deployment Targets
+## Deployment Targets
 
 * dev mode laptop-only
   * use laptop camera, mic, speakers etc.
@@ -540,7 +544,7 @@ Currently zero tests!
   * could it be a traditional fortune-teller table setting?
 * maybe make it like it's a video call to a real person?
 
-### Character Definition Workflow
+## Character Definition Workflow
 
 The following data structure needs to be seeded, expanded, augmented and merged
 in various ways.
@@ -550,10 +554,14 @@ in various ways.
   * interconnected animations are edges, fixed poses are nodes
   * a graph may give nonlinear, realistic animations that are sufficiently
     polished
-* voice model
+* reversible gesture animations
+  * mocap animations don't necessarily return to origin pose, 
+  * experiment with boomerang video animation to return to origin
+* voice model - makes sense to attach a voice to a portrait
 * vocal fx chain
-  * pre-lip sync (e.g. speaking speed)
+  * pre-lip sync (e.g. speaking speed, band-pass, noise reduction, comp)
   * post-lip sync (e.g. reverb, re-pitch)
+  * define in-app audio fx vs external audio fx
 
 For pose variations for example, the tweening between each pose may need to be
 precomputed so that a generated pose reference video can be fed to a lip-sync
