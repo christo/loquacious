@@ -657,13 +657,6 @@ and some comments about it.
   which is calculated not to depend on the real response and the stripped-back
   core response which does.¬
 
-### Speech to Text
-
-* options?
-* test native OS speech recognition
-* low latency
-* sentiment, emotion detection etc.
-
 ## Acknowledgements
 
 * [google-webfont-helper](https://gwfh.mranftl.com/fonts) cool tool for downloading google fonts in
