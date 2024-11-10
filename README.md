@@ -6,6 +6,7 @@ AI face-to-face fortune teller chat experiment.
 
 ## Project Status
 
+* Supports multiple characters defined solely by portrait image and voice
 * Minimal web application front-end, REST back end
 * LLM integration for reasonable fortune teller interaction text,
   implementations:
@@ -19,6 +20,9 @@ AI face-to-face fortune teller chat experiment.
   with [sadtalker](https://github.com/OpenTalker/sadtalker) (open source)
   __CURRENTLY WAY TOO SLOW__ running either on 1x H100 at
   [fal.ai](https://fal.ai/) or MacOS running 64Gb M1 Max Apple Silicon.
+* Client-side face and pose estimation to:
+  * Detect user approach to camera
+  * (WIP) analyse self-portrait for lipsync suitability i.e. dimensions, framing
 * Postgres database for storing and tracing all interactions and intermediate
   media assets.
 * Audio and Video capture is not currently implemented, nor is Speech To Text
@@ -35,7 +39,7 @@ a face-to-face video chat can be assembled using various AI models. Components
 can be swapped for alternatives which is especially useful for quality and
 performance testing.
 
-This application is hoped to produce a usable tech demo but equally likely may
+This application is proving to be a usable tech demo but equally likely may
 be abandoned if heavy engineering or custom model training is required to make
 it fun to use.
 
@@ -444,6 +448,7 @@ both local and as online API services.
   * [ ] recent performance, best, worst, 80th percentile
 * [ ] attempt to read body language and facial expressions
   * stands as if to leave
+  * speaking to multiple visible people who take turns in the hot seat?
   * expresses emotion
     * evaluate if it may have been in response to something that was said
 * [ ] authenticated web user with http session
@@ -555,7 +560,7 @@ in various ways.
   * a graph may give nonlinear, realistic animations that are sufficiently
     polished
 * reversible gesture animations
-  * mocap animations don't necessarily return to origin pose, 
+  * mocap animations don't necessarily return to origin pose,
   * experiment with boomerang video animation to return to origin
 * voice model - makes sense to attach a voice to a portrait
 * vocal fx chain
