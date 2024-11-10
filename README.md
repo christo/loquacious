@@ -25,8 +25,15 @@ AI face-to-face fortune teller chat experiment.
   * (WIP) analyse self-portrait for lipsync suitability i.e. dimensions, framing
 * Postgres database for storing and tracing all interactions and intermediate
   media assets.
-* Audio and Video capture is not currently implemented, nor is Speech To Text
-  (STT), vision via image-to-text or pose estimation for situational awareness.
+* Video capture is **in progress**
+  * client-side object detection and pose estimation is used to detect
+    approaching users
+  * Fortune teller self-portrait is mapped for facial landmarks to enable
+    scaling and reframing portraits to be better suited for lipync video
+    generation. These portraits will be uploadable or ai-generated at some
+    point.
+* Audio input streaming is not currently implemented, nor is Speech To Text
+  (STT), vision via image-to-text.
   The user can currently type text into a chat-like text box and the
   conversation history is shown in the UI.
 * Basic system admin panel is revealed by clicking a subtle sprocket icon near
