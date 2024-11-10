@@ -60,10 +60,6 @@ interface SettingsProps extends SubsystemControlsProps {
   serverPort: number;
   setImageIndex: (i: number) => void;
   resetResponse: () => void;
-  punterDetection: boolean;
-  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void;
-  debugOverlay: boolean;
-  setDebugOverlay: (value: (((prevState: boolean) => boolean) | boolean)) => void;
 }
 
 function WithIcon({TheIcon, tooltip, children}: {
