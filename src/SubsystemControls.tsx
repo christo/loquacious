@@ -97,37 +97,37 @@ function SubsystemControls({
   }
   return <Box alignSelf="end">
     <Tooltip title="Workflow Sigils">
-      <Checkbox checked={workflowIcons} color="success"
+      <Checkbox checked={workflowIcons} color="secondary"
                 icon={<Diversity2Outlined/>} inputProps={{'aria-label': 'controlled'}}
                 checkedIcon={<Diversity2/>} onChange={bindCheckbox(setWorkflowIcons)}/>
     </Tooltip>
     <Tooltip title="Text Chat">
-      <Checkbox checked={showChat} color="success"
+      <Checkbox checked={showChat} color="secondary"
                 icon={<SpeakerNotesOff/>} inputProps={{'aria-label': 'controlled'}}
                 checkedIcon={<SpeakerNotes/>} onChange={bindCheckbox(setShowChat)}/>
     </Tooltip>
     <Tooltip title="Debug Overlay">
-      <Checkbox checked={debugOverlay} color="success"
+      <Checkbox checked={debugOverlay} color="secondary"
                 icon={<BugReportOutlined/>} inputProps={{'aria-label': 'controlled'}}
                 checkedIcon={<BugReport/>} onChange={bindCheckbox(setDebugOverlay)}/>
     </Tooltip>
     <Tooltip title="Auto Calibration">
-      <Checkbox checked={autoCalibration} color="success"
+      <Checkbox checked={autoCalibration} color="secondary"
                 icon={<SensorsOff/>} inputProps={{'aria-label': 'controlled'}}
                 checkedIcon={<Sensors/>} onChange={bindCheckbox(setAutoCalibration)}/>
     </Tooltip>
     <Tooltip title="Punter Detection">
-      <Checkbox checked={punterDetection} color="success"
+      <Checkbox checked={punterDetection} color="secondary"
                 icon={<SensorOccupiedOutlined/>} inputProps={{'aria-label': 'controlled'}}
                 checkedIcon={<SensorOccupied/>} onChange={bindCheckbox(setPunterDetection)}/>
     </Tooltip>
     <Tooltip title="Punter Vision">
-      <Checkbox checked={punterVision} color="success"
+      <Checkbox checked={punterVision} color="secondary"
                 icon={<PersonOff/>} inputProps={{'aria-label': 'controlled'}}
                 checkedIcon={<Person/>} onChange={bindCheckbox(setPunterVision)}/>
     </Tooltip>
     <Tooltip title="Self-Portrait Analysis">
-      <Checkbox checked={portraitAnalysis} color="success"
+      <Checkbox checked={portraitAnalysis} color="secondary"
                 icon={<Face3Outlined/>} inputProps={{'aria-label': 'controlled'}}
                 checkedIcon={<Face3/>} onChange={handlePortraitCheck}/>
     </Tooltip>
