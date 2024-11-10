@@ -211,6 +211,7 @@ const App: React.FC = () => {
     }
   }
 
+  const [debugOverlay, setDebugOverlay] = useState(true);
   const [punterDetection, setPunterDetection] = useState(true);
   const [people, setPeople] = useState<Detection[]>([]);
 
@@ -242,6 +243,7 @@ const App: React.FC = () => {
                      serverPort={SERVER_PORT} poseSystem={poseSystem} imgRef={imgRef}
                      resetResponse={resetResponse} dimension={dimension}
                      punterDetection={punterDetection} setPunterDetection={setPunterDetection}
+                     debugOverlay={debugOverlay} setDebugOverlay={setDebugOverlay}
         />
         {loading && <Spinner/>}
         <Box sx={{
@@ -257,7 +259,7 @@ const App: React.FC = () => {
                         hideVideo={hideVideo}/>
 
           { // TODO change to punterDetection && debugOverlay (?) setting
-            (punterDetection && <PunterDetectIcons people={people}/>)
+            (punterDetection && debugOverlay && <PunterDetectIcons people={people}/>)
           }
 
           <VideoCamera consumers={visionConsumers}/>

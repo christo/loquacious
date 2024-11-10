@@ -61,7 +61,9 @@ interface SettingsProps {
   setImageIndex: (i: number) => void;
   resetResponse: () => void;
   punterDetection: boolean;
-  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void
+  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void;
+  debugOverlay: boolean;
+  setDebugOverlay: (value: (((prevState: boolean) => boolean) | boolean)) => void;
 }
 
 function WithIcon({TheIcon, tooltip, children}: {
@@ -337,7 +339,14 @@ function SettingsPanel(props: SettingsProps) {
     {system && <SettingsForm system={system} postSettings={postSettings}/>}
     {system && <Status system={system}/>}
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
-    <SubsystemControls poseSystem={props.poseSystem} imgRef={props.imgRef} punterDetection={props.punterDetection} setPunterDetection={props.setPunterDetection}/>
+    <SubsystemControls
+        poseSystem={props.poseSystem}
+        imgRef={props.imgRef}
+        punterDetection={props.punterDetection}
+        setPunterDetection={props.setPunterDetection}
+        debugOverlay={props.debugOverlay}
+        setDebugOverlay={props.setDebugOverlay}
+    />
   </Stack>
 }
 
@@ -352,7 +361,9 @@ interface SystemPanelProps {
   serverPort: number,
   resetResponse: () => void,
   punterDetection: boolean,
-  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void
+  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void,
+  debugOverlay: boolean,
+  setDebugOverlay: (value: (((prevState: boolean) => boolean) | boolean)) => void
 }
 
 export function SystemPanel({
@@ -366,7 +377,8 @@ export function SystemPanel({
                               serverPort,
                               resetResponse,
                               punterDetection,
-                              setPunterDetection
+                              setPunterDetection,
+    debugOverlay, setDebugOverlay,
                             }: SystemPanelProps) {
   // ESC toggles drawer
   useEffect(() => {
@@ -396,6 +408,7 @@ export function SystemPanel({
                      serverPort={serverPort} dimension={dimension} poseSystem={poseSystem} imgRef={imgRef}
                      resetResponse={resetResponse}
                      punterDetection={punterDetection} setPunterDetection={setPunterDetection}
+                     debugOverlay={debugOverlay} setDebugOverlay={setDebugOverlay}
       />
     </SwipeableDrawer>
   </Box>

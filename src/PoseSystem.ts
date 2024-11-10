@@ -108,7 +108,7 @@ class PoseSystem {
       drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_TESSELATION,
-          {color: "rgba(114,192,58,0.71)", lineWidth: 1},
+          {color: "rgba(114,192,58,0.91)", lineWidth: 0.5},
       );
       drawingUtils.drawConnectors(
           landmarks,
@@ -133,7 +133,7 @@ class PoseSystem {
       drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
-          {color: "#95b01a"}
+          {color: "#95b01a", lineWidth: 2}
       );
       drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, {
         lineWidth: 4,

@@ -23,17 +23,22 @@ import {
  *
  * @param poseSystem to control the generation of face detection
  * @param imgRef reference to the portrait
+ * @param punterDetection whether the approach of a user in camera should trigger mode transitions
+ * @param setPunterDetection setter for punterDetection
+ * @param debugOverlay whether developer-level detail info is shown on screen
+ * @param setDebugOverlay setter for debugOverlay
  */
-export function SubsystemControls({poseSystem, imgRef, punterDetection, setPunterDetection}: {
+export function SubsystemControls({poseSystem, imgRef, punterDetection, setPunterDetection, debugOverlay, setDebugOverlay}: {
   poseSystem: PoseSystem,
   punterDetection: boolean,
   setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void,
+  debugOverlay: boolean,
+  setDebugOverlay: (value: (((prevState: boolean) => boolean) | boolean)) => void,
   imgRef: React.MutableRefObject<HTMLImageElement | null>,
 }) {
 
   const [workflowIcons, setWorkflowIcons] = React.useState(false);
   const [textChat, setTextChat] = React.useState(false);
-  const [debugOverlay, setDebugOverlay] = React.useState(false);
   const [portraitAnalysis, setPortraitAnalysis] = React.useState(false);
 
   const [punterVision, setPunterVision] = React.useState(false);
