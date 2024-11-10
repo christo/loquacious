@@ -321,7 +321,13 @@ both local and as online API services.
   * possible whole-scene photo input
     * it may help the LLM if it can see not only what it looks like but what
       the actual current deployment scene looks like
-
+* [ ] punter identity persistence
+  * is this person the same person as checkpoint x?
+  * use as input to interruption mode trigger
+  * incorporate possible multi-person session, tag-team people who have witnessed interaction
+    with ai already - note this means session can have multiple punter identities (think through) 
+* [ ] have I met this person before in a previous session?
+* [ ] name and bio reference retrieval for people (stretch) - first hand data / ext data
 * [ ] implement settings presets - depends on server-configured character portraits
   * [ ] portrait image
   * [ ] character voice (implies TTS system-specific)
