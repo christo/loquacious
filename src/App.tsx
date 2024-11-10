@@ -267,9 +267,7 @@ const App: React.FC = () => {
           <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
                         hideVideo={hideVideo} showChat={showChat}/>
 
-          { // TODO change to punterDetection && debugOverlay (?) setting
-            (punterDetection && debugOverlay && <PunterDetectIcons people={people}/>)
-          }
+          {(punterDetection && debugOverlay && <PunterDetectIcons people={people}/>)}
 
           <VideoCamera consumers={visionConsumers}/>
 
