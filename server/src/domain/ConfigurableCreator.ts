@@ -4,8 +4,6 @@
  */
 export interface ConfigurableCreator {
 
-  // TODO probably need to add something to parse and unparse config for a dynamic front-end.
-
   /**
    * Configure self to state defined by metadata previously provided by
    * the corresponding implementation of {@link CreatorType#getMetadata} or
