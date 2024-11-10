@@ -299,10 +299,10 @@ both local and as online API services.
   * [x] download all mediapipe resources for offline operation
     * [x] WasmFileset with base url in web app, use vite build step to copy npm dep from
       `node_modules` - check how vite lifecycle works here (plugin or ?)
-  * [ ] face estimation of portrait
+  * [x] face estimation of portrait
   * [ ] spike pose estimation and seamless audio/video streaming to server
   * pose estimation on client - assumes stable camera (can we detect camera motion?)
-  * [ ] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect user
+  * [x] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect user
     approach
   * detect when a person approaches, describe what they look like etc.
   * detect if they are in an engaged mode or just looking
