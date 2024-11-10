@@ -42,7 +42,7 @@ import {Duration} from "./Duration.tsx";
 import {HealthError, SystemSummary} from "../server/src/domain/SystemSummary.ts";
 import {Dimension} from "../server/src/image/Dimension";
 import {PoseSystem} from "./PoseSystem.ts";
-import {SubsystemControls, SubsystemOptions} from "./SubsystemControls.tsx";
+import {SubsystemControls, SubsystemControlsProps, SubsystemOptions} from "./SubsystemControls.tsx";
 
 type ESet<T> = (value: T) => void;
 
@@ -50,7 +50,7 @@ function ShowError({error}: { error: HealthError }) {
   return (<Typography color="error"><Error fontSize="large"/>{error.message}</Typography>);
 }
 
-interface SettingsProps {
+interface SettingsProps extends SubsystemControlsProps {
   appTitle: string;
   poseSystem: PoseSystem;
   imgRef: MutableRefObject<HTMLImageElement | null>;
@@ -339,14 +339,7 @@ function SettingsPanel(props: SettingsProps) {
     {system && <SettingsForm system={system} postSettings={postSettings}/>}
     {system && <Status system={system}/>}
     <SessionControl serverPort={props.serverPort} resetResponse={props.resetResponse}/>
-    <SubsystemControls
-        poseSystem={props.poseSystem}
-        imgRef={props.imgRef}
-        punterDetection={props.punterDetection}
-        setPunterDetection={props.setPunterDetection}
-        debugOverlay={props.debugOverlay}
-        setDebugOverlay={props.setDebugOverlay}
-    />
+    <SubsystemControls {...props}/>
   </Stack>
 }
 

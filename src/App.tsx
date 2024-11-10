@@ -211,8 +211,11 @@ const App: React.FC = () => {
     }
   }
 
+  // SubsystemOptions
   const [debugOverlay, setDebugOverlay] = useState(true);
   const [punterDetection, setPunterDetection] = useState(true);
+  const [showChat, setShowChat] = useState(true);
+
   const [people, setPeople] = useState<Detection[]>([]);
 
   const tempVc: VisionConsumer[] = [];
@@ -244,6 +247,7 @@ const App: React.FC = () => {
                      resetResponse={resetResponse} dimension={dimension}
                      punterDetection={punterDetection} setPunterDetection={setPunterDetection}
                      debugOverlay={debugOverlay} setDebugOverlay={setDebugOverlay}
+                     showChat={showChat} setShowChat={setShowChat}
         />
         {loading && <Spinner/>}
         <Box sx={{

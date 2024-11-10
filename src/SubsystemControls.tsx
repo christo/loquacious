@@ -26,12 +26,17 @@ interface SubsystemOptions {
   setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void;
   debugOverlay: boolean;
   setDebugOverlay: (value: (((prevState: boolean) => boolean) | boolean)) => void;
+  showChat: boolean;
+  setShowChat: (value: (((prevState: boolean) => boolean) | boolean)) => void;
 }
 
 interface SubsystemControlsProps extends SubsystemOptions {
   poseSystem: PoseSystem,
   imgRef: React.MutableRefObject<HTMLImageElement | null>,
 }
+
+type StateSetter<T> = (value: (((prevState: T) => T) | T)) => void;
+type AsyncBoxChecker = (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
 
 /**
  * Controls for turning on or off subsystem capabilities.
@@ -42,18 +47,21 @@ interface SubsystemControlsProps extends SubsystemOptions {
  * @param setPunterDetection setter for punterDetection
  * @param debugOverlay whether developer-level detail info is shown on screen
  * @param setDebugOverlay setter for debugOverlay
+ * @param showChat
+ * @param setShowChat
  */
 function SubsystemControls({
-                                    poseSystem,
-                                    imgRef,
-                                    punterDetection,
-                                    setPunterDetection,
-                                    debugOverlay,
-                                    setDebugOverlay
-                                  }: SubsystemControlsProps) {
+                             poseSystem,
+                             imgRef,
+                             punterDetection,
+                             setPunterDetection,
+                             debugOverlay,
+                             setDebugOverlay,
+                             showChat,
+                             setShowChat,
+                           }: SubsystemControlsProps) {
 
   const [workflowIcons, setWorkflowIcons] = React.useState(false);
-  const [textChat, setTextChat] = React.useState(false);
   const [portraitAnalysis, setPortraitAnalysis] = React.useState(false);
 
   const [punterVision, setPunterVision] = React.useState(false);
@@ -61,20 +69,8 @@ function SubsystemControls({
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const handleWorkflowIconsCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setWorkflowIcons(e.target.checked);
-    // TODO turn on workflow icons:
-    //  * add esoteric svg icons vertically down the RHS of the page indicating which stages of the ai orchestration
-    //    have completed
-  }
-  const handleTextChatCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTextChat(e.target.checked);
-    // TODO make shit happen
-  }
-  const handleDebugCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDebugOverlay(e.target.checked);
-    // TODO make shit happen
-  }
+  const bindCheckbox = (setter: StateSetter<boolean>): AsyncBoxChecker => async (e) => setter(e.target.checked);
+
   const handlePortraitCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (imgRef.current) {
       const canvasZIndex = parseInt(imgRef.current.style.zIndex, 10) + 1;
@@ -87,49 +83,36 @@ function SubsystemControls({
       }
     }
   }
-  const handlePunterDetectorCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPunterDetection(e.target.checked);
-    // TODO make shit happen
-  }
-  const handlePunterVisionCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPunterVision(e.target.checked);
-    // TODO make shit happen
-  }
-  const handleAutoCalibrationCheck = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAutoCalibration(e.target.checked);
-    // TODO make shit happen
-  }
-
   return <Box alignSelf="end">
     <Tooltip title="Workflow Sigils">
       <Checkbox checked={workflowIcons} color="success"
                 icon={<Diversity2Outlined/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<Diversity2/>} onChange={handleWorkflowIconsCheck}/>
+                checkedIcon={<Diversity2/>} onChange={bindCheckbox(setWorkflowIcons)}/>
     </Tooltip>
     <Tooltip title="Text Chat">
-      <Checkbox checked={textChat} color="success"
+      <Checkbox checked={showChat} color="success"
                 icon={<SpeakerNotesOff/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<SpeakerNotes/>} onChange={handleTextChatCheck}/>
+                checkedIcon={<SpeakerNotes/>} onChange={bindCheckbox(setShowChat)}/>
     </Tooltip>
     <Tooltip title="Debug Overlay">
       <Checkbox checked={debugOverlay} color="success"
                 icon={<BugReportOutlined/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<BugReport/>} onChange={handleDebugCheck}/>
+                checkedIcon={<BugReport/>} onChange={bindCheckbox(setDebugOverlay)}/>
     </Tooltip>
     <Tooltip title="Auto Calibration">
       <Checkbox checked={autoCalibration} color="success"
                 icon={<SensorsOff/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<Sensors/>} onChange={handleAutoCalibrationCheck}/>
+                checkedIcon={<Sensors/>} onChange={bindCheckbox(setAutoCalibration)}/>
     </Tooltip>
     <Tooltip title="Punter Detection">
       <Checkbox checked={punterDetection} color="success"
                 icon={<SensorOccupiedOutlined/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<SensorOccupied/>} onChange={handlePunterDetectorCheck}/>
+                checkedIcon={<SensorOccupied/>} onChange={bindCheckbox(setPunterDetection)}/>
     </Tooltip>
     <Tooltip title="Punter Vision">
       <Checkbox checked={punterVision} color="success"
                 icon={<PersonOff/>} inputProps={{'aria-label': 'controlled'}}
-                checkedIcon={<Person/>} onChange={handlePunterVisionCheck}/>
+                checkedIcon={<Person/>} onChange={bindCheckbox(setPunterVision)}/>
     </Tooltip>
     <Tooltip title="Self-Portrait Analysis">
       <Checkbox checked={portraitAnalysis} color="success"
@@ -139,4 +122,4 @@ function SubsystemControls({
   </Box>
 }
 
-export {type SubsystemOptions, SubsystemControls};
+export {type SubsystemOptions, type SubsystemControlsProps, SubsystemControls};
