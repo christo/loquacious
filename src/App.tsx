@@ -219,7 +219,9 @@ const App: React.FC = () => {
   // SubsystemOptions
   const [debugOverlay, setDebugOverlay] = useState(true);
   const [punterDetection, setPunterDetection] = useState(true);
+  const [punterVision, setPunterVision] = useState(true);
   const [showChat, setShowChat] = useState(true);
+  const [autoCalibration, setAutoCalibration] = useState(true);
 
   const [people, setPeople] = useState<Detection[]>([]);
 
@@ -253,6 +255,8 @@ const App: React.FC = () => {
                      punterDetection={punterDetection} setPunterDetection={setPunterDetection}
                      debugOverlay={debugOverlay} setDebugOverlay={setDebugOverlay}
                      showChat={showChat} setShowChat={setShowChat}
+                     punterVision={punterVision} setPunterVision={setPunterVision}
+                     autoCalibration={autoCalibration} setAutoCalibration={setAutoCalibration}
         />
         {loading && <Spinner/>}
         <Box sx={{

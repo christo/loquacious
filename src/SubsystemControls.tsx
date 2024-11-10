@@ -30,13 +30,15 @@ const bindCheckbox =
  */
 interface SubsystemOptions {
   punterDetection: boolean;
-  setPunterDetection: (value: (((prevState: boolean) => boolean) | boolean)) => void;
+  setPunterDetection: StateSetter<boolean>;
   debugOverlay: boolean;
-  setDebugOverlay: (value: (((prevState: boolean) => boolean) | boolean)) => void;
+  setDebugOverlay: StateSetter<boolean>;
   showChat: boolean;
-  setShowChat: (value: (((prevState: boolean) => boolean) | boolean)) => void;
+  setShowChat: StateSetter<boolean>;
   punterVision: boolean;
-  setPunterVision: (value: (((prevState: boolean) => boolean) | boolean)) => void;
+  setPunterVision: StateSetter<boolean>;
+  autoCalibration: boolean;
+  setAutoCalibration: StateSetter<boolean>;
 }
 
 interface SubsystemControlsProps extends SubsystemOptions {
@@ -59,6 +61,8 @@ interface SubsystemControlsProps extends SubsystemOptions {
  * @param setShowChat setter for showChat
  * @param punterVision whether to use vision model to reason about detected users
  * @param setPunterVision setter for punterVision
+ * @param autoCalibration whether to automatically tune vision-based mode transition trigger conditions
+ * @param setAutoCalibration setter for autoCalibration
  */
 function SubsystemControls({
                              poseSystem,
@@ -67,10 +71,10 @@ function SubsystemControls({
                              debugOverlay, setDebugOverlay,
                              showChat, setShowChat,
                              punterVision, setPunterVision,
+                             autoCalibration, setAutoCalibration,
                            }: SubsystemControlsProps) {
 
   const [workflowIcons, setWorkflowIcons] = React.useState(false);
-  const [autoCalibration, setAutoCalibration] = React.useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
