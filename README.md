@@ -456,7 +456,7 @@ both local and as online API services.
 
 ## Future Ideas
 
-Not proper TODOs.
+The following are not proper TODOs.
 
 * possible whole-scene photo input from secondary camera (option)
   * it may help the LLM if it can see not only what it looks like but what
