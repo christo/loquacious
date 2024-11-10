@@ -1,6 +1,8 @@
 import {styled, TextField} from "@mui/material";
+import React from "react";
+import {StateSetter} from "./Utils.ts";
 
-export const ChatInput = styled(TextField)({
+const ChatInput = styled(TextField)({
   backgroundColor: "black",
   color: "white",
   '& .MuiOutlinedInput-input': {},
@@ -19,3 +21,29 @@ export const ChatInput = styled(TextField)({
     },
   },
 });
+
+interface ChatInputComponentProps {
+    inputRef: React.RefObject<HTMLDivElement>;
+    prompt: string;
+    loading: boolean;
+    handleSubmitKey: (event: React.KeyboardEvent<HTMLElement>) => void;
+    setPrompt: StateSetter<string>
+}
+
+function ChatInputComponent(props: ChatInputComponentProps) {
+  // TODO feels like this styled component is extraneous, at least this component belongs with it
+  return <ChatInput
+      ref={props.inputRef}
+      hiddenLabel
+      multiline
+      margin="none"
+      value={prompt}
+      maxRows={4}
+      {...{disabled: props.loading}}
+      fullWidth
+      onKeyDown={props.handleSubmitKey}
+      onChange={e => props.setPrompt(e.target.value)}
+  />;
+}
+
+export {ChatInputComponent, ChatInput};

@@ -5,7 +5,7 @@ import {Message} from "../server/src/domain/Message";
 import {type ImageInfo} from "../server/src/image/ImageInfo";
 import {SystemPanel} from "./SystemPanel.tsx";
 import {ChatContainer, ChatResponse} from "./ChatHistory.tsx";
-import {ChatInput} from "./ChatInput.tsx";
+import {ChatInputComponent} from "./ChatInput.tsx";
 import type {Dimension} from "../server/src/image/Dimension"
 import {Portrait} from "./Portrait.tsx";
 import {PoseSystem} from "./PoseSystem.ts";
@@ -127,7 +127,7 @@ const App: React.FC = () => {
   const [images, setImages] = useState<ImageInfo[]>([]);
   const [dimension, setDimension] = useState<Dimension | null>(null);
   const [portraitBaseUrl, setPortraitBaseUrl] = useState<string | null>(null);
-  const inputRef = useRef<HTMLDivElement>(null);
+  const inputRef: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
   useEffect(() => {
     try {
       fetch(`//${location.hostname}:${SERVER_PORT}/portraits`).then(result => {
@@ -279,17 +279,8 @@ const App: React.FC = () => {
             left: 0,
             zIndex: 100
           }}>
-            {showChat && <ChatInput
-                ref={inputRef}
-                hiddenLabel
-                multiline
-                margin="none"
-                value={prompt}
-                maxRows={4}
-                {...{disabled: loading}}
-                fullWidth
-                onKeyDown={handleSubmitKey}
-                onChange={e => setPrompt(e.target.value)}/>}
+            {showChat && <ChatInputComponent inputRef={inputRef} prompt={prompt} loading={loading}
+                                             handleSubmitKey={handleSubmitKey} setPrompt={setPrompt}/>}
 
           </Box>
         </Box>
