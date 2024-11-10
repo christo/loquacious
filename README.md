@@ -297,7 +297,10 @@ both local and as online API services.
 
 ## TODO
 
-* [ ] spike websocket - have more than one? keep existing endpoints for integration ease
+* [ ] spike websockets
+  * keep existing endpoints for integration ease
+  * one websocket for streaming bidirectional state updates (need appropriate protocol)
+  * one websocket for media streaming
 * [ ] add websocket streaming status updates so workflow orchestration status is visible via icons
 * [ ] shoot project status screencast
 * [ ] pose estimation and vision using mediapipe
@@ -310,15 +313,15 @@ both local and as online API services.
   * pose estimation on client - assumes stable camera (can we detect camera motion?)
   * [x] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect user
     approach
-  * detect when a person approaches, describe what they look like etc.
-  * detect if they are in an engaged mode or just looking
+  * [ ] detect when a person approaches, describe what they look like etc.
+  * [ ] object persistence tracking with inter-frame object detection matching 
+  * [ ] periodic pose estimation to detect mode state transitions
+  * ? detect if they are in an engaged mode or just looking
   * invite them to sit down and chat
-  * enter introductory mode
+  * enter introductions mode
   * on-demand camera contents description
-    * e.g. how many fingers am I holding up? (see gesture training mediapipe examples)
     * this is my friend jane (if multi-punter, how to know who is speaking!?)
     * does my ass look big in this
-  * periodic pose estimation to detect mode state transitions
   * pose estimation "auto calibration"
     * if camera moves or scene changes, need to mark engagement zone in
       camera field
