@@ -31,7 +31,6 @@ interface ChatInputComponentProps {
 }
 
 function ChatInputComponent(props: ChatInputComponentProps) {
-  // TODO feels like this styled component is extraneous, at least this component belongs with it
   return <ChatInput
       ref={props.inputRef}
       hiddenLabel
