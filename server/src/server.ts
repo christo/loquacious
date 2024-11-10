@@ -65,7 +65,7 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 const wsPort = parseInt(process.env.WEBSOCKET_PORT || "3002", 10);
-const streamServer = new StreamServer(app, wsPort);
+const streamServer = new StreamServer(app, wsPort, "http://localhost:5173"); // TODO remove hardcoding
 streamServer.boot();
 
 app.get("/portraits", async (_req: Request, res: Response) => {

@@ -1,6 +1,7 @@
 import {Server} from "socket.io";
 import {Express} from "express";
 import {createServer} from "http";
+import {WorkflowStep} from "./system/WorkflowStep";
 
 
 class StreamServer {
@@ -13,27 +14,24 @@ class StreamServer {
     }
     this.app = app;
     this.port = port;
-  }
-
-  boot() {
     console.log(`booting StreamServer on port ${this.port}`);
     const httpServer = createServer(this.app);
     // TODO set options like ping, timeout etc.
     const options = {
       cors: {
-        origin: "http://localhost:5173"   // TODO remove hardcoding
+        origin: corsOrigin
       }
     };
-    const io = new Server(httpServer, options);
+    this.io = new Server(httpServer, options);
 
-    io.on("connection", (socket) => {
+    this.io.on("connection", (socket) => {
       console.log(`a user connected on socket id ${socket.id}`);
       socket.on('disconnect', () => {
         console.log('user disconnected');
       });
     });
 
-    io.listen(this.port);
+    this.io.listen(this.port);
   }
 
 }
