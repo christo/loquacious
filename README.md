@@ -300,7 +300,7 @@ both local and as online API services.
     * [x] WasmFileset with base url in web app, use vite build step to copy npm dep from
       `node_modules` - check how vite lifecycle works here (plugin or ?)
   * [x] face estimation of portrait
-  * [ ] spike pose estimation and seamless audio/video streaming to server
+  * [ ] spike seamless audio/video streaming to server, simultaneous to client-side pose est.
   * pose estimation on client - assumes stable camera (can we detect camera motion?)
   * [x] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect user
     approach
