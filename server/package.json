@@ -25,13 +25,13 @@
     "openai": "^4.67.0",
     "pg": "^8.13.0",
     "sharp": "^0.33.5",
+    "socket.io": "^4.8.1",
     "undici": "^6.20.1"
   },
   "devDependencies": {
     "@swc/core": "^1.7.35",
     "@swc/helpers": "^0.5.13",
     "@types/cors": "^2.8.17",
-    "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.21",
     "@types/fluent-ffmpeg": "^2.1.26",
     "@types/node": "^22.7.5",
@@ -40,5 +40,9 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.6.3"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.8",
+    "utf-8-validate": "^6.0.5"
   }
 }

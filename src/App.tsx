@@ -12,10 +12,13 @@ import {PoseSystem} from "./PoseSystem.ts";
 import {poseConsumer, VideoCamera, VisionConsumer} from "./VideoCamera.tsx";
 import {Detection} from "@mediapipe/tasks-vision";
 import {Boy} from "@mui/icons-material";
+import { io } from "socket.io-client";
+
 
 const DEFAULT_PORTRAIT = 0;
 const SERVER_PORT = 3001;
 const poseSystem = new PoseSystem();
+const socket = io("ws://localhost:3002");
 
 type CompResponseProps = {
   response: ChatResponse,
@@ -112,14 +115,31 @@ function PunterDetectIcons({people}: { people: Detection[] }) {
       ;
 }
 
+const EMPTY_RESPONSE: ChatResponse = {
+  messages: [],
+  speech: undefined,
+  llm: undefined,
+  model: undefined,
+  lipsync: undefined,
+}
+
 const App: React.FC = () => {
-  const EMPTY_RESPONSE: ChatResponse = {
-    messages: [],
-    speech: undefined,
-    llm: undefined,
-    model: undefined,
-    lipsync: undefined,
-  }
+
+  socket.on("connect", () => {
+    console.log(`socket connect id ${socket.id}`); // x8WIv7-mJelg7on_ALbx
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`socket DISconnect`); // undefined
+  });
+
+  socket.on("connect_error", (error) => {
+    if (socket.active) {
+      console.log(`socket ${socket.id} connect error, not dead yet`);
+    } else {
+      console.log(`connection denied by server, requires manual reconnection: ${error.message}`);
+    }
+  });
 
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState<ChatResponse>(EMPTY_RESPONSE);

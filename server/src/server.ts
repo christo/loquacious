@@ -27,7 +27,9 @@ import LlmService from "./llm/LlmService";
 import {RunInfo} from "./domain/RunInfo";
 import {SystemSummary} from "./domain/SystemSummary";
 import {Dimension} from "./image/Dimension";
+import {StreamServer} from "./StreamServer";
 import Agent = Undici.Agent;
+
 
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
 
@@ -62,6 +64,9 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+const wsPort = parseInt(process.env.WEBSOCKET_PORT || "3002", 10);
+const streamServer = new StreamServer(app, wsPort);
+streamServer.boot();
 
 app.get("/portraits", async (_req: Request, res: Response) => {
   const exts = supportedImageTypes().flatMap(f => f.extensions).map(f => `.${f}`);
@@ -78,7 +83,7 @@ app.get("/portraits", async (_req: Request, res: Response) => {
 
 app.get("/portrait/:portraitname", async (req: Request, res: Response) => {
   const portraitname = req.params.portraitname;
-  // TODO finish implementation
+  // TODO finish implementation using req.sendFile
 })
 
 /**
