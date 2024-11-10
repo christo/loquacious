@@ -37,7 +37,7 @@ function ChatInputComponent(props: ChatInputComponentProps) {
       hiddenLabel
       multiline
       margin="none"
-      value={prompt}
+      value={props.prompt}
       maxRows={4}
       {...{disabled: props.loading}}
       fullWidth
