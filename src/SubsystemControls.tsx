@@ -17,13 +17,8 @@ import {
   SpeakerNotes,
   SpeakerNotesOff
 } from "@mui/icons-material";
+import {InputHandler, StateSetter} from "./Utils.ts";
 
-/**
- * Convenience alias for React useState setter function.
- */
-type StateSetter<T> = (value: (((prevState: T) => T) | T)) => void;
-
-type InputHandler = (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
 
 const bindCheckbox =
     (setter: StateSetter<boolean>): InputHandler =>
