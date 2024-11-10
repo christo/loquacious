@@ -10,6 +10,11 @@ type RunningMode = "IMAGE" | "VIDEO";
 
 const OBJ_PERSON = "person";
 
+/**
+ * Component responsible for low-latency client-side image analysis to determine camera-field contents focusing
+ * on people and self-image from analysing character portrait, anticipated to be a super-user runtime design
+ * workflow.
+ */
 class PoseSystem {
 
   /**
