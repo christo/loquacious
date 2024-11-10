@@ -1,13 +1,7 @@
 import Box from "@mui/material/Box";
 import {PoseSystem} from "./PoseSystem.ts";
 import {MutableRefObject, useEffect, useRef, useState} from "react";
-import {Typography} from "@mui/material";
 import {Detection} from "@mediapipe/tasks-vision";
-
-interface VideoCameraProps {
-  poseSystem: PoseSystem
-}
-
 
 /**
  * A predicate for a {@link Detection} that return true iff the
@@ -98,7 +92,7 @@ function VideoCamera({consumers}: { consumers: VisionConsumer[] }) {
 function poseConsumer(poseSystem: PoseSystem, setPeople: (d: Detection[]) => void) {
   return {
     async consumeImage(image: HTMLImageElement): Promise<void> {
-      const od =  await poseSystem.personDetect("VIDEO");
+      const od = await poseSystem.personDetect("VIDEO");
       const detections = od.detect(image)
       const ds = detections.detections;
       setPeople(ds);
@@ -113,63 +107,4 @@ function poseConsumer(poseSystem: PoseSystem, setPeople: (d: Detection[]) => voi
   } as VisionConsumer;
 }
 
-function VideoCameraBridge({poseSystem}: VideoCameraProps) {
-  const [people, setPeople] = useState<Detection[]>([]);
-  const pc = poseConsumer(poseSystem, setPeople);
-  return <Box sx={{justifyItems: "center", flexDirection: "column"}}>
-    <Typography variant="h1"
-                sx={{fontWeight: 800, textShadow: "0 0 10px rgba(0, 0, 0, 0.8)"}}>{people?.length}</Typography>
-    <VideoCamera consumers={[pc]}/>
-  </Box>
-}
-
-/**
- * @deprecated use {@link VideoCamera}
- * @param poseSystem
- */
-function VideoCameraOld({poseSystem}: VideoCameraProps) {
-  const [people, setPeople] = useState<Detection[]>([]);
-  const [lastVideoTime, setLastVideoTime] = useState(-1);
-  const camRef: MutableRefObject<HTMLVideoElement | null> = useRef(null);
-  useEffect(() => {
-    console.log("VideoCamera calling useEffect()")
-    poseSystem.personDetect("VIDEO").then(od => {
-      if (camRef.current !== null) {
-
-        async function readVideoFrame() {
-          let startTimeMs = performance.now();
-          if (camRef.current!.currentTime !== lastVideoTime) {
-            setLastVideoTime(camRef.current!.currentTime);
-            const detections = od.detectForVideo(camRef.current!, startTimeMs);
-            //console.log(detections.detections.length);
-            const ds = detections.detections;
-            // const close = ds.filter(closePeople);
-            setPeople(ds);
-          }
-          window.requestAnimationFrame(readVideoFrame);
-        }
-
-        // seemingly need to attach video stream to an html element which probably binds to gpu context
-        // and enables gpu model to access the video frame
-        navigator.mediaDevices.getUserMedia({video: true})
-            .then(function (stream) {
-              camRef.current!.srcObject = stream;
-              camRef.current!.addEventListener("loadeddata", readVideoFrame);
-            })
-            .catch((err) => {
-              // camRef will simply not be set
-              console.error(`webcam error: `, err);
-            });
-      }
-    });
-  }, []);
-
-  return <Box sx={{mb: 150, justifyItems: "center", flexDirection: "column"}}>
-    {people.length > 0 && <Typography variant="h1" sx={{fontWeight: 800}}>HELLO {people.length}</Typography>}
-    <Box sx={{visibility: "hidden"}}>
-      <video ref={camRef} autoPlay playsInline></video>
-    </Box>
-  </Box>
-}
-
-export {VideoCameraOld, VideoCamera, VideoCameraBridge, poseConsumer, type VisionConsumer, type VideoCameraProps};
+export {VideoCamera, poseConsumer, type VisionConsumer};
