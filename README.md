@@ -293,6 +293,7 @@ both local and as online API services.
 
 ## TODO
 
+* [ ] spike websocket - have more than one? keep existing endpoints for integration ease
 * [ ] add websocket streaming status updates so workflow orchestration status is visible via icons
 * [ ] pose estimation and vision using mediapipe
   * [x] pose estimation of portrait
@@ -309,11 +310,11 @@ both local and as online API services.
   * invite them to sit down and chat
   * enter introductory mode
   * on-demand camera contents description
-    * how many fingers am I holding up?
-    * this is my friend jane
+    * e.g. how many fingers am I holding up? (see gesture training mediapipe examples) 
+    * this is my friend jane (if multi-punter, how to know who is speaking!?)
     * does my ass look big in this
   * periodic pose estimation to detect mode state transitions
-  * pose estimation calibration
+  * pose estimation "auto calibration"
     * if camera moves or scene changes, need to mark engagement zone in
       camera field
     * lighting
