@@ -43,7 +43,6 @@ interface SubsystemOptions {
 }
 
 interface SubsystemControlsProps extends SubsystemOptions {
-  // TODO untangle this, shouldn't be an "override"
   poseSystem: PoseSystem,
   imgRef: React.MutableRefObject<HTMLImageElement | null>,
 }
