@@ -4,6 +4,10 @@ import type {ChatResult, Llm} from "./Llm";
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 import Model = OpenAI.Model;
 
+const CANNOT_DO_SYSTEM_PROMPT = [
+  "o1preview"
+]
+
 /**
  * OpenAI LLM Backend
  */
@@ -27,10 +31,12 @@ class OpenAiLlm implements Llm {
   }
 
   async setCurrentOption(value: string): Promise<void> {
+    if (CANNOT_DO_SYSTEM_PROMPT.includes(value)) {
+      return Promise.reject(`${value} cannot do a system prompt`);
+    }
     const models = await this.models();
     for (let i = 0; i < models.length; i++) {
       if (models[i].id === value) {
-        // TODO filter out available models that are incapable of working with a system prompt
         this.model = value;
         console.log(`${this.name}: setting model to ${value}`);
         return Promise.resolve();
@@ -41,7 +47,7 @@ class OpenAiLlm implements Llm {
 
   async models(): Promise<Array<Model>> {
     let modelsPage = await this.openai.models.list();
-    return modelsPage.data as Array<Model>;
+    return modelsPage.data.filter(m => !CANNOT_DO_SYSTEM_PROMPT.includes(m.id)) as Array<Model>;
   }
 
   async chat(messages: Array<ChatCompletionMessageParam>): Promise<ChatResult> {
