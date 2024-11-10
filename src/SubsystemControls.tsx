@@ -26,7 +26,7 @@ const bindCheckbox =
 
 
 /**
- * Options with their {@link StateSetter StateSetters}.
+ * Options - boolean React States - with their {@link StateSetter StateSetters}.
  */
 interface SubsystemOptions {
   punterDetection: boolean;
@@ -40,6 +40,7 @@ interface SubsystemOptions {
 }
 
 interface SubsystemControlsProps extends SubsystemOptions {
+  // TODO untangle this, shouldn't be an "override"
   poseSystem: PoseSystem,
   imgRef: React.MutableRefObject<HTMLImageElement | null>,
 }
