@@ -30,8 +30,8 @@ AI face-to-face fortune teller chat experiment.
     approaching users
   * Fortune teller self-portrait is mapped for facial landmarks to enable
     scaling and reframing portraits to be better suited for lipync video
-    generation. These portraits will be uploadable or ai-generated at some
-    point.
+    generation. These portraits will be uploadable or integrated with gen-ai
+    at some point.
 * Audio input streaming is not currently implemented, nor is Speech To Text
   (STT), vision via image-to-text.
   The user can currently type text into a chat-like text box and the
