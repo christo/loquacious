@@ -23,6 +23,7 @@ type CompResponseProps = {
   videoRef: MutableRefObject<HTMLVideoElement | null>,
   hideVideo: () => void;
   showVideo: () => void;
+  showChat: boolean;
 }
 
 /**
@@ -31,9 +32,10 @@ type CompResponseProps = {
  * @param videoRef
  * @param hideVideo
  * @param showVideo
+ * @param showChat
  * @constructor
  */
-function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponseProps) {
+function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: CompResponseProps) {
   const video = response.lipsync?.videoPath;
   const speech = response.speech;
   // TODO test lipsync and speech without video
@@ -75,8 +77,11 @@ function CompResponse({response, videoRef, hideVideo, showVideo}: CompResponsePr
       }
     }
   }, [response])
-
-  return <ChatContainer messages={response.messages}/>;
+  if (showChat) {
+    return <ChatContainer messages={response.messages}/>;
+  } else {
+    return null;
+  }
 }
 
 const Spinner = () => {
@@ -93,8 +98,8 @@ const Spinner = () => {
                            }}/>;
 }
 
-function PunterDetectIcons({people}:{people: Detection[]}) {
-  return  <Stack sx={{justifyItems: "end"}}>
+function PunterDetectIcons({people}: { people: Detection[] }) {
+  return <Stack sx={{justifyItems: "end"}}>
     {people?.map((_: Detection, i: number) => {
       return <Boy
           key={`dpersoni_${i}`}
@@ -260,7 +265,7 @@ const App: React.FC = () => {
           overflow: "clip"
         }}>
           <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
-                        hideVideo={hideVideo}/>
+                        hideVideo={hideVideo} showChat={showChat}/>
 
           { // TODO change to punterDetection && debugOverlay (?) setting
             (punterDetection && debugOverlay && <PunterDetectIcons people={people}/>)
@@ -274,7 +279,7 @@ const App: React.FC = () => {
             left: 0,
             zIndex: 100
           }}>
-            <ChatInput
+            {showChat && <ChatInput
                 ref={inputRef}
                 hiddenLabel
                 multiline
@@ -284,7 +289,8 @@ const App: React.FC = () => {
                 {...{disabled: loading}}
                 fullWidth
                 onKeyDown={handleSubmitKey}
-                onChange={e => setPrompt(e.target.value)}/>
+                onChange={e => setPrompt(e.target.value)}/>}
+
           </Box>
         </Box>
       </Box>
