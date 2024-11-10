@@ -24,7 +24,6 @@ const bindCheckbox =
     (setter: StateSetter<boolean>): InputHandler =>
         async (e) => setter(e.target.checked);
 
-
 /**
  * Options - boolean React States - with their {@link StateSetter StateSetters}.
  */
@@ -48,7 +47,6 @@ interface SubsystemControlsProps extends SubsystemOptions {
   poseSystem: PoseSystem,
   imgRef: React.MutableRefObject<HTMLImageElement | null>,
 }
-
 
 /**
  * Controls for turning on or off subsystem capabilities.
@@ -78,7 +76,6 @@ function SubsystemControls({
                              autoCalibration, setAutoCalibration,
                              workflowIcons, setWorkflowIcons,
                            }: SubsystemControlsProps) {
-
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
