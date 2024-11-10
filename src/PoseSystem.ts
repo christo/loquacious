@@ -39,7 +39,6 @@ class PoseSystem {
   /**
    * Detects people in the frame of the given vision input.
    * @param runningMode
-   * @param canvas the canvas to bind to
    */
   async personDetect(runningMode: RunningMode): Promise<ObjectDetector> {
     // models downloaded from https://ai.google.dev/edge/mediapipe/solutions/vision/object_detector
@@ -173,7 +172,7 @@ class PoseSystem {
   }
 
   /**
-   * Attaches the standard pose markers to the given image at the given zIndex, calling the given callback
+   * Attaches the standard body pose markers to the given image at the given zIndex, calling the given callback
    * with the resulting appended canvas so the caller can remove it whenever.
    * @param image the image to attach to
    * @param zIndex zIndex of the canvas
