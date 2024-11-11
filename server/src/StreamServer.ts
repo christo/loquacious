@@ -40,6 +40,10 @@ class StreamServer {
     this.io.emit("workflow", workflow);
   }
 
+  error(mesg: string) {
+    this.io.emit("loq_error", mesg);
+  }
+
 }
 
 export {StreamServer};

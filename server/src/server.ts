@@ -36,7 +36,7 @@ setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
 // Load environment variables
 dotenv.config();
 
-const BASE_WEB_ROOT = "../public"
+const BASE_WEB_ROOT = "../public";
 /** file path relative to server module root */
 const BASE_PATH_PORTRAIT = `${BASE_WEB_ROOT}/img`;
 const PORTRAIT_DIMS: Dimension[] = [
@@ -46,14 +46,14 @@ const PORTRAIT_DIMS: Dimension[] = [
 const dimIndex = 0;
 const portraitBaseUrl = () => `/img/${PORTRAIT_DIMS[dimIndex].width}x${PORTRAIT_DIMS[dimIndex].height}`;
 const pathPortrait = () => `${BASE_WEB_ROOT}${portraitBaseUrl()}`;
-console.log(`path portrait: ${pathPortrait()}`)
+console.log(`path portrait: ${pathPortrait()}`);
 
 if (!process.env.DATA_DIR) {
   console.error("ensure environment variable DATA_DIR is set");
 }
 const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 
-const llms = new LlmService()
+const llms = new LlmService();
 const speechSystems = new SpeechSystems(PATH_BASE_DATA);
 const animators = new AnimatorServices(PATH_BASE_DATA);
 const modes = new Modes();
@@ -80,10 +80,11 @@ app.get("/portraits", async (_req: Request, res: Response) => {
   });
 });
 
-app.get("/portrait/:portraitname", async (req: Request, res: Response) => {
-  const portraitname = req.params.portraitname;
+app.get("/portrait/:portraitname", async (req: Request, _res: Response) => {
+  // noinspection JSUnusedLocalSymbols
+  const _portraitname = req.params.portraitname;
   // TODO finish implementation using req.sendFile
-})
+});
 
 /**
  * Modify current system settings - body should be partial SystemSummary.
@@ -195,11 +196,11 @@ app.get('/session', async (_req: Request, res: Response) => {
   } catch (e) {
     res.status(404).json({message: "no current session"}).end();
   }
-})
+});
 
 app.get('/api/chat', async (_req: Request, res: Response) => {
   await failable(res, "get chat", async () => {
-    const session = await getOrCreateSession()
+    const session = await getOrCreateSession();
     const messages = await db.getSessionMessages(session);
     res.json({
       response: {
@@ -228,8 +229,9 @@ const failable = async (res: Response, name: string, thunk: () => Promise<void>)
     const msg = `${name} failed`;
     console.error(msg, e);
     res.status(500).json({error: msg}).end();
+    streamServer.error(msg);
   }
-}
+};
 
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
@@ -242,7 +244,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     streamServer.workflow("llm_request");
     await failable(res, "loquacious chat", async () => {
       const currentLlm = llms.current();
-      const currentModel = await currentLlm.currentModel()
+      const currentModel = await currentLlm.currentModel();
       const currentSpeech = speechSystems.current();
       const currentAnimator = animators.current();
       const buildResponse = (messages: Message[], speechFilePath?: string, lipsyncResult?: LipSyncResult) => ({

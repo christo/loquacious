@@ -1,4 +1,4 @@
-import {Box, CircularProgress, Stack} from "@mui/material";
+import {Box} from "@mui/material";
 import React, {type MutableRefObject, useEffect, useRef, useState} from 'react';
 import "./App.css";
 import {Message} from "../server/src/domain/Message";
@@ -11,18 +11,9 @@ import {Portrait} from "./Portrait.tsx";
 import {PoseSystem} from "./PoseSystem.ts";
 import {poseConsumer, VideoCamera, VisionConsumer} from "./VideoCamera.tsx";
 import {Detection} from "@mediapipe/tasks-vision";
-import {Boy} from "@mui/icons-material";
 import {io} from "socket.io-client";
 import {WorkflowStep} from "../server/src/system/WorkflowStep.ts";
-import SvgIcon from '@mui/material/SvgIcon';
-import SocketConnectSigil from './icons/ouroboros-svgrepo-com.svg?react';
-import IdleSigil from './icons/prayer-svgrepo-com.svg?react';
-import LlmRequestSigil from './icons/quill-svgrepo-com.svg?react';
-import LlmResponseSigil from './icons/book-cover-svgrepo-com.svg?react';
-import TtsRequestSigil from './icons/sprout-svgrepo-com.svg?react';
-import TtsResponseSigil from './icons/spoted-flower-svgrepo-com.svg?react';
-import LipsyncRequestSigil from './icons/octopus-svgrepo-com.svg?react';
-import LipsyncResponseSigil from './icons/android-mask-svgrepo-com.svg?react';
+import {Sigils} from "./Sigils.tsx";
 
 const DEFAULT_PORTRAIT = 0;
 const SERVER_PORT = 3001;
@@ -79,7 +70,6 @@ function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: Comp
           });
         });
       } else if (response.llm) {
-        // no llm no response at all
         console.log("no speech or video in response");
       }
     }
@@ -91,80 +81,7 @@ function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: Comp
   }
 }
 
-function PunterDetectIcons({people, sx}: { people: Detection[], sx: any }) {
-
-  return <Stack gap={0}>
-    {people?.map((_: Detection, i: number) => {
-      return <Boy
-          key={`dprsn_${i}`}
-          color="warning"
-          fontSize="large"
-          sx={sx}
-      />;
-    })}
-  </Stack>;
-}
-
-function WorkflowIcons(props: { step: WorkflowStep, sx: any }) {
-
-  /*
-  need icons for each
-  "lipsync_request" |
-  "lipsync_response"
-   */
-  return <Stack gap={1} sx={{alignItems: "center"}} >
-    {props.step}
-    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-      <SocketConnectSigil />
-    </SvgIcon>
-    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-      <IdleSigil />
-    </SvgIcon>
-    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-      <LlmRequestSigil />
-    </SvgIcon>
-    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-      <LlmResponseSigil />
-    </SvgIcon>
-    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-      <TtsRequestSigil />
-    </SvgIcon>
-    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-      <TtsResponseSigil />
-    </SvgIcon>
-    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-      <LipsyncRequestSigil />
-    </SvgIcon>
-    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-      <LipsyncResponseSigil />
-    </SvgIcon>
-  </Stack>;
-}
-
-interface ActivityIconsParams {
-    loading: boolean;
-    punterDetection: boolean;
-    debugOverlay: boolean;
-    people: Detection[];
-    workflow: WorkflowStep
-};
-
-/**
- * Region of UI where activity icons appear.
- */
-function ActivityIcons(props: ActivityIconsParams) {
-  const shadowColour="rgba(30, 30, 0, 0.4)";
-  const dropShadow = {p: 0, m: 1,
-    backgroundColor: shadowColour,
-    borderRadius: "100%",
-    boxShadow: `0 0 10px 10px ${shadowColour}`,
-  };
-  return <Stack gap={1} alignItems="end" sx={{position: "absolute", top: 50, right: 50, zIndex: 800}}>
-    <CircularProgress size="2rem" color="warning" sx={{opacity: !props.loading ? 1.0 : 0, ...dropShadow}}/>
-    <WorkflowIcons step={props.workflow} sx={dropShadow}/>
-    {(props.punterDetection && props.debugOverlay && <PunterDetectIcons people={props.people} sx={dropShadow}/>)}
-  </Stack>;
-}
+;
 
 const EMPTY_RESPONSE: ChatResponse = {
   messages: [],
@@ -177,17 +94,21 @@ const EMPTY_RESPONSE: ChatResponse = {
 const App: React.FC = () => {
 
   const [workflow, setWorkflow] = useState<WorkflowStep>("idle");
+  const [socketConnected, setSocketConnected] = useState(false);
 
   useEffect(() => {
 
     const socket = io("ws://localhost:3002");
     socket.on("connect", () => {
+      setSocketConnected(true);
       console.log(`socket connect id ${socket!.id}`);
     });
     socket.on("disconnect", () => {
+      setSocketConnected(false);
       console.log(`socket DISconnect`);
     });
     socket.on("connect_error", (error) => {
+      setSocketConnected(socket.active);
       if (socket.active) {
         //console.log(`socket ${socket.id} connect error, not dead yet`);
       } else {
@@ -196,7 +117,12 @@ const App: React.FC = () => {
     });
     socket.on("workflow", (args: any) => {
       console.log(`socket workflow ${args}`);
+      setSocketConnected(true);
       setWorkflow(args as WorkflowStep);
+    });
+    socket.on("loq_error", (args: any) => {
+      setWorkflow("idle");
+      console.log(`loq error ${args}`);
     });
 
   }, []);
@@ -287,6 +213,7 @@ const App: React.FC = () => {
       videoRef.current.style.transition = "opacity: 1.5s ease-in-out"; // TODO why not works!
       videoRef.current.style.opacity = "0";
     }
+    setWorkflow("idle");
   };
 
   // SubsystemOptions
@@ -295,7 +222,7 @@ const App: React.FC = () => {
   const [punterVision, setPunterVision] = useState(true);
   const [showChat, setShowChat] = useState(true);
   const [autoCalibration, setAutoCalibration] = useState(true);
-  const [workflowIcons, setWorkflowIcons] = React.useState(true);
+  const [workflowSigils, setWorkflowSigils] = React.useState(true);
 
   const [people, setPeople] = useState<Detection[]>([]);
 
@@ -331,9 +258,9 @@ const App: React.FC = () => {
                      showChat={showChat} setShowChat={setShowChat}
                      punterVision={punterVision} setPunterVision={setPunterVision}
                      autoCalibration={autoCalibration} setAutoCalibration={setAutoCalibration}
-                     workflowIcons={workflowIcons} setWorkflowIcons={setWorkflowIcons}
+                     workflowIcons={workflowSigils} setWorkflowIcons={setWorkflowSigils}
         />
-        <ActivityIcons debugOverlay={debugOverlay} workflow={workflow} people={people} loading={loading} punterDetection={punterDetection}/>
+        <Sigils workflowSigils={workflowSigils} socketConnected={socketConnected} debugOverlay={debugOverlay} workflow={workflow} people={people} loading={loading} punterDetection={punterDetection}/>
 
         <VideoCamera consumers={visionConsumers}/>
         <Box sx={{
