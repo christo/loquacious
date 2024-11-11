@@ -67,8 +67,7 @@ function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: Comp
       if (speech) {
         // no video, only speech
         fetchMedia("audio", blob => {
-          const audioUrl = URL.createObjectURL(blob);
-          const audio = new Audio(audioUrl);
+          const audio = new Audio(URL.createObjectURL(blob));
           audio.play().catch(reason => {
             console.error("Audio play failure", reason)
           });
