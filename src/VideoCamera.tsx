@@ -101,7 +101,7 @@ function poseConsumer(poseSystem: PoseSystem, setPeople: (d: Detection[]) => voi
   return {
     async consumeImage(image: HTMLImageElement): Promise<void> {
       const od = await poseSystem.personDetect("VIDEO");
-      const detections = od.detect(image)
+      const detections = od.detect(image);
       const ds = detections.detections;
       setPeople(ds);
       return Promise.resolve();
