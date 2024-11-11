@@ -53,7 +53,9 @@ type VisionConsumer = {
 }
 
 /**
- * Single on-page video camera component that subscribed to by the given consumers.
+ * Single on-page video camera component subscribed to by the given consumers.
+ * Expected consumers include client-side ai models for vision and streaming to server, depending on settings
+ * and current state.
  * @param consumers each will be passed the video on each frame update.
  */
 function VideoCamera({consumers}: { consumers: VisionConsumer[] }) {
