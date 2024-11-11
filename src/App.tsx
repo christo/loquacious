@@ -77,7 +77,7 @@ function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: Comp
         console.log("no speech or video in response");
       }
     }
-  }, [response])
+  }, [response]);
   if (showChat) {
     return <ChatContainer messages={response.messages}/>;
   } else {
