@@ -48,8 +48,8 @@ TODO: investigate "scene change" and "camera move" detection using vision-enable
  */
 
 type VisionConsumer = {
-  consumeVideo: (video: HTMLVideoElement, startTimeMs: number, deltaMs: number) => Promise<void>,
-  consumeImage: (image: HTMLImageElement) => Promise<void>,
+  video: (video: HTMLVideoElement, startTimeMs: number, deltaMs: number) => Promise<void>,
+  image: (image: HTMLImageElement) => Promise<void>,
 }
 
 /**
@@ -71,7 +71,7 @@ function VideoCamera({consumers}: { consumers: VisionConsumer[] }) {
         let startTimeMs = performance.now();
         if (camRef.current!.currentTime !== lastVideoTime) {
           setLastVideoTime(camRef.current!.currentTime);
-          await Promise.all(consumers.map(c => c.consumeVideo(camRef.current!, startTimeMs, startTimeMs - lastVideoTime)));
+          await Promise.all(consumers.map(c => c.video(camRef.current!, startTimeMs, startTimeMs - lastVideoTime)));
         }
         window.requestAnimationFrame(readVideoFrame);
       }
@@ -92,25 +92,33 @@ function VideoCamera({consumers}: { consumers: VisionConsumer[] }) {
   // we seemingly need to attach camera video stream to an on-page html element probably so it binds to gpu context
   // enabling gpu ai model direct access to the video frame, it can be hidden:
   // {display: none} breaks it but {visibility: hidden} does not
-  return <Stack sx={{border: "purple dotted thick", position: "absolute", bottom: 100, right: 100, visibility: "visible", mb: 150, justifyItems: "center"}}>
+  return <Stack sx={{position: "absolute", top: 0, right: 0, visibility: "hidden"}}>
     <video ref={camRef} autoPlay playsInline></video>
-  </Stack>
+  </Stack>;
 }
 
+/**
+ * How long between person detections.
+ */
+const PERIOD_DETECT_PERSON_MS = 2000;
+
 function poseConsumer(poseSystem: PoseSystem, setPeople: (d: Detection[]) => void) {
+  let lastPeopleUpdate = 0;
   return {
-    async consumeImage(image: HTMLImageElement): Promise<void> {
+    async image(image: HTMLImageElement): Promise<void> {
       const od = await poseSystem.personDetect("VIDEO");
       const detections = od.detect(image);
       const ds = detections.detections;
       setPeople(ds);
       return Promise.resolve();
     },
-    async consumeVideo(video: HTMLVideoElement, startTimeMs: number, _deltaMs: number): Promise<void> {
-      const od = await poseSystem.personDetect("VIDEO");
-      const detections = od.detectForVideo(video, startTimeMs);
-      const ds = detections.detections;
-      setPeople(ds);
+    async video(video: HTMLVideoElement, startTimeMs: number, _deltaMs: number): Promise<void> {
+      if (Date.now() - lastPeopleUpdate > PERIOD_DETECT_PERSON_MS) {
+        const od = await poseSystem.personDetect("VIDEO");
+        const detections = od.detectForVideo(video, startTimeMs);
+        const ds = detections.detections;
+        setPeople(ds);
+      }
     }
   } as VisionConsumer;
 }

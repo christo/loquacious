@@ -1,4 +1,4 @@
-import {Box, CircularProgress, Stack, Typography} from "@mui/material";
+import {Box, CircularProgress, Stack} from "@mui/material";
 import React, {type MutableRefObject, useEffect, useRef, useState} from 'react';
 import "./App.css";
 import {Message} from "../server/src/domain/Message";
@@ -15,8 +15,14 @@ import {Boy} from "@mui/icons-material";
 import {io} from "socket.io-client";
 import {WorkflowStep} from "../server/src/system/WorkflowStep.ts";
 import SvgIcon from '@mui/material/SvgIcon';
-import Mask from './icons/android-mask-svgrepo-com.svg?react';
-import Oroburos from './icons/ouroboros-svgrepo-com.svg?react';
+import SocketConnectSigil from './icons/ouroboros-svgrepo-com.svg?react';
+import IdleSigil from './icons/prayer-svgrepo-com.svg?react';
+import LlmRequestSigil from './icons/quill-svgrepo-com.svg?react';
+import LlmResponseSigil from './icons/book-cover-svgrepo-com.svg?react';
+import TtsRequestSigil from './icons/sprout-svgrepo-com.svg?react';
+import TtsResponseSigil from './icons/spoted-flower-svgrepo-com.svg?react';
+import LipsyncRequestSigil from './icons/octopus-svgrepo-com.svg?react';
+import LipsyncResponseSigil from './icons/android-mask-svgrepo-com.svg?react';
 
 const DEFAULT_PORTRAIT = 0;
 const SERVER_PORT = 3001;
@@ -86,11 +92,11 @@ function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: Comp
 }
 
 function PunterDetectIcons({people, sx}: { people: Detection[], sx: any }) {
-  return <Stack sx={{border: "yellow dotted thick", width: 50, alignItems: "center"}}>
-    <Typography>{people.length}</Typography>
+
+  return <Stack gap={0}>
     {people?.map((_: Detection, i: number) => {
       return <Boy
-          key={`dpersoni_${i}`}
+          key={`dprsn_${i}`}
           color="warning"
           fontSize="large"
           sx={sx}
@@ -100,13 +106,37 @@ function PunterDetectIcons({people, sx}: { people: Detection[], sx: any }) {
 }
 
 function WorkflowIcons(props: { step: WorkflowStep, sx: any }) {
+
+  /*
+  need icons for each
+  "lipsync_request" |
+  "lipsync_response"
+   */
   return <Stack gap={1} sx={{alignItems: "center"}} >
     {props.step}
     <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-      <Oroburos />
+      <SocketConnectSigil />
     </SvgIcon>
     <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-      <Mask />
+      <IdleSigil />
+    </SvgIcon>
+    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
+      <LlmRequestSigil />
+    </SvgIcon>
+    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
+      <LlmResponseSigil />
+    </SvgIcon>
+    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
+      <TtsRequestSigil />
+    </SvgIcon>
+    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
+      <TtsResponseSigil />
+    </SvgIcon>
+    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
+      <LipsyncRequestSigil />
+    </SvgIcon>
+    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
+      <LipsyncResponseSigil />
     </SvgIcon>
   </Stack>;
 }
@@ -123,13 +153,13 @@ interface ActivityIconsParams {
  * Region of UI where activity icons appear.
  */
 function ActivityIcons(props: ActivityIconsParams) {
-  const shadowColour="rgba(40, 40, 0, 0.6)";
+  const shadowColour="rgba(30, 30, 0, 0.4)";
   const dropShadow = {p: 0, m: 1,
     backgroundColor: shadowColour,
     borderRadius: "100%",
-    boxShadow: `0 0 18px 10px ${shadowColour}`,
+    boxShadow: `0 0 10px 10px ${shadowColour}`,
   };
-  return <Stack gap={1} alignItems="center" sx={{position: "absolute", top: 50, right: 50, zIndex: 800}}>
+  return <Stack gap={1} alignItems="end" sx={{position: "absolute", top: 50, right: 50, zIndex: 800}}>
     <CircularProgress size="2rem" color="warning" sx={{opacity: !props.loading ? 1.0 : 0, ...dropShadow}}/>
     <WorkflowIcons step={props.workflow} sx={dropShadow}/>
     {(props.punterDetection && props.debugOverlay && <PunterDetectIcons people={props.people} sx={dropShadow}/>)}
@@ -170,7 +200,6 @@ const App: React.FC = () => {
     });
 
   }, []);
-
 
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState<ChatResponse>(EMPTY_RESPONSE);
