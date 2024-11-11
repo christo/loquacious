@@ -1,7 +1,7 @@
-import Box from "@mui/material/Box";
 import {PoseSystem} from "./PoseSystem.ts";
 import {MutableRefObject, useEffect, useRef, useState} from "react";
 import {Detection} from "@mediapipe/tasks-vision";
+import {Stack} from "@mui/material";
 
 // noinspection JSUnusedLocalSymbols
 /**
@@ -85,12 +85,12 @@ function VideoCamera({consumers}: { consumers: VisionConsumer[] }) {
           });
     }
   }, []);
-
-  return <Box sx={{mb: 150, justifyItems: "center", flexDirection: "column"}}>
-    <Box sx={{visibility: "hidden"}}>
-      <video ref={camRef} autoPlay playsInline></video>
-    </Box>
-  </Box>
+  // we seemingly need to attach camera video stream to an on-page html element probably so it binds to gpu context
+  // enabling gpu ai model direct access to the video frame, it can be hidden:
+  // {display: none} breaks it but {visibility: hidden} does not
+  return <Stack sx={{visibility: "hidden", mb: 150, justifyItems: "center"}}>
+    <video ref={camRef} autoPlay playsInline></video>
+  </Stack>
 }
 
 function poseConsumer(poseSystem: PoseSystem, setPeople: (d: Detection[]) => void) {
