@@ -248,6 +248,7 @@ const App: React.FC = () => {
   if (punterDetection) {
     tempVc.push(poseConsumer(poseSystem, setPeople));
   }
+  // TODO add audio level monitor VisionConsumer
   // TODO add each consumer based on config
 
   // @ts-ignore
