@@ -53,8 +53,7 @@ function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: Comp
     }).then(handleBlob).catch(error => {
       console.error('Fetch-o-Error:', error);
     });
-  }
-
+  };
   useEffect(() => {
     if (video) {
       fetchMedia("video", blob => {
