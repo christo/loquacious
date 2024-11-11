@@ -78,8 +78,10 @@ function VideoCamera({consumers}: { consumers: VisionConsumer[] }) {
 
       navigator.mediaDevices.getUserMedia({video: true, audio: true})
           .then(function (stream) {
-            camRef.current!.srcObject = stream;
-            camRef.current!.addEventListener("loadeddata", readVideoFrame);
+            if (camRef.current) {
+              camRef.current.srcObject = stream;
+              camRef.current.addEventListener("loadeddata", readVideoFrame);
+            }
           })
           .catch((err) => {
             // camRef will simply not be set
