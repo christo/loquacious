@@ -304,12 +304,13 @@ both local and as online API services.
 
 ## TODO
 
-* [ ] spike websockets
+* [x] spike websockets
   * keep existing endpoints for integration ease
   * one websocket for streaming bidirectional state updates (need appropriate protocol)
   * one websocket for media streaming
 * [ ] add websocket streaming status updates so workflow orchestration status is visible via icons
 * [ ] shoot project status screencast
+* [ ] test lipsync and speech with failed/disabled video - should play audio keeping image portrait
 * [ ] pose estimation and vision using mediapipe
   * [x] pose estimation of portrait
   * [x] download all mediapipe resources for offline operation
@@ -320,7 +321,10 @@ both local and as online API services.
   * pose estimation on client - assumes stable camera (can we detect camera motion?)
   * [x] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect user
     approach
+  * [ ] person object identity persistence (distinguish same vs new person present)
+    * see comment in `VideoCamera.tsx`
   * [ ] detect when a person approaches, describe what they look like etc.
+    * distinguish presence vs approach over time
   * [ ] object persistence tracking with inter-frame object detection matching 
   * [ ] periodic pose estimation to detect mode state transitions
   * ? detect if they are in an engaged mode or just looking
