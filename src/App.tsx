@@ -1,5 +1,5 @@
-import {Box, CircularProgress, Stack} from "@mui/material";
-import React, {KeyboardEventHandler, type MutableRefObject, useEffect, useRef, useState} from 'react';
+import {Box, CircularProgress, Stack, Typography} from "@mui/material";
+import React, {type MutableRefObject, useEffect, useRef, useState} from 'react';
 import "./App.css";
 import {Message} from "../server/src/domain/Message";
 import {type ImageInfo} from "../server/src/image/ImageInfo";
@@ -12,13 +12,15 @@ import {PoseSystem} from "./PoseSystem.ts";
 import {poseConsumer, VideoCamera, VisionConsumer} from "./VideoCamera.tsx";
 import {Detection} from "@mediapipe/tasks-vision";
 import {Boy} from "@mui/icons-material";
-import { io } from "socket.io-client";
-
+import {io} from "socket.io-client";
+import {WorkflowStep} from "../server/src/system/WorkflowStep.ts";
+import SvgIcon from '@mui/material/SvgIcon';
+import Mask from './icons/android-mask-svgrepo-com.svg?react';
+import Oroburos from './icons/ouroboros-svgrepo-com.svg?react';
 
 const DEFAULT_PORTRAIT = 0;
 const SERVER_PORT = 3001;
 const poseSystem = new PoseSystem();
-const socket = io("ws://localhost:3002");
 
 type CompResponseProps = {
   response: ChatResponse,
@@ -83,32 +85,55 @@ function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: Comp
   }
 }
 
-const Spinner = () => {
-  return <CircularProgress size="3rem" color="secondary"
-                           sx={{
-                             position: "absolute",
-                             zIndex: 500,
-                             top: "2rem",
-                             right: "2rem",
-                             p: 1,
-                             borderRadius: "100%",
-                             backgroundColor: "rgba(0, 0, 0, 0.25)",
-                             boxShadow: "0 0 9px 9px rgba(0, 0, 0, 0.25)",
-                           }}/>;
-}
-
-function PunterDetectIcons({people}: { people: Detection[] }) {
-  return <Stack sx={{justifyItems: "end"}}>
+function PunterDetectIcons({people, sx}: { people: Detection[], sx: any }) {
+  return <Stack sx={{border: "yellow dotted thick", width: 50, alignItems: "center"}}>
+    <Typography>{people.length}</Typography>
     {people?.map((_: Detection, i: number) => {
       return <Boy
           key={`dpersoni_${i}`}
           color="warning"
           fontSize="large"
-          sx={{p: 0, m: 1, backgroundColor: "#000", borderRadius: "100%"}}
+          sx={sx}
       />;
     })}
-  </Stack>
-      ;
+  </Stack>;
+}
+
+function WorkflowIcons(props: { step: WorkflowStep, sx: any }) {
+  return <Stack gap={1} sx={{alignItems: "center"}} >
+    {props.step}
+    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
+      <Oroburos />
+    </SvgIcon>
+    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
+      <Mask />
+    </SvgIcon>
+  </Stack>;
+}
+
+interface ActivityIconsParams {
+    loading: boolean;
+    punterDetection: boolean;
+    debugOverlay: boolean;
+    people: Detection[];
+    workflow: WorkflowStep
+};
+
+/**
+ * Region of UI where activity icons appear.
+ */
+function ActivityIcons(props: ActivityIconsParams) {
+  const shadowColour="rgba(40, 40, 0, 0.6)";
+  const dropShadow = {p: 0, m: 1,
+    backgroundColor: shadowColour,
+    borderRadius: "100%",
+    boxShadow: `0 0 18px 10px ${shadowColour}`,
+  };
+  return <Stack gap={1} alignItems="center" sx={{position: "absolute", top: 50, right: 50, zIndex: 800}}>
+    <CircularProgress size="2rem" color="warning" sx={{opacity: !props.loading ? 1.0 : 0, ...dropShadow}}/>
+    <WorkflowIcons step={props.workflow} sx={dropShadow}/>
+    {(props.punterDetection && props.debugOverlay && <PunterDetectIcons people={props.people} sx={dropShadow}/>)}
+  </Stack>;
 }
 
 const EMPTY_RESPONSE: ChatResponse = {
@@ -121,21 +146,31 @@ const EMPTY_RESPONSE: ChatResponse = {
 
 const App: React.FC = () => {
 
-  socket.on("connect", () => {
-    console.log(`socket connect id ${socket.id}`); // x8WIv7-mJelg7on_ALbx
-  });
+  const [workflow, setWorkflow] = useState<WorkflowStep>("idle");
 
-  socket.on("disconnect", () => {
-    console.log(`socket DISconnect`); // undefined
-  });
+  useEffect(() => {
 
-  socket.on("connect_error", (error) => {
-    if (socket.active) {
-      console.log(`socket ${socket.id} connect error, not dead yet`);
-    } else {
-      console.log(`connection denied by server, requires manual reconnection: ${error.message}`);
-    }
-  });
+    const socket = io("ws://localhost:3002");
+    socket.on("connect", () => {
+      console.log(`socket connect id ${socket!.id}`);
+    });
+    socket.on("disconnect", () => {
+      console.log(`socket DISconnect`);
+    });
+    socket.on("connect_error", (error) => {
+      if (socket.active) {
+        //console.log(`socket ${socket.id} connect error, not dead yet`);
+      } else {
+        console.log(`socket connection denied by server, requires manual reconnection: ${error.message}`);
+      }
+    });
+    socket.on("workflow", (args: any) => {
+      console.log(`socket workflow ${args}`);
+      setWorkflow(args as WorkflowStep);
+    });
+
+  }, []);
+
 
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState<ChatResponse>(EMPTY_RESPONSE);
@@ -220,7 +255,7 @@ const App: React.FC = () => {
   };
   const hideVideo = () => {
     if (videoRef.current) {
-      videoRef.current.style.transition = "opacity: 1.5s ease-in-out"; // does not work
+      videoRef.current.style.transition = "opacity: 1.5s ease-in-out"; // TODO why not works!
       videoRef.current.style.opacity = "0";
     }
   };
@@ -269,7 +304,9 @@ const App: React.FC = () => {
                      autoCalibration={autoCalibration} setAutoCalibration={setAutoCalibration}
                      workflowIcons={workflowIcons} setWorkflowIcons={setWorkflowIcons}
         />
-        {loading && <Spinner/>}
+        <ActivityIcons debugOverlay={debugOverlay} workflow={workflow} people={people} loading={loading} punterDetection={punterDetection}/>
+
+        <VideoCamera consumers={visionConsumers}/>
         <Box sx={{
           position: "absolute",
           width: "100%",
@@ -281,11 +318,6 @@ const App: React.FC = () => {
         }}>
           <CompResponse response={response} loading={loading} videoRef={videoRef} showVideo={showVideo}
                         hideVideo={hideVideo} showChat={showChat}/>
-
-          {(punterDetection && debugOverlay && <PunterDetectIcons people={people}/>)}
-
-          <VideoCamera consumers={visionConsumers}/>
-
           <Box component="form" sx={{
             position: "sticky",
             bottom: 0,

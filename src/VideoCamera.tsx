@@ -92,7 +92,7 @@ function VideoCamera({consumers}: { consumers: VisionConsumer[] }) {
   // we seemingly need to attach camera video stream to an on-page html element probably so it binds to gpu context
   // enabling gpu ai model direct access to the video frame, it can be hidden:
   // {display: none} breaks it but {visibility: hidden} does not
-  return <Stack sx={{visibility: "hidden", mb: 150, justifyItems: "center"}}>
+  return <Stack sx={{border: "purple dotted thick", position: "absolute", bottom: 100, right: 100, visibility: "visible", mb: 150, justifyItems: "center"}}>
     <video ref={camRef} autoPlay playsInline></video>
   </Stack>
 }
