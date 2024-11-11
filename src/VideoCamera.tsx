@@ -74,9 +74,7 @@ function VideoCamera({consumers}: { consumers: VisionConsumer[] }) {
         window.requestAnimationFrame(readVideoFrame);
       }
 
-      // seemingly need to attach video stream to an html element which probably binds to gpu context
-      // and enables gpu model to access the video frame
-      navigator.mediaDevices.getUserMedia({video: true})
+      navigator.mediaDevices.getUserMedia({video: true, audio: true})
           .then(function (stream) {
             camRef.current!.srcObject = stream;
             camRef.current!.addEventListener("loadeddata", readVideoFrame);
