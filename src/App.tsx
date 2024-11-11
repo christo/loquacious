@@ -119,7 +119,7 @@ const EMPTY_RESPONSE: ChatResponse = {
   llm: undefined,
   model: undefined,
   lipsync: undefined,
-}
+};
 
 const App: React.FC = () => {
 
@@ -217,13 +217,13 @@ const App: React.FC = () => {
     } else {
       hideVideo();
     }
-  }
+  };
   const hideVideo = () => {
     if (videoRef.current) {
       videoRef.current.style.transition = "opacity: 1.5s ease-in-out"; // does not work
       videoRef.current.style.opacity = "0";
     }
-  }
+  };
 
   // SubsystemOptions
   const [debugOverlay, setDebugOverlay] = useState(true);
