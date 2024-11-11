@@ -257,8 +257,7 @@ const App: React.FC = () => {
       }} component="div">
 
         {images.length > 0 && (
-            <Portrait videoRef={videoRef} imgRef={imgRef} videoSrc={undefined} src={imageUrl()}
-                      hideVideo={hideVideo}/>)
+            <Portrait videoRef={videoRef} imgRef={imgRef} src={imageUrl()} hideVideo={hideVideo}/>)
         }
         <SystemPanel appTitle="Loquacious" images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}
                      serverPort={SERVER_PORT} poseSystem={poseSystem} imgRef={imgRef}
