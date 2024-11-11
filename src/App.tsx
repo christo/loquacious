@@ -205,16 +205,7 @@ const App: React.FC = () => {
     }
   };
 
-  const resetResponse = () => setResponse(EMPTY_RESPONSE)
-
-  // submit on enter
-  const handleSubmitKey: KeyboardEventHandler<HTMLElement> = async (e) => {
-    // shift enter is newline
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); // Prevent default Enter behavior (new line)
-      await handleSubmit(e); // Submit the form
-    }
-  };
+  const resetResponse = () => setResponse(EMPTY_RESPONSE);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const imgRef: React.MutableRefObject<HTMLImageElement | null> = useRef<HTMLImageElement | null>(null);
@@ -303,7 +294,7 @@ const App: React.FC = () => {
             zIndex: 100
           }}>
             {showChat && <ChatInputComponent inputRef={inputRef} prompt={prompt} loading={loading}
-                                             handleSubmitKey={handleSubmitKey} setPrompt={setPrompt}/>}
+                                             handleSubmit={handleSubmit} setPrompt={setPrompt}/>}
 
           </Box>
         </Box>

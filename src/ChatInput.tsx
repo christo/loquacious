@@ -1,5 +1,5 @@
 import {styled, TextField} from "@mui/material";
-import React from "react";
+import React, {KeyboardEventHandler} from "react";
 import {StateSetter} from "./Utils.ts";
 
 const ChatInput = styled(TextField)({
@@ -26,11 +26,19 @@ interface ChatInputComponentProps {
     inputRef: React.RefObject<HTMLDivElement>;
     prompt: string;
     loading: boolean;
-    handleSubmitKey: (event: React.KeyboardEvent<HTMLElement>) => void;
+    handleSubmit: (e: React.KeyboardEvent) => void;
     setPrompt: StateSetter<string>
 }
 
 function ChatInputComponent(props: ChatInputComponentProps) {
+  // submit on enter
+  const handleSubmitKey: KeyboardEventHandler<HTMLElement> = async (e) => {
+    // shift enter is newline
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevent default Enter behavior (new line)
+      props.handleSubmit(e); // Submit the form
+    }
+  };
   return <ChatInput
       ref={props.inputRef}
       hiddenLabel
@@ -40,7 +48,7 @@ function ChatInputComponent(props: ChatInputComponentProps) {
       maxRows={4}
       {...{disabled: props.loading}}
       fullWidth
-      onKeyDown={props.handleSubmitKey}
+      onKeyDown={handleSubmitKey}
       onChange={e => props.setPrompt(e.target.value)}
   />;
 }
