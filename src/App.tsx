@@ -46,7 +46,7 @@ function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: Comp
     const url = `//${location.hostname}:${SERVER_PORT}/${av}?file=${video}`;
     fetch(url).then(response => {
       if (!response.ok) {
-        throw `network response for ${av} was crap`;
+        throw `${av} network response status ${response.status}`;
       } else {
         return response.blob();
       }
