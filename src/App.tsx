@@ -31,17 +31,15 @@ type CompResponseProps = {
 
 /**
  * Composite response component. Includes chat history, and either audio or video.
- * @param response
- * @param videoRef
- * @param hideVideo
- * @param showVideo
- * @param showChat
- * @constructor
+ * @param response from server
+ * @param videoRef ref to animation video element
+ * @param hideVideo function to hide video, revealing portrait image
+ * @param showVideo function to reveal and play video
+ * @param showChat whether or not to show chat
  */
 function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: CompResponseProps) {
   const video = response.lipsync?.videoPath;
   const speech = response.speech;
-  // TODO test lipsync and speech without video
   const fetchMedia = (av: "audio" | "video", handleBlob: (blob: Blob) => void) => {
     const url = `//${location.hostname}:${SERVER_PORT}/${av}?file=${video}`;
     fetch(url).then(response => {
@@ -165,8 +163,10 @@ const App: React.FC = () => {
   const handleSubmit = async (e: React.KeyboardEvent) => {
     e.preventDefault();
     if (!prompt.trim()) {
+      // no prompt, do nothing
       return;
     }
+    // clear the face overlay before video plays
     poseSystem.resetCanvas();
     const anticipatedMessg = new Message(-1, new Date(), prompt, -1, true);
     const anticipatedResponse: ChatResponse = {
@@ -175,7 +175,7 @@ const App: React.FC = () => {
       llm: undefined,
       model: undefined,
       lipsync: undefined,
-    }
+    };
     setResponse(anticipatedResponse);
     setLoading(true);
     setPrompt("");
