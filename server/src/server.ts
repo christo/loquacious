@@ -66,7 +66,6 @@ app.use(cors());
 app.use(express.json());
 const wsPort = parseInt(process.env.WEBSOCKET_PORT || "3002", 10);
 const streamServer = new StreamServer(app, wsPort, "http://localhost:5173"); // TODO remove hardcoding
-streamServer.boot();
 
 app.get("/portraits", async (_req: Request, res: Response) => {
   const exts = supportedImageTypes().flatMap(f => f.extensions).map(f => `.${f}`);
@@ -240,6 +239,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   if (!prompt) {
     res.status(400).json({error: 'No prompt provided'});
   } else {
+    streamServer.workflow("llm_request");
     await failable(res, "loquacious chat", async () => {
       const currentLlm = llms.current();
       const currentModel = await currentLlm.currentModel()
@@ -267,6 +267,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       });
 
       if (llmResponse) {
+        streamServer.workflow("llm_response");
         // this nested chain of calls needs to be a pre-wired modular production line
         const llmMessage = await timed("storing llm response",
             () => db.createCreatorTypeMessage(session, llmResponse, currentLlm));
@@ -274,6 +275,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         await failable(res, "speech generation", async () => {
           const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
               async () => {
+                streamServer.workflow("tts_request");
                 const ssCreator = await db.findCreator(currentSpeech.getName(), currentSpeech.getMetadata(), true);
                 const mimeType = currentSpeech.outputFormat().mimeType;
                 const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
@@ -284,21 +286,23 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           );
           const speechFilePath = speechResult.filePath();
           if (speechFilePath) {
+            streamServer.workflow("tts_response");
             const portait = path.join(pathPortrait(), portrait.f).toString();
             await failable(res, "lipsync generation", async () => {
               const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
               const mimeType = currentAnimator.outputFormat()?.mimeType;
               if (!mimeType) {
-                // TODO this is a hack - how to signal NoLipsync lipsync animation?
+                // this is a hack - how to signal NoLipsync lipsync animation?
                 return Promise.reject("animator does not declare a Mime Type");
               } else {
                 const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
                 const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
-                  // TODO code smells...
                   const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
                   console.log(`lipsync db id: ${lipsync.id}`);
+                  streamServer.workflow("lipsync_request");
                   return currentAnimator.animate(portait, speechFilePath!, `${videoFile.id}`);
                 });
+                streamServer.workflow("lipsync_response");
                 // TODO return full session graph for enabling replay etc.
                 const finalMessages = (await db.getSessionMessages(session)).map(m => currentSpeech.removePauseCommands(m));
                 res.json(buildResponse(finalMessages, speechFilePath, lipsyncResult));

@@ -1,21 +1,17 @@
-import {Server} from "socket.io";
+import {DefaultEventsMap, Server} from "socket.io";
 import {Express} from "express";
 import {createServer} from "http";
 import {WorkflowStep} from "./system/WorkflowStep";
 
-
 class StreamServer {
-  private app: Express;
-  private port: number;
+  private io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
 
-  constructor(app: Express, port: number) {
+  constructor(app: Express, port: number, corsOrigin: string) {
     if (port <=1024 || port > 65535) {
       throw new Error(`Bad port number ${port}`);
     }
-    this.app = app;
-    this.port = port;
-    console.log(`booting StreamServer on port ${this.port}`);
-    const httpServer = createServer(this.app);
+    console.log(`booting StreamServer on port ${port}`);
+    const httpServer = createServer(app);
     // TODO set options like ping, timeout etc.
     const options = {
       cors: {
@@ -30,8 +26,18 @@ class StreamServer {
         console.log('user disconnected');
       });
     });
+    this.io.on("hello", (socket) => {
+      console.log(`a user said hello on socket ${socket.id}`);
+    });
+    this.io.listen(port);
+  }
 
-    this.io.listen(this.port);
+  /**
+   * Report reaching the given {@link WorkflowStep}
+   * @param workflow
+   */
+  workflow(workflow: WorkflowStep) {
+    this.io.emit("workflow", workflow);
   }
 
 }
