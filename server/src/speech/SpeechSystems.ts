@@ -14,7 +14,7 @@ class SpeechSystemOption {
   systemName: string;
   optionKey: string;
   optionName: string;
-  description?: string
+  description?: string;
   isFree: boolean;
 
   constructor(system: SpeechSystem, key: string, name: string, description?: string) {

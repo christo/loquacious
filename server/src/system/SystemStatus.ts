@@ -46,7 +46,7 @@ async function systemHealth(llm: Llm): Promise<HealthStatus> {
   if (llm.enableHealth) {
     try {
       const r = await fetch(`${(llm.baseUrl)}/health`, {});
-      msgOrError = await r.json(); // TODO can we trust this will construct the right type?
+      msgOrError = await r.json();
     } catch (error) {
       msgOrError = {
         message: undefined,
