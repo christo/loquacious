@@ -247,7 +247,7 @@ class Db {
       return Promise.reject("db is not booted");
     }
     console.log("finishing current session of this run");
-    const runId = this.getRun().id
+    const runId = this.getRun().id;
     const q = `update session
                set finished = CURRENT_TIMESTAMP
                where finished is null
