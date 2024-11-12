@@ -224,6 +224,17 @@ class Db {
   }
 
   /**
+   * If there's a current session return it, otherwise create one.
+   */
+  async getOrCreateSession(): Promise<Session> {
+    try {
+      return await this.currentSession();
+    } catch {
+      return await this.createSession();
+    }
+  }
+
+  /**
    * Finishes all incomplete sessions.
    */
   async finishAllSessions(): Promise<void> {

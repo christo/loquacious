@@ -200,7 +200,7 @@ app.get('/session', async (_req: Request, res: Response) => {
 
 app.get('/api/chat', async (_req: Request, res: Response) => {
   await failable(res, "get chat", async () => {
-    const session = await getOrCreateSession();
+    const session = await db.getOrCreateSession();
     const messages = await db.getSessionMessages(session);
     res.json({
       response: {
@@ -210,17 +210,6 @@ app.get('/api/chat', async (_req: Request, res: Response) => {
     });
   });
 });
-
-/**
- * If there's a current session return it, otherwise create one.
- */
-async function getOrCreateSession(): Promise<Session> {
-  try {
-    return await db.currentSession();
-  } catch {
-    return await db.createSession();
-  }
-}
 
 const failable = async (res: Response, name: string, thunk: () => Promise<void>) => {
   try {
@@ -257,7 +246,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           model: currentModel,
         }
       });
-      let session = await getOrCreateSession();
+      let session = await db.getOrCreateSession();
       console.log("storing user message");
       await db.createUserMessage(session, prompt);
       const messageHistory: Message[] = await db.getSessionMessages(session);
