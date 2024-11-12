@@ -1,23 +1,23 @@
 import {
-  AccessibilityNew,
-  AccessTime,
-  AccountTree,
+  AccessibilityNew as MocapIcon,
+  AccessTime as UptimeIcon,
+  AccountTree as ModesIcon,
   ArrowCircleLeft,
   ArrowCircleRight,
   AspectRatio,
   AutoMode,
-  Campaign,
+  Campaign as TtsIcon,
   Dns,
   Error,
   Memory,
-  Mic,
+  Mic as SttIcon,
   MonetizationOn,
   MonitorHeart,
-  Portrait,
-  QuestionAnswer,
-  RecordVoiceOver,
-  RemoveRedEye,
-  School,
+  Portrait as LipsyncIcon,
+  QuestionAnswer as LlmIcon,
+  RecordVoiceOver as VoiceIcon,
+  RemoveRedEye as VisionIcon,
+  School as ModelIcon,
   Settings,
   type SvgIconComponent,
 } from "@mui/icons-material";
@@ -134,7 +134,7 @@ function SettingsForm({system, postSettings}: {
     };
 
     return <Stack spacing={2}>
-      <WithIcon TheIcon={AccountTree} tooltip="Interaction Modes">
+      <WithIcon TheIcon={ModesIcon} tooltip="Interaction Modes">
         <SettingsSelect
             label={"Mode"}
             value={system.mode.current}
@@ -142,7 +142,7 @@ function SettingsForm({system, postSettings}: {
             options={system.mode.all}/>
       </WithIcon>
 
-      <WithIcon TheIcon={Mic} tooltip="Speech to Text">
+      <WithIcon TheIcon={SttIcon} tooltip="Speech to Text">
         <SettingsSelect
             label={"STT"}
             value={system.stt.current}
@@ -152,17 +152,17 @@ function SettingsForm({system, postSettings}: {
 
       {/*<IconLabelled TheIcon={Videocam} tooltip="Camera Input"><i>In progress</i></IconLabelled>*/}
 
-      <WithIcon TheIcon={RemoveRedEye} tooltip="Vision System">
+      <WithIcon TheIcon={VisionIcon} tooltip="Vision System">
         <SettingsSelect label={"Vision"} value={system.vision.current} setValue={updater("vision")}
                         options={system.vision.all}/>
       </WithIcon>
 
-      <WithIcon TheIcon={AccessibilityNew} tooltip="Motion Capture">
+      <WithIcon TheIcon={MocapIcon} tooltip="Motion Capture">
         <SettingsSelect label="Mocap" value={system.pose.current} setValue={updater("pose")}
                         options={system.pose.all}/>
       </WithIcon>
 
-      <WithIcon TheIcon={QuestionAnswer} tooltip="LLM">
+      <WithIcon TheIcon={LlmIcon} tooltip="LLM">
         <SettingsSelect
             label="LLM"
             value={system.llm.current}
@@ -171,26 +171,26 @@ function SettingsForm({system, postSettings}: {
         <FreePaid isFree={system.llm.isFree}/>
       </WithIcon>
 
-      <WithIcon TheIcon={School} tooltip="Model">
+      <WithIcon TheIcon={ModelIcon} tooltip="Model">
         <SettingsSelect label="Model"
                         value={system.llm.currentOption.id}
                         setValue={updater("llm_option")}
                         options={system.llm.options.map(m => m.id)}/>
       </WithIcon>
-      <WithIcon TheIcon={Campaign} tooltip="Speech System">
+      <WithIcon TheIcon={TtsIcon} tooltip="Speech System">
         <SettingsSelect label="Speech"
                         value={system.tts.current}
                         setValue={updater("tts")}
                         options={system.tts.all}/>
         <FreePaid isFree={system.tts.isFree}/>
       </WithIcon>
-      <WithIcon TheIcon={RecordVoiceOver} tooltip="Voice">
+      <WithIcon TheIcon={VoiceIcon} tooltip="Voice">
         <SettingsSelect label="Voice"
                         value={system.tts.currentOption.optionName}
                         setValue={updater("tts_option")}
                         options={system.tts.options.map(sso => sso.optionName)}/>
       </WithIcon>
-      <WithIcon TheIcon={Portrait} tooltip="Lip Sync Animator">
+      <WithIcon TheIcon={LipsyncIcon} tooltip="Lip Sync Animator">
         <SettingsSelect label="Lip Sync" value={system.lipsync.current} setValue={updater("lipsync")}
                         options={system.lipsync.all}/>
         <FreePaid isFree={system.lipsync.isFree}/>
@@ -198,7 +198,7 @@ function SettingsForm({system, postSettings}: {
 
       <Divider/>
 
-      <WithIcon TheIcon={AccessTime} tooltip="Uptime">
+      <WithIcon TheIcon={UptimeIcon} tooltip="Uptime">
         <Duration ms={uptime} run={true}/>
       </WithIcon>
     </Stack>;
