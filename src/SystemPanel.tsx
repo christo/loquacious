@@ -85,6 +85,12 @@ function SettingsSelect({label, value, setValue, options}: {
   if (!options) {
     throw `no options for ${label}`
   }
+  if (value === undefined) {
+    console.warn(`value for label ${label} is undefined`);
+    return null;
+  } else if (!options.includes(value)) {
+    throw `value ${value} is not present in options ${options}`;
+  }
 
   return <FormControl sx={{m: 0, minWidth: 120}} size="small">
     <InputLabel id={`${label}-select-label`} shrink>{label}</InputLabel>
@@ -125,7 +131,7 @@ function SettingsForm({system, postSettings}: {
         kv[key] = newValue;
         return postSettings(kv)
       };
-    }
+    };
 
     return <Stack spacing={2}>
       <WithIcon TheIcon={AccountTree} tooltip="Interaction Modes">
@@ -167,7 +173,7 @@ function SettingsForm({system, postSettings}: {
 
       <WithIcon TheIcon={School} tooltip="Model">
         <SettingsSelect label="Model"
-                        value={system.llm.currentOption}
+                        value={system.llm.currentOption.id}
                         setValue={updater("llm_option")}
                         options={system.llm.options.map(m => m.id)}/>
       </WithIcon>
@@ -239,7 +245,7 @@ function PortraitChooser({images, imageIndex, setImageIndex, dimension, poseSyst
       setImageIndex(newValue);
       poseSystem.resetCanvas();
     };
-  }
+  };
   const portraitWidth = images[imageIndex].w;
   const portraitHeight = images[imageIndex].h;
   return <Box sx={{display: "flex", flexDirection: "column", gap: 1}}>
@@ -274,7 +280,7 @@ function SessionControl({serverPort, resetResponse}: { serverPort: number, reset
         resetResponse();
       });
     });
-  }
+  };
   return <Fab size="medium" variant="extended" aria-label="new session" sx={{mt: 2}} onClick={newSession}
               disabled={inFlight}>
     <AutoMode sx={{mr: 1}}/>
@@ -325,7 +331,7 @@ function SettingsPanel(props: SettingsProps) {
       },
       body: JSON.stringify(partial)
     });
-  }
+  };
 
   return <Stack gap={1} sx={{p: 2}}>
     <AppTitle appTitle={props.appTitle}/>

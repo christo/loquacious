@@ -18,7 +18,7 @@ interface Llm extends CreatorService {
   enableHealth: boolean,
   models: () => Promise<Array<Model>>
   chat: (params: OpenAI.Chat.Completions.ChatCompletionMessageParam[]) => Promise<ChatResult>;
-  currentModel: () => Promise<string>;
+  currentModel: () => Promise<Model>;
 
   setCurrentOption(value: string): Promise<void>;
 }

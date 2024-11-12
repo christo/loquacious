@@ -11,7 +11,9 @@ class LmStudioLlm implements Llm {
   private readonly name = "LM-Studio-LLM";
   canRun = always;
   private openai;
+  private currentModelId: string | null = null;
 
+  // TODO replace this with an async static
   constructor(baseUrl = "http://localhost:1234/v1") {
     this.baseUrl = baseUrl;
     // seems we cannot simply specify the model here, not all results from models() can be used with a system prompt
@@ -26,12 +28,12 @@ class LmStudioLlm implements Llm {
   /**
    * If there's only one model, it must be current. Otherwise we assume we don't know.
    */
-  async currentModel(): Promise<string> {
+  async currentModel(): Promise<Model> {
     const allModels = await this.models();
     if (allModels.length === 1) {
-      return allModels[0].id;
+      return allModels[0];
     } else {
-      return "unknown";
+      return Promise.reject(`Undecided which model is "current" here.`);
     }
   }
 
@@ -39,8 +41,18 @@ class LmStudioLlm implements Llm {
    * Currently does nothing.
    * @param value
    */
-  setCurrentOption(value: string): Promise<void> {
-    return Promise.reject(`${this.name}: Cannot change models.`);
+  async setCurrentOption(value: string): Promise<void> {
+    const currentModel = await this.fetchCurrentModel(value);
+    if (currentModel) {
+      this.currentModelId = value;
+    } else {
+      return Promise.reject(`Model ${value} not currently loaded for ${this.name}`);
+    }
+  }
+
+  private async fetchCurrentModel(value: string) {
+    const currentModels = await this.models();
+    return currentModels.find(m => m.id === value);
   }
 
   async models(): Promise<Array<Model>> {
@@ -59,9 +71,8 @@ class LmStudioLlm implements Llm {
   }
 
   getMetadata(): string | undefined {
-    // seemingly current model is not provided by the API but needs further investigation
-    // maybe we could be in charge of launching and configuring the process from here?
-    return undefined;
+    // this is error prone
+    return this.currentModelId ? this.currentModelId : undefined;
   }
 
   getName(): string {
@@ -73,6 +84,7 @@ class LmStudioLlm implements Llm {
    * @param _metadata
    */
   configure(_metadata: string): Promise<void> {
+    // TODO make this work in the case that current model is loaded
     return Promise.reject("does not support configuration because external process defines model");
   }
 

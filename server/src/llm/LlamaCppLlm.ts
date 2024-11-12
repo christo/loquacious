@@ -27,8 +27,9 @@ class LlamaCppLlm implements Llm {
     });
   }
 
-  async currentModel(): Promise<string> {
-    return "whatevs";
+  async currentModel(): Promise<Model> {
+    // pretty dodgy
+    return (await this.models())[0];
   }
 
   /**

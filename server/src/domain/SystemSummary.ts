@@ -48,10 +48,7 @@ type SystemSummary = {
     current: string,
     all: string[],
   },
-  llm: Module & {
-    options: Model[],
-    currentOption: string,
-  },
+  llm: OptionedModule<Model>,
   tts: OptionedModule<SpeechSystemOption>,
   lipsync: Module,
   pose: Module,

@@ -56,8 +56,8 @@ class FakeLlm implements Llm {
     return Promise.resolve(this.myModels[this.currentModelKey].chat(_params));
   }
 
-  currentModel(): Promise<string> {
-    return Promise.resolve(this.myModels[this.currentModelKey].id);
+  currentModel(): Promise<Model> {
+    return Promise.resolve(this.myModels[this.currentModelKey]);
   }
 
   setCurrentOption(value: string): Promise<void> {
