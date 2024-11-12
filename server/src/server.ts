@@ -131,7 +131,6 @@ async function getSystem(): Promise<SystemSummary> {
       all: modes.allModes()
     },
     llm: {
-      // TODO make all others like this
       current: llms.current().getName(),
       all: llms.all().map(llm => llm.getName()),
       options: await llms.current().models(),
