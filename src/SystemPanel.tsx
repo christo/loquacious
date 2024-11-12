@@ -150,8 +150,6 @@ function SettingsForm({system, postSettings}: {
             options={system.stt.all}/>
       </WithIcon>
 
-      {/*<IconLabelled TheIcon={Videocam} tooltip="Camera Input"><i>In progress</i></IconLabelled>*/}
-
       <WithIcon TheIcon={VisionIcon} tooltip="Vision System">
         <SettingsSelect label={"Vision"} value={system.vision.current} setValue={updater("vision")}
                         options={system.vision.all}/>
