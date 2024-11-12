@@ -44,7 +44,7 @@ type HealthStatus = {
 type SystemSummary = {
   asAt: Date,
   mode: {
-    // mode is semantically distinct from a Module
+    // although isomorphic, mode is semantically distinct from a Module
     current: string,
     all: string[],
   },
