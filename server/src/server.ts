@@ -123,7 +123,7 @@ app.post("/system/", async (req: Request, res: Response) => {
   });
 });
 
-async function getSystem() {
+async function getSystem(): Promise<SystemSummary> {
   const system: SystemSummary = {
     asAt: new Date(),
     mode: {
