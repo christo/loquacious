@@ -6,7 +6,7 @@ import Model = OpenAI.Model;
 
 const CANNOT_DO_SYSTEM_PROMPT = [
   "o1preview"
-]
+];
 
 /**
  * OpenAI LLM Backend
