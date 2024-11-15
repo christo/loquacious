@@ -118,7 +118,6 @@ const App: React.FC = () => {
       }
     });
     socket.on("workflow", (args: any) => {
-      console.log(`socket workflow ${args}`);
       setSocketConnected(true);
       setWorkflow(args as WorkflowStep);
     });
