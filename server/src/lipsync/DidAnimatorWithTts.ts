@@ -1,6 +1,6 @@
 import {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
 import {DisplaySpeechSystem, SpeechResult, SpeechSystem} from "../speech/SpeechSystem";
-import {MediaFormat, MF_MP3} from "../media";
+import {MediaFormat, MF_MP3, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
 import {SpeechSystemOption} from "../speech/SpeechSystems";
 import {Message} from "../domain/Message";
@@ -11,8 +11,10 @@ import {Message} from "../domain/Message";
 class DidAnimatorWithTts implements LipSyncAnimator, SpeechSystem {
 
   display: DisplaySpeechSystem;
+  speechSystemOption: SpeechSystemOption;
 
   constructor() {
+    this.speechSystemOption = new SpeechSystemOption(this, "default", "default");
     this.display = new DisplaySpeechSystem(this.getName(), [], this.free());
   }
 
@@ -26,12 +28,12 @@ class DidAnimatorWithTts implements LipSyncAnimator, SpeechSystem {
     return MF_MP3;
   }
 
-  writeCacheFile(): Promise<void> {
+  postResponseHook(): Promise<void> {
     return Promise.resolve(undefined);
   }
 
   videoOutputFormat(): MediaFormat | undefined {
-    return undefined;
+    return MF_MP4;
   }
 
   free = () => false;
@@ -48,17 +50,16 @@ class DidAnimatorWithTts implements LipSyncAnimator, SpeechSystem {
   canRun = hasEnv("DID_AUTH");
 
   speak(message: string, basename: string): Promise<SpeechResult> {
+    console.warn("DidAnimatorWithTts.speak not implemented.");
     return Promise.reject("unimplemented");
   }
 
   currentOption() {
-    // TODO implement
-    return new SpeechSystemOption(this, "default", "default");
+    return this.speechSystemOption;
   }
 
   options(): SpeechSystemOption[] {
-    // TODO implement
-    return [];
+    return [this.speechSystemOption];
   }
 
   pauseCommand(msDuration: number): string | null {
@@ -67,11 +68,8 @@ class DidAnimatorWithTts implements LipSyncAnimator, SpeechSystem {
   }
 
   setCurrentOption(value: string): Promise<void> {
-    return Promise.resolve(undefined);
+    return Promise.resolve();
   }
-
-
-
 
   removePauseCommands(m: Message): Message {
     // TODO implement this
