@@ -5,7 +5,7 @@ import {type MediaFormat, MF_MP3} from "media";
 import type {PathLike} from "node:fs";
 import path from "path";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
+import {AsyncSpeechResult, DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import util from "util";
@@ -117,10 +117,8 @@ class MacOsSpeech implements SpeechSystem {
         result = Promise.reject(e);
       }
       const audioFile = await result;
-      return {
-        filePath: () => audioFile,
-        tts: () => undefined
-      } as SpeechResult;
+      return new AsyncSpeechResult(audioFile, () => Promise.resolve(undefined));
+
     } catch (error) {
       console.error('An error occurred during speech synthesis:', error);
       return Promise.reject(error);

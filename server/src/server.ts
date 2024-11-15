@@ -10,7 +10,7 @@ import {Modes} from "llm/Modes";
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
-import type {SpeechResult} from "speech/SpeechSystem";
+import {AsyncSpeechResult, SpeechResult} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
 import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
@@ -20,7 +20,6 @@ import Db from "./db/Db";
 import type {AudioFile} from "./domain/AudioFile";
 import type {CreatorType} from "./domain/CreatorType";
 import {Message} from "./domain/Message";
-import {Session} from "./domain/Session";
 import type {VideoFile} from "./domain/VideoFile";
 import AnimatorServices from "./lipsync/AnimatorServices";
 import LlmService from "./llm/LlmService";
@@ -57,7 +56,7 @@ const llms = new LlmService();
 const speechSystems = new SpeechSystems(PATH_BASE_DATA);
 const animators = new AnimatorServices(PATH_BASE_DATA);
 const modes = new Modes();
-const db = new Db( process.env.DB_POOL_SIZE ? parseInt(process.env.DB_POOL_SIZE, 10) : 10);
+const db = new Db(process.env.DB_POOL_SIZE ? parseInt(process.env.DB_POOL_SIZE, 10) : 10);
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -271,8 +270,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                 const mimeType = currentSpeech.speechOutputFormat().mimeType;
                 const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
                 const sr = await currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
-                const tts = await db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
-                return {...sr, tts: () => tts} as SpeechResult;
+                const getTts = () => db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
+                return Promise.resolve(new AsyncSpeechResult(sr.filePath(), getTts) as SpeechResult);
               }
           );
           const speechFilePath = speechResult.filePath();
@@ -288,7 +287,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               } else {
                 const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
                 const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
-                  const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
+                  const lipsync = await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
                   console.log(`lipsync db id: ${lipsync.id}`);
                   streamServer.workflow("lipsync_request");
                   return currentAnimator.animate(portait, speechFilePath!, `${videoFile.id}`);

@@ -6,8 +6,8 @@ import {type MediaFormat, MF_MP3} from "../media";
 
 const SILENT_SUCCESS: SpeechResult = {
   filePath: () => undefined,
-  tts: () => undefined
-}
+  tts: () => Promise.reject()
+};
 
 /**
  * Does not make sound or generate audio files.

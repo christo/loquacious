@@ -3,7 +3,7 @@ import fs from 'fs';
 import type {PathLike} from "node:fs";
 import path from "path";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
+import {AsyncSpeechResult, DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import {Message} from "../domain/Message";
@@ -11,6 +11,7 @@ import {type MediaFormat, MF_MP3} from "../media";
 import {hasEnv} from "../system/config";
 
 import {mkDirIfMissing} from "../system/filetoy";
+import {Tts} from "../domain/Tts";
 
 const VOICES = [
   new CharacterVoice("Andromeda - warm and lovely", "Andromeda", "Posh English woman, mid tones (5)"),
@@ -164,7 +165,8 @@ class ElevenLabsSpeech implements SpeechSystem {
         outStream.on('finish', () => {
           console.log('speech file writing completed successfully.');
           // hack alert
-          resolve({filePath: () => outFile, tts: () => undefined});
+          const ttsp = () => Promise.resolve<Tts|undefined>(undefined);
+          resolve(new AsyncSpeechResult(outFile, ttsp));
         });
         audio.pipe(outStream);
       })

@@ -1,7 +1,7 @@
 import type {CharacterVoice} from "speech/CharacterVoice";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import type {Message} from "../domain/Message";
-import type {Tts} from "../domain/Tts";
+import  {Tts} from "../domain/Tts";
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
 
@@ -25,8 +25,27 @@ class DisplaySpeechSystem {
  * Type representing the result of a request to generate speech from text.
  */
 interface SpeechResult {
-  filePath: () => string | undefined;
-  tts: () => Tts | undefined;
+  filePath(): string | undefined;
+  tts(): Promise<Tts | undefined>;
+}
+
+class AsyncSpeechResult implements SpeechResult {
+  private fp: string | undefined;
+  private _tts: () => Promise<Tts | undefined>;
+
+  constructor(fp: string | undefined, tts: () => Promise<Tts| undefined>) {
+    this.fp = fp;
+    this._tts = tts;
+  }
+
+  filePath() {
+    return this.fp;
+  }
+
+  tts(): Promise<Tts | undefined> {
+    return this._tts();
+  }
+
 }
 
 /**
@@ -39,24 +58,24 @@ interface SpeechSystem extends CreatorService {
    * @param message
    * @param basename file base name
    */
-  speak: (message: string, basename: string) => Promise<SpeechResult>;
+  speak(message: string, basename: string): Promise<SpeechResult>;
 
   /**
    * Unique key for each option.
    */
-  options: () => Array<SpeechSystemOption>;
+  options(): Array<SpeechSystemOption>;
 
-  setCurrentOption: (value: string) => Promise<void>;
+  setCurrentOption(value: string): Promise<void>;
 
   /**
    * Command for inserting a speech of this duration or null if no such command exists
    */
-  pauseCommand: (msDuration: number) => string | null;
+  pauseCommand(msDuration: number): string | null;
 
   /**
    * Current voice for the speech system.
    */
-  currentOption: () => SpeechSystemOption;
+  currentOption(): SpeechSystemOption;
   display: DisplaySpeechSystem;
 
   /**
@@ -73,4 +92,4 @@ interface SpeechSystem extends CreatorService {
   speechOutputFormat(): MediaFormat;
 }
 
-export {type SpeechSystem, type SpeechResult, DisplaySpeechSystem};
+export {type SpeechSystem, type SpeechResult, DisplaySpeechSystem, AsyncSpeechResult};
