@@ -15,7 +15,9 @@ import {io} from "socket.io-client";
 import {WorkflowStep} from "../server/src/system/WorkflowStep.ts";
 import {Sigils} from "./Sigils.tsx";
 
-const DEFAULT_PORTRAIT = 0;
+let APP_TITLE ="Loquacious";
+
+const DEFAULT_PORTRAIT = 16;
 const SERVER_PORT = 3001;
 const poseSystem = new PoseSystem();
 
@@ -250,7 +252,7 @@ const App: React.FC = () => {
         {images.length > 0 && (
             <Portrait videoRef={videoRef} imgRef={imgRef} src={imageUrl()} hideVideo={hideVideo}/>)
         }
-        <SystemPanel appTitle="Loquacious" images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}
+        <SystemPanel appTitle={APP_TITLE} images={images} setImageIndex={setImageIndex} imageIndex={imageIndex}
                      serverPort={SERVER_PORT} poseSystem={poseSystem} imgRef={imgRef}
                      resetResponse={resetResponse} dimension={dimension}
                      punterDetection={punterDetection} setPunterDetection={setPunterDetection}
