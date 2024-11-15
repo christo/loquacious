@@ -20,7 +20,6 @@ import Db from "./db/Db";
 import type {AudioFile} from "./domain/AudioFile";
 import type {CreatorType} from "./domain/CreatorType";
 import {Message} from "./domain/Message";
-import {Session} from "./domain/Session";
 import type {VideoFile} from "./domain/VideoFile";
 import AnimatorServices from "./lipsync/AnimatorServices";
 import LlmService from "./llm/LlmService";
@@ -57,7 +56,7 @@ const llms = new LlmService();
 const speechSystems = new SpeechSystems(PATH_BASE_DATA);
 const animators = new AnimatorServices(PATH_BASE_DATA);
 const modes = new Modes();
-const db = new Db( process.env.DB_POOL_SIZE ? parseInt(process.env.DB_POOL_SIZE, 10) : 10);
+const db = new Db(process.env.DB_POOL_SIZE ? parseInt(process.env.DB_POOL_SIZE, 10) : 10);
 
 const app = express();
 const port = process.env.PORT || 3001;
