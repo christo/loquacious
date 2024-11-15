@@ -29,7 +29,7 @@ class NoAnimator implements LipSyncAnimator {
         return "No Animator";
     }
 
-    outputFormat(): MediaFormat | undefined {
+    videoOutputFormat(): MediaFormat | undefined {
         return undefined;
     }
 
