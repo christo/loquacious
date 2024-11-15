@@ -16,7 +16,7 @@ class DidAnimatorWithTts implements LipSyncAnimator, SpeechSystem {
     this.display = new DisplaySpeechSystem(this.getName(), [], this.free());
   }
 
-  animate(imageFile: string, speechFile: string, fileKey: string): Promise<LipSyncResult> {
+  animate(imageFile: string, speechFile: Promise<string| undefined>, fileKey: string): Promise<LipSyncResult> {
     return Promise.reject();
   }
 

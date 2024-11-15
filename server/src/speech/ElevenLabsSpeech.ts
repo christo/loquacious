@@ -164,9 +164,8 @@ class ElevenLabsSpeech implements SpeechSystem {
 
         outStream.on('finish', () => {
           console.log('speech file writing completed successfully.');
-          // hack alert
-          const ttsp = () => Promise.resolve<Tts|undefined>(undefined);
-          resolve(new AsyncSpeechResult(outFile, ttsp));
+          // hack alert - tts has a circular dependency in construction
+          resolve(AsyncSpeechResult.fromValues(outFile, undefined));
         });
         audio.pipe(outStream);
       })

@@ -27,7 +27,7 @@ interface LipSyncAnimator extends CreatorService {
    * @param speechFile
    * @param fileKey unique database id to use as unique key in filename
    */
-  animate(imageFile: string, speechFile: string, fileKey: string): Promise<LipSyncResult>;
+  animate(imageFile: string, speechFile: Promise<string | undefined>, fileKey: string): Promise<LipSyncResult>;
 
   writeCacheFile(): Promise<void>;
 

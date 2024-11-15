@@ -27,6 +27,7 @@ import {RunInfo} from "./domain/RunInfo";
 import {SystemSummary} from "./domain/SystemSummary";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
+import {Tts} from "./domain/Tts";
 import Agent = Undici.Agent;
 
 
@@ -269,9 +270,15 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                 const ssCreator = await db.findCreator(currentSpeech.getName(), currentSpeech.getMetadata(), true);
                 const mimeType = currentSpeech.speechOutputFormat().mimeType;
                 const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
-                const sr = await currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
-                const getTts = () => db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
-                return Promise.resolve(new AsyncSpeechResult(sr.filePath(), getTts) as SpeechResult);
+                const getTts: () => Promise<Tts> = () => db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
+                const psr: Promise<SpeechResult> = currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
+                /* must await for speech request to finish to ensure file has been written */
+                const pfp = async () => {
+                  const speechResult = await psr;
+                  console.dir(speechResult);
+                  return speechResult.filePath();
+                };
+                return Promise.resolve(new AsyncSpeechResult(pfp, getTts) as SpeechResult);
               }
           );
           const speechFilePath = speechResult.filePath();
@@ -295,7 +302,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                 streamServer.workflow("lipsync_response");
                 // TODO return full session graph for enabling replay etc.
                 const finalMessages = (await db.getSessionMessages(session)).map(m => currentSpeech.removePauseCommands(m));
-                res.json(buildResponse(finalMessages, speechFilePath, lipsyncResult));
+                res.json(buildResponse(finalMessages, await speechFilePath, lipsyncResult));
                 await currentAnimator.writeCacheFile();
               }
             })

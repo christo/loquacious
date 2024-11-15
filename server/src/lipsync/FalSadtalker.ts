@@ -87,10 +87,10 @@ class FalSadtalker implements LipSyncAnimator {
     return this.urlCache[filePath];
   }
 
-  async animate(img: string, speech: string, filekey: string): Promise<LipSyncResult> {
+  async animate(img: string, speech: Promise<string>, filekey: string): Promise<LipSyncResult> {
     const imgUrl = await this.urlFor(img);
     // don't bother caching speech, reuse is vanishingly rare
-    const speechUrl = await fal.storage.upload(await readBinaryFile(speech));
+    const speechUrl = await fal.storage.upload(await readBinaryFile(await speech));
     const result: Result<{ video: SadTalkerResult }> = await timed(
       "fal run sadtalker",
       async () => {

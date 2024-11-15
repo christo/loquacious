@@ -17,7 +17,7 @@ class NoAnimator implements LipSyncAnimator {
         return undefined;
     }
 
-    animate(_imageFile: string, _speechFile: string, _fileKey: string): Promise<LipSyncResult> {
+    animate(_imageFile: string, _speechFile: Promise<string>, _fileKey: string): Promise<LipSyncResult> {
         return Promise.reject();
     }
 

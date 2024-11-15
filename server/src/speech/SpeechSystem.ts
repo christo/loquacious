@@ -25,27 +25,27 @@ class DisplaySpeechSystem {
  * Type representing the result of a request to generate speech from text.
  */
 interface SpeechResult {
-  filePath(): string | undefined;
+  filePath(): Promise<string | undefined>;
   tts(): Promise<Tts | undefined>;
 }
 
 class AsyncSpeechResult implements SpeechResult {
-  private fp: string | undefined;
-  private _tts: () => Promise<Tts | undefined>;
+  tts: () => Promise<Tts | undefined>;
+  filePath: () => Promise<string | undefined>;
 
-  constructor(fp: string | undefined, tts: () => Promise<Tts| undefined>) {
-    this.fp = fp;
-    this._tts = tts;
+  constructor(fp: () => Promise<string | undefined>, tts: () => Promise<Tts| undefined>) {
+    this.tts = tts;
+    console.log(`typeof fp: ${typeof fp}`);
+    this.filePath = fp;
   }
 
-  filePath() {
-    return this.fp;
+  static fromPromises(fp: Promise<string|undefined>, tts: Promise<Tts|undefined>) {
+    return new AsyncSpeechResult(() => fp, () => tts);
   }
 
-  tts(): Promise<Tts | undefined> {
-    return this._tts();
+  static fromValues(fp: string | undefined, tts: Tts | undefined) {
+    return AsyncSpeechResult.fromPromises(Promise.resolve(fp), Promise.resolve(tts));
   }
-
 }
 
 /**

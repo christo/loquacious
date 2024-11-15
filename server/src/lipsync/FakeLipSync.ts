@@ -33,7 +33,7 @@ class FakeLipSync implements LipSyncAnimator {
    * @param _speechFile ignored
    * @param _fileKey ignored
    */
-  async animate(_imageFile: string, _speechFile: string, _fileKey: string): Promise<LipSyncResult> {
+  async animate(_imageFile: string, _speechFile: Promise<string>, _fileKey: string): Promise<LipSyncResult> {
     const files = await promises.readdir(this.lipSyncDataDir, {withFileTypes: true, recursive: true});
     const aFile: Dirent | undefined = files.find(f => f.isFile() && hasVideoExt(f.name));
     if (!aFile) {

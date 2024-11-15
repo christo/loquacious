@@ -117,7 +117,7 @@ class MacOsSpeech implements SpeechSystem {
         result = Promise.reject(e);
       }
       const audioFile = await result;
-      return new AsyncSpeechResult(audioFile, () => Promise.resolve(undefined));
+      return AsyncSpeechResult.fromPromises(result, Promise.resolve(undefined));
 
     } catch (error) {
       console.error('An error occurred during speech synthesis:', error);
