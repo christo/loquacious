@@ -58,7 +58,7 @@ class FakeLipSync implements LipSyncAnimator {
   /**
    * Does nothing.
    */
-  writeCacheFile(): Promise<void> {
+  postResponseHook(): Promise<void> {
     return Promise.resolve(undefined);
   }
 

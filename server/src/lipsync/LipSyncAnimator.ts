@@ -29,7 +29,10 @@ interface LipSyncAnimator extends CreatorService {
    */
   animate(imageFile: string, speechFile: Promise<string | undefined>, fileKey: string): Promise<LipSyncResult>;
 
-  writeCacheFile(): Promise<void>;
+  /**
+   * Give implementations an opportunity to do non-critical-path work that will not delay user response.
+   */
+  postResponseHook(): Promise<void>;
 
   videoOutputFormat(): MediaFormat | undefined;
 }

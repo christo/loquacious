@@ -297,7 +297,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                   model: currentModel,
                 }
               }));
-              await currentAnimator.writeCacheFile();
+              await currentAnimator.postResponseHook();
             }
           })
 

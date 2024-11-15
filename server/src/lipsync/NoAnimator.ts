@@ -33,7 +33,7 @@ class NoAnimator implements LipSyncAnimator {
         return undefined;
     }
 
-    writeCacheFile(): Promise<void> {
+    postResponseHook(): Promise<void> {
         return Promise.resolve();
     }
 
