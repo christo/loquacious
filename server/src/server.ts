@@ -272,13 +272,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                 const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
                 const getTts: () => Promise<Tts> = () => db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
                 const psr: Promise<SpeechResult> = currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
-                /* must await for speech request to finish to ensure file has been written */
-                const pfp = async () => {
-                  const speechResult = await psr;
-                  console.dir(speechResult);
-                  return speechResult.filePath();
-                };
-                return Promise.resolve(new AsyncSpeechResult(pfp, getTts) as SpeechResult);
+                const newPfp = () => psr.then(sr => sr.filePath());
+                return Promise.resolve(new AsyncSpeechResult(newPfp, getTts));
               }
           );
           const speechFilePath = speechResult.filePath();
