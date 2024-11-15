@@ -236,20 +236,10 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const currentModel = await currentLlm.currentModel();
       const currentSpeech = speechSystems.current();
       const currentAnimator = animators.current();
-      const buildResponse = (messages: Message[], speechFilePath?: string, lipsyncResult?: LipSyncResult) => ({
-        response: {
-          portrait: portrait,
-          messages: messages,
-          speech: speechFilePath,
-          lipsync: lipsyncResult,
-          llm: currentLlm.getName(),
-          model: currentModel,
-        }
-      });
       let session = await db.getOrCreateSession();
       console.log("storing user message");
       await db.createUserMessage(session, prompt);
-      const messageHistory: Message[] = await db.getSessionMessages(session);
+      const messageHistory: Message[] = await db.getMessages(session);
       const mode = modes.getChatPrepper();
       let allMessages = mode(messageHistory, currentSpeech);
       let llmResponse: string | null = await timed("text generation", async () => {
@@ -276,34 +266,41 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                 return Promise.resolve(new AsyncSpeechResult(newPfp, getTts));
               }
           );
-          const speechFilePath = speechResult.filePath();
-          if (speechFilePath) {
-            streamServer.workflow("tts_response");
-            const portait = path.join(pathPortrait(), portrait.f).toString();
-            await failable(res, "lipsync generation", async () => {
-              const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
-              const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
-              if (!mimeType) {
-                // this is a hack - how to signal NoLipsync lipsync animation?
-                return Promise.reject("animator does not declare a Mime Type");
-              } else {
-                const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
-                const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
-                  const lipsync = await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
-                  console.log(`lipsync db id: ${lipsync.id}`);
-                  streamServer.workflow("lipsync_request");
-                  return currentAnimator.animate(portait, speechFilePath!, `${videoFile.id}`);
-                });
-                streamServer.workflow("lipsync_response");
-                // TODO return full session graph for enabling replay etc.
-                const finalMessages = (await db.getSessionMessages(session)).map(m => currentSpeech.removePauseCommands(m));
-                res.json(buildResponse(finalMessages, await speechFilePath, lipsyncResult));
-                await currentAnimator.writeCacheFile();
-              }
-            })
-          } else {
-            res.json(buildResponse(await db.getSessionMessages(session), undefined, undefined));
-          }
+
+          streamServer.workflow("tts_response");
+          const portait = path.join(pathPortrait(), portrait.f).toString();
+          await failable(res, "lipsync generation", async () => {
+            const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
+            const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
+            if (!mimeType) {
+              // this is a hack - how to signal NoLipsync lipsync animation?
+              return Promise.reject("animator does not declare a Mime Type");
+            } else {
+              const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
+              const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
+                const lipsync = await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
+                console.log(`lipsync db id: ${lipsync.id}`);
+                streamServer.workflow("lipsync_request");
+                return currentAnimator.animate(portait, speechResult.filePath(), `${videoFile.id}`);
+              });
+              streamServer.workflow("lipsync_response");
+              // TODO return full session graph for enabling replay etc.
+              res.json(({
+                response: {
+                  portrait: portrait,
+                  // TODO should not use currentSpeech to remove pause commands, the TTS system should be
+                  //   attached to the message request as the LLM was instructed at that point
+                  messages: (await db.getMessages(session)).map(m => currentSpeech.removePauseCommands(m)),
+                  speech: await speechResult.filePath(),
+                  lipsync: lipsyncResult,
+                  llm: currentLlm.getName(),
+                  model: currentModel,
+                }
+              }));
+              await currentAnimator.writeCacheFile();
+            }
+          })
+
         });
       } else {
         res.status(500).json({error: 'No message in response'});
