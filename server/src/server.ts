@@ -268,7 +268,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               async () => {
                 streamServer.workflow("tts_request");
                 const ssCreator = await db.findCreator(currentSpeech.getName(), currentSpeech.getMetadata(), true);
-                const mimeType = currentSpeech.outputFormat().mimeType;
+                const mimeType = currentSpeech.speechOutputFormat().mimeType;
                 const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
                 const sr = await currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
                 const tts = await db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
@@ -281,7 +281,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
             const portait = path.join(pathPortrait(), portrait.f).toString();
             await failable(res, "lipsync generation", async () => {
               const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
-              const mimeType = currentAnimator.outputFormat()?.mimeType;
+              const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
               if (!mimeType) {
                 // this is a hack - how to signal NoLipsync lipsync animation?
                 return Promise.reject("animator does not declare a Mime Type");
