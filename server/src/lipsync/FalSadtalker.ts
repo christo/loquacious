@@ -43,7 +43,7 @@ type UrlCache = { [keyof: string]: string };
 class FalSadtalker implements LipSyncAnimator {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
   private readonly name = "FalSadtalker";
-  canRun = hasEnv("FAL_API_KEY")
+  canRun = hasEnv("FAL_API_KEY");
   private readonly dataDir: string;
   private readonly urlCache: UrlCache;
   private sadtalkerConfig: FalSadtalkerInput = {
