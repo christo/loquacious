@@ -201,7 +201,7 @@ app.get('/session', async (_req: Request, res: Response) => {
 app.get('/api/chat', async (_req: Request, res: Response) => {
   await failable(res, "get chat", async () => {
     const session = await db.getOrCreateSession();
-    const messages = await db.getSessionMessages(session);
+    const messages = await db.getMessages(session);
     res.json({
       response: {
         session: session.id,

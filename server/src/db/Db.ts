@@ -369,10 +369,11 @@ class Db {
    * Fetch all the messages for a session in sequence order.
    * @param session
    */
-  async getSessionMessages(session: Session): Promise<Message[]> {
+  async getMessages(session: Session): Promise<Message[]> {
     if (!this.booted) {
       throw new Error("db is not booted");
     }
+    // TODO join db ids of video, or if absent, speech and provide replay button for speech bubble ui
     const query = `select m.id,
                           m.created,
                           m.content,
