@@ -6,7 +6,7 @@ AI face-to-face fortune teller chat experiment.
 
 ## Project Status
 
-* Supports multiple characters defined solely by portrait image and voice
+* Supports multiple characters defined solely by portrait image and voice selection.
 * Minimal web application front-end, REST back end
 * LLM integration for reasonable fortune teller interaction text,
   implementations:
