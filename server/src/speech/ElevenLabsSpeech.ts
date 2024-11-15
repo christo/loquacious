@@ -96,7 +96,7 @@ class ElevenLabsSpeech implements SpeechSystem {
    * Requires environment variable ELEVEN_LABS_API_KEY
    */
   canRun = hasEnv("ELEVENLABS_API_KEY");
-  private currentVoice = 0;
+  private currentVoice = VOICES.findIndex(v => v.name === "Sigrid") ;
   private readonly dataDir: string;
 
   /**
