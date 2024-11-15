@@ -70,7 +70,7 @@ interface SpeechSystem extends CreatorService {
   /**
    * Provide the {@link MediaFormat} of the created audio.
    */
-  outputFormat(): MediaFormat;
+  speechOutputFormat(): MediaFormat;
 }
 
 export {type SpeechSystem, type SpeechResult, DisplaySpeechSystem};

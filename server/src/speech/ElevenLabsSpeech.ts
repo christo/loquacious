@@ -214,7 +214,7 @@ class ElevenLabsSpeech implements SpeechSystem {
     return false;
   }
 
-  outputFormat(): MediaFormat {
+  speechOutputFormat(): MediaFormat {
     return MF_MP3;
   }
 
