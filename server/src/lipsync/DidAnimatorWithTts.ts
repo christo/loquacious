@@ -19,7 +19,37 @@ class DidAnimatorWithTts implements LipSyncAnimator, SpeechSystem {
   }
 
   animate(imageFile: string, speechFile: Promise<string| undefined>, fileKey: string): Promise<LipSyncResult> {
+
+    /* example code from https://docs.d-id.com/reference/createtalk
+
+
+    const url = 'https://api.d-id.com/talks';
+    const options = {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        authorization: 'Basic Zm9vOmJhcg==' // TODO basic auth
+      },
+      body: JSON.stringify({
+        source_url: 'https://d-id-public-bucket.s3.us-west-2.amazonaws.com/alice.jpg',
+        script: {
+          type: 'text',
+          subtitles: 'false',
+          provider: {type: 'elevenlabs', voice_id: 'Sara'},
+          input: 'Making videos is easy with D-ID'
+        },
+        config: {fluent: 'false', pad_audio: '0.0'}
+      })
+    };
+
+    fetch(url, options)
+        .then(res => res.json())
+        .then(json => console.log(json))
+        .catch(err => console.error(err));
+     */
     return Promise.reject();
+
   }
 
   speechOutputFormat(): MediaFormat {
