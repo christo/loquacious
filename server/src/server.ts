@@ -211,7 +211,34 @@ app.get('/api/chat', async (_req: Request, res: Response) => {
   });
 });
 
-const failable = async (res: Response, name: string, thunk: () => Promise<void>) => {
+/**
+ * Generic labelled function execution with failure reporting to res and streamServer.
+ * On success, the returned promise of fn is returned.
+ * @param res response to use for reporting any failure
+ * @param name label to use for failure reporting
+ * @param fn the function to call
+ * @return on success the returned value from fn, on failure, a rejected promise.
+ */
+const failable = async <T>(res: Response, name: string, fn: () => Promise<T>) =>{
+  try {
+    return await fn();
+  } catch (e) {
+    const msg = `${name} failed`;
+    console.error(msg, e);
+    res.status(500).json({error: msg}).end();
+    streamServer.error(msg);
+    // TODO check callsite ergonomics
+    return Promise.reject(e);
+  }
+};
+
+/**
+ * Execute the given async thunk in a try context, identified by a name, returning a 500 error on failure.
+ * @param res the response to which a failure will be reported.
+ * @param name the label for which any failure will be reported.
+ * @param thunk async void function
+ */
+const failableVoid = async (res: Response, name: string, thunk: () => Promise<void>) => {
   try {
     return await thunk();
   } catch (e) {
@@ -219,6 +246,7 @@ const failable = async (res: Response, name: string, thunk: () => Promise<void>)
     console.error(msg, e);
     res.status(500).json({error: msg}).end();
     streamServer.error(msg);
+    // assuming a resolved promise of void is returned here
   }
 };
 
@@ -249,7 +277,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
       if (llmResponse) {
         streamServer.workflow("llm_response");
-        // this nested chain of calls needs to be a pre-wired modular production line
         const llmMessage = await timed("storing llm response",
             () => db.createCreatorTypeMessage(session, llmResponse, currentLlm));
 
@@ -257,7 +284,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
               async () => {
                 streamServer.workflow("tts_request");
-                const ssCreator = await db.findCreator(currentSpeech.getName(), currentSpeech.getMetadata(), true);
+                const ssCreator = await db.findCreatorForService(currentSpeech);
                 const mimeType = currentSpeech.speechOutputFormat().mimeType;
                 const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
                 const getTts: () => Promise<Tts> = () => db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
@@ -273,18 +300,17 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
             const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
             const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
             if (!mimeType) {
-              // this is a hack - how to signal NoLipsync lipsync animation?
+              // hack - better to signal NoLipsync lipsync more explicitly
               return Promise.reject("animator does not declare a Mime Type");
             } else {
               const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
               const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
+                streamServer.workflow("lipsync_request");
                 const lipsync = await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
                 console.log(`lipsync db id: ${lipsync.id}`);
-                streamServer.workflow("lipsync_request");
                 return currentAnimator.animate(portait, speechResult.filePath(), `${videoFile.id}`);
               });
               streamServer.workflow("lipsync_response");
-              // TODO return full session graph for enabling replay etc.
               res.json(({
                 response: {
                   portrait: portrait,
