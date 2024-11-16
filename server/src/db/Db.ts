@@ -9,6 +9,7 @@ import {Run} from "../domain/Run";
 import {Session} from "../domain/Session";
 import {Tts} from "../domain/Tts";
 import {VideoFile} from "../domain/VideoFile";
+import {CreatorService} from "../system/CreatorService";
 
 
 export const CREATOR_USER_NAME = 'user';
@@ -269,6 +270,10 @@ class Db {
     } finally {
       client.release();
     }
+  }
+
+  async findCreatorForService(creator: CreatorService) {
+    return this.findCreator(creator.getName(), creator.getMetadata(), true);
   }
 
   async findCreator(name: string, metadata: string | undefined, createIfMissing: boolean): Promise<Creator> {
