@@ -425,7 +425,7 @@ class Db {
   async createVideoFile(mimeType: string, creatorId: number, durationMs: number = -1): Promise<VideoFile> {
     const query = `insert into video (duration_ms, mime_type, creator)
                     values ($1, $2, $3)
-                    returning *`
+                    returning *`;
     const client = await this.pool.connect();
     try {
       const result = await client.query(query, [durationMs, mimeType, creatorId]);
