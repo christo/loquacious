@@ -83,8 +83,6 @@ function CompResponse({response, videoRef, hideVideo, showVideo, showChat}: Comp
   }
 }
 
-;
-
 const EMPTY_RESPONSE: ChatResponse = {
   messages: [],
   speech: undefined,

@@ -306,9 +306,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
               const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
                 streamServer.workflow("lipsync_request");
-                const lipsync = await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
-                console.log(`lipsync db id: ${lipsync.id}`);
-                return currentAnimator.animate(portait, speechResult.filePath(), `${videoFile.id}`);
+                const animatePromise = currentAnimator.animate(portait, speechResult.filePath(), `${videoFile.id}`);
+                await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
+                return await animatePromise;
               });
               streamServer.workflow("lipsync_response");
               res.json(({
