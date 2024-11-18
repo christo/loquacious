@@ -5,7 +5,7 @@ import {type MediaFormat, MF_MP3} from "media";
 import type {PathLike} from "node:fs";
 import path from "path";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
+import {AsyncSpeechResult, DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import util from "util";
@@ -101,7 +101,7 @@ class MacOsSpeech implements SpeechSystem {
           if (desiredFormat !== 'aiff') {
             result = timed("convert audio format", () => convertAudio(desiredFormat, aiffFile)).then(_s => {
               // shouldn't need await
-              timed("clean up aiff audio", () => unlinkPromise(aiffFile))
+              timed("clean up aiff audio", () => unlinkPromise(aiffFile));
               return _s;
             });
           } else {
@@ -116,18 +116,15 @@ class MacOsSpeech implements SpeechSystem {
         console.error("problem executing say command", e);
         result = Promise.reject(e);
       }
-      const audioFile = await result;
-      return {
-        filePath: () => audioFile,
-        tts: () => undefined
-      } as SpeechResult;
+      return AsyncSpeechResult.fromPromises(result, Promise.resolve(undefined));
+
     } catch (error) {
       console.error('An error occurred during speech synthesis:', error);
       return Promise.reject(error);
     }
   }
 
-  outputFormat(): MediaFormat {
+  speechOutputFormat(): MediaFormat {
     return MF_MP3;
   }
 

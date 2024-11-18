@@ -3,7 +3,7 @@ import fs from 'fs';
 import type {PathLike} from "node:fs";
 import path from "path";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
+import {AsyncSpeechResult, DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import {Message} from "../domain/Message";
@@ -11,6 +11,7 @@ import {type MediaFormat, MF_MP3} from "../media";
 import {hasEnv} from "../system/config";
 
 import {mkDirIfMissing} from "../system/filetoy";
+import {Tts} from "../domain/Tts";
 
 const VOICES = [
   new CharacterVoice("Andromeda - warm and lovely", "Andromeda", "Posh English woman, mid tones (5)"),
@@ -95,7 +96,7 @@ class ElevenLabsSpeech implements SpeechSystem {
    * Requires environment variable ELEVEN_LABS_API_KEY
    */
   canRun = hasEnv("ELEVENLABS_API_KEY");
-  private currentVoice = 0;
+  private currentVoice = VOICES.findIndex(v => v.name === "Sigrid") ;
   private readonly dataDir: string;
 
   /**
@@ -163,8 +164,8 @@ class ElevenLabsSpeech implements SpeechSystem {
 
         outStream.on('finish', () => {
           console.log('speech file writing completed successfully.');
-          // hack alert
-          resolve({filePath: () => outFile, tts: () => undefined});
+          // hack alert - tts has a circular dependency in construction
+          resolve(AsyncSpeechResult.fromValues(outFile, undefined));
         });
         audio.pipe(outStream);
       })
@@ -214,7 +215,7 @@ class ElevenLabsSpeech implements SpeechSystem {
     return false;
   }
 
-  outputFormat(): MediaFormat {
+  speechOutputFormat(): MediaFormat {
     return MF_MP3;
   }
 

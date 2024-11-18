@@ -10,7 +10,7 @@ import {Modes} from "llm/Modes";
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
-import type {SpeechResult} from "speech/SpeechSystem";
+import {AsyncSpeechResult, SpeechResult} from "speech/SpeechSystem";
 import {SpeechSystems} from "speech/SpeechSystems";
 import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
@@ -27,6 +27,7 @@ import {RunInfo} from "./domain/RunInfo";
 import {SystemSummary} from "./domain/SystemSummary";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
+import {Tts} from "./domain/Tts";
 import Agent = Undici.Agent;
 
 
@@ -200,7 +201,7 @@ app.get('/session', async (_req: Request, res: Response) => {
 app.get('/api/chat', async (_req: Request, res: Response) => {
   await failable(res, "get chat", async () => {
     const session = await db.getOrCreateSession();
-    const messages = await db.getSessionMessages(session);
+    const messages = await db.getMessages(session);
     res.json({
       response: {
         session: session.id,
@@ -210,7 +211,34 @@ app.get('/api/chat', async (_req: Request, res: Response) => {
   });
 });
 
-const failable = async (res: Response, name: string, thunk: () => Promise<void>) => {
+/**
+ * Generic labelled function execution with failure reporting to res and streamServer.
+ * On success, the returned promise of fn is returned.
+ * @param res response to use for reporting any failure
+ * @param name label to use for failure reporting
+ * @param fn the function to call
+ * @return on success the returned value from fn, on failure, a rejected promise.
+ */
+const failable = async <T>(res: Response, name: string, fn: () => Promise<T>) =>{
+  try {
+    return await fn();
+  } catch (e) {
+    const msg = `${name} failed`;
+    console.error(msg, e);
+    res.status(500).json({error: msg}).end();
+    streamServer.error(msg);
+    // TODO check callsite ergonomics
+    return Promise.reject(e);
+  }
+};
+
+/**
+ * Execute the given async thunk in a try context, identified by a name, returning a 500 error on failure.
+ * @param res the response to which a failure will be reported.
+ * @param name the label for which any failure will be reported.
+ * @param thunk async void function
+ */
+const failableVoid = async (res: Response, name: string, thunk: () => Promise<void>) => {
   try {
     return await thunk();
   } catch (e) {
@@ -218,6 +246,7 @@ const failable = async (res: Response, name: string, thunk: () => Promise<void>)
     console.error(msg, e);
     res.status(500).json({error: msg}).end();
     streamServer.error(msg);
+    // assuming a resolved promise of void is returned here
   }
 };
 
@@ -235,20 +264,10 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const currentModel = await currentLlm.currentModel();
       const currentSpeech = speechSystems.current();
       const currentAnimator = animators.current();
-      const buildResponse = (messages: Message[], speechFilePath?: string, lipsyncResult?: LipSyncResult) => ({
-        response: {
-          portrait: portrait,
-          messages: messages,
-          speech: speechFilePath,
-          lipsync: lipsyncResult,
-          llm: currentLlm.getName(),
-          model: currentModel,
-        }
-      });
       let session = await db.getOrCreateSession();
       console.log("storing user message");
       await db.createUserMessage(session, prompt);
-      const messageHistory: Message[] = await db.getSessionMessages(session);
+      const messageHistory: Message[] = await db.getMessages(session);
       const mode = modes.getChatPrepper();
       let allMessages = mode(messageHistory, currentSpeech);
       let llmResponse: string | null = await timed("text generation", async () => {
@@ -258,7 +277,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
       if (llmResponse) {
         streamServer.workflow("llm_response");
-        // this nested chain of calls needs to be a pre-wired modular production line
         const llmMessage = await timed("storing llm response",
             () => db.createCreatorTypeMessage(session, llmResponse, currentLlm));
 
@@ -266,42 +284,49 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
               async () => {
                 streamServer.workflow("tts_request");
-                const ssCreator = await db.findCreator(currentSpeech.getName(), currentSpeech.getMetadata(), true);
-                const mimeType = currentSpeech.outputFormat().mimeType;
+                const ssCreator = await db.findCreatorForService(currentSpeech);
+                const mimeType = currentSpeech.speechOutputFormat().mimeType;
                 const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
-                const sr = await currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
-                const tts = await db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
-                return {...sr, tts: () => tts} as SpeechResult;
+                const getTts: () => Promise<Tts> = () => db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
+                const psr: Promise<SpeechResult> = currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
+                const newPfp = () => psr.then(sr => sr.filePath());
+                return Promise.resolve(new AsyncSpeechResult(newPfp, getTts));
               }
           );
-          const speechFilePath = speechResult.filePath();
-          if (speechFilePath) {
-            streamServer.workflow("tts_response");
-            const portait = path.join(pathPortrait(), portrait.f).toString();
-            await failable(res, "lipsync generation", async () => {
-              const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
-              const mimeType = currentAnimator.outputFormat()?.mimeType;
-              if (!mimeType) {
-                // this is a hack - how to signal NoLipsync lipsync animation?
-                return Promise.reject("animator does not declare a Mime Type");
-              } else {
-                const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
-                const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
-                  const lipsync = await db.createLipSync(lipsyncCreator.id, speechResult.tts()!.id, videoFile.id);
-                  console.log(`lipsync db id: ${lipsync.id}`);
-                  streamServer.workflow("lipsync_request");
-                  return currentAnimator.animate(portait, speechFilePath!, `${videoFile.id}`);
-                });
-                streamServer.workflow("lipsync_response");
-                // TODO return full session graph for enabling replay etc.
-                const finalMessages = (await db.getSessionMessages(session)).map(m => currentSpeech.removePauseCommands(m));
-                res.json(buildResponse(finalMessages, speechFilePath, lipsyncResult));
-                await currentAnimator.writeCacheFile();
-              }
-            })
-          } else {
-            res.json(buildResponse(await db.getSessionMessages(session), undefined, undefined));
-          }
+
+          streamServer.workflow("tts_response");
+          const portait = path.join(pathPortrait(), portrait.f).toString();
+          await failable(res, "lipsync generation", async () => {
+            const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
+            const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
+            if (!mimeType) {
+              // hack - better to signal NoLipsync lipsync more explicitly
+              return Promise.reject("animator does not declare a Mime Type");
+            } else {
+              const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
+              const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
+                streamServer.workflow("lipsync_request");
+                const animatePromise = currentAnimator.animate(portait, speechResult.filePath(), `${videoFile.id}`);
+                await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
+                return await animatePromise;
+              });
+              streamServer.workflow("lipsync_response");
+              res.json(({
+                response: {
+                  portrait: portrait,
+                  // TODO should not use currentSpeech to remove pause commands, the TTS system should be
+                  //   attached to the message request as the LLM was instructed at that point
+                  messages: (await db.getMessages(session)).map(m => currentSpeech.removePauseCommands(m)),
+                  speech: await speechResult.filePath(),
+                  lipsync: lipsyncResult,
+                  llm: currentLlm.getName(),
+                  model: currentModel,
+                }
+              }));
+              await currentAnimator.postResponseHook();
+            }
+          })
+
         });
       } else {
         res.status(500).json({error: 'No message in response'});

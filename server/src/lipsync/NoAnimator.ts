@@ -17,7 +17,7 @@ class NoAnimator implements LipSyncAnimator {
         return undefined;
     }
 
-    animate(_imageFile: string, _speechFile: string, _fileKey: string): Promise<LipSyncResult> {
+    animate(_imageFile: string, _speechFile: Promise<string>, _fileKey: string): Promise<LipSyncResult> {
         return Promise.reject();
     }
 
@@ -29,11 +29,11 @@ class NoAnimator implements LipSyncAnimator {
         return "No Animator";
     }
 
-    outputFormat(): MediaFormat | undefined {
+    videoOutputFormat(): MediaFormat | undefined {
         return undefined;
     }
 
-    writeCacheFile(): Promise<void> {
+    postResponseHook(): Promise<void> {
         return Promise.resolve();
     }
 

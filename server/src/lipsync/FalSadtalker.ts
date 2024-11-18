@@ -43,7 +43,7 @@ type UrlCache = { [keyof: string]: string };
 class FalSadtalker implements LipSyncAnimator {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
   private readonly name = "FalSadtalker";
-  canRun = hasEnv("FAL_API_KEY")
+  canRun = hasEnv("FAL_API_KEY");
   private readonly dataDir: string;
   private readonly urlCache: UrlCache;
   private sadtalkerConfig: FalSadtalkerInput = {
@@ -87,10 +87,10 @@ class FalSadtalker implements LipSyncAnimator {
     return this.urlCache[filePath];
   }
 
-  async animate(img: string, speech: string, filekey: string): Promise<LipSyncResult> {
+  async animate(img: string, speech: Promise<string>, filekey: string): Promise<LipSyncResult> {
     const imgUrl = await this.urlFor(img);
     // don't bother caching speech, reuse is vanishingly rare
-    const speechUrl = await fal.storage.upload(await readBinaryFile(speech));
+    const speechUrl = await fal.storage.upload(await readBinaryFile(await speech));
     const result: Result<{ video: SadTalkerResult }> = await timed(
       "fal run sadtalker",
       async () => {
@@ -110,7 +110,9 @@ class FalSadtalker implements LipSyncAnimator {
       });
   }
 
-  async writeCacheFile(): Promise<void> {
+  async postResponseHook(): Promise<void> {
+    // TODO cache entries should be invalidated roughly weekly - fal does not keep uploads longer than two weeks
+    //   so cache entries need datestamps
     try {
       return promises.writeFile(this.urlCacheFile, JSON.stringify(this.urlCache), 'utf-8');
     } catch (error: unknown) {
@@ -136,7 +138,7 @@ class FalSadtalker implements LipSyncAnimator {
     return false;
   }
 
-  outputFormat(): MediaFormat {
+  videoOutputFormat(): MediaFormat {
     return MF_MP4;
   }
 

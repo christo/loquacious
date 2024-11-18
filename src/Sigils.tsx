@@ -1,4 +1,4 @@
-import {CircularProgress, Stack} from "@mui/material";
+import {CircularProgress, Stack, Tooltip} from "@mui/material";
 import {Detection} from "@mediapipe/tasks-vision";
 import {WorkflowStep} from "../server/src/system/WorkflowStep.ts";
 import {Boy} from "@mui/icons-material";
@@ -26,21 +26,23 @@ function PunterDetectIcons({people, sx}: { people: Detection[], sx: any }) {
   </Stack>;
 }
 
-function ShowSigil(props: {sx: any, sigil: ReactNode}) {
-  return <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
-    {props.sigil}
-  </SvgIcon>
+function ShowSigil(props: { sx: any, sigil: [ReactNode, string] }) {
+  return <Tooltip title={props.sigil[1]}>
+    <SvgIcon color="warning" viewBox="0 0 512 512" fontSize="large" sx={props.sx}>
+      {props.sigil[0]}
+    </SvgIcon>
+  </Tooltip>;
 }
 
 function WorkflowIcons({sx, step}: { step: WorkflowStep, sx: any }) {
-  const sigilMap: {[keyof: string]: ReactNode} = {
-    "idle": <IdleSigil/>,
-    "llm_request": <LlmRequestSigil/>,
-    "llm_response": <LlmResponseSigil/>,
-    "tts_request": <TtsRequestSigil/>,
-    "tts_response": <TtsResponseSigil/>,
-    "lipsync_request": <LipsyncRequestSigil/>,
-    "lipsync_response": <LipsyncResponseSigil/>,
+  const sigilMap: { [keyof: string]: [ReactNode, string] } = {
+    "idle": [<IdleSigil/>, "AI Waiting"], // not really idle if detection models active
+    "llm_request": [<LlmRequestSigil/>, "LLM Request Sent"],
+    "llm_response": [<LlmResponseSigil/>, "LLM Response Received"],
+    "tts_request": [<TtsRequestSigil/>, "Speech Synthesis Requested"],
+    "tts_response": [<TtsResponseSigil/>, "Speech Synthesis Response Received"],
+    "lipsync_request": [<LipsyncRequestSigil/>, "Lip Sync Requested"],
+    "lipsync_response": [<LipsyncResponseSigil/>, "Lip Sync Response Received"],
   };
 
   return <Stack gap={1} sx={{alignItems: "center"}}>
@@ -71,7 +73,7 @@ export function Sigils(props: SigilsParams) {
   };
   return <Stack gap={1} alignItems="end" sx={{position: "absolute", top: 50, right: 50, zIndex: 800}}>
     {<CircularProgress size="2rem" color="warning" sx={{opacity: props.loading ? 1.0 : 0, ...dropShadow}}/>}
-    {props.socketConnected && <ShowSigil sx={dropShadow} sigil={<SocketConnectSigil/>}/>}
+    {props.socketConnected && <ShowSigil sx={dropShadow} sigil={[<SocketConnectSigil/>, "Socket Stream Connected"]}/>}
     {props.workflowSigils && <WorkflowIcons step={props.workflow} sx={dropShadow}/>}
     {(props.punterDetection && props.debugOverlay && <PunterDetectIcons people={props.people} sx={dropShadow}/>)}
   </Stack>;

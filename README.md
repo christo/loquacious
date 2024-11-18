@@ -6,7 +6,7 @@ AI face-to-face fortune teller chat experiment.
 
 ## Project Status
 
-* Supports multiple characters defined solely by portrait image and voice
+* Supports multiple characters defined solely by portrait image and voice selection.
 * Minimal web application front-end, REST back end
 * LLM integration for reasonable fortune teller interaction text,
   implementations:
@@ -94,16 +94,16 @@ Non-verbal portrait animation is apparently achievable by using reference video.
 This would violate the above design constraint. Maybe this video could be
 captured from user input - maybe even system-operator user input? Given that
 user video capture is intended for core functionality, it may be interesting to
-provide gesture demonstration input as a design-time feature. Character design
+provide gesture demonstration input as a runtime feature. Character design
 could be more independent of system code.
 
 ## Character Portrait
 
-The first thing a user sees when interacting with the system is a portrait of a
-fortune teller. Various text-to-image generative systems have been used to
-create make these characters at design time although in theory, this could be
-created on demand. In a full realisation of such a system, the character may be
-gently animated in a suitable waiting state like a meditative trance.
+The first thing a user sees when interacting with the system is a portrait of a fortune teller.
+Various text-to-image generative systems have been used to create these characters before the system
+boots although this could easily be generated, uploaded or captured from a camera. In a full
+realisation of such a system, the character may be gently animated in a suitable waiting state like
+a meditative trance.
 
 Various design alternatives include making the installation like a portal or
 magic mirror through which the character could be summoned akin to a kind of
@@ -244,6 +244,7 @@ is not speaking. These can be categorised and used appropriately.
 * Q: Could a character-design mode be worth adding where image, voice and
   gesture capture is configured?
 * Q: Could these videos be used as additional video input to lipsync?
+* Q: Can a parametric animated character render be used as reference video for gesture animation?
 
 ## Expert System
 
@@ -325,7 +326,7 @@ both local and as online API services.
     * see comment in `VideoCamera.tsx`
   * [ ] detect when a person approaches, describe what they look like etc.
     * distinguish presence vs approach over time
-  * [ ] object persistence tracking with inter-frame object detection matching 
+  * [ ] object persistence tracking with inter-frame object detection matching
   * [ ] periodic pose estimation to detect mode state transitions
   * ? detect if they are in an engaged mode or just looking
   * invite them to sit down and chat

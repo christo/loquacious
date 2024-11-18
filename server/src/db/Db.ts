@@ -9,6 +9,7 @@ import {Run} from "../domain/Run";
 import {Session} from "../domain/Session";
 import {Tts} from "../domain/Tts";
 import {VideoFile} from "../domain/VideoFile";
+import {CreatorService} from "../system/CreatorService";
 
 
 export const CREATOR_USER_NAME = 'user';
@@ -271,6 +272,10 @@ class Db {
     }
   }
 
+  async findCreatorForService(creator: CreatorService) {
+    return this.findCreator(creator.getName(), creator.getMetadata(), true);
+  }
+
   async findCreator(name: string, metadata: string | undefined, createIfMissing: boolean): Promise<Creator> {
     const client = await this.pool.connect();
     try {
@@ -369,10 +374,11 @@ class Db {
    * Fetch all the messages for a session in sequence order.
    * @param session
    */
-  async getSessionMessages(session: Session): Promise<Message[]> {
+  async getMessages(session: Session): Promise<Message[]> {
     if (!this.booted) {
       throw new Error("db is not booted");
     }
+    // TODO join db ids of video, or if absent, speech and provide replay button for speech bubble ui
     const query = `select m.id,
                           m.created,
                           m.content,
@@ -419,7 +425,7 @@ class Db {
   async createVideoFile(mimeType: string, creatorId: number, durationMs: number = -1): Promise<VideoFile> {
     const query = `insert into video (duration_ms, mime_type, creator)
                     values ($1, $2, $3)
-                    returning *`
+                    returning *`;
     const client = await this.pool.connect();
     try {
       const result = await client.query(query, [durationMs, mimeType, creatorId]);
