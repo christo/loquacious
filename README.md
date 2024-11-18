@@ -244,6 +244,7 @@ is not speaking. These can be categorised and used appropriately.
 * Q: Could a character-design mode be worth adding where image, voice and
   gesture capture is configured?
 * Q: Could these videos be used as additional video input to lipsync?
+* Q: Can a parametric animated character render be used as reference video for gesture animation?
 
 ## Expert System
 
