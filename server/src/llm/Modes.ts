@@ -76,10 +76,10 @@ const pauseInstructions = (ss: SpeechSystem): PromptPart => {
 /**
  * Initiated by us to invite a conversation.
  *
- * @param chatHistory currently ignored.
+ * @param _chatHistory currently ignored.
  * @param ss speech system to render for.
  */
-const inviteModeMessages = (chatHistory: Message[], ss: SpeechSystem): OpenAIMsg[] => {
+const inviteModeMessages = (_chatHistory: Message[], ss: SpeechSystem): OpenAIMsg[] => {
   console.log("invite mode function");
   const systemPrompt = [
     dateTimePrompt(),
