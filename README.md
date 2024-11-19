@@ -257,11 +257,10 @@ on user input.
 
 # System Design
 
-Currently only operated in devmode on MacOS. It should work on any system but
-`MacOsSpeech` will not show up. Native subsystem implementations should detect
-missing system requirements at boot and show up disabled. Likewise, if a
-component implementation is missing a required API key set in the `.env` file,
-this component will not be registered at boot time.
+Currently only operated in devmode on MacOS. It should work on any operating system but
+`MacOsSpeech` will only show up on MacOS. Native subsystem implementations should detect missing
+system requirements at boot and show up disabled. Likewise, if a component implementation is missing
+a required API key set in the `.env` file, this component will not be registered at boot time.
 
 Database is postgres. `node-pg-migrate` scripts defined in `server/package.json`
 to create tables etc. Production deployment process is yet to be defined.
