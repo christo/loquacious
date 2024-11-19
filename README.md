@@ -121,7 +121,7 @@ Suitable character portraits seem to have the following features:
   Otherwise they will be warped.
 * Body position ideally should look natural if held still indefinitely. Having
   the character's hands on a crystal ball or be hidden somehow makes the
-  anticipated absence of hand gestures less conspicuous.
+  absence of hand gestures less conspicuous.
 * Face lighting and colour should be most like the training data. Face paint,
   extreme wrinkles, exaggerated features, excessive shadows or extreme postures
   all seem to result in pathalogically bad lip sync results.
