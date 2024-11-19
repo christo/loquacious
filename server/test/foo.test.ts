@@ -1,6 +1,6 @@
 import {assert} from 'chai';
 
-describe("foo", () => {
+descaribe("foo", () => {
   it("should not explode", () => {
     assert.equal(2 + 5, 7);
   });

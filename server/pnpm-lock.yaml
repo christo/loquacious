@@ -30,7 +30,7 @@ importers:
         specifier: ^6.2.2
         version: 6.2.2(pg@8.13.1)
       openai:
-        specifier: ^4.72.0
+        specifier: ^4.67.0
         version: 4.72.0
       pg:
         specifier: ^8.13.1
