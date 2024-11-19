@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import {hasEnv} from "../system/config";
 import type {ChatResult, Llm} from "./Llm";
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
-import Model = OpenAI.Model;
+type Model = OpenAI.Model;
 
 const CANNOT_DO_SYSTEM_PROMPT = [
   "o1preview"
