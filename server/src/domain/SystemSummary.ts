@@ -1,8 +1,8 @@
 import {SpeechSystemOption} from "../speech/SpeechSystems";
 import {RunInfo} from "./RunInfo";
 import OpenAI from "openai";
-import Model = OpenAI.Model;
 
+type Model = OpenAI.Model;
 
 type Module = {
   current: string,

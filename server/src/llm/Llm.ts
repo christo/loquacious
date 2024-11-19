@@ -1,6 +1,9 @@
 import OpenAI from "openai";
 import type {CreatorService} from "../system/CreatorService";
-import Model = OpenAI.Model;
+
+type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
+
+type Model = OpenAI.Model;
 
 /**
  * Encapsulates a result from calling chat on an Llm.
@@ -17,7 +20,7 @@ interface Llm extends CreatorService {
   baseUrl: string | undefined,
   enableHealth: boolean,
   models: () => Promise<Array<Model>>
-  chat: (params: OpenAI.Chat.Completions.ChatCompletionMessageParam[]) => Promise<ChatResult>;
+  chat: (params: OpenAIMsg[]) => Promise<ChatResult>;
   currentModel: () => Promise<Model>;
 
   setCurrentOption(value: string): Promise<void>;
