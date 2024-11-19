@@ -309,7 +309,9 @@ both local and as online API services.
   * keep existing endpoints for integration ease
   * one websocket for streaming bidirectional state updates (need appropriate protocol)
   * one websocket for media streaming
-* [ ] add websocket streaming status updates so workflow orchestration status is visible via icons
+* [x] add websocket streaming status updates so workflow orchestration status is visible via icons
+* [ ] spike Mocha & Chai
+  * [ ] spike of Bun to make TS easier with test config
 * [ ] shoot project status screencast
 * [ ] test lipsync and speech with failed/disabled video - should play audio keeping image portrait
 * [ ] pose estimation and vision using mediapipe
