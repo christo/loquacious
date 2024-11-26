@@ -210,8 +210,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       console.log("storing user message");
       await db.createUserMessage(session, prompt);
       const messageHistory: Message[] = await db.getMessages(session);
-      const mode = loq.modes.getChatPrepper();
-      let allMessages = mode(messageHistory, currentSpeech);
+      const chatPrepper = loq.modes.getChatPrepper();
+      let allMessages = chatPrepper(messageHistory, currentSpeech);
       let llmResponse: string | null = await timed("text generation", async () => {
         const response = await currentLlm.chat(allMessages);
         return response.message
@@ -222,6 +222,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         const llmMessage = await timed("storing llm response",
             () => db.createCreatorTypeMessage(session, llmResponse, currentLlm));
 
+        // start tts request
+
         await failable(res, "speech generation", async () => {
           const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
               async () => {
@@ -231,12 +233,16 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                 const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
                 const getTts: () => Promise<Tts> = () => db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
                 const psr: Promise<SpeechResult> = currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
+                // baby dragon!
                 const newPfp = () => psr.then(sr => sr.filePath());
                 return Promise.resolve(new AsyncSpeechResult(newPfp, getTts));
               }
           );
 
           streamServer.workflow("tts_response");
+
+          // start lipsync request
+
           const portait = path.join(pathPortrait(), portrait.f).toString();
           await failable(res, "lipsync generation", async () => {
             const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
