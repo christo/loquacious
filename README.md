@@ -312,6 +312,7 @@ both local and as online API services.
 * [x] add websocket streaming status updates so workflow orchestration status is visible via icons
 * [x] spike Mocha & Chai
   * [x] spike of Bun to make TS easier with test config
+* [ ] extract core logic out of `server.ts`
 * [ ] shoot project status screencast
 * [ ] test lipsync and speech with failed/disabled video - should play audio keeping image portrait
 * [ ] pose estimation and vision using mediapipe
