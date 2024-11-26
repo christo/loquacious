@@ -372,7 +372,7 @@ app.listen(port, async () => {
   const llm = llms.current();
   console.log(`LLM Health check: ${llm.enableHealth ? "enabled" : "disabled"}`);
   console.log(`LLM back end: ${llm.getName()} at URL: ${(llm.baseUrl)}`);
-  console.log(`LLM current model: ${await llm.currentModel()}`);
+  console.log(`LLM current model: ${await llm.currentModel().then(m => m.id)}`);
   const models = await llm.models();
   console.log(`LLM available models (${models.length}):`);
   models.forEach(m => console.log(`   ${m.id}`));
