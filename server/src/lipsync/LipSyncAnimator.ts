@@ -61,6 +61,9 @@ interface LipSyncAnimator extends CreatorService {
    */
   postResponseHook(): Promise<void>;
 
+  /**
+   * Declare the output format.
+   */
   videoOutputFormat(): MediaFormat | undefined;
 
   /**

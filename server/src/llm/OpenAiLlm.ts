@@ -65,7 +65,12 @@ class OpenAiLlm implements Llm {
       model: this.modelName,
       messages: messages
     });
-    return {message: response.choices[0]?.message?.content as (string | null)} as ChatResult;
+    const text = response.choices[0]?.message?.content as (string | null);
+    return this.currentModel().then(m => ({
+      message: text,
+      llm: this.name,
+      model: m
+    } as ChatResult));
   }
 
   getMetadata(): string | undefined {

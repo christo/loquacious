@@ -67,7 +67,12 @@ class LmStudioLlm implements Llm {
       model: model,
       messages: messages
     });
-    return {message: response.choices[0]?.message?.content as (string | null)} as ChatResult;
+    const text = response.choices[0]?.message?.content as (string | null);
+    return {
+      message: text,
+      llm: this.name,
+      model: await this.currentModel()
+    } as ChatResult;
   }
 
   getMetadata(): string | undefined {

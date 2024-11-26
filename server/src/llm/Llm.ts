@@ -8,8 +8,10 @@ type Model = OpenAI.Model;
 /**
  * Encapsulates a result from calling chat on an Llm.
  */
-type ChatResult = {
+interface ChatResult {
   message: string | null;
+  llm: string;
+  model: Model;
 }
 
 /**

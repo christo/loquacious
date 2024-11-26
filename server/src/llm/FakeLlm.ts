@@ -16,9 +16,9 @@ class FakeModel implements Model {
   id: string;
   object: "model";
   owned_by: string;
-  chat: (params: OpenAIMsg[]) => ChatResult;
+  chat: (params: OpenAIMsg[]) => string;
 
-  constructor(id: string, fn: (params: OpenAIMsg[]) => ChatResult) {
+  constructor(id: string, fn: (params: OpenAIMsg[]) => string) {
     this.created = 0;
     this.id = id;
     this.object = "model";
@@ -42,19 +42,24 @@ class FakeLlm implements Llm {
   canRun = always;
   private currentModelKey = "echo";
   private readonly myModels: { [key: string]: FakeModel; } = {
-    static: new FakeModel("static", (_params: OpenAIMsg[]) => ({message: "fake chat result"})),
+    static: new FakeModel("static", (_params: OpenAIMsg[]) => "fake chat result"),
     echo: new FakeModel("echo", (params: OpenAIMsg[]) => {
       try {
-        return {message: (params!.filter(mp => mp.role === "user")!.pop())!.content.toString()!}
+        return (params!.filter(mp => mp.role === "user")!.pop())!.content.toString()!;
       } catch (err) {
-        return {message: `I tried to be fake but I failed. Here's how it went down: ${err}`}
+        return `I tried to be fake but I failed. Here's how it went down: ${err}`;
       }
     }),
-    clock: new FakeModel("clock", (_params: OpenAIMsg[]) => ({message: dateTimeMessage()})),
+    clock: new FakeModel("clock", (_params: OpenAIMsg[]) => dateTimeMessage()),
   };
 
   chat(_params: OpenAIMsg[]): Promise<ChatResult> {
-    return Promise.resolve(this.myModels[this.currentModelKey].chat(_params));
+    const text = this.myModels[this.currentModelKey].chat(_params);
+    return Promise.resolve({
+      message: text,
+      model: this.myModels[this.currentModelKey],
+      llm: this.name
+    });
   }
 
   currentModel(): Promise<Model> {

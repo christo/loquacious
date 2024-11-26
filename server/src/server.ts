@@ -5,7 +5,7 @@ import express, {Request, Response} from 'express';
 import {promises} from 'fs';
 import {ImageInfo} from "image/ImageInfo";
 import {prescaleImages} from "image/imageOps";
-import type {LipSyncResult} from "lipsync/LipSyncAnimator";
+import type {LipSyncInput, LipSyncResult} from "lipsync/LipSyncAnimator";
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
@@ -203,7 +203,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     streamServer.workflow("llm_request");
     await failable(res, "loquacious chat", async () => {
       const currentLlm = loq.llms.current();
-      const currentModel = await currentLlm.currentModel();
       const currentSpeech = loq.speechSystems.current();
       const currentAnimator = loq.animators.current();
       let session = await db.getOrCreateSession();
@@ -212,38 +211,29 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const messageHistory: Message[] = await db.getMessages(session);
       const chatPrepper = loq.modes.getChatPrepper();
       let allMessages = chatPrepper(messageHistory, currentSpeech);
-      let llmResponse: string | null = await timed("text generation", async () => {
-        const response = await currentLlm.chat(allMessages);
-        return response.message
-      });
+      let llmResponse = await timed("text generation", () => currentLlm.chat(allMessages));
 
-      if (llmResponse) {
+      if (llmResponse.message !== null) {
         streamServer.workflow("llm_response");
         const llmMessage = await timed("storing llm response",
-            () => db.createCreatorTypeMessage(session, llmResponse, currentLlm));
-
-        // start tts request
+            () => db.createCreatorTypeMessage(session, llmResponse.message!, currentLlm));
+        const doSpeechSynthesis = async () => {
+          streamServer.workflow("tts_request");
+          const ssCreator = await db.findCreatorForService(currentSpeech);
+          const mimeType = currentSpeech.speechOutputFormat().mimeType;
+          const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
+          const getTts: () => Promise<Tts> = () => db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
+          const psr: Promise<SpeechResult> = currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
+          // baby dragon!
+          const newPfp = () => psr.then(sr => sr.filePath());
+          return Promise.resolve(new AsyncSpeechResult(newPfp, getTts));
+        };
 
         await failable(res, "speech generation", async () => {
-          const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
-              async () => {
-                streamServer.workflow("tts_request");
-                const ssCreator = await db.findCreatorForService(currentSpeech);
-                const mimeType = currentSpeech.speechOutputFormat().mimeType;
-                const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
-                const getTts: () => Promise<Tts> = () => db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
-                const psr: Promise<SpeechResult> = currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
-                // baby dragon!
-                const newPfp = () => psr.then(sr => sr.filePath());
-                return Promise.resolve(new AsyncSpeechResult(newPfp, getTts));
-              }
-          );
 
+          const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis", doSpeechSynthesis);
           streamServer.workflow("tts_response");
 
-          // start lipsync request
-
-          const portait = path.join(pathPortrait(), portrait.f).toString();
           await failable(res, "lipsync generation", async () => {
             const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
             const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
@@ -254,7 +244,13 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
               const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
                 streamServer.workflow("lipsync_request");
-                const animatePromise = currentAnimator.animate(portait, speechResult.filePath(), `${videoFile.id}`);
+                const lsi = speechResult.filePath().then(sf => ({
+                  fileKey: `${videoFile.id}`,
+                  imageFile: path.join(pathPortrait(), portrait.f).toString(),
+                  speechFile: sf
+                } as LipSyncInput));
+
+                const animatePromise = currentAnimator.loqModule().call(lsi);
                 await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
                 return await animatePromise;
               });
@@ -268,7 +264,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                   speech: await speechResult.filePath(),
                   lipsync: lipsyncResult,
                   llm: currentLlm.getName(),
-                  model: currentModel,
+                  model: llmResponse.model,
                 }
               }));
               await currentAnimator.postResponseHook();

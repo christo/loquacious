@@ -1,6 +1,7 @@
 import type {ChatResult, Llm} from "llm/Llm";
 import OpenAI from "openai";
 import {always} from "../system/config";
+
 type Model = OpenAI.Model;
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
@@ -51,7 +52,12 @@ class LlamaCppLlm implements Llm {
       model: "no-idea-is_model-ignored",
       messages: messages
     });
-    return {message: response.choices[0]?.message?.content as (string | null)} as ChatResult;
+    const text = response.choices[0]?.message?.content as (string | null);
+    return {
+      message: text,
+      llm: this.name,
+      model: await this.currentModel(),
+    } as ChatResult;
   }
 
   getMetadata(): string | undefined {
