@@ -305,22 +305,10 @@ both local and as online API services.
 
 ## TODO
 
-* [x] spike websockets
-  * keep existing endpoints for integration ease
-  * one websocket for streaming bidirectional state updates (need appropriate protocol)
-  * one websocket for media streaming
-* [x] add websocket streaming status updates so workflow orchestration status is visible via icons
-* [x] spike Mocha & Chai
-  * [x] spike of Bun to make TS easier with test config
 * [ ] extract core logic out of `server.ts`
+* [ ] test DiD service
 * [ ] shoot project status screencast
 * [ ] test lipsync and speech with failed/disabled video - should play audio keeping image portrait
-* [x] pose estimation using mediapipe
-  * [x] pose estimation of portrait
-  * [x] download all mediapipe resources for offline operation
-    * [x] WasmFileset with base url in web app, use vite build step to copy npm dep from
-      `node_modules` - check how vite lifecycle works here (plugin or ?)
-  * [x] face estimation of portrait
 * [ ] vision system
   * [ ] spike seamless audio/video streaming to server, simultaneous to client-side pose est.
   * pose estimation on client - assumes stable camera (can we detect camera motion?)
