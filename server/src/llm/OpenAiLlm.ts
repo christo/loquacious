@@ -1,12 +1,13 @@
 import OpenAI from "openai";
 import {hasEnv} from "../system/config";
 import type {ChatResult, Llm} from "./Llm";
-import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
-import Model = OpenAI.Model;
+type Model = OpenAI.Model;
+
+type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 const CANNOT_DO_SYSTEM_PROMPT = [
   "o1preview"
-]
+];
 
 /**
  * OpenAI LLM Backend
@@ -59,7 +60,7 @@ class OpenAiLlm implements Llm {
     return modelsPage.data.filter(m => !CANNOT_DO_SYSTEM_PROMPT.includes(m.id)) as Array<Model>;
   }
 
-  async chat(messages: Array<ChatCompletionMessageParam>): Promise<ChatResult> {
+  async chat(messages: Array<OpenAIMsg>): Promise<ChatResult> {
     const response = await this.openai.chat.completions.create({
       model: this.modelName,
       messages: messages

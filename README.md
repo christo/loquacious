@@ -25,7 +25,7 @@ AI face-to-face fortune teller chat experiment.
   * (WIP) analyse self-portrait for lipsync suitability i.e. dimensions, framing
 * Postgres database for storing and tracing all interactions and intermediate
   media assets.
-* Video capture is **in progress**
+_ Video capture is __in progress__
   * client-side object detection and pose estimation is used to detect
     approaching users
   * Fortune teller self-portrait is mapped for facial landmarks to enable
@@ -78,6 +78,7 @@ The documents here are a bit disorganised and quite verbose. See also:
 
 * [general notes](notes.md)
 * [database schema notes](db-schema.md)
+* [build and run](build.md)
 
 ## Design Principles
 
@@ -121,7 +122,7 @@ Suitable character portraits seem to have the following features:
   Otherwise they will be warped.
 * Body position ideally should look natural if held still indefinitely. Having
   the character's hands on a crystal ball or be hidden somehow makes the
-  anticipated absence of hand gestures less conspicuous.
+  absence of hand gestures less conspicuous.
 * Face lighting and colour should be most like the training data. Face paint,
   extreme wrinkles, exaggerated features, excessive shadows or extreme postures
   all seem to result in pathalogically bad lip sync results.
@@ -257,11 +258,10 @@ on user input.
 
 # System Design
 
-Currently only operated in devmode on MacOS. It should work on any system but
-`MacOsSpeech` will not show up. Native subsystem implementations should detect
-missing system requirements at boot and show up disabled. Likewise, if a
-component implementation is missing a required API key set in the `.env` file,
-this component will not be registered at boot time.
+Currently only operated in devmode on MacOS. It should work on any operating system but
+`MacOsSpeech` will only show up on MacOS. Native subsystem implementations should detect missing
+system requirements at boot and show up disabled. Likewise, if a component implementation is missing
+a required API key set in the `.env` file, this component will not be registered at boot time.
 
 Database is postgres. `node-pg-migrate` scripts defined in `server/package.json`
 to create tables etc. Production deployment process is yet to be defined.
@@ -309,7 +309,9 @@ both local and as online API services.
   * keep existing endpoints for integration ease
   * one websocket for streaming bidirectional state updates (need appropriate protocol)
   * one websocket for media streaming
-* [ ] add websocket streaming status updates so workflow orchestration status is visible via icons
+* [x] add websocket streaming status updates so workflow orchestration status is visible via icons
+* [ ] spike Mocha & Chai
+  * [ ] spike of Bun to make TS easier with test config
 * [ ] shoot project status screencast
 * [ ] test lipsync and speech with failed/disabled video - should play audio keeping image portrait
 * [ ] pose estimation and vision using mediapipe

@@ -1,7 +1,7 @@
 import type {ChatResult, Llm} from "llm/Llm";
 import OpenAI from "openai";
 import {always} from "../system/config";
-import Model = OpenAI.Model;
+type Model = OpenAI.Model;
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -64,7 +64,7 @@ class LlamaCppLlm implements Llm {
     return this.name;
   }
 
-  configure(metadata: string): Promise<void> {
+  configure(_metadata: string): Promise<void> {
     // currently does not support configuration
     return Promise.reject("does not support configuration because external process defines model");
   }

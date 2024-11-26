@@ -1,8 +1,9 @@
 import type {ChatResult, Llm} from "llm/Llm";
 import OpenAI from "openai";
 import {always} from "../system/config";
-import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
-import Model = OpenAI.Model;
+
+type Model = OpenAI.Model;
+type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 /*
 Using acouple of OpenAI's lightweight interfaces as part of our public interface seems fine.
@@ -15,9 +16,9 @@ class FakeModel implements Model {
   id: string;
   object: "model";
   owned_by: string;
-  chat: (params: ChatCompletionMessageParam[]) => ChatResult;
+  chat: (params: OpenAIMsg[]) => ChatResult;
 
-  constructor(id: string, fn: (params: ChatCompletionMessageParam[]) => ChatResult) {
+  constructor(id: string, fn: (params: OpenAIMsg[]) => ChatResult) {
     this.created = 0;
     this.id = id;
     this.object = "model";
@@ -36,23 +37,23 @@ function dateTimeMessage() {
  */
 class FakeLlm implements Llm {
   readonly baseUrl = undefined;
-  private readonly name = "FakeLlm"
+  private readonly name = "FakeLlm";
   readonly enableHealth = false;
   canRun = always;
   private currentModelKey = "echo";
   private readonly myModels: { [key: string]: FakeModel; } = {
-    static: new FakeModel("static", (params: ChatCompletionMessageParam[]) => ({message: "fake chat result"})),
-    echo: new FakeModel("echo", (params: ChatCompletionMessageParam[]) => {
+    static: new FakeModel("static", (_params: OpenAIMsg[]) => ({message: "fake chat result"})),
+    echo: new FakeModel("echo", (params: OpenAIMsg[]) => {
       try {
         return {message: (params!.filter(mp => mp.role === "user")!.pop())!.content.toString()!}
       } catch (err) {
         return {message: `I tried to be fake but I failed. Here's how it went down: ${err}`}
       }
     }),
-    clock: new FakeModel("clock", (params: ChatCompletionMessageParam[]) => ({message: dateTimeMessage()})),
-  }
+    clock: new FakeModel("clock", (_params: OpenAIMsg[]) => ({message: dateTimeMessage()})),
+  };
 
-  chat(_params: ChatCompletionMessageParam[]): Promise<ChatResult> {
+  chat(_params: OpenAIMsg[]): Promise<ChatResult> {
     return Promise.resolve(this.myModels[this.currentModelKey].chat(_params));
   }
 

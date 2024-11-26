@@ -15,6 +15,4 @@ export class SimplePromptPart implements PromptPart {
   text(): string {
     return this._text;
   }
-
-
 }

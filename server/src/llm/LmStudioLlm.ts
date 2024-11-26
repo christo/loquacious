@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import {always} from "../system/config";
 import type {ChatResult, Llm} from "./Llm";
-import Model = OpenAI.Model;
+type Model = OpenAI.Model;
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
