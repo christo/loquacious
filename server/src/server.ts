@@ -6,28 +6,22 @@ import {promises} from 'fs';
 import {ImageInfo} from "image/ImageInfo";
 import {prescaleImages} from "image/imageOps";
 import type {LipSyncResult} from "lipsync/LipSyncAnimator";
-import {Modes} from "llm/Modes";
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
 import {AsyncSpeechResult, SpeechResult} from "speech/SpeechSystem";
-import {SpeechSystems} from "speech/SpeechSystems";
 import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
-import {systemHealth} from "system/SystemStatus";
 import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
 import type {AudioFile} from "./domain/AudioFile";
 import type {CreatorType} from "./domain/CreatorType";
 import {Message} from "./domain/Message";
 import type {VideoFile} from "./domain/VideoFile";
-import AnimatorServices from "./lipsync/AnimatorServices";
-import LlmService from "./llm/LlmService";
-import {RunInfo} from "./domain/RunInfo";
-import {SystemSummary} from "./domain/SystemSummary";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
 import {Tts} from "./domain/Tts";
+import {Loquacious} from "./system/Loquacious";
 import Agent = Undici.Agent;
 
 
@@ -53,12 +47,9 @@ if (!process.env.DATA_DIR) {
 }
 const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 
-const llms = new LlmService();
-const speechSystems = new SpeechSystems(PATH_BASE_DATA);
-const animators = new AnimatorServices(PATH_BASE_DATA);
-const modes = new Modes();
+// const llms = new LlmService();
 const db = new Db(process.env.DB_POOL_SIZE ? parseInt(process.env.DB_POOL_SIZE, 10) : 10);
-
+const loq = new Loquacious(PATH_BASE_DATA, db);
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -98,85 +89,37 @@ app.post("/system/", async (req: Request, res: Response) => {
       const value = req.body[k];
       switch (k) {
         case "mode":
-          modes.setCurrent(value);
+          loq.modes.setCurrent(value);
           break;
         case "llm":
-          llms.setCurrent(value);
+          loq.llms.setCurrent(value);
           break;
         case "llm_option":
-          await llms.current().setCurrentOption(value);
+          await loq.llms.current().setCurrentOption(value);
           break;
         case "tts":
-          await speechSystems.setCurrent(value);
+          await loq.speechSystems.setCurrent(value);
           break;
         case "tts_option":
-          await speechSystems.current().setCurrentOption(value);
+          await loq.speechSystems.current().setCurrentOption(value);
           break;
         case "lipsync":
-          animators.setCurrent(value);
+          loq.animators.setCurrent(value);
           break;
         default:
           console.log(`system setting update for ${k} not implemented`);
       }
     }
-    res.json(await getSystem());
+    res.json(await loq.getSystem());
   });
 });
 
-async function getSystem(): Promise<SystemSummary> {
-  const system: SystemSummary = {
-    asAt: new Date(),
-    mode: {
-      current: modes.current(),
-      all: modes.allModes()
-    },
-    llm: {
-      current: llms.current().getName(),
-      all: llms.all().map(llm => llm.getName()),
-      options: await llms.current().models(),
-      currentOption: await llms.current().currentModel(),
-      isFree: llms.current().free()
-    },
-    tts: {
-      current: speechSystems.current().getName(),
-      all: speechSystems.systems.map(ss => ss.getName()),
-      currentOption: speechSystems.current().currentOption(),
-      options: speechSystems.current().options(),
-      isFree: speechSystems.current().free(),
-    },
-    lipsync: {
-      all: animators.all().map(ls => ls.getName()),
-      current: animators.current().getName(),
-      isFree: animators.current().free()
-    },
-    pose: {
-      current: "MediaPipe",
-      all: ["MediaPipe", "MoveNet"],
-      isFree: true
-    },
-    vision: {
-      current: "Claude 3.5 Sonnet (New)",
-      all: ["Claude 3.5 Sonnet (New)", "ChatGPT", "LM-Studio", "llama.cpp", "fal.ai Florence 2 Large"],
-      isFree: false,
-    },
-    stt: {
-      current: "whisper.cpp",
-      all: ["whisper.cpp", "OpenAI Whisper", "fal.ai something"],
-      isFree: true
-    },
-    runtime: {
-      run: new RunInfo(db.getRun())
-    },
-    health: await systemHealth(llms.current())
-  };
-  return system;
-}
 
 /**
  * Get current system settings.
  */
 app.get("/system", async (_req: Request, res: Response) => {
-  res.json(await getSystem());
+  res.json(await loq.getSystem());
 });
 
 /**
@@ -219,7 +162,7 @@ app.get('/api/chat', async (_req: Request, res: Response) => {
  * @param fn the function to call
  * @return on success the returned value from fn, on failure, a rejected promise.
  */
-const failable = async <T>(res: Response, name: string, fn: () => Promise<T>) =>{
+const failable = async <T>(res: Response, name: string, fn: () => Promise<T>) => {
   try {
     return await fn();
   } catch (e) {
@@ -260,15 +203,15 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     streamServer.workflow("llm_request");
     await failable(res, "loquacious chat", async () => {
-      const currentLlm = llms.current();
+      const currentLlm = loq.llms.current();
       const currentModel = await currentLlm.currentModel();
-      const currentSpeech = speechSystems.current();
-      const currentAnimator = animators.current();
+      const currentSpeech = loq.speechSystems.current();
+      const currentAnimator = loq.animators.current();
       let session = await db.getOrCreateSession();
       console.log("storing user message");
       await db.createUserMessage(session, prompt);
       const messageHistory: Message[] = await db.getMessages(session);
-      const mode = modes.getChatPrepper();
+      const mode = loq.modes.getChatPrepper();
       let allMessages = mode(messageHistory, currentSpeech);
       let llmResponse: string | null = await timed("text generation", async () => {
         const response = await currentLlm.chat(allMessages);
@@ -348,9 +291,9 @@ app.get('/video', async (req: Request, res: Response) => fileStream(req.query.fi
 
 async function initialiseCreatorTypes() {
   const creators: CreatorType[] = [
-    ...llms.all(),
-    ...speechSystems.systems,
-    ...animators.all()
+    ...loq.llms.all(),
+    ...loq.speechSystems.systems,
+    ...loq.animators.all()
   ];
   console.log(`ensuring ${creators.length} creator types are in database`);
   await Promise.all(creators.map(async creator => {
@@ -369,13 +312,13 @@ app.listen(port, async () => {
   await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
   console.log(`Server is running on port ${port}`);
 
-  const llm = llms.current();
+  const llm = loq.llms.current();
   console.log(`LLM Health check: ${llm.enableHealth ? "enabled" : "disabled"}`);
   console.log(`LLM back end: ${llm.getName()} at URL: ${(llm.baseUrl)}`);
   console.log(`LLM current model: ${await llm.currentModel().then(m => m.id)}`);
   const models = await llm.models();
   console.log(`LLM available models (${models.length}):`);
   models.forEach(m => console.log(`   ${m.id}`));
-  console.log(`Current Speech System: ${speechSystems.current().currentOption().descriptor()}`);
-  console.log(`Current LipSync: ${animators.current().getName()}`);
+  console.log(`Current Speech System: ${loq.speechSystems.current().currentOption().descriptor()}`);
+  console.log(`Current LipSync: ${loq.animators.current().getName()}`);
 });
