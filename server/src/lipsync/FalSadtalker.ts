@@ -35,6 +35,7 @@ type FalSadtalkerInvocation = {
   input: { source_image_url: string, driven_audio_url: string } & FalSadtalkerInput
 };
 
+// TODO modify value to tuple of url and datetime (serialised as string in JSON)
 type UrlCache = { [keyof: string]: string };
 
 /**
