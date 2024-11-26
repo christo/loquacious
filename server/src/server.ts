@@ -170,7 +170,6 @@ const failable = async <T>(res: Response, name: string, fn: () => Promise<T>) =>
     console.error(msg, e);
     res.status(500).json({error: msg}).end();
     streamServer.error(msg);
-    // TODO check callsite ergonomics
     return Promise.reject(e);
   }
 };
