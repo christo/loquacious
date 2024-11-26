@@ -6,7 +6,7 @@ import {LoqModule} from "../system/Loquacious";
 
 
 /**
- * Implementation of {@link LipSyncAnimator} intended to be used together with {@link DidTts}.
+ * D-iD implementation of {@link LipSyncAnimator} intended to be used together with {@link DidTts}.
  */
 class DidAnimator implements LipSyncAnimator {
   private readonly module: LoqModule<LipSyncInput, LipSyncResult>;
