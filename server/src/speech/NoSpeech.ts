@@ -9,7 +9,8 @@ import {
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import type {Message} from "../domain/Message";
 import {type MediaFormat, MF_MP3} from "../media";
-import {LoqModule} from "../system/Loquacious";
+
+import {LoqModule} from "../system/LoqModule";
 
 const SILENT_SUCCESS: SpeechResult = AsyncSpeechResult.fromValues(undefined, undefined);
 

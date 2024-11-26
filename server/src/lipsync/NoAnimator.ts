@@ -1,6 +1,7 @@
 import {LipSyncAnimator, LipSyncInput, LipSyncLoqModule, LipSyncResult} from "./LipSyncAnimator";
 import {MediaFormat} from "../media";
-import {LoqModule} from "../system/Loquacious";
+
+import {LoqModule} from "../system/LoqModule";
 
 /**
  * Animator that doesn't animate.

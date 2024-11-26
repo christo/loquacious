@@ -202,6 +202,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     streamServer.workflow("llm_request");
     await failable(res, "loquacious chat", async () => {
+
       const currentLlm = loq.llms.current();
       const currentSpeech = loq.speechSystems.current();
       const currentAnimator = loq.animators.current();

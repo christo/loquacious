@@ -4,8 +4,8 @@ import type {Message} from "../domain/Message";
 import  {Tts} from "../domain/Tts";
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
-import {LoqEvent, LoqModule} from "../system/Loquacious";
-import {EventEmitter} from "../system/EventEmitter";
+import {EventChannel, EventEmitter, LoqEvent} from "../system/EventEmitter";
+import {LoqModule} from "../system/LoqModule";
 
 /** UI struct for a speech system with its name and all possible options */
 class DisplaySpeechSystem {
@@ -36,7 +36,7 @@ class SpeechSystemLoqModule extends EventEmitter implements LoqModule<SpeechInpu
     return this.speechSystem.speak(speechInput.getText(), speechInput.getBaseFileName());
   }
 
-  on(event: string, handler: (event: LoqEvent) => void): void {
+  on(event: EventChannel, handler: (event: LoqEvent) => void): void {
     super.addHandler(event, handler);
   }
 

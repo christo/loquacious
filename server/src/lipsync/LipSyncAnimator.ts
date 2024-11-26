@@ -1,7 +1,7 @@
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
-import {LoqEvent, LoqModule} from "../system/Loquacious";
-import {EventEmitter} from "../system/EventEmitter";
+import {EventChannel, EventEmitter, LoqEvent} from "../system/EventEmitter";
+import {LoqModule} from "../system/LoqModule";
 
 /**
  * Output of calling {@LipSync} to generate a video.
@@ -36,7 +36,7 @@ class LipSyncLoqModule extends EventEmitter implements LoqModule<LipSyncInput, L
     return this._lsa.animate(lipSyncInput.imageFile, input.then(lsi => lsi.speechFile), lipSyncInput.fileKey);
   }
 
-  on(event: string, handler: (event: LoqEvent) => void): void {
+  on(event: EventChannel, handler: (event: LoqEvent) => void): void {
     super.addHandler(event, handler);
   }
 }

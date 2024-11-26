@@ -1,4 +1,9 @@
-import {LoqEvent} from "./Loquacious";
+
+type EventChannel = "error" | "begin" | "end" | "defer"
+
+type LoqEvent = {
+  channel: EventChannel;
+};
 
 /**
  * Generalised pub/sub.
@@ -11,7 +16,7 @@ class EventEmitter {
     this.handlers = {};
   }
 
-  addHandler(channel: string, handler: (e: LoqEvent) => void): void {
+  addHandler(channel: EventChannel, handler: (e: LoqEvent) => void): void {
     if (!this.handlers[channel]) {
       this.handlers[channel] = [];
     }
@@ -31,3 +36,4 @@ class EventEmitter {
 }
 
 export {EventEmitter};
+export {type LoqEvent, EventChannel};

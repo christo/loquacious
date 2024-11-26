@@ -18,7 +18,8 @@ import {hasEnv} from "../system/config";
 
 import {mkDirIfMissing} from "../system/filetoy";
 import {Tts} from "../domain/Tts";
-import {LoqModule} from "../system/Loquacious";
+
+import {LoqModule} from "../system/LoqModule";
 
 const VOICES = [
   new CharacterVoice("Andromeda - warm and lovely", "Andromeda", "Posh English woman, mid tones (5)"),

@@ -19,7 +19,8 @@ import {Message} from "../domain/Message";
 import {isMac} from "../system/config";
 
 import {escapeFilepart, mkDirIfMissing} from "../system/filetoy";
-import {LoqModule} from "../system/Loquacious";
+
+import {LoqModule} from "../system/LoqModule";
 
 const execPromise = util.promisify(exec);
 const unlinkPromise = util.promisify(fs.unlink);

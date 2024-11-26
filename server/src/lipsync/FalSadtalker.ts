@@ -8,7 +8,8 @@ import {timed} from "system/performance";
 import {type MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
 import {mkDirIfMissing} from "../system/filetoy";
-import {LoqModule} from "../system/Loquacious";
+
+import {LoqModule} from "../system/LoqModule";
 
 
 async function readBinaryFile(filePath: string): Promise<File> {

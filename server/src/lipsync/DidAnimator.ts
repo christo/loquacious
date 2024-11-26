@@ -2,7 +2,8 @@ import {LipSyncAnimator, LipSyncInput, LipSyncLoqModule, LipSyncResult} from "./
 import {SpeechResult, SpeechSystem} from "../speech/SpeechSystem";
 import {MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
-import {LoqModule} from "../system/Loquacious";
+
+import {LoqModule} from "../system/LoqModule";
 
 
 /**

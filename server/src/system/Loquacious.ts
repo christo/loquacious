@@ -17,28 +17,6 @@ import {RunInfo} from "../domain/RunInfo";
 import {systemHealth} from "./SystemStatus";
 
 
-type LoqEvent = {
-  channel: "error" | "begin" | "end" | "defer";
-};
-
-/**
- * Generic async function call.
- */
-interface LoqModule<I, O> {
-  /**
-   * Perform primary function, transforming input to output.
-   * @param input
-   */
-  call(input: Promise<I>): Promise<O>;
-
-  /**
-   * Register for events
-   * @param event
-   * @param handler
-   */
-  on(event: string, handler: (event: LoqEvent) => void): void;
-}
-
 /**
  * Container abstraction for coherent multi-service agent for a single interactive session. Maintains configuration
  * state of component modules as well as interaction mode. For concurrent sessions, each should have an instance of
@@ -126,4 +104,4 @@ class Loquacious {
 
 }
 
-export {Loquacious, type LoqModule, type LoqEvent};
+export {Loquacious};

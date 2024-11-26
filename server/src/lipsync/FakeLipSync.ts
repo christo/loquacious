@@ -5,7 +5,8 @@ import {hasVideoExt, type MediaFormat, MF_MP4} from "../media";
 import {always} from "../system/config";
 import {LipSyncAnimator, LipSyncInput, LipSyncLoqModule, LipSyncResult} from "./LipSyncAnimator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
-import {LoqModule} from "../system/Loquacious";
+
+import {LoqModule} from "../system/LoqModule";
 
 
 /**
