@@ -9,7 +9,7 @@
     "migrate:up": "node-pg-migrate --tsconfig ./tsconfig.json up",
     "migrate:down": "node-pg-migrate --tsconfig ./tsconfig.json down",
     "migrate:help": "node-pg-migrate --tsconfig ./tsconfig.json help",
-    "test": "mocha --experimentalSpecifierResolution node --trace-warnings --require ts-node/register --extensions ts,tsx --watch --watch-files src 'tests/**/*.{ts,tsx}' [...args] ",
+    "test": "mocha --experimentalSpecifierResolution node --trace-warnings'",
     "nodeversion": "ts-node --showConfig -vv"
   },
   "keywords": [],
@@ -54,11 +54,5 @@
   "engines": {
     "node": ">=20",
     "pnpm": ">=9"
-  },
-  "mocha": {
-    "loader": "ts-node/esm",
-    "require": ["tsconfig-paths/register"],
-    "extension": ["ts"],
-    "spec": "test/**/*.test.ts"
   }
 }
