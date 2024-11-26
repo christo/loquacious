@@ -235,8 +235,6 @@ class ElevenLabsSpeech implements SpeechSystem {
   loqModule(): LoqModule<SpeechInput, SpeechResult> {
     return this.module;
   }
-
-
 }
 
 export {ElevenLabsSpeech};
