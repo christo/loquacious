@@ -25,7 +25,7 @@ AI face-to-face fortune teller chat experiment.
   * (WIP) analyse self-portrait for lipsync suitability i.e. dimensions, framing
 * Postgres database for storing and tracing all interactions and intermediate
   media assets.
-* Video capture is **in progress**
+_ Video capture is __in progress__
   * client-side object detection and pose estimation is used to detect
     approaching users
   * Fortune teller self-portrait is mapped for facial landmarks to enable
@@ -78,6 +78,7 @@ The documents here are a bit disorganised and quite verbose. See also:
 
 * [general notes](notes.md)
 * [database schema notes](db-schema.md)
+* [build and run](build.md)
 
 ## Design Principles
 
