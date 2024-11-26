@@ -1,21 +1,10 @@
 /*
-Idea is like a DI container, modules are added which feed into each other and emit events, possibly failures.
-
-DiD can do speech as well... can we make the hand-off between
-the implementations of each module transparently handle the
-effective no-op of the middle pass-through call?
-
-
-TODO: create generic module interface with input type and output type
+TODO extract core logic from server.ts for this
 
 Promise<Audio> -> sttService -> sttResult
 message -> llmService -> llmResult
 llmResult -> ttsService -> speechResult
 (speechResult, portrait) -> animatorService -> animatorResult
-
-
-
-TODO extract core logic from server.ts for this
  */
 
 import LlmService from "../llm/LlmService";
@@ -28,9 +17,8 @@ import {RunInfo} from "../domain/RunInfo";
 import {systemHealth} from "./SystemStatus";
 
 
-// temporary until we figure out the shape of events
 type LoqEvent = {
-  channel: string;
+  channel: "error" | "begin" | "end" | "defer";
 };
 
 /**
@@ -70,7 +58,6 @@ class Loquacious {
     this._modes = new Modes();
     this.db = db;
   }
-
 
   get llms(): LlmService {
     return this._llms;
