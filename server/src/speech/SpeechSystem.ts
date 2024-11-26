@@ -4,6 +4,8 @@ import type {Message} from "../domain/Message";
 import  {Tts} from "../domain/Tts";
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
+import {LoqEvent, LoqModule} from "../system/Loquacious";
+import {EventEmitter} from "../system/EventEmitter";
 
 /** UI struct for a speech system with its name and all possible options */
 class DisplaySpeechSystem {
@@ -19,6 +21,25 @@ class DisplaySpeechSystem {
     this.options = options;
     this.isFree = isFree;
   }
+}
+
+class SpeechSystemLoqModule extends EventEmitter implements LoqModule<SpeechInput, SpeechResult>{
+  private readonly speechSystem: SpeechSystem;
+
+  constructor(ss: SpeechSystem) {
+    super();
+    this.speechSystem = ss;
+  }
+
+  async call(input: Promise<SpeechInput>): Promise<SpeechResult> {
+    const speechInput = await input;
+    return this.speechSystem.speak(speechInput.getText(), speechInput.getBaseFileName());
+  }
+
+  on(event: string, handler: (event: LoqEvent) => void): void {
+    super.addHandler(event, handler);
+  }
+
 }
 
 /**
@@ -46,6 +67,11 @@ class AsyncSpeechResult implements SpeechResult {
   static fromValues(fp: string | undefined, tts: Tts | undefined) {
     return AsyncSpeechResult.fromPromises(Promise.resolve(fp), Promise.resolve(tts));
   }
+}
+
+type SpeechInput = {
+  getText(): string;
+  getBaseFileName(): string;
 }
 
 /**
@@ -90,6 +116,11 @@ interface SpeechSystem extends CreatorService {
    * Provide the {@link MediaFormat} of the created audio.
    */
   speechOutputFormat(): MediaFormat;
+
+  /**
+   * Transitional mechanism for acquiring a LoqModule for this.
+   */
+  loqModule(): LoqModule<SpeechInput, SpeechResult>;
 }
 
-export {type SpeechSystem, type SpeechResult, DisplaySpeechSystem, AsyncSpeechResult};
+export {type SpeechSystem, type SpeechResult, DisplaySpeechSystem, AsyncSpeechResult, type SpeechInput, SpeechSystemLoqModule};

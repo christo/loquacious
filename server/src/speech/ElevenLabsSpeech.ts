@@ -1,9 +1,15 @@
 import {ElevenLabsClient} from "elevenlabs";
 import fs from 'fs';
 import type {PathLike} from "node:fs";
-import path from "path";
+import path, {basename} from "path";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {AsyncSpeechResult, DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
+import {
+  AsyncSpeechResult,
+  DisplaySpeechSystem,
+  SpeechInput,
+  type SpeechResult,
+  type SpeechSystem, SpeechSystemLoqModule
+} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import {Message} from "../domain/Message";
@@ -12,6 +18,7 @@ import {hasEnv} from "../system/config";
 
 import {mkDirIfMissing} from "../system/filetoy";
 import {Tts} from "../domain/Tts";
+import {LoqModule} from "../system/Loquacious";
 
 const VOICES = [
   new CharacterVoice("Andromeda - warm and lovely", "Andromeda", "Posh English woman, mid tones (5)"),
@@ -118,12 +125,14 @@ class ElevenLabsSpeech implements SpeechSystem {
       }
     }
   });
+  private readonly module: SpeechSystemLoqModule;
 
   constructor(ttsDataDir: PathLike) {
     this.dataDir = path.join(ttsDataDir.toString(), "el");
     mkDirIfMissing(this.dataDir);
     this.client = new ElevenLabsClient({});
     this.display = new DisplaySpeechSystem(this.getName(), VOICES, this.free())
+    this.module = new SpeechSystemLoqModule(this);
   }
 
   options() {
@@ -222,6 +231,12 @@ class ElevenLabsSpeech implements SpeechSystem {
   private getConfig(): ElevenLabsPartialConfig {
     return this.partialConfig();
   }
+
+  loqModule(): LoqModule<SpeechInput, SpeechResult> {
+    return this.module;
+  }
+
+
 }
 
 export {ElevenLabsSpeech};

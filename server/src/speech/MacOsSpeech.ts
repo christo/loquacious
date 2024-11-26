@@ -3,9 +3,15 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import {type MediaFormat, MF_MP3} from "media";
 import type {PathLike} from "node:fs";
-import path from "path";
+import path, {basename} from "path";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {AsyncSpeechResult, DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
+import {
+  AsyncSpeechResult,
+  DisplaySpeechSystem,
+  SpeechInput,
+  type SpeechResult,
+  type SpeechSystem, SpeechSystemLoqModule
+} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import util from "util";
@@ -13,6 +19,7 @@ import {Message} from "../domain/Message";
 import {isMac} from "../system/config";
 
 import {escapeFilepart, mkDirIfMissing} from "../system/filetoy";
+import {LoqModule} from "../system/Loquacious";
 
 const execPromise = util.promisify(exec);
 const unlinkPromise = util.promisify(fs.unlink);
@@ -58,11 +65,13 @@ class MacOsSpeech implements SpeechSystem {
   private currentIndex = 0;
   private readonly dataDir: string;
   private fileFormat: MediaFormat;
+  private module: SpeechSystemLoqModule;
 
   constructor(ttsDataDir: PathLike, fileFormat = MF_MP3) {
     this.dataDir = path.join(ttsDataDir.toString(), "macos");
     mkDirIfMissing(this.dataDir);
     this.fileFormat = fileFormat;
+    this.module = new SpeechSystemLoqModule(this);
   }
 
   currentOption(): SpeechSystemOption {
@@ -167,6 +176,10 @@ class MacOsSpeech implements SpeechSystem {
 
   free(): boolean {
     return true;
+  }
+
+  loqModule(): LoqModule<SpeechInput, SpeechResult> {
+    return this.module;
   }
 }
 

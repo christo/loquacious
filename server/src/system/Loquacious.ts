@@ -5,10 +5,15 @@ DiD can do speech as well... can we make the hand-off between
 the implementations of each module transparently handle the
 effective no-op of the middle pass-through call?
 
-deviceStream? -> sttService -> sttResult
+
+TODO: create generic module interface with input type and output type
+
+Promise<Audio> -> sttService -> sttResult
 message -> llmService -> llmResult
 llmResult -> ttsService -> speechResult
 (speechResult, portrait) -> animatorService -> animatorResult
+
+
 
 TODO extract core logic from server.ts for this
  */
@@ -22,6 +27,29 @@ import {SystemSummary} from "../domain/SystemSummary";
 import {RunInfo} from "../domain/RunInfo";
 import {systemHealth} from "./SystemStatus";
 
+
+// temporary until we figure out the shape of events
+type LoqEvent = {
+  channel: string;
+};
+
+/**
+ * Generic async function call.
+ */
+interface LoqModule<I, O> {
+  /**
+   * Perform primary function, transforming input to output.
+   * @param input
+   */
+  call(input: Promise<I>): Promise<O>;
+
+  /**
+   * Register for events
+   * @param event
+   * @param handler
+   */
+  on(event: string, handler: (event: LoqEvent) => void): void;
+}
 
 /**
  * Container abstraction for coherent multi-service agent for a single interactive session. Maintains configuration
@@ -111,4 +139,4 @@ class Loquacious {
 
 }
 
-export {Loquacious};
+export {Loquacious, type LoqModule, type LoqEvent};

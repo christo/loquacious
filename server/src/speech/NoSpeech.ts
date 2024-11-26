@@ -1,8 +1,15 @@
 import {CharacterVoice} from "speech/CharacterVoice";
-import {AsyncSpeechResult, DisplaySpeechSystem, type SpeechResult, type SpeechSystem} from "speech/SpeechSystem";
+import {
+  AsyncSpeechResult,
+  DisplaySpeechSystem, SpeechInput,
+  type SpeechResult,
+  type SpeechSystem,
+  SpeechSystemLoqModule
+} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import type {Message} from "../domain/Message";
 import {type MediaFormat, MF_MP3} from "../media";
+import {LoqModule} from "../system/Loquacious";
 
 const SILENT_SUCCESS: SpeechResult = AsyncSpeechResult.fromValues(undefined, undefined);
 
@@ -13,6 +20,7 @@ class NoSpeech implements SpeechSystem {
   readonly name = "NoSpeech";
   private onlyOption = [new CharacterVoice("silence", "silence", "is golden")];
   readonly display = new DisplaySpeechSystem(this.getName(), this.onlyOption, this.free());
+  private readonly module = new SpeechSystemLoqModule(this);
 
   canRun() {
     return true;
@@ -72,6 +80,10 @@ class NoSpeech implements SpeechSystem {
 
   free(): boolean {
     return true;
+  }
+
+  loqModule(): LoqModule<SpeechInput, SpeechResult> {
+    return this.module;
   }
 }
 
