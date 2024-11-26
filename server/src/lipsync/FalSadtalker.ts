@@ -36,8 +36,11 @@ type FalSadtalkerInvocation = {
   input: { source_image_url: string, driven_audio_url: string } & FalSadtalkerInput
 };
 
-// TODO modify value to tuple of url and datetime (serialised as string in JSON)
-type UrlCache = { [keyof: string]: string };
+const MS_MIN = 60 * 1000;
+const MS_HOUR = 60 * MS_MIN;
+const MS_DAY = 24 * MS_HOUR;
+const CACHE_EXPIRY_MS = 5 * MS_MIN;
+type UrlCache = { [keyof: string]: [string, string] };
 
 
 /**
@@ -57,7 +60,7 @@ class FalSadtalker implements LipSyncAnimator {
     preprocess: "full",            // crop, extcrop, resize, full, extfull
   };
   private readonly urlCacheFile: string;
-  private module: LoqModule<LipSyncInput, LipSyncResult>;
+  private readonly module: LoqModule<LipSyncInput, LipSyncResult>;
 
   /**
    * Constructor.
@@ -83,13 +86,25 @@ class FalSadtalker implements LipSyncAnimator {
     return this.name;
   }
 
+  /**
+   * Get the fal accessible stored url for the given local filePath, reusing any previous unexpired cached value,
+   * skipping the step of uploading the portrait image.
+   * @param filePath
+   */
   async urlFor(filePath: string): Promise<string> {
-    if (!this.urlCache[filePath]) {
+    if (!this.urlCache[filePath] || this.expired(filePath)) {
       await timed(`fal upload ${filePath.split(path.sep).pop()}`, async () => {
-        this.urlCache[filePath] = await fal.storage.upload(await readBinaryFile(filePath));
+        this.urlCache[filePath] = [
+          await fal.storage.upload(await readBinaryFile(filePath)),
+          new Date().toISOString()
+        ];
       });
     }
-    return this.urlCache[filePath];
+    return this.urlCache[filePath][0];
+  }
+
+  private expired(filePath: string) {
+    return Date.parse(this.urlCache[filePath][1]) + CACHE_EXPIRY_MS < Date.now();
   }
 
   async animate(img: string, speech: Promise<string>, filekey: string): Promise<LipSyncResult> {
@@ -97,22 +112,22 @@ class FalSadtalker implements LipSyncAnimator {
     // don't bother caching speech, reuse is vanishingly rare
     const speechUrl = await fal.storage.upload(await readBinaryFile(await speech));
     const result: Result<{ video: SadTalkerResult }> = await timed(
-      "fal run sadtalker",
-      async () => {
-        return await fal.run(FalSadtalker.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl))
-      }
+        "fal run sadtalker",
+        async () => {
+          return await fal.run(FalSadtalker.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl))
+        }
     );
     return timed(
-      "fal sadtalker video download",
-      async () => {
-        const r = result.data.video;
-        const videoDownload = await fetch(r.url);
-        const buffer = await videoDownload.arrayBuffer();
-        const filename = `falst_${filekey}_${(r.file_name)}`;
-        const filepath = path.join(this.dataDir, filename);
-        writeFileSync(filepath, Buffer.from(buffer));
-        return new SadTalkerResult(r.url, r.content_type, filename, r.file_size, filepath);
-      });
+        "fal sadtalker video download",
+        async () => {
+          const r = result.data.video;
+          const videoDownload = await fetch(r.url);
+          const buffer = await videoDownload.arrayBuffer();
+          const filename = `falst_${filekey}_${(r.file_name)}`;
+          const filepath = path.join(this.dataDir, filename);
+          writeFileSync(filepath, Buffer.from(buffer));
+          return new SadTalkerResult(r.url, r.content_type, filename, r.file_size, filepath);
+        });
   }
 
   async postResponseHook(): Promise<void> {
