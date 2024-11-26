@@ -306,6 +306,8 @@ both local and as online API services.
 ## TODO
 
 * [ ] extract core logic out of `server.ts`
+  * match outputs from one module to inputs of next module
+  * how to model service that does multiple module roles?
 * [ ] test DiD service
 * [ ] shoot project status screencast
 * [ ] test lipsync and speech with failed/disabled video - should play audio keeping image portrait
