@@ -40,6 +40,10 @@ const MS_MIN = 60 * 1000;
 const MS_HOUR = 60 * MS_MIN;
 const MS_DAY = 24 * MS_HOUR;
 const CACHE_EXPIRY_MS = 5 * MS_DAY;
+
+/**
+ * filepath: [url, isoDatestamp]
+ */
 type UrlCache = { [keyof: string]: [string, string] };
 
 
