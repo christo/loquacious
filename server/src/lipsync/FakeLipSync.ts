@@ -3,8 +3,9 @@ import type {Dirent} from "node:fs";
 import path from "path";
 import {hasVideoExt, type MediaFormat, MF_MP4} from "../media";
 import {always} from "../system/config";
-import type {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
+import {LipSyncAnimator, LipSyncInput, LipSyncLoqModule, LipSyncResult} from "./LipSyncAnimator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
+import {LoqModule} from "../system/Loquacious";
 
 
 /**
@@ -13,6 +14,7 @@ import {LocalLipSyncResult} from "./LocalLipSyncResult";
 class FakeLipSync implements LipSyncAnimator {
   canRun = always;
   private readonly lipSyncDataDir: string;
+  private readonly module: LipSyncLoqModule;
 
   /**
    * Constructor.
@@ -21,6 +23,7 @@ class FakeLipSync implements LipSyncAnimator {
   constructor(lipSyncDataDir: string) {
     // because this reuses other lipsync videos it doesn't have its own subdir
     this.lipSyncDataDir = lipSyncDataDir;
+    this.module = new LipSyncLoqModule(this);
   }
 
   getName(): string {
@@ -71,6 +74,9 @@ class FakeLipSync implements LipSyncAnimator {
     return MF_MP4;
   }
 
+  loqModule(): LoqModule<LipSyncInput, LipSyncResult> {
+    return this.module;
+  }
 }
 
 export {FakeLipSync};

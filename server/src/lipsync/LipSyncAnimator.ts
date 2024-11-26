@@ -1,5 +1,7 @@
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
+import {LoqEvent, LoqModule} from "../system/Loquacious";
+import {EventEmitter} from "../system/EventEmitter";
 
 /**
  * Output of calling {@LipSync} to generate a video.
@@ -14,6 +16,31 @@ type LipSyncResult = {
   /** Local relative path on server of video */
   getVideoPath(): string;
 }
+
+type LipSyncInput = {
+  imageFile: string;
+  speechFile: string | undefined
+  fileKey: string;
+}
+
+class LipSyncLoqModule extends EventEmitter implements LoqModule<LipSyncInput, LipSyncResult> {
+  private _lsa: LipSyncAnimator;
+
+  constructor(lsa: LipSyncAnimator) {
+    super();
+    this._lsa = lsa;
+  }
+
+  async call(input: Promise<LipSyncInput>): Promise<LipSyncResult> {
+    const lipSyncInput = await input;
+    return this._lsa.animate(lipSyncInput.imageFile, input.then(lsi => lsi.speechFile), lipSyncInput.fileKey);
+  }
+
+  on(event: string, handler: (event: LoqEvent) => void): void {
+    super.addHandler(event, handler);
+  }
+}
+
 
 /**
  * Service that can create animation video from portrait image and speech audio.
@@ -35,6 +62,12 @@ interface LipSyncAnimator extends CreatorService {
   postResponseHook(): Promise<void>;
 
   videoOutputFormat(): MediaFormat | undefined;
+
+  /**
+   * Transitional mechanism for acquiring a LoqModule for this.
+   */
+  loqModule(): LoqModule<LipSyncInput, LipSyncResult>;
 }
 
-export type {LipSyncAnimator, LipSyncResult};
+export type {LipSyncAnimator, LipSyncResult, LipSyncInput};
+export {LipSyncLoqModule};

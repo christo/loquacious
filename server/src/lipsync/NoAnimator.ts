@@ -1,10 +1,18 @@
-import {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
+import {LipSyncAnimator, LipSyncInput, LipSyncLoqModule, LipSyncResult} from "./LipSyncAnimator";
 import {MediaFormat} from "../media";
+import {LoqModule} from "../system/Loquacious";
 
 /**
  * Animator that doesn't animate.
  */
 class NoAnimator implements LipSyncAnimator {
+    private readonly module: LipSyncLoqModule;
+
+
+    constructor() {
+        this.module = new LipSyncLoqModule(this);
+    }
+
     canRun(): boolean {
         return true;
     }
@@ -36,6 +44,12 @@ class NoAnimator implements LipSyncAnimator {
     postResponseHook(): Promise<void> {
         return Promise.resolve();
     }
+
+    loqModule(): LoqModule<LipSyncInput, LipSyncResult> {
+        return this.module;
+    }
+
+
 
 }
 

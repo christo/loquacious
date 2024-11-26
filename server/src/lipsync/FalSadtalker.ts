@@ -1,6 +1,6 @@
 import {fal, type Result} from "@fal-ai/client";
 import {promises, readFileSync} from "fs";
-import type {LipSyncAnimator, LipSyncResult} from "lipsync/LipSyncAnimator";
+import {LipSyncAnimator, LipSyncInput, LipSyncLoqModule, LipSyncResult} from "lipsync/LipSyncAnimator";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
 import path from "path";
@@ -8,6 +8,7 @@ import {timed} from "system/performance";
 import {type MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
 import {mkDirIfMissing} from "../system/filetoy";
+import {LoqModule} from "../system/Loquacious";
 
 
 async function readBinaryFile(filePath: string): Promise<File> {
@@ -38,6 +39,7 @@ type FalSadtalkerInvocation = {
 // TODO modify value to tuple of url and datetime (serialised as string in JSON)
 type UrlCache = { [keyof: string]: string };
 
+
 /**
  * Implementation that calls fal.ai service, requires valid FAL_API_KEY in env.
  */
@@ -55,6 +57,7 @@ class FalSadtalker implements LipSyncAnimator {
     preprocess: "full",            // crop, extcrop, resize, full, extfull
   };
   private readonly urlCacheFile: string;
+  private module: LoqModule<LipSyncInput, LipSyncResult>;
 
   /**
    * Constructor.
@@ -73,6 +76,7 @@ class FalSadtalker implements LipSyncAnimator {
     fal.config({
       credentials: process.env.FAL_API_KEY,
     });
+    this.module = new LipSyncLoqModule(this);
   }
 
   getName(): string {
@@ -151,6 +155,10 @@ class FalSadtalker implements LipSyncAnimator {
         ...this.sadtalkerConfig
       }
     });
+  }
+
+  loqModule(): LoqModule<LipSyncInput, LipSyncResult> {
+    return this.module;
   }
 }
 
