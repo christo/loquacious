@@ -27,13 +27,22 @@ class LipSyncLoqModule extends EventEmitter implements LoqModule<LipSyncInput, L
   private _lsa: LipSyncAnimator;
 
   constructor(lsa: LipSyncAnimator) {
-    super();
+    super(lsa.getName());
     this._lsa = lsa;
   }
 
   async call(input: Promise<LipSyncInput>): Promise<LipSyncResult> {
-    const lipSyncInput = await input;
-    return this._lsa.animate(lipSyncInput.imageFile, input.then(lsi => lsi.speechFile), lipSyncInput.fileKey);
+    try {
+      super.emitSimple("begin");
+      const lipSyncInput = await input;
+      return this._lsa.animate(lipSyncInput.imageFile, input.then(lsi => lsi.speechFile), lipSyncInput.fileKey).then(x => {
+        super.emitSimple("end");
+        return x;
+      });
+    } catch(error) {
+      super.emit({channel: "error", body: {error}});
+      return Promise.reject(error);
+    }
   }
 
   on(event: EventChannel, handler: (event: LoqEvent) => void): void {

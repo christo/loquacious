@@ -1,7 +1,7 @@
 import type {CharacterVoice} from "speech/CharacterVoice";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import type {Message} from "../domain/Message";
-import  {Tts} from "../domain/Tts";
+import {Tts} from "../domain/Tts";
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
 import {EventChannel, EventEmitter, LoqEvent} from "../system/EventEmitter";
@@ -23,17 +23,26 @@ class DisplaySpeechSystem {
   }
 }
 
-class SpeechSystemLoqModule extends EventEmitter implements LoqModule<SpeechInput, SpeechResult>{
+class SpeechSystemLoqModule extends EventEmitter implements LoqModule<SpeechInput, SpeechResult> {
   private readonly speechSystem: SpeechSystem;
 
   constructor(ss: SpeechSystem) {
-    super();
+    super(ss.getName());
     this.speechSystem = ss;
   }
 
   async call(input: Promise<SpeechInput>): Promise<SpeechResult> {
-    const speechInput = await input;
-    return this.speechSystem.speak(speechInput.getText(), speechInput.getBaseFileName());
+    try {
+      super.emitSimple("begin");
+      const speechInput = await input;
+      return this.speechSystem.speak(speechInput.getText(), speechInput.getBaseFileName()).then(x => {
+        super.emitSimple("end");
+        return x;
+      });
+    } catch (e) {
+      super.emit({channel: "error", body: e});
+      return Promise.reject(e);
+    }
   }
 
   on(event: EventChannel, handler: (event: LoqEvent) => void): void {
@@ -47,6 +56,7 @@ class SpeechSystemLoqModule extends EventEmitter implements LoqModule<SpeechInpu
  */
 interface SpeechResult {
   filePath(): Promise<string | undefined>;
+
   tts(): Promise<Tts | undefined>;
 }
 
@@ -54,13 +64,13 @@ class AsyncSpeechResult implements SpeechResult {
   tts: () => Promise<Tts | undefined>;
   filePath: () => Promise<string | undefined>;
 
-  constructor(fp: () => Promise<string | undefined>, tts: () => Promise<Tts| undefined>) {
+  constructor(fp: () => Promise<string | undefined>, tts: () => Promise<Tts | undefined>) {
     this.tts = tts;
     console.log(`typeof fp: ${typeof fp}`);
     this.filePath = fp;
   }
 
-  static fromPromises(fp: Promise<string|undefined>, tts: Promise<Tts|undefined>) {
+  static fromPromises(fp: Promise<string | undefined>, tts: Promise<Tts | undefined>) {
     return new AsyncSpeechResult(() => fp, () => tts);
   }
 
@@ -102,6 +112,7 @@ interface SpeechSystem extends CreatorService {
    * Current voice for the speech system.
    */
   currentOption(): SpeechSystemOption;
+
   display: DisplaySpeechSystem;
 
   /**
@@ -123,4 +134,11 @@ interface SpeechSystem extends CreatorService {
   loqModule(): LoqModule<SpeechInput, SpeechResult>;
 }
 
-export {type SpeechSystem, type SpeechResult, DisplaySpeechSystem, AsyncSpeechResult, type SpeechInput, SpeechSystemLoqModule};
+export {
+  type SpeechSystem,
+  type SpeechResult,
+  DisplaySpeechSystem,
+  AsyncSpeechResult,
+  type SpeechInput,
+  SpeechSystemLoqModule
+};

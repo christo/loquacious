@@ -1,9 +1,14 @@
 import OpenAI from "openai";
 import {always} from "../system/config";
-import type {ChatResult, Llm} from "./Llm";
+import type {ChatInput, ChatResult, Llm} from "./Llm";
+import {LlmLoqModule} from "./LlmLoqModule";
+import * as process from "node:process";
+import {LoqModule} from "../system/LoqModule";
 type Model = OpenAI.Model;
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
+
+const LM_STUDIO_BASE_URL_DEFAULT = "http://localhost:1234/v1";
 
 class LmStudioLlm implements Llm {
   readonly baseUrl: string | undefined;
@@ -12,9 +17,10 @@ class LmStudioLlm implements Llm {
   canRun = always;
   private openai;
   private currentModelId: string | null = null;
+  private readonly module: LlmLoqModule;
 
-  // TODO replace this with an async static
-  constructor(baseUrl = "http://localhost:1234/v1") {
+  /** TODO replace this constructor with an async static interface factory method */
+  constructor(baseUrl = LM_STUDIO_BASE_URL_DEFAULT) {
     this.baseUrl = baseUrl;
     // seems we cannot simply specify the model here, not all results from models() can be used with a system prompt
     // and the effective model indicated on the response is not necessarily what was requested, it may partly be a
@@ -23,6 +29,7 @@ class LmStudioLlm implements Llm {
       baseURL: baseUrl,
       apiKey: process.env.OPENAI_API_KEY as string,
     });
+    this.module = new LlmLoqModule(this);
   }
 
   /**
@@ -95,6 +102,10 @@ class LmStudioLlm implements Llm {
 
   free(): boolean {
     return true;
+  }
+
+  loqModule(): LoqModule<ChatInput, ChatResult> {
+    return this.module;
   }
 }
 

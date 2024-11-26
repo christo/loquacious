@@ -9,7 +9,7 @@ import type {LipSyncInput, LipSyncResult} from "lipsync/LipSyncAnimator";
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
-import {AsyncSpeechResult, SpeechResult} from "speech/SpeechSystem";
+import {AsyncSpeechResult, SpeechInput, SpeechResult} from "speech/SpeechSystem";
 import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
 import Undici, {setGlobalDispatcher} from "undici";
@@ -20,7 +20,6 @@ import {Message} from "./domain/Message";
 import type {VideoFile} from "./domain/VideoFile";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
-import {Tts} from "./domain/Tts";
 import {Loquacious} from "./system/Loquacious";
 import Agent = Undici.Agent;
 
@@ -216,18 +215,24 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
       if (llmResponse.message !== null) {
         streamServer.workflow("llm_response");
-        const llmMessage = await timed("storing llm response",
+        const llmMessage = timed("storing llm response",
             () => db.createCreatorTypeMessage(session, llmResponse.message!, currentLlm));
         const doSpeechSynthesis = async () => {
           streamServer.workflow("tts_request");
           const ssCreator = await db.findCreatorForService(currentSpeech);
           const mimeType = currentSpeech.speechOutputFormat().mimeType;
           const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
-          const getTts: () => Promise<Tts> = () => db.createTts(ssCreator.id, llmMessage.id, audioFile.id);
-          const psr: Promise<SpeechResult> = currentSpeech.speak(llmMessage.content, `${audioFile.id}`);
+          const si = llmMessage.then(m => ({
+            getText: () => m.content,
+            getBaseFileName: () => `${audioFile.id}`,
+          } as SpeechInput));
+
+          const psr = currentSpeech.loqModule().call(si);
           // baby dragon!
-          const newPfp = () => psr.then(sr => sr.filePath());
-          return Promise.resolve(new AsyncSpeechResult(newPfp, getTts));
+          return Promise.resolve(new AsyncSpeechResult(
+              () => psr.then(sr => sr.filePath()),
+              () => llmMessage.then(m => db.createTts(ssCreator.id, m.id, audioFile.id))
+          ));
         };
 
         await failable(res, "speech generation", async () => {
@@ -242,20 +247,22 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               // hack - better to signal NoLipsync lipsync more explicitly
               return Promise.reject("animator does not declare a Mime Type");
             } else {
-              const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
+              const animateModule = currentAnimator.loqModule();
+              animateModule.on("start", (_) => streamServer.workflow("lipsync_request"));
+              animateModule.on("end", (_) => streamServer.workflow("lipsync_response"));
+
               const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
-                streamServer.workflow("lipsync_request");
+                const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
                 const lsi = speechResult.filePath().then(sf => ({
                   fileKey: `${videoFile.id}`,
                   imageFile: path.join(pathPortrait(), portrait.f).toString(),
                   speechFile: sf
                 } as LipSyncInput));
 
-                const animatePromise = currentAnimator.loqModule().call(lsi);
+                const animatePromise = animateModule.call(lsi);
                 await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
                 return await animatePromise;
               });
-              streamServer.workflow("lipsync_response");
               res.json(({
                 response: {
                   portrait: portrait,
@@ -264,7 +271,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                   messages: (await db.getMessages(session)).map(m => currentSpeech.removePauseCommands(m)),
                   speech: await speechResult.filePath(),
                   lipsync: lipsyncResult,
-                  llm: currentLlm.getName(),
+                  llm: llmResponse.llm,
                   model: llmResponse.model,
                 }
               }));

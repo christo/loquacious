@@ -1,8 +1,9 @@
 
-type EventChannel = "error" | "begin" | "end" | "defer"
+type EventChannel = "error" | "begin" | "end";
 
 type LoqEvent = {
   channel: EventChannel;
+  body: any;
 };
 
 /**
@@ -10,9 +11,15 @@ type LoqEvent = {
  */
 class EventEmitter {
 
+  /**
+   * Handler registry keyed by {@link EventChannel}.
+   * @private
+   */
   private readonly handlers: { [keyof: string]: Array<(e: LoqEvent) => void>};
+  private readonly name: string;
 
-  constructor() {
+  constructor(name: string) {
+    this.name = name;
     this.handlers = {};
   }
 
@@ -23,13 +30,27 @@ class EventEmitter {
     this.handlers[channel].push(handler);
   }
 
+  /**
+   * Like emit but while {@LoqEvent} only has channel, easier to use.
+   * @param c the channel
+   */
+  emitSimple(c: EventChannel): void {
+    this.emit({channel: c} as LoqEvent);
+  }
+
+  /**
+   * Safely send the event to handlers registered for it.
+   */
   emit(e: LoqEvent): void {
+    console.log(`(${this.name}) emitting event: ${e.channel}`);
     const channelHandlers = this.handlers[e.channel];
-    for (let i = 0; i < channelHandlers.length; i++) {
-      try {
-        channelHandlers[i](e);
-      } catch (e) {
-        console.error("error handling event", e);
+    if (channelHandlers) {
+      for (let i = 0; i < channelHandlers.length; i++) {
+        try {
+          channelHandlers[i](e);
+        } catch (error) {
+          console.error(`error while handling event ${e.channel}`, error);
+        }
       }
     }
   }

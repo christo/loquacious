@@ -1,4 +1,4 @@
-import {LoqEvent} from "./EventEmitter";
+import {EventChannel, LoqEvent} from "./EventEmitter";
 
 /**
  * Encapsulation of polymorphic generic async function call.
@@ -15,7 +15,7 @@ interface LoqModule<I, O> {
    * @param event
    * @param handler
    */
-  on(event: string, handler: (event: LoqEvent) => void): void;
+  on(event: EventChannel, handler: (event: LoqEvent) => void): void;
 }
 
 export {LoqModule};

@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type {CreatorService} from "../system/CreatorService";
+import {LoqModule} from "../system/LoqModule";
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -14,6 +15,10 @@ interface ChatResult {
   model: Model;
 }
 
+interface ChatInput {
+  params: OpenAIMsg[]
+}
+
 /**
  * Large Language Model service.
  * Can do chat completions. May have multiple models that can be dynamically selected.
@@ -24,8 +29,8 @@ interface Llm extends CreatorService {
   models: () => Promise<Array<Model>>
   chat: (params: OpenAIMsg[]) => Promise<ChatResult>;
   currentModel: () => Promise<Model>;
-
   setCurrentOption(value: string): Promise<void>;
+  loqModule(): LoqModule<ChatInput, ChatResult>
 }
 
-export type {Llm, ChatResult};
+export type {Llm, ChatResult, ChatInput};

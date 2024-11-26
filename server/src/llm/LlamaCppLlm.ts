@@ -1,10 +1,13 @@
-import type {ChatResult, Llm} from "llm/Llm";
+import type {ChatInput, ChatResult, Llm} from "llm/Llm";
 import OpenAI from "openai";
 import {always} from "../system/config";
+import {LlmLoqModule} from "./LlmLoqModule";
+import {LoqModule} from "../system/LoqModule";
 
 type Model = OpenAI.Model;
-
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
+
+const LLAMA_CPP_BASE_URL_DEFAULT = "http://localhost:8080";
 
 /**
  * Connects to an already running llama.cpp process with an OpenAI API implementation.
@@ -15,17 +18,19 @@ class LlamaCppLlm implements Llm {
   private readonly name = "Llama.cpp-LLM";
   canRun = always;
   private openai;
+  private readonly module: LlmLoqModule;
 
   /**
    * By default connects to localhost on default llama.cpp port.
    * @param baseUrl baseUrl of OpenAI API for llama.cpp
    */
-  constructor(baseUrl = "http://localhost:8080") {
+  constructor(baseUrl = LLAMA_CPP_BASE_URL_DEFAULT) {
     this.baseUrl = baseUrl;
     this.openai = new OpenAI({
       baseURL: baseUrl,
       apiKey: "REQURIED_BY_OPENAI_IGNORED_BY_LLAMA_CPP",
     });
+    this.module = new LlmLoqModule(this);
   }
 
   async currentModel(): Promise<Model> {
@@ -78,6 +83,11 @@ class LlamaCppLlm implements Llm {
   free(): boolean {
     return true;
   }
+
+  loqModule(): LoqModule<ChatInput, ChatResult> {
+    return this.module;
+  }
+
 }
 
 export {LlamaCppLlm};
