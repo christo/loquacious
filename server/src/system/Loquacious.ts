@@ -1,6 +1,15 @@
 /*
 Idea is like a DI container, modules are added which feed into each other and emit events, possibly failures.
 
+DiD can do speech as well... can we make the hand-off between
+the implementations of each module transparently handle the
+effective no-op of the middle pass-through call?
+
+deviceStream? -> sttService -> sttResult
+message -> llmService -> llmResult
+llmResult -> ttsService -> speechResult
+(speechResult, portrait) -> animatorService -> animatorResult
+
 TODO extract core logic from server.ts for this
  */
 
