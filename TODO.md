@@ -13,9 +13,10 @@
     actual evaluation until the lipsync call. The trick is that the SpeechResult from
     the DiD implementation may not work if given to another lipsync animator and this
     configuration should ideally be prohibited in the front end.
-* [ ] maybe bug: review workflow sigils timing - refactoring and promisification with `EventEmitter`
-  seems to have made these transitions happen at the wrong time? 
 * [ ] test DiD service
+* [ ] maybe bug: review workflow sigils timing - refactoring and promisification with `EventEmitter`
+  seems to have made these transitions happen at the wrong time?
+* [ ] plan 1.0 release scope
 * [ ] shoot project status screencast
 * [ ] test lipsync and speech with failed/disabled video - should play audio keeping image portrait
 * [ ] vision system
