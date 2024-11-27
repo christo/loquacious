@@ -40,18 +40,22 @@ class Loquacious {
     this.db = db;
   }
 
+  /** @deprecated transitional interface */
   get llms(): LlmService {
     return this._llms;
   }
 
+  /** @deprecated transitional interface */
   get speechSystems(): SpeechSystems {
     return this._speechSystems;
   }
 
+  /** @deprecated transitional interface */
   get animators(): AnimatorServices {
     return this._animators;
   }
 
+  /** @deprecated transitional interface? */
   get modes(): Modes {
     return this._modes;
   }
