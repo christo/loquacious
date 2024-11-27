@@ -41,6 +41,8 @@ _ Video capture is __in progress__
 * Desktop Chrome is the only browser currently used in testing. Mobile browsers
   are kept in mind and might even mostly work.
 
+[TODO list](TODO.md)
+
 At this _proof-of-concept_ stage, the project is a feasibility study to see how
 a face-to-face video chat can be assembled using various AI models. Components
 can be swapped for alternatives which is especially useful for quality and
