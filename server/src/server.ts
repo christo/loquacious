@@ -199,17 +199,23 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         streamServer.workflow("llm_response");
         const llmMessage = timed("storing llm response",
             () => db.createCreatorTypeMessage(session, llmResponse.message!, currentLlm));
+
         const doSpeechSynthesis = async () => {
           streamServer.workflow("tts_request");
+
+          // TODO these guys belong in the tts module's call
           const ssCreator = await db.findCreatorForService(currentSpeech);
           const mimeType = currentSpeech.speechOutputFormat().mimeType;
           const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
-          const si = llmMessage.then(m => ({
+
+          const speechInput = llmMessage.then(m => ({
             getText: () => m.content,
             getBaseFileName: () => `${audioFile.id}`,
           } as SpeechInput));
 
-          const psr = currentSpeech.loqModule().call(si);
+          const loqModule = currentSpeech.loqModule();
+
+          const psr = loqModule.call(speechInput);
           // baby dragon!
           return Promise.resolve(new AsyncSpeechResult(
               () => psr.then(sr => sr.filePath()),
