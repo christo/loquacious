@@ -184,7 +184,7 @@ Sync system.
 
 Although there are various ways to accomplish an animated character who is
 visibly speaking the generated speech, reasonable quality can be achieved using
-a model to convert a portait image and the speech audio into a video of that
+a model to convert a portrait image and the speech audio into a video of that
 character speaking the words. A 3D model that is rigged for speech and gestures
 could also be used but both design-time and runtime components would be
 divergent from the current plan. The generated video is sent to the screen to
@@ -225,7 +225,7 @@ fortune teller might compliment the customer on thier outfit or some other
 in-character smalltalk that references their appearance.
 
 The fortune teller's own portrait can also be used as input to the image-to-text
-system for any given portait image so that any reference made to their own
+system for any given portrait image so that any reference made to their own
 appearance can be responded to naturally and in-character. The same system might
 also be used to evaluate the dynamic generation of a fresh fortune-teller
 portrait.
