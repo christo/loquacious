@@ -173,24 +173,6 @@ const failable = async <T>(res: Response, name: string, fn: () => Promise<T>) =>
   }
 };
 
-/**
- * Execute the given async thunk in a try context, identified by a name, returning a 500 error on failure.
- * @param res the response to which a failure will be reported.
- * @param name the label for which any failure will be reported.
- * @param thunk async void function
- */
-const failableVoid = async (res: Response, name: string, thunk: () => Promise<void>) => {
-  try {
-    return await thunk();
-  } catch (e) {
-    const msg = `${name} failed`;
-    console.error(msg, e);
-    res.status(500).json({error: msg}).end();
-    streamServer.error(msg);
-    // assuming a resolved promise of void is returned here
-  }
-};
-
 // POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const {prompt, portrait} = req.body;
