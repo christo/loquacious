@@ -248,7 +248,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               return Promise.reject("animator does not declare a Mime Type");
             } else {
               const animateModule = currentAnimator.loqModule();
-              animateModule.on("start", (_) => streamServer.workflow("lipsync_request"));
+              animateModule.on("begin", (_) => streamServer.workflow("lipsync_request"));
               animateModule.on("end", (_) => streamServer.workflow("lipsync_response"));
 
               const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
