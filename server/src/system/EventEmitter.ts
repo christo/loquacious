@@ -7,7 +7,8 @@ type LoqEvent = {
 };
 
 /**
- * Generalised pub/sub.
+ * Generalised pub/sub. Event handlers registered for the specific channel are called in order
+ * of registration when emit is called for that channel.
  */
 class EventEmitter {
 
