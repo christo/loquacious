@@ -474,7 +474,9 @@ The following are not proper TODOs.
 
 ## Test Suite
 
-Currently zero tests!
+Mostly nonexistent, basic scaffold:
+
+`bun run test`
 
 * Component tests
 * Full session log (replayable interactions)
