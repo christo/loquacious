@@ -156,11 +156,13 @@
   * consider second camera trained on whole scene or entrance
 * Per-deployment configuration needs to know:
   * event details, maybe including whole schedule of events
-  * VIPs
-  * permanent physical layout and scene design details (red tablecloth,
-    crystal ball, vase of flowers etc.)
+  * VIPs / who's who
+  * physical layout and scene design details (red tablecloth,
+    crystal ball, vase of flowers etc.) Some of this can be dynamically derived using vision.
   * if a person asks about an event coming up, we could quip about telling
     their future: that they will go to that event
+  * This config needs to be in database, system prompt or embedding must be driven by database
+    rather than hard-coded.
 * db logging
 * [ ] aggregated system logs
 * [ ] usage stats
