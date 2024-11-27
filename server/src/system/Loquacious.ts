@@ -21,6 +21,9 @@ import {systemHealth} from "./SystemStatus";
  * Container abstraction for coherent multi-service agent for a single interactive session. Maintains configuration
  * state of component modules as well as interaction mode. For concurrent sessions, each should have an instance of
  * this sharing the same database connection.
+ *
+ * TODO fix the current service configuration while a multi-service call is in-flight, maybe use new instance of this
+ *   per client request?
  */
 class Loquacious {
   private readonly _llms: LlmService;
