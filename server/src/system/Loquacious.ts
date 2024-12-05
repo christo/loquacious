@@ -8,15 +8,15 @@ llmResult -> ttsService -> speechResult
  */
 
 import LlmService from "../llm/LlmService";
-import {SpeechSystems} from "../speech/SpeechSystems";
+import {SpeechSystemOption, SpeechSystems} from "../speech/SpeechSystems";
 import AnimatorServices from "../lipsync/AnimatorServices";
 import {Modes} from "../llm/Modes";
 import Db from "../db/Db";
 import {ModuleWithOptions, SystemSummary} from "../domain/SystemSummary";
 import {RunInfo} from "../domain/RunInfo";
 import {systemHealth} from "./SystemStatus";
-import {LoqModule} from "./LoqModule";
 import {LlmModel} from "../llm/LlmModel";
+import * as Module from "node:module";
 
 
 /**
@@ -77,25 +77,9 @@ class Loquacious {
         current: this.modes.current(),
         all: this.modes.allModes()
       },
-      llm: {
-        current: this.llms.current().getName(),
-        all: this.llms.all().map(llm => llm.getName()),
-        options: await this.llms.current().models(),
-        currentOption: await this.llms.current().currentModel(),
-        isFree: this.llms.current().free()
-      },
-      tts: {
-        current: this.speechSystems.current().getName(),
-        all: this.speechSystems.systems.map(ss => ss.getName()),
-        currentOption: this.speechSystems.current().currentOption(),
-        options: this.speechSystems.current().options(),
-        isFree: this.speechSystems.current().free(),
-      },
-      lipsync: {
-        all: this.animators.all().map(ls => ls.getName()),
-        current: this.animators.current().getName(),
-        isFree: this.animators.current().free()
-      },
+      llm: await this.getLlmModule(),
+      tts: await this.getTtsModule(),
+      lipsync: this.getLipsyncModule(),
       pose: {
         current: "MediaPipe",
         all: ["MediaPipe", "MoveNet"],
@@ -119,6 +103,23 @@ class Loquacious {
     return system;
   }
 
+  private getLipsyncModule(): Module {
+    return {
+      all: this.animators.all().map(ls => ls.getName()),
+      current: this.animators.current().getName(),
+      isFree: this.animators.current().free()
+    } as Module;
+  }
+
+  private async getTtsModule(): Promise<ModuleWithOptions<SpeechSystemOption>> {
+    return {
+      current: this._speechSystems.current().getName(),
+      all: this._speechSystems.systems.map(ss => ss.getName()),
+      currentOption: this._speechSystems.current().currentOption(),
+      options: this._speechSystems.current().options(),
+      isFree: this._speechSystems.current().free(),
+    }
+  }
 }
 
 export {Loquacious};
