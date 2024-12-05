@@ -5,7 +5,6 @@ import {LlmLoqModule} from "./LlmLoqModule";
 import {LoqModule} from "../system/LoqModule";
 import {LlmModel} from "./LlmModel";
 
-type Model = OpenAI.Model;
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 const LLAMA_CPP_BASE_URL_DEFAULT = "http://localhost:8080";
