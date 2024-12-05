@@ -195,7 +195,7 @@ class PoseSystem {
         });
         drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
       }
-      // TODO rewrite as Promise
+      // future: rewrite as Promise
       callback(canvas);
     });
   }

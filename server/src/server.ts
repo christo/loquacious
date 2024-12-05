@@ -154,7 +154,7 @@ app.get('/api/chat', async (_req: Request, res: Response) => {
 });
 
 /**
- * Generic labelled function execution with failure reporting to res and streamServer.
+ * Generic labelled function execution with failure reporting to Response and streamServer.
  * On success, the returned promise of fn is returned.
  * @param res response to use for reporting any failure
  * @param name label to use for failure reporting
