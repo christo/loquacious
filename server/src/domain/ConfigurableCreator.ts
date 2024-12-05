@@ -1,6 +1,6 @@
 /**
- * API implemented by all services that produce assets so they can configure themselves like
- * the db record from some previous invocation.
+ * API implemented by all services that produce assets so they can configure themselves the same way
+ * as the db record for a previous invocation.
  */
 export interface ConfigurableCreator {
 
