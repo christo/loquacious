@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import {always} from "../system/config";
 import {LlmLoqModule} from "./LlmLoqModule";
 import {LoqModule} from "../system/LoqModule";
+import {LlmModel} from "./LlmModel";
 
 type Model = OpenAI.Model;
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
@@ -33,7 +34,7 @@ class LlamaCppLlm implements Llm {
     this.module = new LlmLoqModule(this);
   }
 
-  async currentModel(): Promise<Model> {
+  async currentModel(): Promise<LlmModel> {
     // pretty dodgy
     return (await this.models())[0];
   }
@@ -46,7 +47,7 @@ class LlamaCppLlm implements Llm {
     return Promise.reject(`${this.name}: Cannot change models.`);
   }
 
-  async models(): Promise<Array<Model>> {
+  async models(): Promise<Array<LlmModel>> {
     const response = await fetch(`${this.baseUrl}/models`);
     const j = await response.json();
     return j.data;

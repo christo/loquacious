@@ -4,7 +4,7 @@ import type {ChatInput, ChatResult, Llm} from "./Llm";
 import {LlmLoqModule} from "./LlmLoqModule";
 import * as process from "node:process";
 import {LoqModule} from "../system/LoqModule";
-type Model = OpenAI.Model;
+import {LlmModel} from "./LlmModel";
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -35,7 +35,7 @@ class LmStudioLlm implements Llm {
   /**
    * If there's only one model, it must be current. Otherwise we assume we don't know.
    */
-  async currentModel(): Promise<Model> {
+  async currentModel(): Promise<LlmModel> {
     const allModels = await this.models();
     if (allModels.length === 1) {
       return allModels[0];
@@ -62,7 +62,7 @@ class LmStudioLlm implements Llm {
     return currentModels.find(m => m.id === value);
   }
 
-  async models(): Promise<Array<Model>> {
+  async models(): Promise<Array<LlmModel>> {
     const response = await fetch(`${this.baseUrl}/models`);
     const j = await response.json();
     return j.data;

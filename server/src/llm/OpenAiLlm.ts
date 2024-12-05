@@ -3,8 +3,7 @@ import {hasEnv} from "../system/config";
 import type {ChatInput, ChatResult, Llm} from "./Llm";
 import {LoqModule} from "../system/LoqModule";
 import {LlmLoqModule} from "./LlmLoqModule";
-
-type Model = OpenAI.Model;
+import {LlmModel} from "./LlmModel";
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -32,7 +31,7 @@ class OpenAiLlm implements Llm {
     this.module = new LlmLoqModule(this);
   }
 
-  async currentModel(): Promise<Model> {
+  async currentModel(): Promise<LlmModel> {
     const theModel = await this.findByName(this.modelName);
     if (theModel) {
       return theModel;
@@ -60,9 +59,9 @@ class OpenAiLlm implements Llm {
     }
   }
 
-  async models(): Promise<Array<Model>> {
+  async models(): Promise<Array<LlmModel>> {
     let modelsPage = await this.openai.models.list();
-    return modelsPage.data.filter(m => !CANNOT_DO_SYSTEM_PROMPT.includes(m.id)) as Array<Model>;
+    return modelsPage.data.filter(m => !CANNOT_DO_SYSTEM_PROMPT.includes(m.id)) as Array<LlmModel>;
   }
 
   async chat(messages: Array<OpenAIMsg>): Promise<ChatResult> {

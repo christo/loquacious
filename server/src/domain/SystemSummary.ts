@@ -1,8 +1,6 @@
 import {SpeechSystemOption} from "../speech/SpeechSystems";
 import {RunInfo} from "./RunInfo";
-import OpenAI from "openai";
-
-type Model = OpenAI.Model;
+import {LlmModel} from "../llm/LlmModel";
 
 type Module = {
   current: string,
@@ -48,7 +46,7 @@ type SystemSummary = {
     current: string,
     all: string[],
   },
-  llm: OptionedModule<Model>,
+  llm: OptionedModule<LlmModel>,
   tts: OptionedModule<SpeechSystemOption>,
   lipsync: Module,
   pose: Module,
