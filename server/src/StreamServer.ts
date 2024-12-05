@@ -12,7 +12,7 @@ class StreamServer {
     }
     console.log(`booting StreamServer on port ${port}`);
     const httpServer = createServer(app);
-    // TODO set options like ping, timeout etc.
+    // perhaps for production we should set options like ping, timeout etc.
     const options = {
       cors: {
         origin: corsOrigin
