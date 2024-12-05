@@ -7,7 +7,7 @@ export interface ConfigurableCreator {
   /**
    * Configure self to state defined by metadata previously provided by
    * the corresponding implementation of {@link CreatorType#getMetadata} or
-   * explode if not possible.
+   * reject if not possible.
    * @param metadata configuration.
    */
   configure(metadata: string): Promise<void>;
