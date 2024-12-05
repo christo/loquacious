@@ -41,8 +41,7 @@ Q: do we need to estimate velocity over n frames in order to make assertions abo
 Q: how relevant is object constancy at all? We want a new session if the user swaps with another.
 Q: what time parameters should we use? Frame times are not guaranteed to be consistent.
 
-TODO: set up an empirical test suite to find coefficients for flexible approach and departure detection;
-  use the assumption that approach vector is colinear with the centroid of the camera frustrum (reduces to width?)
+TODO: flexible approach and departure detection using vision and pose estimation
 TODO: investigate "scene change" and "camera move" detection using vision-enabled LLM
   can a vision-enabled LLM tell if two images are "the same scene"? Can a delta on edge-detect kernel filter do this?
  */
