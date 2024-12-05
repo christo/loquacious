@@ -7,6 +7,7 @@ type Module = {
   all: string[],
   isFree: boolean
 }
+
 type OptionedModule<T> = Module & {
   options: T[],
   currentOption: T,
@@ -17,6 +18,7 @@ type HealthError = {
   message: string;
   type: string;
 }
+
 type PerfStat = {
   seconds: number,
   measure: string,
@@ -28,10 +30,12 @@ type PerfStat = {
   worst: number,
   count: number,
 }
+
 type MemSpec = {
   bytes: number,
   formatted: string,
 };
+
 type HealthStatus = {
   freeMem: MemSpec,
   totalMem: MemSpec,
@@ -39,6 +43,7 @@ type HealthStatus = {
   error: HealthError | undefined;
   message: string | undefined;
 };
+
 type SystemSummary = {
   asAt: Date,
   mode: {
@@ -56,6 +61,6 @@ type SystemSummary = {
     run: RunInfo
   },
   health: HealthStatus,
-
 }
+
 export type {SystemSummary, Module, OptionedModule, HealthStatus, MemSpec, PerfStat, HealthError};

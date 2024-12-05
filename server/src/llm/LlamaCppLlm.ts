@@ -87,7 +87,6 @@ class LlamaCppLlm implements Llm {
   loqModule(): LoqModule<ChatInput, ChatResult> {
     return this.module;
   }
-
 }
 
 export {LlamaCppLlm};
