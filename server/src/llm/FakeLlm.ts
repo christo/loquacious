@@ -6,7 +6,6 @@ import {text} from "express";
 import {LoqModule} from "../system/LoqModule";
 import {LlmLoqModule} from "./LlmLoqModule";
 
-type Model = OpenAI.Model;
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 /*
@@ -15,7 +14,7 @@ Using acouple of OpenAI's lightweight interfaces as part of our public interface
 
 
 /** Support multiple "models" to conveniently switch between different fake behaviour */
-class FakeModel implements Model {
+class FakeModel implements LlmModel {
   created: number;
   id: string;
   object: "model";
@@ -66,7 +65,7 @@ class FakeLlm implements Llm {
     });
   }
 
-  currentModel(): Promise<Model> {
+  currentModel(): Promise<LlmModel> {
     return Promise.resolve(this.myModels[this.currentModelKey]);
   }
 
@@ -80,7 +79,7 @@ class FakeLlm implements Llm {
     return Promise.reject(`${this.name}: Unknown model: ${value}`);
   }
 
-  models(): Promise<Array<Model>> {
+  models(): Promise<Array<LlmModel>> {
     return Promise.resolve(Object.values(this.myModels));
   }
 
