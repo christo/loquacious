@@ -8,7 +8,7 @@ type Module = {
   isFree: boolean
 }
 
-type OptionedModule<T> = Module & {
+type ModuleWithOptions<T> = Module & {
   options: T[],
   currentOption: T,
 }
@@ -51,8 +51,8 @@ type SystemSummary = {
     current: string,
     all: string[],
   },
-  llm: OptionedModule<LlmModel>,
-  tts: OptionedModule<SpeechSystemOption>,
+  llm: ModuleWithOptions<LlmModel>,
+  tts: ModuleWithOptions<SpeechSystemOption>,
   lipsync: Module,
   pose: Module,
   vision: Module,
@@ -63,4 +63,4 @@ type SystemSummary = {
   health: HealthStatus,
 }
 
-export type {SystemSummary, Module, OptionedModule, HealthStatus, MemSpec, PerfStat, HealthError};
+export type {SystemSummary, Module, ModuleWithOptions, HealthStatus, MemSpec, PerfStat, HealthError};

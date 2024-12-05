@@ -12,7 +12,7 @@ import {SpeechSystems} from "../speech/SpeechSystems";
 import AnimatorServices from "../lipsync/AnimatorServices";
 import {Modes} from "../llm/Modes";
 import Db from "../db/Db";
-import {OptionedModule, SystemSummary} from "../domain/SystemSummary";
+import {ModuleWithOptions, SystemSummary} from "../domain/SystemSummary";
 import {RunInfo} from "../domain/RunInfo";
 import {systemHealth} from "./SystemStatus";
 import {LoqModule} from "./LoqModule";
@@ -62,14 +62,14 @@ class Loquacious {
     return this._modes;
   }
 
-  async getLlmModule(): Promise<OptionedModule<LlmModel>> {
+  private async getLlmModule(): Promise<ModuleWithOptions<LlmModel>> {
     return {
       current: this._llms.current().getName(),
       all: this._llms.all().map(llm => llm.getName()),
       options: await this._llms.current().models(),
       currentOption: await this._llms.current().currentModel(),
       isFree: this._llms.current().free()
-    }
+    } as ModuleWithOptions<LlmModel>
   }
 
   async getSystem(): Promise<SystemSummary> {
