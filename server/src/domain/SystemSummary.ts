@@ -2,15 +2,15 @@ import {SpeechSystemOption} from "../speech/SpeechSystems";
 import {RunInfo} from "./RunInfo";
 import {LlmModel} from "../llm/LlmModel";
 
-type Module = {
-  current: string,
-  all: string[],
-  isFree: boolean
+interface Module {
+  current: string;
+  all: string[];
+  isFree: boolean;
 }
 
-type ModuleWithOptions<T> = Module & {
-  options: T[],
-  currentOption: T,
+interface ModuleWithOptions<T> extends Module {
+  options: T[];
+  currentOption: T;
 }
 
 type HealthError = {

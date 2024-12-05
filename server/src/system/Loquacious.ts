@@ -67,7 +67,7 @@ class Loquacious {
       options: await this._llms.current().models(),
       currentOption: await this._llms.current().currentModel(),
       isFree: this._llms.current().free()
-    } as ModuleWithOptions<LlmModel>
+    }
   }
 
   async getSystem(): Promise<SystemSummary> {
