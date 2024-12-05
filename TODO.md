@@ -2,6 +2,7 @@
 
 * [ ] extract core logic out of `server.ts`
   * [x] match outputs from one module to inputs of next module
+  * [ ] review wip LoqModule - should combine service with db access to do whole domain operation.
   * [ ] ? move `LoqModule` construction to same place as `CreatorService` construction. The
     `LoqModule` needs a reference to it as well as a `Db`.
   * [ ] move module acquisition to `Loquacious`? The modules need a db reference so maybe
