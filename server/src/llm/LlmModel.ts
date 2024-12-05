@@ -1,4 +1,6 @@
-class LlmModel {
+import OpenAI from "openai";
+
+interface LlmModel {
   /**
    * Unique identifier used by external APIs.
    */
@@ -20,4 +22,8 @@ class LlmModel {
   owned_by: string;
 }
 
-export {LlmModel};
+function fromOpenAi(openai: OpenAI.Model): LlmModel {
+  return openai as LlmModel;
+}
+
+export {type LlmModel, fromOpenAi};
