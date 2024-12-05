@@ -3,6 +3,9 @@ import {Express} from "express";
 import {createServer} from "http";
 import {WorkflowStep} from "./system/WorkflowStep";
 
+/**
+ * Websocket server implemented with Socket.io
+ */
 class StreamServer {
   private io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
 
