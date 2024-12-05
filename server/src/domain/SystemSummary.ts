@@ -1,23 +1,8 @@
 import {SpeechSystemOption} from "../speech/SpeechSystems";
 import {RunInfo} from "./RunInfo";
 import {LlmModel} from "../llm/LlmModel";
-
-/**
- * Element of the system that could be replaced by an alternative.
- */
-interface Module {
-  current: string;
-  all: string[];
-  isFree: boolean;
-}
-
-/**
- * {@link Module} that has user-choosable options.
- */
-interface ModuleWithOptions<T> extends Module {
-  options: T[];
-  currentOption: T;
-}
+import ModuleWithOptions from "./Module";
+import Module from "./Module";
 
 type HealthError = {
   code: number,
@@ -69,4 +54,4 @@ type SystemSummary = {
   health: HealthStatus,
 }
 
-export type {SystemSummary, Module, ModuleWithOptions, HealthStatus, MemSpec, PerfStat, HealthError};
+export type {SystemSummary, HealthStatus, MemSpec, PerfStat, HealthError};

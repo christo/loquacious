@@ -12,11 +12,12 @@ import {SpeechSystemOption, SpeechSystems} from "../speech/SpeechSystems";
 import AnimatorServices from "../lipsync/AnimatorServices";
 import {Modes} from "../llm/Modes";
 import Db from "../db/Db";
-import {ModuleWithOptions, SystemSummary} from "../domain/SystemSummary";
+import {SystemSummary} from "../domain/SystemSummary";
 import {RunInfo} from "../domain/RunInfo";
 import {systemHealth} from "./SystemStatus";
 import {LlmModel} from "../llm/LlmModel";
 import * as Module from "node:module";
+import {ModuleWithOptions} from "../domain/Module";
 
 
 /**
