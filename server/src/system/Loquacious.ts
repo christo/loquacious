@@ -24,6 +24,7 @@ import type {CreatorType} from "../domain/CreatorType";
 import {StreamServer} from "../StreamServer";
 import {SpeechInput, SpeechResult, SpeechSystemLoqModule} from "../speech/SpeechSystem";
 import {LipSyncInput, LipSyncLoqModule, LipSyncResult} from "../lipsync/LipSyncAnimator";
+import {WorkflowEvents} from "./WorkflowEvents";
 
 
 /**
@@ -37,16 +38,16 @@ class Loquacious {
   private readonly _speechSystems: SpeechSystems;
   private readonly _animators: AnimatorServices;
   private readonly _modes: Modes;
-  private readonly db: Db;
-  private readonly _streamServer: StreamServer;
+  private readonly _db: Db;
+  private readonly _workflowEvents: WorkflowEvents;
 
-  constructor(PATH_BASE_DATA: string, db: Db, streamServer: StreamServer) {
+  constructor(PATH_BASE_DATA: string, db: Db, streamServer: WorkflowEvents) {
     this._llms = new LlmService();
     this._speechSystems = new SpeechSystems(PATH_BASE_DATA);
     this._animators = new AnimatorServices(PATH_BASE_DATA);
     this._modes = new Modes();
-    this._streamServer = streamServer;
-    this.db = db;
+    this._workflowEvents = streamServer;
+    this._db = db;
   }
 
   async initialiseCreatorTypes(): Promise<void> {
@@ -58,20 +59,20 @@ class Loquacious {
     console.log(`ensuring ${creators.length} creator types are in database`);
     await Promise.all(creators.map(async creator => {
       console.log(`   initialising ${creator.getName()}`);
-      return this.db.findCreator(creator.getName(), creator.getMetadata(), true);
+      return this._db.findCreator(creator.getName(), creator.getMetadata(), true);
     }));
   }
 
   getLlmLoqModule(): LoqModule<ChatInput, ChatResult> {
-    return new LlmLoqModule(this._llms.current(), this.db);
+    return new LlmLoqModule(this._llms.current(), this._db);
   }
 
   getTtsLoqModule(): LoqModule<SpeechInput, SpeechResult> {
-    return new SpeechSystemLoqModule(this._speechSystems.current(), this.db);
+    return new SpeechSystemLoqModule(this._speechSystems.current(), this._db);
   }
 
   getLipSyncLoqModule(): LoqModule<LipSyncInput, LipSyncResult> {
-    return new LipSyncLoqModule(this._animators.current(), this.db);
+    return new LipSyncLoqModule(this._animators.current(), this._db, this._workflowEvents);
   }
 
   /** @deprecated transitional interface */
@@ -130,7 +131,7 @@ class Loquacious {
         isFree: true
       },
       runtime: {
-        run: new RunInfo(this.db.getRun())
+        run: new RunInfo(this._db.getRun())
       },
       health: await systemHealth(this.llms.current())
     };
