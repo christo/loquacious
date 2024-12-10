@@ -96,10 +96,6 @@ class Loquacious {
     this._animators.setCurrent(key);
   }
 
-  setCurrentMode(key:  string): void {
-
-  }
-
   /** @deprecated transitional interface */
   get llms(): LlmService {
     return this._llms;
@@ -115,7 +111,7 @@ class Loquacious {
     return this._animators;
   }
 
-  /** @deprecated transitional interface? */
+  // TODO decide how this should handle mode changes
   get modes(): Modes {
     return this._modes;
   }
