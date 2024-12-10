@@ -10,11 +10,9 @@ import {LoqModule} from "../system/LoqModule";
  * D-iD implementation of {@link LipSyncAnimator} intended to be used together with {@link DidTts}.
  */
 class DidAnimator implements LipSyncAnimator {
-  private readonly module: LoqModule<LipSyncInput, LipSyncResult>;
 
 
   constructor() {
-    this.module = new LipSyncLoqModule(this, this.db);
   }
 
   animate(imageFile: string, speechFile: Promise<string | undefined>, fileKey: string): Promise<LipSyncResult> {
@@ -78,9 +76,6 @@ class DidAnimator implements LipSyncAnimator {
     return Promise.reject("unimplemented");
   }
 
-  loqModule(): LoqModule<LipSyncInput, LipSyncResult> {
-    return this.module;
-  }
 }
 
 export {DidAnimator};

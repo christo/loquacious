@@ -15,7 +15,6 @@ import {LoqModule} from "../system/LoqModule";
 class FakeLipSync implements LipSyncAnimator {
   canRun = always;
   private readonly lipSyncDataDir: string;
-  private readonly module: LipSyncLoqModule;
 
   /**
    * Constructor.
@@ -24,7 +23,6 @@ class FakeLipSync implements LipSyncAnimator {
   constructor(lipSyncDataDir: string) {
     // because this reuses other lipsync videos it doesn't have its own subdir
     this.lipSyncDataDir = lipSyncDataDir;
-    this.module = new LipSyncLoqModule(this, this.db);
   }
 
   getName(): string {
@@ -73,10 +71,6 @@ class FakeLipSync implements LipSyncAnimator {
   videoOutputFormat(): MediaFormat {
     // apparently
     return MF_MP4;
-  }
-
-  loqModule(): LoqModule<LipSyncInput, LipSyncResult> {
-    return this.module;
   }
 }
 

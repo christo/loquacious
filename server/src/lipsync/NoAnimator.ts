@@ -7,13 +7,6 @@ import {LoqModule} from "../system/LoqModule";
  * Animator that doesn't animate.
  */
 class NoAnimator implements LipSyncAnimator {
-    private readonly module: LipSyncLoqModule;
-
-
-    constructor() {
-        this.module = new LipSyncLoqModule(this, this.db);
-    }
-
     canRun(): boolean {
         return true;
     }
@@ -45,13 +38,6 @@ class NoAnimator implements LipSyncAnimator {
     postResponseHook(): Promise<void> {
         return Promise.resolve();
     }
-
-    loqModule(): LoqModule<LipSyncInput, LipSyncResult> {
-        return this.module;
-    }
-
-
-
 }
 
 export {NoAnimator};

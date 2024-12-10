@@ -1,11 +1,7 @@
-import type {ChatInput, ChatResult, Llm} from "llm/Llm";
+import type {ChatResult, Llm} from "llm/Llm";
 import OpenAI from "openai";
 import {always} from "../system/config";
 import {LlmModel} from "./LlmModel";
-import {text} from "express";
-import {LoqModule} from "../system/LoqModule";
-import {LlmLoqModule} from "./LlmLoqModule";
-import Db from "../db/Db";
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -103,10 +99,6 @@ class FakeLlm implements Llm {
 
   free(): boolean {
     return true;
-  }
-
-  loqModule(db: Db): LoqModule<ChatInput, ChatResult> {
-    return new LlmLoqModule(this, db);
   }
 }
 

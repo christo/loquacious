@@ -7,6 +7,7 @@ import type {CreatorService} from "../system/CreatorService";
 import {EventChannel, EventEmitter, LoqEvent} from "../system/EventEmitter";
 import {LoqModule} from "../system/LoqModule";
 import Db from "../db/Db";
+import {WorkflowEvents} from "../system/WorkflowEvents";
 
 /** UI struct for a speech system with its name and all possible options */
 class DisplaySpeechSystem {
@@ -27,10 +28,12 @@ class DisplaySpeechSystem {
 class SpeechSystemLoqModule implements LoqModule<SpeechInput, SpeechResult> {
   private readonly speechSystem: SpeechSystem;
   private _db: Db;
+  private _workflowEvents: WorkflowEvents;
 
-  constructor(ss: SpeechSystem, db: Db) {
+  constructor(ss: SpeechSystem, db: Db, workflowEvents: WorkflowEvents) {
     this.speechSystem = ss;
     this._db = db;
+    this._workflowEvents = workflowEvents;
   }
 
   async call(input: Promise<SpeechInput>): Promise<SpeechResult> {
@@ -121,11 +124,6 @@ interface SpeechSystem extends CreatorService {
    * Provide the {@link MediaFormat} of the created audio.
    */
   speechOutputFormat(): MediaFormat;
-
-  /**
-   * Transitional mechanism for acquiring a LoqModule for this.
-   */
-  loqModule(): LoqModule<SpeechInput, SpeechResult>;
 }
 
 export {

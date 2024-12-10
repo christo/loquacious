@@ -7,18 +7,12 @@ import {LoqModule} from "../system/LoqModule";
 class DidTts implements SpeechSystem {
   display: DisplaySpeechSystem;
   private speechSystemOption: SpeechSystemOption;
-  private module: LoqModule<SpeechInput, SpeechResult>;
 
 
   constructor() {
     this.display = new DisplaySpeechSystem(this.getName(), [], this.free());
 
     this.speechSystemOption = new SpeechSystemOption(this, "default", "default");
-    this.module = new SpeechSystemLoqModule(this);
-  }
-
-  loqModule(): LoqModule<SpeechInput, SpeechResult> {
-    return this.module;
   }
 
   pauseCommand(msDuration: number): string | null {

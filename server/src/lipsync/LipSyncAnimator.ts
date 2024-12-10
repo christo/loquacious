@@ -28,20 +28,20 @@ type LipSyncInput = {
 
 class LipSyncLoqModule implements LoqModule<LipSyncInput, LipSyncResult> {
   private _lsa: LipSyncAnimator;
-  private _streamServer: WorkflowEvents;
+  private _workflowEvents: WorkflowEvents;
 
   constructor(lsa: LipSyncAnimator, db: Db, workflowEvents: WorkflowEvents) {
     this._lsa = lsa;
-    this._streamServer = workflowEvents;
+    this._workflowEvents = workflowEvents;
   }
 
   async call(input: Promise<LipSyncInput>): Promise<LipSyncResult> {
     try {
-      // TODO check this sequencing logic
-      this._streamServer.workflow("lipsync_request");
+      // TODO check the sequencing logic of firing these workflow events
+      this._workflowEvents.workflow("lipsync_request");
       const lipSyncInput = await input;
       return this._lsa.animate(lipSyncInput.imageFile, input.then(lsi => lsi.speechFile), lipSyncInput.fileKey).then(x => {
-        this._streamServer.workflow("lipsync_response");
+        this._workflowEvents.workflow("lipsync_response");
         return x;
       });
     } catch(error) {
@@ -74,10 +74,6 @@ interface LipSyncAnimator extends CreatorService {
    */
   videoOutputFormat(): MediaFormat | undefined;
 
-  /**
-   * Transitional mechanism for acquiring a LoqModule for this.
-   */
-  loqModule(): LoqModule<LipSyncInput, LipSyncResult>;
 }
 
 export type {LipSyncAnimator, LipSyncResult, LipSyncInput};

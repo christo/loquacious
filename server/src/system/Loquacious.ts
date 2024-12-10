@@ -50,6 +50,11 @@ class Loquacious {
     this._db = db;
   }
 
+  // TODO need to support setting configuration options for some CreatorTypes
+
+  /**
+   * Makes sure all the current available CreatorTypes have database entities
+   */
   async initialiseCreatorTypes(): Promise<void> {
     const creators: CreatorType[] = [
       ...this._llms.all(),
@@ -64,15 +69,35 @@ class Loquacious {
   }
 
   getLlmLoqModule(): LoqModule<ChatInput, ChatResult> {
-    return new LlmLoqModule(this._llms.current(), this._db);
+    // TODO rename to getLlm
+    return new LlmLoqModule(this._llms.current(), this._db, this._workflowEvents);
   }
 
   getTtsLoqModule(): LoqModule<SpeechInput, SpeechResult> {
-    return new SpeechSystemLoqModule(this._speechSystems.current(), this._db);
+    // TODO rename to getTts
+    return new SpeechSystemLoqModule(this._speechSystems.current(), this._db, this._workflowEvents);
   }
 
   getLipSyncLoqModule(): LoqModule<LipSyncInput, LipSyncResult> {
+    // TODO rename to getLipSync
     return new LipSyncLoqModule(this._animators.current(), this._db, this._workflowEvents);
+  }
+
+  setCurrentLlm(key:  string): void {
+    this._llms.setCurrent(key);
+  }
+
+  setCurrentTts(key:  string): void {
+    // TODO standardise on async or not for these setCurrentFoo methods
+    this._speechSystems.setCurrent(key);
+  }
+
+  setCurrentAnimator(key:  string): void {
+    this._animators.setCurrent(key);
+  }
+
+  setCurrentMode(key:  string): void {
+
   }
 
   /** @deprecated transitional interface */

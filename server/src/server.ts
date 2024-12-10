@@ -85,13 +85,14 @@ app.post("/system/", async (req: Request, res: Response) => {
   await failable(res, "update system settings", async () => {
     const keys = Object.getOwnPropertyNames(req.body);
     for (const k of keys) {
+      // TODO confirm this can be trusted to be a string
       const value = req.body[k];
       switch (k) {
         case "mode":
           loq.modes.setCurrent(value);
           break;
         case "llm":
-          loq.llms.setCurrent(value);
+          loq.setCurrentLlm (value);
           break;
         case "llm_option":
           await loq.llms.current().setCurrentOption(value);
@@ -112,7 +113,6 @@ app.post("/system/", async (req: Request, res: Response) => {
     res.json(await loq.getSystem());
   });
 });
-
 
 /**
  * Get current system settings.
@@ -213,9 +213,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
             getBaseFileName: () => `${audioFile.id}`,
           } as SpeechInput));
 
-          const loqModule = currentSpeech.loqModule();
+          const ttsLoqModule = loq.getTtsLoqModule();
 
-          const psr = loqModule.call(speechInput);
+          const psr = ttsLoqModule.call(speechInput);
           // baby dragon!
           return Promise.resolve(new AsyncSpeechResult(
               () => psr.then(sr => sr.filePath()),
@@ -235,7 +235,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               // hack - better to signal NoLipsync lipsync more explicitly
               return Promise.reject("animator does not declare a Mime Type");
             } else {
-              const animateModule = currentAnimator.loqModule();
+              const animateModule = loq.getLipSyncLoqModule();
 
               const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
                 const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);

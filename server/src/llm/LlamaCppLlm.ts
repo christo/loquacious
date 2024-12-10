@@ -30,7 +30,7 @@ class LlamaCppLlm implements Llm {
       baseURL: baseUrl,
       apiKey: "REQURIED_BY_OPENAI_IGNORED_BY_LLAMA_CPP",
     });
-    this.module = new LlmLoqModule(this);
+    this.module = new LlmLoqModule(this, undefined, this._workflowEvents);
   }
 
   async currentModel(): Promise<LlmModel> {

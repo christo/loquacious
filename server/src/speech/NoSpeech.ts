@@ -21,7 +21,6 @@ class NoSpeech implements SpeechSystem {
   readonly name = "NoSpeech";
   private onlyOption = [new CharacterVoice("silence", "silence", "is golden")];
   readonly display = new DisplaySpeechSystem(this.getName(), this.onlyOption, this.free());
-  private readonly module = new SpeechSystemLoqModule(this);
 
   canRun() {
     return true;
@@ -81,10 +80,6 @@ class NoSpeech implements SpeechSystem {
 
   free(): boolean {
     return true;
-  }
-
-  loqModule(): LoqModule<SpeechInput, SpeechResult> {
-    return this.module;
   }
 }
 

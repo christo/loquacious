@@ -66,13 +66,11 @@ class MacOsSpeech implements SpeechSystem {
   private currentIndex = 0;
   private readonly dataDir: string;
   private fileFormat: MediaFormat;
-  private module: SpeechSystemLoqModule;
 
   constructor(ttsDataDir: PathLike, fileFormat = MF_MP3) {
     this.dataDir = path.join(ttsDataDir.toString(), "macos");
     mkDirIfMissing(this.dataDir);
     this.fileFormat = fileFormat;
-    this.module = new SpeechSystemLoqModule(this);
   }
 
   currentOption(): SpeechSystemOption {
@@ -177,10 +175,6 @@ class MacOsSpeech implements SpeechSystem {
 
   free(): boolean {
     return true;
-  }
-
-  loqModule(): LoqModule<SpeechInput, SpeechResult> {
-    return this.module;
   }
 }
 

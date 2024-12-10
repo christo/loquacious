@@ -65,7 +65,6 @@ class FalSadtalker implements LipSyncAnimator {
     preprocess: "full",            // crop, extcrop, resize, full, extfull
   };
   private readonly urlCacheFile: string;
-  private readonly module: LoqModule<LipSyncInput, LipSyncResult>;
 
   /**
    * Constructor.
@@ -84,7 +83,6 @@ class FalSadtalker implements LipSyncAnimator {
     fal.config({
       credentials: process.env.FAL_API_KEY,
     });
-    this.module = new LipSyncLoqModule(this, this.db);
   }
 
   getName(): string {
@@ -175,10 +173,6 @@ class FalSadtalker implements LipSyncAnimator {
         ...this.sadtalkerConfig
       }
     });
-  }
-
-  loqModule(): LoqModule<LipSyncInput, LipSyncResult> {
-    return this.module;
   }
 }
 

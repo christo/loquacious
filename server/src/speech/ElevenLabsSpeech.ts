@@ -126,14 +126,12 @@ class ElevenLabsSpeech implements SpeechSystem {
       }
     }
   });
-  private readonly module: SpeechSystemLoqModule;
 
   constructor(ttsDataDir: PathLike) {
     this.dataDir = path.join(ttsDataDir.toString(), "el");
     mkDirIfMissing(this.dataDir);
     this.client = new ElevenLabsClient({});
     this.display = new DisplaySpeechSystem(this.getName(), VOICES, this.free())
-    this.module = new SpeechSystemLoqModule(this);
   }
 
   options() {
@@ -231,10 +229,6 @@ class ElevenLabsSpeech implements SpeechSystem {
 
   private getConfig(): ElevenLabsPartialConfig {
     return this.partialConfig();
-  }
-
-  loqModule(): LoqModule<SpeechInput, SpeechResult> {
-    return this.module;
   }
 }
 

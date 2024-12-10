@@ -1,8 +1,6 @@
 import OpenAI from "openai";
 import type {CreatorService} from "../system/CreatorService";
-import {LoqModule} from "../system/LoqModule";
 import {LlmModel} from "./LlmModel";
-import Db from "../db/Db";
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -29,6 +27,7 @@ interface Llm extends CreatorService {
   models: () => Promise<Array<LlmModel>>
   chat: (params: OpenAIMsg[]) => Promise<ChatResult>;
   currentModel: () => Promise<LlmModel>;
+
   setCurrentOption(value: string): Promise<void>;
 }
 
