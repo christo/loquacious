@@ -16,6 +16,14 @@ export class LlmLoqModule implements LoqModule<ChatInput, ChatResult> {
 
   async call(input: Promise<ChatInput>): Promise<ChatResult> {
     // TODO move db logic from server here
-    return this.llm.chat(await input.then(cr => cr.params));
+    try {
+      this._workflowEvents.workflow("llm_request");
+      return this.llm.chat(await input.then(cr => {
+        this._workflowEvents.workflow("llm_response");
+        return cr.params
+      }));
+    } catch (error: any) {
+      return Promise.reject(error);
+    }
   }
 }

@@ -181,7 +181,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   if (!prompt) {
     res.status(400).json({error: 'No prompt provided'});
   } else {
-    streamServer.workflow("llm_request");
     await failable(res, "loquacious chat", async () => {
 
       const currentLlm = loq.llms.current();
@@ -193,14 +192,15 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const messageHistory: Message[] = await db.getMessages(session);
       const chatPrepper = loq.modes.getChatPrepper();
       let allMessages = chatPrepper(messageHistory, currentSpeech);
+      // TODO migrate to using LoqModule.call() for llm (already emits workflow event)
       let llmResponse = await timed("text generation", () => currentLlm.chat(allMessages));
 
       if (llmResponse.message !== null) {
-        streamServer.workflow("llm_response");
         const llmMessage = timed("storing llm response",
             () => db.createCreatorTypeMessage(session, llmResponse.message!, currentLlm));
 
         const doSpeechSynthesis = async () => {
+          // TODO move workflow event triggers into TtsLoqModule
           streamServer.workflow("tts_request");
 
           // TODO these guys belong in the tts module's call
