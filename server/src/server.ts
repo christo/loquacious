@@ -22,6 +22,8 @@ import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
 import {Loquacious} from "./system/Loquacious";
 import Agent = Undici.Agent;
+import {LlmInput} from "./llm/Llm";
+import {ChatPrepper} from "./llm/Modes";
 
 
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
@@ -190,18 +192,16 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       console.log("storing user message");
       await db.createUserMessage(session, prompt);
       const messageHistory: Message[] = await db.getMessages(session);
-      const chatPrepper = loq.modes.getChatPrepper();
-      let allMessages = chatPrepper(messageHistory, currentSpeech);
-      // TODO migrate to using LoqModule.call() for llm (already emits workflow event)
-      let llmResponse = await timed("text generation", () => currentLlm.chat(allMessages));
+      const chatPrepper: ChatPrepper = loq.modes.getChatPrepper();
+      const llmInput = chatPrepper(messageHistory, currentSpeech);
+      let llmResult = await timed("text generation",
+          () => loq.getLlmLoqModule().call(Promise.resolve(llmInput)));
 
-      if (llmResponse.message !== null) {
+      if (llmResult.message !== null) {
         const llmMessage = timed("storing llm response",
-            () => db.createCreatorTypeMessage(session, llmResponse.message!, currentLlm));
+            () => db.createCreatorTypeMessage(session, llmResult.message!, currentLlm));
 
         const doSpeechSynthesis = async () => {
-          // TODO move workflow event triggers into TtsLoqModule
-          streamServer.workflow("tts_request");
 
           // TODO these guys belong in the tts module's call
           const ssCreator = await db.findCreatorForService(currentSpeech);
@@ -226,7 +226,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         await failable(res, "speech generation", async () => {
 
           const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis", doSpeechSynthesis);
-          streamServer.workflow("tts_response");
 
           await failable(res, "lipsync generation", async () => {
             const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
@@ -257,8 +256,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                   messages: (await db.getMessages(session)).map(m => currentSpeech.removePauseCommands(m)),
                   speech: await speechResult.filePath(),
                   lipsync: lipsyncResult,
-                  llm: llmResponse.llm,
-                  model: llmResponse.model,
+                  llm: llmResult.llm,
+                  model: llmResult.model,
                 }
               }));
               await currentAnimator.postResponseHook();

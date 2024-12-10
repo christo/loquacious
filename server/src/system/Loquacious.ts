@@ -18,7 +18,7 @@ import {systemHealth} from "./SystemStatus";
 import {LlmModel} from "../llm/LlmModel";
 import {Module, ModuleWithOptions} from "../domain/Module";
 import {LoqModule} from "./LoqModule";
-import type {ChatInput, ChatResult} from "../llm/Llm";
+import type {LlmInput, LlmResult} from "../llm/Llm";
 import {LlmLoqModule} from "../llm/LlmLoqModule";
 import type {CreatorType} from "../domain/CreatorType";
 import {StreamServer} from "../StreamServer";
@@ -68,7 +68,7 @@ class Loquacious {
     }));
   }
 
-  getLlmLoqModule(): LoqModule<ChatInput, ChatResult> {
+  getLlmLoqModule(): LoqModule<LlmInput, LlmResult> {
     // TODO rename to getLlm
     return new LlmLoqModule(this._llms.current(), this._db, this._workflowEvents);
   }

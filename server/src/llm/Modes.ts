@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import type {Message} from "../domain/Message";
 import type {SpeechSystem} from "../speech/SpeechSystem";
 import {type PromptPart, SimplePromptPart} from "./PromptPart";
+import {BasicLlmInput, LlmInput} from "./Llm";
 
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 const rokosBasiliskSystemPrompt: string = readFileSync("prompts/rokos-basilisk.prompt.txt").toString();
@@ -33,7 +34,7 @@ const messageToOpenAi = (m: Message) => ({
  * @param messageHistory the possibly two way conversation until now
  * @param ss the speech system being used
  */
-const chatModeMessages = (messageHistory: Message[], ss: SpeechSystem): OpenAIMsg[] => {
+const chatModeMessages = (messageHistory: Message[], ss: SpeechSystem): LlmInput => {
   console.log("chat mode function");
   const systemParts = [
     dateTimePrompt(),
@@ -46,14 +47,14 @@ const chatModeMessages = (messageHistory: Message[], ss: SpeechSystem): OpenAIMs
     console.error("message history was empty");
     // imagine timer-based interjection prompt if last message from system, mode is chat and time gap > x
     systemParts.push("There is an awkward gap in the conversation. You say something next.");
-    return [
+    return new BasicLlmInput([
       {role: ROLE_SYSTEM, content: systemParts.join("\\n\\n")},
-    ];
+    ]);
   } else {
-    return [
+    return new BasicLlmInput([
       {role: ROLE_SYSTEM, content: systemParts.join("\\n\\n")},
       ...messageHistory.map(messageToOpenAi)
-    ];
+    ]);
   }
 
 };
@@ -79,7 +80,7 @@ const pauseInstructions = (ss: SpeechSystem): PromptPart => {
  * @param _chatHistory currently ignored.
  * @param ss speech system to render for.
  */
-const inviteModeMessages = (_chatHistory: Message[], ss: SpeechSystem): OpenAIMsg[] => {
+const inviteModeMessages = (_chatHistory: Message[], ss: SpeechSystem): LlmInput => {
   console.log("invite mode function");
   const systemPrompt = [
     dateTimePrompt(),
@@ -88,14 +89,14 @@ const inviteModeMessages = (_chatHistory: Message[], ss: SpeechSystem): OpenAIMs
     pauseInstructions(ss).text()
   ].join("\\n\\n");
 
-  return [{role: ROLE_SYSTEM, content: systemPrompt}];
+  return new BasicLlmInput([{role: ROLE_SYSTEM, content: systemPrompt}]);
 };
 
 /**
  * Function for building LLM prompt from chatHistory and relevant config to get a Message properly formatted for
  * the speech system. Each mode implements differently which supplies parameters for a chat completion request.
  */
-type ChatPrepper = (chatHistory: Message[], ss: SpeechSystem) => OpenAIMsg[];
+type ChatPrepper = (chatHistory: Message[], ss: SpeechSystem) => LlmInput;
 
 // Future consideration: abstract an LLM Request Config rather than directly passing SpeechSystem
 // so that tactical instructions about things like putting in pauses are fed to the ChatPrepper

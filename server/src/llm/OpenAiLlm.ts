@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import {hasEnv} from "../system/config";
-import type {ChatResult, Llm} from "./Llm";
+import type {LlmResult, Llm} from "./Llm";
 import {LlmModel} from "./LlmModel";
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
@@ -60,7 +60,7 @@ class OpenAiLlm implements Llm {
     return modelsPage.data.filter(m => !CANNOT_DO_SYSTEM_PROMPT.includes(m.id)) as Array<LlmModel>;
   }
 
-  async chat(messages: Array<OpenAIMsg>): Promise<ChatResult> {
+  async chat(messages: Array<OpenAIMsg>): Promise<LlmResult> {
     const response = await this.openai.chat.completions.create({
       model: this.modelName,
       messages: messages
@@ -70,7 +70,7 @@ class OpenAiLlm implements Llm {
       message: text,
       llm: this.name,
       model: m
-    } as ChatResult));
+    } as LlmResult));
   }
 
   getMetadata(): string | undefined {

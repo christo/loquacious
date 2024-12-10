@@ -25,6 +25,7 @@ class DisplaySpeechSystem {
   }
 }
 
+// TODO rename this to TtsLoqModule
 class SpeechSystemLoqModule implements LoqModule<SpeechInput, SpeechResult> {
   private readonly speechSystem: SpeechSystem;
   private _db: Db;
@@ -38,8 +39,10 @@ class SpeechSystemLoqModule implements LoqModule<SpeechInput, SpeechResult> {
 
   async call(input: Promise<SpeechInput>): Promise<SpeechResult> {
     try {
+      this._workflowEvents.workflow("tts_request");
       const speechInput = await input;
       return this.speechSystem.speak(speechInput.getText(), speechInput.getBaseFileName()).then(x => {
+        this._workflowEvents.workflow("tts_response");
         return x;
       });
     } catch (e) {
