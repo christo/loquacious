@@ -18,7 +18,6 @@ class LlamaCppLlm implements Llm {
   private readonly name = "Llama.cpp-LLM";
   canRun = always;
   private openai;
-  private readonly module: LlmLoqModule;
 
   /**
    * By default connects to localhost on default llama.cpp port.
@@ -30,7 +29,6 @@ class LlamaCppLlm implements Llm {
       baseURL: baseUrl,
       apiKey: "REQURIED_BY_OPENAI_IGNORED_BY_LLAMA_CPP",
     });
-    this.module = new LlmLoqModule(this, undefined, this._workflowEvents);
   }
 
   async currentModel(): Promise<LlmModel> {
@@ -82,10 +80,6 @@ class LlamaCppLlm implements Llm {
 
   free(): boolean {
     return true;
-  }
-
-  loqModule(): LoqModule<ChatInput, ChatResult> {
-    return this.module;
   }
 }
 
