@@ -1,7 +1,29 @@
 # General Notes
 
+## Key Interfaces
 
-# LIP SYNC
+## Loquacious
+
+Stateful system configuration with various domain services configured and contained.
+
+All system and domain logic should live under here. Server endpoints should be constrained to
+dealing with the HTTP domain.
+
+Each interactive session should have its own instance of this.
+
+## LoqModule
+
+Interface with parametised types for input and output high level interaction types.
+
+Integration point between db and possibly multiple domain service instances.
+
+## CreatorService
+
+* Responsible for db creation of domain objects, one for each domain category
+* 
+
+
+## LIP SYNC
 
 Q: What is the best lip-sync system/service. What inputs/workflow? 
 
