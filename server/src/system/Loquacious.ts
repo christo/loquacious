@@ -16,8 +16,14 @@ import {SystemSummary} from "../domain/SystemSummary";
 import {RunInfo} from "../domain/RunInfo";
 import {systemHealth} from "./SystemStatus";
 import {LlmModel} from "../llm/LlmModel";
-import * as Module from "node:module";
-import {ModuleWithOptions} from "../domain/Module";
+import {Module, ModuleWithOptions} from "../domain/Module";
+import {LoqModule} from "./LoqModule";
+import type {ChatInput, ChatResult} from "../llm/Llm";
+import {LlmLoqModule} from "../llm/LlmLoqModule";
+import type {CreatorType} from "../domain/CreatorType";
+import {StreamServer} from "../StreamServer";
+import {SpeechInput, SpeechResult, SpeechSystemLoqModule} from "../speech/SpeechSystem";
+import {LipSyncInput, LipSyncLoqModule, LipSyncResult} from "../lipsync/LipSyncAnimator";
 
 
 /**
@@ -31,14 +37,41 @@ class Loquacious {
   private readonly _speechSystems: SpeechSystems;
   private readonly _animators: AnimatorServices;
   private readonly _modes: Modes;
-  private db: Db;
+  private readonly db: Db;
+  private readonly _streamServer: StreamServer;
 
-  constructor(PATH_BASE_DATA: string, db: Db) {
+  constructor(PATH_BASE_DATA: string, db: Db, streamServer: StreamServer) {
     this._llms = new LlmService();
     this._speechSystems = new SpeechSystems(PATH_BASE_DATA);
     this._animators = new AnimatorServices(PATH_BASE_DATA);
     this._modes = new Modes();
+    this._streamServer = streamServer;
     this.db = db;
+  }
+
+  async initialiseCreatorTypes(): Promise<void> {
+    const creators: CreatorType[] = [
+      ...this._llms.all(),
+      ...this._speechSystems.systems,
+      ...this._animators.all()
+    ];
+    console.log(`ensuring ${creators.length} creator types are in database`);
+    await Promise.all(creators.map(async creator => {
+      console.log(`   initialising ${creator.getName()}`);
+      return this.db.findCreator(creator.getName(), creator.getMetadata(), true);
+    }));
+  }
+
+  getLlmLoqModule(): LoqModule<ChatInput, ChatResult> {
+    return new LlmLoqModule(this._llms.current(), this.db);
+  }
+
+  getTtsLoqModule(): LoqModule<SpeechInput, SpeechResult> {
+    return new SpeechSystemLoqModule(this._speechSystems.current(), this.db);
+  }
+
+  getLipSyncLoqModule(): LoqModule<LipSyncInput, LipSyncResult> {
+    return new LipSyncLoqModule(this._animators.current(), this.db);
   }
 
   /** @deprecated transitional interface */

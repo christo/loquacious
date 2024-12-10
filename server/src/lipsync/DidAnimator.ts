@@ -14,7 +14,7 @@ class DidAnimator implements LipSyncAnimator {
 
 
   constructor() {
-    this.module = new LipSyncLoqModule(this);
+    this.module = new LipSyncLoqModule(this, this.db);
   }
 
   animate(imageFile: string, speechFile: Promise<string | undefined>, fileKey: string): Promise<LipSyncResult> {

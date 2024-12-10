@@ -10,12 +10,6 @@ interface LoqModule<I, O> {
    */
   call(input: Promise<I>): Promise<O>;
 
-  /**
-   * Register for events
-   * @param event
-   * @param handler
-   */
-  on(event: EventChannel, handler: (event: LoqEvent) => void): void;
 }
 
 export {LoqModule};

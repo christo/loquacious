@@ -11,7 +11,7 @@ class NoAnimator implements LipSyncAnimator {
 
 
     constructor() {
-        this.module = new LipSyncLoqModule(this);
+        this.module = new LipSyncLoqModule(this, this.db);
     }
 
     canRun(): boolean {

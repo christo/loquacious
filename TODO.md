@@ -1,6 +1,9 @@
 ## TODO
 
 * [ ] extract core logic out of `server.ts`
+  * [ ] put in Loquacious and its delegates
+  * [ ] establish where the database reference goes. 
+    * It should be held by Loquacioius and fed downward
   * [x] match outputs from one module to inputs of next module
   * [ ] review wip LoqModule - should combine service with db access to do whole domain operation.
   * [ ] ? move `LoqModule` construction to same place as `CreatorService` construction. The

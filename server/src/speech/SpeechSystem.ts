@@ -6,6 +6,7 @@ import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
 import {EventChannel, EventEmitter, LoqEvent} from "../system/EventEmitter";
 import {LoqModule} from "../system/LoqModule";
+import Db from "../db/Db";
 
 /** UI struct for a speech system with its name and all possible options */
 class DisplaySpeechSystem {
@@ -23,32 +24,25 @@ class DisplaySpeechSystem {
   }
 }
 
-class SpeechSystemLoqModule extends EventEmitter implements LoqModule<SpeechInput, SpeechResult> {
+class SpeechSystemLoqModule implements LoqModule<SpeechInput, SpeechResult> {
   private readonly speechSystem: SpeechSystem;
+  private _db: Db;
 
-  constructor(ss: SpeechSystem) {
-    super(ss.getName());
+  constructor(ss: SpeechSystem, db: Db) {
     this.speechSystem = ss;
+    this._db = db;
   }
 
   async call(input: Promise<SpeechInput>): Promise<SpeechResult> {
     try {
-      super.emitSimple("begin");
       const speechInput = await input;
       return this.speechSystem.speak(speechInput.getText(), speechInput.getBaseFileName()).then(x => {
-        super.emitSimple("end");
         return x;
       });
     } catch (e) {
-      super.emit({channel: "error", body: e});
       return Promise.reject(e);
     }
   }
-
-  on(event: EventChannel, handler: (event: LoqEvent) => void): void {
-    super.addHandler(event, handler);
-  }
-
 }
 
 /**

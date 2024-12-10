@@ -5,6 +5,7 @@ import {LlmLoqModule} from "./LlmLoqModule";
 import * as process from "node:process";
 import {LoqModule} from "../system/LoqModule";
 import {LlmModel} from "./LlmModel";
+import db from "../db/Db";
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -17,7 +18,6 @@ class LmStudioLlm implements Llm {
   canRun = always;
   private openai;
   private currentModelId: string | null = null;
-  private readonly module: LlmLoqModule;
 
   /** TODO replace this constructor with an async static interface factory method */
   constructor(baseUrl = LM_STUDIO_BASE_URL_DEFAULT) {
@@ -29,7 +29,6 @@ class LmStudioLlm implements Llm {
       baseURL: baseUrl,
       apiKey: process.env.OPENAI_API_KEY as string,
     });
-    this.module = new LlmLoqModule(this);
   }
 
   /**
@@ -102,10 +101,6 @@ class LmStudioLlm implements Llm {
 
   free(): boolean {
     return true;
-  }
-
-  loqModule(): LoqModule<ChatInput, ChatResult> {
-    return this.module;
   }
 }
 

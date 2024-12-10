@@ -4,6 +4,7 @@ import type {ChatInput, ChatResult, Llm} from "./Llm";
 import {LoqModule} from "../system/LoqModule";
 import {LlmLoqModule} from "./LlmLoqModule";
 import {LlmModel} from "./LlmModel";
+import db from "../db/Db";
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -21,14 +22,12 @@ class OpenAiLlm implements Llm {
   canRun = hasEnv("OPENAI_API_KEY");
   private openai;
   private modelName: string;
-  private readonly module: LlmLoqModule;
 
   constructor(model = "gpt-4o") {
     this.modelName = model;
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY as string,
     });
-    this.module = new LlmLoqModule(this);
   }
 
   async currentModel(): Promise<LlmModel> {
@@ -95,9 +94,6 @@ class OpenAiLlm implements Llm {
     return false;
   }
 
-  loqModule(): LoqModule<ChatInput, ChatResult> {
-    return this.module;
-  }
 }
 
 export {OpenAiLlm};

@@ -48,7 +48,6 @@ const PATH_BASE_DATA: string = process.env.DATA_DIR!;
 
 // const llms = new LlmService();
 const db = new Db(process.env.DB_POOL_SIZE ? parseInt(process.env.DB_POOL_SIZE, 10) : 10);
-const loq = new Loquacious(PATH_BASE_DATA, db);
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -57,6 +56,7 @@ app.use(express.json());
 const wsPort = parseInt(process.env.WEBSOCKET_PORT || "3002", 10);
 // TODO remove hardcoding of devserver for cors host
 const streamServer = new StreamServer(app, wsPort, "http://localhost:5173");
+const loq = new Loquacious(PATH_BASE_DATA, db, streamServer);
 
 app.get("/portraits", async (_req: Request, res: Response) => {
   const exts = supportedImageTypes().flatMap(f => f.extensions).map(f => `.${f}`);
@@ -236,8 +236,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               return Promise.reject("animator does not declare a Mime Type");
             } else {
               const animateModule = currentAnimator.loqModule();
-              animateModule.on("begin", (_) => streamServer.workflow("lipsync_request"));
-              animateModule.on("end", (_) => streamServer.workflow("lipsync_response"));
 
               const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
                 const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
@@ -286,25 +284,14 @@ app.get('/audio', async (req: Request, res: Response) => fileStream(req.query.fi
 app.get('/video', async (req: Request, res: Response) => fileStream(req.query.file!.toString(), res));
 
 
-async function initialiseCreatorTypes() {
-  const creators: CreatorType[] = [
-    ...loq.llms.all(),
-    ...loq.speechSystems.systems,
-    ...loq.animators.all()
-  ];
-  console.log(`ensuring ${creators.length} creator types are in database`);
-  await Promise.all(creators.map(async creator => {
-    console.log(`   initialising ${creator.getName()}`);
-    return db.findCreator(creator.getName(), creator.getMetadata(), true);
-  }));
-}
+
 
 // Start the server
 app.listen(port, async () => {
   // TODO make production implementation that has stored commit hash and uses explicit version metdata
   const hash = await getCurrentCommitHash(process.cwd());
   await db.boot(process.env.DEPLOYMENT_NAME!, hash);
-  await initialiseCreatorTypes();
+  await loq.initialiseCreatorTypes();
 
   await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
   console.log(`Server is running on port ${port}`);

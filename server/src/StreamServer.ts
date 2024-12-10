@@ -2,15 +2,16 @@ import {DefaultEventsMap, Server} from "socket.io";
 import {Express} from "express";
 import {createServer} from "http";
 import {WorkflowStep} from "./system/WorkflowStep";
+import {WorkflowEvents} from "./WorkflowEvents";
 
 /**
  * Websocket server implemented with Socket.io
  */
-class StreamServer {
+class StreamServer implements WorkflowEvents {
   private io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
 
   constructor(app: Express, port: number, corsOrigin: string) {
-    if (port <=1024 || port > 65535) {
+    if (port <= 1024 || port > 65535) {
       throw new Error(`Bad port number ${port}`);
     }
     console.log(`booting StreamServer on port ${port}`);
@@ -43,6 +44,10 @@ class StreamServer {
     this.io.emit("workflow", workflow);
   }
 
+  /**
+   * Report an error to clients
+   * @param mesg
+   */
   error(mesg: string) {
     this.io.emit("loq_error", mesg);
   }

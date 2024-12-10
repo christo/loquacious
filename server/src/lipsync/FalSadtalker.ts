@@ -84,7 +84,7 @@ class FalSadtalker implements LipSyncAnimator {
     fal.config({
       credentials: process.env.FAL_API_KEY,
     });
-    this.module = new LipSyncLoqModule(this);
+    this.module = new LipSyncLoqModule(this, this.db);
   }
 
   getName(): string {

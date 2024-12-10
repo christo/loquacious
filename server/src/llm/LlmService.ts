@@ -3,8 +3,14 @@ import {LlamaCppLlm} from "./LlamaCppLlm";
 import type {Llm} from "./Llm";
 import {LmStudioLlm} from "./LmStudioLlm";
 import {OpenAiLlm} from "./OpenAiLlm";
+import {GateWay} from "../system/GateWay";
+import {EventEmitter} from "../system/EventEmitter";
 
-class LlmService {
+/**
+ * Configurable gateway to LLM implementations.
+ * Holds currently configured LLM.
+ */
+class LlmService implements GateWay<Llm> {
 
   private readonly llms: Llm[];
   private llmIndex = 0;

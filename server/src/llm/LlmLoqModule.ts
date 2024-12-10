@@ -1,20 +1,18 @@
-import {EventChannel, EventEmitter, LoqEvent} from "../system/EventEmitter";
 import {LoqModule} from "../system/LoqModule";
 import type {ChatInput, ChatResult, Llm} from "./Llm";
+import Db from "../db/Db";
 
-export class LlmLoqModule extends EventEmitter implements LoqModule<ChatInput, ChatResult> {
+export class LlmLoqModule implements LoqModule<ChatInput, ChatResult> {
   private readonly llm: Llm;
+  private readonly _db: Db;
 
-  constructor(llm: Llm) {
-    super(llm.getName());
+  constructor(llm: Llm, db: Db) {
+    this._db = db;
     this.llm = llm;
   }
 
   async call(input: Promise<ChatInput>): Promise<ChatResult> {
+    // TODO move db logic from server here
     return this.llm.chat(await input.then(cr => cr.params));
-  }
-
-  on(event: EventChannel, handler: (event: LoqEvent) => void): void {
-    super.addHandler(event, handler);
   }
 }

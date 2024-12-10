@@ -24,7 +24,7 @@ class FakeLipSync implements LipSyncAnimator {
   constructor(lipSyncDataDir: string) {
     // because this reuses other lipsync videos it doesn't have its own subdir
     this.lipSyncDataDir = lipSyncDataDir;
-    this.module = new LipSyncLoqModule(this);
+    this.module = new LipSyncLoqModule(this, this.db);
   }
 
   getName(): string {

@@ -2,6 +2,9 @@ import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
 import {EventChannel, EventEmitter, LoqEvent} from "../system/EventEmitter";
 import {LoqModule} from "../system/LoqModule";
+import Db from "../db/Db";
+import {StreamServer} from "../StreamServer";
+import {WorkflowEvents} from "../system/WorkflowEvents";
 
 /**
  * Output of calling {@LipSync} to generate a video.
@@ -23,33 +26,29 @@ type LipSyncInput = {
   fileKey: string;
 }
 
-class LipSyncLoqModule extends EventEmitter implements LoqModule<LipSyncInput, LipSyncResult> {
+class LipSyncLoqModule implements LoqModule<LipSyncInput, LipSyncResult> {
   private _lsa: LipSyncAnimator;
+  private _streamServer: WorkflowEvents;
 
-  constructor(lsa: LipSyncAnimator) {
-    super(lsa.getName());
+  constructor(lsa: LipSyncAnimator, db: Db, workflowEvents: WorkflowEvents) {
     this._lsa = lsa;
+    this._streamServer = workflowEvents;
   }
 
   async call(input: Promise<LipSyncInput>): Promise<LipSyncResult> {
     try {
-      super.emitSimple("begin");
+      // TODO check this sequencing logic
+      this._streamServer.workflow("lipsync_request");
       const lipSyncInput = await input;
       return this._lsa.animate(lipSyncInput.imageFile, input.then(lsi => lsi.speechFile), lipSyncInput.fileKey).then(x => {
-        super.emitSimple("end");
+        this._streamServer.workflow("lipsync_response");
         return x;
       });
     } catch(error) {
-      super.emit({channel: "error", body: {error}});
       return Promise.reject(error);
     }
   }
-
-  on(event: EventChannel, handler: (event: LoqEvent) => void): void {
-    super.addHandler(event, handler);
-  }
 }
-
 
 /**
  * Service that can create animation video from portrait image and speech audio.
