@@ -80,31 +80,28 @@ class Loquacious {
     return llmInputCreator(messageHistory, this._speechSystems.current());
   }
 
-  getLlmLoqModule(): LoqModule<LlmInput, LlmResult> {
-    // TODO rename to getLlm
-    return new LlmLoqModule(this._llms.current(), this._db, this._workflowEvents, this);
+  async getLlmLoqModule(): Promise<LoqModule<LlmInput, LlmResult>> {
+    return new LlmLoqModule(this._llms.current(), this._db, this._workflowEvents, await this.getSession());
   }
 
   getTtsLoqModule(): LoqModule<SpeechInput, SpeechResult> {
-    // TODO rename to getTts
     return new SpeechSystemLoqModule(this._speechSystems.current(), this._db, this._workflowEvents);
   }
 
   getLipSyncLoqModule(): LoqModule<LipSyncInput, LipSyncResult> {
-    // TODO rename to getLipSync
     return new LipSyncLoqModule(this._animators.current(), this._db, this._workflowEvents);
   }
 
-  setCurrentLlm(key:  string): void {
+  setCurrentLlm(key: string): void {
     this._llms.setCurrent(key);
   }
 
-  setCurrentTts(key:  string): Promise<void> {
+  setCurrentTts(key: string): Promise<void> {
     // TODO standardise on async or not for these setCurrentFoo methods
     return this._speechSystems.setCurrent(key);
   }
 
-  setCurrentAnimator(key:  string): void {
+  setCurrentAnimator(key: string): void {
     this._animators.setCurrent(key);
   }
 
