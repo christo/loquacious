@@ -128,6 +128,11 @@ class Loquacious {
     return this.db.getOrCreateSession();
   }
 
+  async newSession(): Promise<Session> {
+    await this.db.finishCurrentSession();
+    return await this.db.createSession();
+  }
+
   /** @deprecated transitional interface */
   get llms(): LlmService {
     return this._llms;

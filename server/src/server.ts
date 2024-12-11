@@ -17,7 +17,6 @@ import type {VideoFile} from "./domain/VideoFile";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
 import {Loquacious} from "./system/Loquacious";
-import {LlmResult} from "./llm/Llm";
 import Agent = Undici.Agent;
 
 
@@ -33,7 +32,7 @@ const PORTRAIT_DIMS: Dimension[] = [
   {width: 608, height: 800},
   {width: 1080, height: 1920}
 ];
-const dimIndex = 0;
+let dimIndex = 0;
 const portraitBaseUrl = () => `/img/${PORTRAIT_DIMS[dimIndex].width}x${PORTRAIT_DIMS[dimIndex].height}`;
 const pathPortrait = () => `${BASE_WEB_ROOT}${portraitBaseUrl()}`;
 console.log(`path portrait: ${pathPortrait()}`);
@@ -126,16 +125,13 @@ app.get("/system", async (_req: Request, res: Response) => {
  * Front end request for a new session.
  */
 app.put("/session", async (_req: Request, res: Response) => {
-  await mkFailable(res)("creating new session", async () => {
-    await db.finishCurrentSession();
-    const session = await db.createSession();
-    res.json(session);
-  });
+  await mkFailable(res)("creating new session", () => loq.newSession()
+      .then(s => res.json(s)));
 });
 
 app.get('/session', async (_req: Request, res: Response) => {
   try {
-    res.json(await db.currentSession());
+    res.json(await loq.getSession());
   } catch (e) {
     res.status(404).json({message: "no current session"}).end();
   }
@@ -143,19 +139,18 @@ app.get('/session', async (_req: Request, res: Response) => {
 
 app.get('/api/chat', async (_req: Request, res: Response) => {
   await mkFailable(res)("get chat", async () => {
-    const session = await db.getOrCreateSession();
-    const messages = await db.getMessages(session);
+    const session = await loq.getSession();
     res.json({
       response: {
         session: session.id,
-        messages: messages
+        messages: await db.getMessages(session)
       }
     });
   });
 });
 
 /**
- * Curried generic labelled function execution with failure reporting to Response and streamServer.
+ * Curried generic labelled function execution and failure reporting to Response and streamServer.
  * On success, the returned promise of fn is returned.
  * @param res response to use for reporting any failure
  *
@@ -179,7 +174,6 @@ const mkFailable = (res: Response) => {
   }
 };
 
-// POST route to handle GPT request
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const {prompt, portrait} = req.body;
   console.log(`chat request for portrait ${portrait.f} with prompt ${prompt}`);
@@ -188,15 +182,14 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({error: 'No prompt provided'});
   } else {
     const failable = mkFailable(res);
-    const llmResultPromise = failable<LlmResult>("loquacious chat", async () => {
+    const llmResultPromise = failable("loquacious chat", async () => {
       const llmInput = loq.createLlmInput(cleanPrompt);
       const loqModule = await loq.getLlmLoqModule();
-      return timed("text generation", () => loqModule.call(llmInput));
+      return loqModule.call(llmInput);
     });
 
     const speechResultPromise = failable("speech generation",
-        () => timed<SpeechResult>("speech synthesis",
-            async () => loq.getTtsLoqModule().call(loq.createTtsInput(llmResultPromise)))
+        async () => loq.getTtsLoqModule().call(loq.createTtsInput(llmResultPromise))
     );
 
     const speechResult: SpeechResult = await speechResultPromise;
