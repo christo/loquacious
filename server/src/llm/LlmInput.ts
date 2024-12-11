@@ -27,7 +27,7 @@ interface LlmInput {
   // TODO ideally we would enumerate the instruction support functions here and forego the dependency on speechsystem
   //   but we don't know how many we need right now, at least we also need to be able to remove the pause instructions
   //   so we can also render the llm output as text
-  intendedTtsId(): SpeechSystem;
+  targetTts(): SpeechSystem;
 }
 
 /**
@@ -46,7 +46,7 @@ class BasicLlmInput implements LlmInput {
     return this._params;
   }
 
-  intendedTtsId(): SpeechSystem {
+  targetTts(): SpeechSystem {
     return this._speechSystem;
   }
 }

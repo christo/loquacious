@@ -184,7 +184,6 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   } else {
     await failable(res, "loquacious chat", async () => {
 
-      const currentLlm = loq.llms.current();
       const currentSpeech = loq.speechSystems.current();
       const currentAnimator = loq.animators.current();
 
@@ -244,9 +243,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
               res.json(({
                 response: {
                   portrait: portrait,
-                  // TODO should not use currentSpeech to remove pause commands, the TTS system should be
-                  //   attached to the message request as the LLM was instructed at that point
-                  messages: (await db.getMessages(await loq.getSession())).map(m => currentSpeech.removePauseCommands(m)),
+                  messages: (await db.getMessages(await loq.getSession())).map(async m => (await llmInput).targetTts().removePauseCommands(m)),
                   speech: await speechResult.filePath(),
                   lipsync: lipsyncResult,
                   llm: (await llmResult).llm,
