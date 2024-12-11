@@ -7,10 +7,6 @@
   * [x] match outputs from one module to inputs of next module
   * [ ] resolve taxonomy and ontology confusion between Module and LoqModule 
   * [ ] review wip LoqModule - should combine service with db access to do whole domain operation.
-  * [ ] ? move `LoqModule` construction to same place as `CreatorService` construction. The
-    `LoqModule` needs a reference to it as well as a `Db`.
-  * [ ] move module acquisition to `Loquacious`? The modules need a db reference so maybe
-    `Loquacious` can pass it? Once interface is shpaed, add tests so that db and filesystem do
     not create boring untestability problems.
   * [ ] move all db updates into the module's call but keep the pure non-db parts in the existing
     CreatorService implementations.
