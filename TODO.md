@@ -2,14 +2,11 @@
 
 * [ ] extract core logic out of `server.ts`
   * [ ] put in Loquacious and its delegates
-  * [x] establish where the database reference goes. 
-    * It should be held by Loquacioius and fed downward
-  * [x] match outputs from one module to inputs of next module
+  * [ ] move all db updates into the module's call but keep the pure non-db parts in the existing
+    CreatorService implementations.
   * [ ] resolve taxonomy and ontology confusion between Module and LoqModule 
   * [ ] review wip LoqModule - should combine service with db access to do whole domain operation.
     not create boring untestability problems.
-  * [ ] move all db updates into the module's call but keep the pure non-db parts in the existing
-    CreatorService implementations.
   * services that do multiple module roles should be made to work as if they are
     separate because input and output are both a `Promise`. DiD tts and lipsync
     are done in one remote call so the tts part merely collects input and does no
