@@ -15,7 +15,6 @@ import {timed} from "system/performance";
 import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
 import type {AudioFile} from "./domain/AudioFile";
-import {Message} from "./domain/Message";
 import type {VideoFile} from "./domain/VideoFile";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
@@ -91,7 +90,7 @@ app.post("/system/", async (req: Request, res: Response) => {
           loq.modes.setCurrent(value);
           break;
         case "llm":
-          loq.setCurrentLlm (value);
+          loq.setCurrentLlm(value);
           break;
         case "llm_option":
           // TODO support setting llm options tastefully through loq
@@ -191,73 +190,68 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const loqModule = await loq.getLlmLoqModule();
       let llmResult = timed("text generation", () => loqModule.call(llmInput));
 
-      try {
+      const doSpeechSynthesis = async () => {
 
-        const doSpeechSynthesis = async () => {
+        // TODO these guys belong in the tts module's call
+        const ssCreator = await db.findCreatorForService(currentSpeech);
+        const mimeType = currentSpeech.speechOutputFormat().mimeType;
+        const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
 
-          // TODO these guys belong in the tts module's call
-          const ssCreator = await db.findCreatorForService(currentSpeech);
-          const mimeType = currentSpeech.speechOutputFormat().mimeType;
-          const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
+        const speechInput = llmResult.then(lr => ({
+          getText: () => lr.llmMessage!.content,
+          getBaseFileName: () => `${audioFile.id}`,
+        }) as SpeechInput);
 
-          const speechInput = llmResult.then(lr => ({
-            getText: () => lr.llmMessage!.content,
-            getBaseFileName: () => `${audioFile.id}`,
-          }) as SpeechInput);
+        const ttsLoqModule = loq.getTtsLoqModule();
 
-          const ttsLoqModule = loq.getTtsLoqModule();
+        const psr = ttsLoqModule.call(speechInput);
+        // baby dragon!
+        return Promise.resolve(new AsyncSpeechResult(
+            () => psr.then(sr => sr.filePath()),
+            () => llmResult.then(lr => db.createTts(ssCreator.id, lr.llmMessage!.id, audioFile.id))
+        ));
+      };
 
-          const psr = ttsLoqModule.call(speechInput);
-          // baby dragon!
-          return Promise.resolve(new AsyncSpeechResult(
-              () => psr.then(sr => sr.filePath()),
-              () => llmResult.then(lr => db.createTts(ssCreator.id, lr.llmMessage!.id, audioFile.id))
-          ));
-        };
+      await failable(res, "speech generation", async () => {
 
-        await failable(res, "speech generation", async () => {
+        const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis", doSpeechSynthesis);
 
-          const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis", doSpeechSynthesis);
+        await failable(res, "lipsync generation", async () => {
+          const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
+          const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
+          if (!mimeType) {
+            // hack - better to signal NoLipsync lipsync more explicitly
+            return Promise.reject("animator does not declare a Mime Type");
+          } else {
+            const animateModule = loq.getLipSyncLoqModule();
 
-          await failable(res, "lipsync generation", async () => {
-            const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
-            const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
-            if (!mimeType) {
-              // hack - better to signal NoLipsync lipsync more explicitly
-              return Promise.reject("animator does not declare a Mime Type");
-            } else {
-              const animateModule = loq.getLipSyncLoqModule();
+            const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
+              const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
+              const lsi = speechResult.filePath().then(sf => ({
+                fileKey: `${videoFile.id}`,
+                imageFile: path.join(pathPortrait(), portrait.f).toString(),
+                speechFile: sf
+              } as LipSyncInput));
 
-              const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
-                const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
-                const lsi = speechResult.filePath().then(sf => ({
-                  fileKey: `${videoFile.id}`,
-                  imageFile: path.join(pathPortrait(), portrait.f).toString(),
-                  speechFile: sf
-                } as LipSyncInput));
+              const animatePromise = animateModule.call(lsi);
+              await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
+              return await animatePromise;
+            });
+            res.json(({
+              response: {
+                portrait: portrait,
+                messages: (await db.getMessages(await loq.getSession())).map(async m => (await llmInput).targetTts().removePauseCommands(m)),
+                speech: await speechResult.filePath(),
+                lipsync: lipsyncResult,
+                llm: (await llmResult).llm,
+                model: (await llmResult).model,
+              }
+            }));
+            await currentAnimator.postResponseHook();
+          }
+        })
 
-                const animatePromise = animateModule.call(lsi);
-                await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
-                return await animatePromise;
-              });
-              res.json(({
-                response: {
-                  portrait: portrait,
-                  messages: (await db.getMessages(await loq.getSession())).map(async m => (await llmInput).targetTts().removePauseCommands(m)),
-                  speech: await speechResult.filePath(),
-                  lipsync: lipsyncResult,
-                  llm: (await llmResult).llm,
-                  model: (await llmResult).model,
-                }
-              }));
-              await currentAnimator.postResponseHook();
-            }
-          })
-
-        });
-      } catch (err: any) {
-        res.status(500).json({error: err});
-      }
+      });
     });
   }
 });
@@ -281,14 +275,14 @@ app.listen(port, async () => {
 
   await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
   console.log(`Server is running on port ${port}`);
-
+  const systemSummary = await loq.getSystem();
   const llm = loq.llms.current();
   console.log(`LLM Health check: ${llm.enableHealth ? "enabled" : "disabled"}`);
-  console.log(`LLM back end: ${llm.getName()} at URL: ${(llm.baseUrl)}`);
+  console.log(`LLM back end: ${systemSummary.llm.current} ${llm.baseUrl ? `at URL: ${llm.baseUrl}` : ""}`);
   console.log(`LLM current model: ${await llm.currentModel().then(m => m.id)}`);
   const models = await llm.models();
   console.log(`LLM available models (${models.length}):`);
   models.forEach(m => console.log(`   ${m.id}`));
-  console.log(`Current Speech System: ${loq.speechSystems.current().currentOption().descriptor()}`);
-  console.log(`Current LipSync: ${loq.animators.current().getName()}`);
+  console.log(`Current Speech System: ${systemSummary.tts.current} ${systemSummary.tts.currentOption.descriptor()}`);
+  console.log(`Current LipSync: ${systemSummary.lipsync.current}`);
 });

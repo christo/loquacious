@@ -10,7 +10,7 @@ import {
   DisplaySpeechSystem,
   SpeechInput,
   type SpeechResult,
-  type SpeechSystem, SpeechSystemLoqModule
+  type SpeechSystem, TtsLoqModule
 } from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";

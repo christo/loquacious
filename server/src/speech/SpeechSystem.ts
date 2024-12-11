@@ -25,8 +25,7 @@ class DisplaySpeechSystem {
   }
 }
 
-// TODO rename this to TtsLoqModule
-class SpeechSystemLoqModule implements LoqModule<SpeechInput, SpeechResult> {
+class TtsLoqModule implements LoqModule<SpeechInput, SpeechResult> {
   private readonly speechSystem: SpeechSystem;
   private _db: Db;
   private _workflowEvents: WorkflowEvents;
@@ -135,5 +134,5 @@ export {
   DisplaySpeechSystem,
   AsyncSpeechResult,
   type SpeechInput,
-  SpeechSystemLoqModule
+  TtsLoqModule
 };

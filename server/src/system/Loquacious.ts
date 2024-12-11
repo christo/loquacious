@@ -21,7 +21,7 @@ import {LoqModule} from "./LoqModule";
 import type {LlmResult} from "../llm/Llm";
 import {LlmLoqModule} from "../llm/LlmLoqModule";
 import type {CreatorType} from "../domain/CreatorType";
-import {SpeechInput, SpeechResult, SpeechSystemLoqModule} from "../speech/SpeechSystem";
+import {SpeechInput, SpeechResult, TtsLoqModule} from "../speech/SpeechSystem";
 import {LipSyncInput, LipSyncLoqModule, LipSyncResult} from "../lipsync/LipSyncAnimator";
 import {WorkflowEvents} from "./WorkflowEvents";
 import {LlmInput} from "../llm/LlmInput";
@@ -85,7 +85,7 @@ class Loquacious {
   }
 
   getTtsLoqModule(): LoqModule<SpeechInput, SpeechResult> {
-    return new SpeechSystemLoqModule(this._speechSystems.current(), this._db, this._workflowEvents);
+    return new TtsLoqModule(this._speechSystems.current(), this._db, this._workflowEvents);
   }
 
   getLipSyncLoqModule(): LoqModule<LipSyncInput, LipSyncResult> {

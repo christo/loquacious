@@ -1,4 +1,4 @@
-import {DisplaySpeechSystem, SpeechInput, SpeechResult, SpeechSystem, SpeechSystemLoqModule} from "./SpeechSystem";
+import {DisplaySpeechSystem, SpeechInput, SpeechResult, SpeechSystem, TtsLoqModule} from "./SpeechSystem";
 import {SpeechSystemOption} from "./SpeechSystems";
 import {Message} from "../domain/Message";
 import {MediaFormat, MF_MP3} from "../media";
