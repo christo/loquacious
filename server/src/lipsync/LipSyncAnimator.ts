@@ -3,6 +3,7 @@ import type {CreatorService} from "../system/CreatorService";
 import {LoqModule} from "../system/LoqModule";
 import Db from "../db/Db";
 import {WorkflowEvents} from "../system/WorkflowEvents";
+import {timed} from "../system/performance";
 
 /**
  * Output of calling {@LipSync} to generate a video.
@@ -37,12 +38,13 @@ class LipSyncLoqModule implements LoqModule<LipSyncInput, LipSyncResult> {
     try {
       this.workflowEvents.workflow("lipsync_request");
       const lipSyncInput = await input;
-      const speechFile = lipSyncInput.speechFile;
-      return this.animator.animate(lipSyncInput.imageFile, Promise.resolve(speechFile), lipSyncInput.fileKey)
-          .then(lr => {
+      return timed("lipsync animate", () => this.animator.animate(
+          lipSyncInput.imageFile,
+          Promise.resolve(lipSyncInput.speechFile),
+          lipSyncInput.fileKey).then(lr => {
             this.workflowEvents.workflow("lipsync_response");
             return lr;
-          });
+          }));
     } catch (error) {
       return Promise.reject(error);
     }
