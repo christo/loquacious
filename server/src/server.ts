@@ -15,15 +15,12 @@ import {timed} from "system/performance";
 import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
 import type {AudioFile} from "./domain/AudioFile";
-import type {CreatorType} from "./domain/CreatorType";
 import {Message} from "./domain/Message";
 import type {VideoFile} from "./domain/VideoFile";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
 import {Loquacious} from "./system/Loquacious";
 import Agent = Undici.Agent;
-import {LlmInput} from "./llm/Llm";
-import {ChatPrepper} from "./llm/Modes";
 
 
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
@@ -97,16 +94,18 @@ app.post("/system/", async (req: Request, res: Response) => {
           loq.setCurrentLlm (value);
           break;
         case "llm_option":
+          // TODO support setting llm options tastefully through loq
           await loq.llms.current().setCurrentOption(value);
           break;
         case "tts":
-          await loq.speechSystems.setCurrent(value);
+          await loq.setCurrentTts(value);
           break;
         case "tts_option":
+          // TODO support setting tts options tastefully through loq
           await loq.speechSystems.current().setCurrentOption(value);
           break;
         case "lipsync":
-          loq.animators.setCurrent(value);
+          loq.setCurrentAnimator(value);
           break;
         default:
           console.log(`system setting update for ${k} not implemented`);
@@ -179,8 +178,8 @@ const failable = async <T>(res: Response, name: string, fn: () => Promise<T>) =>
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   const {prompt, portrait} = req.body;
   console.log(`chat request for portrait ${portrait.f} with prompt ${prompt}`);
-
-  if (!prompt) {
+  const cleanPrompt = prompt.trim();
+  if (!cleanPrompt || !cleanPrompt.length) {
     res.status(400).json({error: 'No prompt provided'});
   } else {
     await failable(res, "loquacious chat", async () => {
@@ -190,10 +189,9 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const currentAnimator = loq.animators.current();
       let session = await db.getOrCreateSession();
       console.log("storing user message");
-      await db.createUserMessage(session, prompt);
+      await db.createUserMessage(session, cleanPrompt);
       const messageHistory: Message[] = await db.getMessages(session);
-      const chatPrepper: ChatPrepper = loq.modes.getChatPrepper();
-      const llmInput = chatPrepper(messageHistory, currentSpeech);
+      const llmInput = loq.modes.getChatPrepper()(messageHistory, currentSpeech);
       let llmResult = await timed("text generation",
           () => loq.getLlmLoqModule().call(Promise.resolve(llmInput)));
 

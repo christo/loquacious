@@ -1,7 +1,8 @@
 import {LoqModule} from "../system/LoqModule";
-import type {LlmInput, LlmResult, Llm} from "./Llm";
+import type {LlmResult, Llm} from "./Llm";
 import Db from "../db/Db";
 import {WorkflowEvents} from "../system/WorkflowEvents";
+import {LlmInput} from "./LlmInput";
 
 export class LlmLoqModule implements LoqModule<LlmInput, LlmResult> {
   private readonly llm: Llm;

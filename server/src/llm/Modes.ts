@@ -3,7 +3,8 @@ import OpenAI from "openai";
 import type {Message} from "../domain/Message";
 import type {SpeechSystem} from "../speech/SpeechSystem";
 import {type PromptPart, SimplePromptPart} from "./PromptPart";
-import {BasicLlmInput, LlmInput} from "./Llm";
+
+import {BasicLlmInput, LlmInput} from "./LlmInput";
 
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 const rokosBasiliskSystemPrompt: string = readFileSync("prompts/rokos-basilisk.prompt.txt").toString();
@@ -49,12 +50,12 @@ const chatModeMessages = (messageHistory: Message[], ss: SpeechSystem): LlmInput
     systemParts.push("There is an awkward gap in the conversation. You say something next.");
     return new BasicLlmInput([
       {role: ROLE_SYSTEM, content: systemParts.join("\\n\\n")},
-    ]);
+    ], ss);
   } else {
     return new BasicLlmInput([
       {role: ROLE_SYSTEM, content: systemParts.join("\\n\\n")},
       ...messageHistory.map(messageToOpenAi)
-    ]);
+    ], ss);
   }
 
 };
@@ -89,7 +90,7 @@ const inviteModeMessages = (_chatHistory: Message[], ss: SpeechSystem): LlmInput
     pauseInstructions(ss).text()
   ].join("\\n\\n");
 
-  return new BasicLlmInput([{role: ROLE_SYSTEM, content: systemPrompt}]);
+  return new BasicLlmInput([{role: ROLE_SYSTEM, content: systemPrompt}], ss);
 };
 
 /**

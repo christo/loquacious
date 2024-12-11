@@ -1,9 +1,10 @@
-import type {LlmInput, LlmResult, Llm} from "llm/Llm";
+import type {LlmResult, Llm} from "llm/Llm";
 import OpenAI from "openai";
 import {always} from "../system/config";
 import {LlmLoqModule} from "./LlmLoqModule";
 import {LoqModule} from "../system/LoqModule";
 import {LlmModel} from "./LlmModel";
+import {LlmInput} from "./LlmInput";
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 

@@ -18,13 +18,13 @@ import {systemHealth} from "./SystemStatus";
 import {LlmModel} from "../llm/LlmModel";
 import {Module, ModuleWithOptions} from "../domain/Module";
 import {LoqModule} from "./LoqModule";
-import type {LlmInput, LlmResult} from "../llm/Llm";
+import type {LlmResult} from "../llm/Llm";
 import {LlmLoqModule} from "../llm/LlmLoqModule";
 import type {CreatorType} from "../domain/CreatorType";
-import {StreamServer} from "../StreamServer";
 import {SpeechInput, SpeechResult, SpeechSystemLoqModule} from "../speech/SpeechSystem";
 import {LipSyncInput, LipSyncLoqModule, LipSyncResult} from "../lipsync/LipSyncAnimator";
 import {WorkflowEvents} from "./WorkflowEvents";
+import {LlmInput} from "../llm/LlmInput";
 
 
 /**
@@ -87,9 +87,9 @@ class Loquacious {
     this._llms.setCurrent(key);
   }
 
-  setCurrentTts(key:  string): void {
+  setCurrentTts(key:  string): Promise<void> {
     // TODO standardise on async or not for these setCurrentFoo methods
-    this._speechSystems.setCurrent(key);
+    return this._speechSystems.setCurrent(key);
   }
 
   setCurrentAnimator(key:  string): void {
