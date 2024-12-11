@@ -9,17 +9,17 @@ import type {LipSyncInput, LipSyncResult} from "lipsync/LipSyncAnimator";
 import {supportedImageTypes} from "media";
 import type {Dirent} from "node:fs";
 import * as path from 'path';
-import {AsyncSpeechResult, SpeechInput, SpeechResult} from "speech/SpeechSystem";
+import {SpeechResult} from "speech/SpeechSystem";
 import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
 import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
-import type {AudioFile} from "./domain/AudioFile";
 import type {VideoFile} from "./domain/VideoFile";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
 import {Loquacious} from "./system/Loquacious";
 import Agent = Undici.Agent;
+import {LlmResult} from "./llm/Llm";
 
 
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
@@ -80,7 +80,7 @@ app.get("/portrait/:portraitname", async (req: Request, _res: Response) => {
  * Returns the new system summary
  */
 app.post("/system/", async (req: Request, res: Response) => {
-  await failable(res, "update system settings", async () => {
+  await mkFailable(res)("update system settings", async () => {
     const keys = Object.getOwnPropertyNames(req.body);
     for (const k of keys) {
       // TODO confirm this can be trusted to be a string
@@ -125,7 +125,7 @@ app.get("/system", async (_req: Request, res: Response) => {
  * Front end request for a new session.
  */
 app.put("/session", async (_req: Request, res: Response) => {
-  await failable(res, "creating new session", async () => {
+  await mkFailable(res)("creating new session", async () => {
     await db.finishCurrentSession();
     const session = await db.createSession();
     res.json(session);
@@ -141,7 +141,7 @@ app.get('/session', async (_req: Request, res: Response) => {
 });
 
 app.get('/api/chat', async (_req: Request, res: Response) => {
-  await failable(res, "get chat", async () => {
+  await mkFailable(res)("get chat", async () => {
     const session = await db.getOrCreateSession();
     const messages = await db.getMessages(session);
     res.json({
@@ -154,22 +154,27 @@ app.get('/api/chat', async (_req: Request, res: Response) => {
 });
 
 /**
- * Generic labelled function execution with failure reporting to Response and streamServer.
+ * Curried generic labelled function execution with failure reporting to Response and streamServer.
  * On success, the returned promise of fn is returned.
  * @param res response to use for reporting any failure
- * @param name label to use for failure reporting
- * @param fn the function to call
- * @return on success the returned value from fn, on failure, a rejected promise.
+ *
  */
-const failable = async <T>(res: Response, name: string, fn: () => Promise<T>) => {
-  try {
-    return await fn();
-  } catch (e) {
-    const msg = `${name} failed`;
-    console.error(msg, e);
-    res.status(500).json({error: msg}).end();
-    streamServer.error(msg);
-    return Promise.reject(e);
+const mkFailable = (res: Response) => {
+  /**
+   * @param name label to use for failure reporting
+   * @param fn the function to call
+   * @return on success the returned value from fn, on failure, a rejected promise.
+   */
+  return async <T>(name: string, fn: () => Promise<T>) => {
+    try {
+      return await fn();
+    } catch (e) {
+      const msg = `${name} failed`;
+      console.error(msg, e);
+      res.status(500).json({error: msg}).end();
+      streamServer.error(msg);
+      return Promise.reject(e);
+    }
   }
 };
 
@@ -181,77 +186,58 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   if (!cleanPrompt || !cleanPrompt.length) {
     res.status(400).json({error: 'No prompt provided'});
   } else {
-    await failable(res, "loquacious chat", async () => {
-
-      const currentSpeech = loq.speechSystems.current();
-      const currentAnimator = loq.animators.current();
-
-      const llmInput = loq.getLlmInput(cleanPrompt);
+    const failable = mkFailable(res);
+    const llmResultPromise = failable<LlmResult>("loquacious chat", async () => {
+      const llmInput = loq.createLlmInput(cleanPrompt);
       const loqModule = await loq.getLlmLoqModule();
-      let llmResult = timed("text generation", () => loqModule.call(llmInput));
+      return timed("text generation", () => loqModule.call(llmInput));
+    });
+    const currentAnimator = loq.animators.current();
+    console.log("llmMessage id from llmResultPromise:");
+    await failable("speech generation", async () => {
 
-      const doSpeechSynthesis = async () => {
+      const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis",
+          async () => loq.getTtsLoqModule().call(loq.createTtsInput(llmResultPromise)));
 
-        // TODO these guys belong in the tts module's call
-        const ssCreator = await db.findCreatorForService(currentSpeech);
-        const mimeType = currentSpeech.speechOutputFormat().mimeType;
-        const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
+      await failable("lipsync generation", async () => {
+        const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
+        const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
+        if (!mimeType) {
+          // hack - better to signal NoLipsync lipsync more explicitly
+          return Promise.reject("animator does not declare a Mime Type");
+        } else {
+          const animateModule = loq.getLipSyncLoqModule();
 
-        const speechInput = llmResult.then(lr => ({
-          getText: () => lr.llmMessage!.content,
-          getBaseFileName: () => `${audioFile.id}`,
-        }) as SpeechInput);
+          const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
+            const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
+            const lsi = speechResult.filePath().then(sf => ({
+              fileKey: `${videoFile.id}`,
+              imageFile: path.join(pathPortrait(), portrait.f).toString(),
+              speechFile: sf
+            } as LipSyncInput));
+            const animatePromise = animateModule.call(lsi);
+            const somethingTts = await speechResult.tts();
 
-        const ttsLoqModule = loq.getTtsLoqModule();
-
-        const psr = ttsLoqModule.call(speechInput);
-        // baby dragon!
-        return Promise.resolve(new AsyncSpeechResult(
-            () => psr.then(sr => sr.filePath()),
-            () => llmResult.then(lr => db.createTts(ssCreator.id, lr.llmMessage!.id, audioFile.id))
-        ));
-      };
-
-      await failable(res, "speech generation", async () => {
-
-        const speechResult: SpeechResult = await timed<SpeechResult>("speech synthesis", doSpeechSynthesis);
-
-        await failable(res, "lipsync generation", async () => {
-          const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
-          const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
-          if (!mimeType) {
-            // hack - better to signal NoLipsync lipsync more explicitly
-            return Promise.reject("animator does not declare a Mime Type");
-          } else {
-            const animateModule = loq.getLipSyncLoqModule();
-
-            const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
-              const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
-              const lsi = speechResult.filePath().then(sf => ({
-                fileKey: `${videoFile.id}`,
-                imageFile: path.join(pathPortrait(), portrait.f).toString(),
-                speechFile: sf
-              } as LipSyncInput));
-
-              const animatePromise = animateModule.call(lsi);
-              await db.createLipSync(lipsyncCreator.id, (await speechResult.tts())!.id, videoFile.id);
-              return await animatePromise;
-            });
-            res.json(({
-              response: {
-                portrait: portrait,
-                messages: (await db.getMessages(await loq.getSession())).map(async m => (await llmInput).targetTts().removePauseCommands(m)),
-                speech: await speechResult.filePath(),
-                lipsync: lipsyncResult,
-                llm: (await llmResult).llm,
-                model: (await llmResult).model,
-              }
-            }));
-            await currentAnimator.postResponseHook();
-          }
-        })
-
-      });
+            await db.createLipSync(lipsyncCreator.id, somethingTts!.id, videoFile.id);
+            return await animatePromise;
+          });
+          const llmResult = await llmResultPromise;
+          const messages = (await db.getMessages(await loq.getSession())).map(async m => {
+            return llmResult.targetTts.removePauseCommands(m);});
+          res.json(({
+            response: {
+              portrait: portrait,
+              messages: messages,
+              speech: await speechResult.filePath(),
+              lipsync: lipsyncResult,
+              llm: llmResult.llm,
+              model: llmResult.model,
+            }
+          }));
+          // noinspection ES6MissingAwait
+          currentAnimator.postResponseHook();
+        }
+      })
     });
   }
 });

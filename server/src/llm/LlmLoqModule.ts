@@ -1,5 +1,5 @@
 import {LoqModule} from "../system/LoqModule";
-import type {Llm, LlmResult} from "./Llm";
+import {Llm, LlmResult, LlmResultStruct} from "./Llm";
 import Db from "../db/Db";
 import {WorkflowEvents} from "../system/WorkflowEvents";
 import {LlmInput} from "./LlmInput";
@@ -30,7 +30,11 @@ export class LlmLoqModule implements LoqModule<LlmInput, LlmResult> {
       const result = await this.llm.chat(params);
       this.workflowEvents.workflow("llm_response");
       if (result.message) {
-        return await this.createResult(result);
+        const text = result.message!;
+        const llmMessage = await timed("storing llm response",
+            () => this._db.createCreatorTypeMessage(this.session, text, this.llm)
+        );
+        return new LlmResultStruct(result.llm, llmMessage, text, result.model, (await input).targetTts());
       } else {
         console.log("not sure how to tell you this but there was no result message...");
         return Promise.reject("cattle mutilations are up");
@@ -42,12 +46,6 @@ export class LlmLoqModule implements LoqModule<LlmInput, LlmResult> {
   }
 
   private async createResult(result: LlmResult) {
-    const llmMessage = timed("storing llm response",
-        () => this._db.createCreatorTypeMessage(this.session, result.message!, this.llm)
-    );
-    return {
-      ...result,
-      llmMessage: await llmMessage
-    } as LlmResult;
+
   }
 }

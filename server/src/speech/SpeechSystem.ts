@@ -26,25 +26,29 @@ class DisplaySpeechSystem {
  */
 interface SpeechResult {
   filePath(): Promise<string | undefined>;
-
   tts(): Promise<Tts | undefined>;
 }
 
+/**
+ * TODO kill this
+ * @deprecated abomination
+ */
 class AsyncSpeechResult implements SpeechResult {
   tts: () => Promise<Tts | undefined>;
   filePath: () => Promise<string | undefined>;
 
   constructor(fp: () => Promise<string | undefined>, tts: () => Promise<Tts | undefined>) {
     this.tts = tts;
-    console.log(`typeof fp: ${typeof fp}`);
     this.filePath = fp;
   }
 
   static fromPromises(fp: Promise<string | undefined>, tts: Promise<Tts | undefined>) {
+    // noinspection JSDeprecatedSymbols
     return new AsyncSpeechResult(() => fp, () => tts);
   }
 
   static fromValues(fp: string | undefined, tts: Tts | undefined) {
+    // noinspection JSDeprecatedSymbols
     return AsyncSpeechResult.fromPromises(Promise.resolve(fp), Promise.resolve(tts));
   }
 }
@@ -52,6 +56,7 @@ class AsyncSpeechResult implements SpeechResult {
 type SpeechInput = {
   getText(): string;
   getBaseFileName(): string;
+  getLlmMessageId(): number;
 }
 
 /**

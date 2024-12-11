@@ -1,4 +1,4 @@
-import type {LlmResult, Llm} from "llm/Llm";
+import type {LlmResult, Llm, PartialLlmResult} from "llm/Llm";
 import OpenAI from "openai";
 import {always} from "../system/config";
 import {LlmModel} from "./LlmModel";
@@ -53,12 +53,12 @@ class FakeLlm implements Llm {
     clock: new FakeModel("clock", (_params: OpenAIMsg[]) => dateTimeMessage()),
   };
 
-  chat(_params: OpenAIMsg[]): Promise<LlmResult> {
+  chat(_params: OpenAIMsg[]): Promise<PartialLlmResult> {
     const text = this.myModels[this.currentModelKey].chat(_params);
     return Promise.resolve({
       message: text,
       model: this.myModels[this.currentModelKey],
-      llm: this.name
+      llm: this.name,
     });
   }
 

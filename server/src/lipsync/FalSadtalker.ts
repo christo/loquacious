@@ -1,6 +1,6 @@
 import {fal, type Result} from "@fal-ai/client";
 import {promises, readFileSync} from "fs";
-import {LipSyncAnimator, LipSyncInput, LipSyncLoqModule, LipSyncResult} from "lipsync/LipSyncAnimator";
+import {LipSyncAnimator, LipSyncResult} from "lipsync/LipSyncAnimator";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
 import path from "path";
@@ -9,13 +9,11 @@ import {type MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
 import {mkDirIfMissing} from "../system/filetoy";
 
-import {LoqModule} from "../system/LoqModule";
-
 
 async function readBinaryFile(filePath: string): Promise<File> {
   const fileBuffer = await promises.readFile(filePath);
   const fileName = filePath.split('/').pop()!;
-  return new File([fileBuffer], fileName, {type: 'application/octet-stream'});
+  return new File([fileBuffer!], fileName, {type: 'application/octet-stream'});
 }
 
 /**

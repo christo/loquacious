@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import {always} from "../system/config";
-import type {LlmResult, Llm} from "./Llm";
+import type {LlmResult, Llm, PartialLlmResult} from "./Llm";
 import * as process from "node:process";
 import {LlmModel} from "./LlmModel";
 
@@ -64,7 +64,7 @@ class LmStudioLlm implements Llm {
     return j.data;
   }
 
-  async chat(messages: OpenAIMsg[]): Promise<LlmResult> {
+  async chat(messages: OpenAIMsg[]): Promise<PartialLlmResult> {
     const model = (await this.models())[0].id;
     const response = await this.openai.chat.completions.create({
       model: model,
@@ -75,7 +75,7 @@ class LmStudioLlm implements Llm {
       message: text,
       llm: this.name,
       model: await this.currentModel()
-    } as LlmResult;
+    } as PartialLlmResult;
   }
 
   getMetadata(): string | undefined {

@@ -28,6 +28,7 @@ import {LlmInput} from "../llm/LlmInput";
 import {Session} from "../domain/Session";
 import {Message} from "../domain/Message";
 import {TtsLoqModule} from "../speech/TtsLoqModule";
+import type {AudioFile} from "../domain/AudioFile";
 
 
 /**
@@ -41,16 +42,16 @@ class Loquacious {
   private readonly _speechSystems: SpeechSystems;
   private readonly _animators: AnimatorServices;
   private readonly _modes: Modes;
-  private readonly _db: Db;
-  private readonly _workflowEvents: WorkflowEvents;
+  private readonly db: Db;
+  private readonly workflowEvents: WorkflowEvents;
 
   constructor(PATH_BASE_DATA: string, db: Db, streamServer: WorkflowEvents) {
     this._llms = new LlmService();
     this._speechSystems = new SpeechSystems(PATH_BASE_DATA);
     this._animators = new AnimatorServices(PATH_BASE_DATA);
     this._modes = new Modes();
-    this._workflowEvents = streamServer;
-    this._db = db;
+    this.workflowEvents = streamServer;
+    this.db = db;
   }
 
   // TODO need to support setting configuration options for some CreatorTypes
@@ -67,30 +68,44 @@ class Loquacious {
     console.log(`ensuring ${creators.length} creator types are in database`);
     await Promise.all(creators.map(async creator => {
       console.log(`   initialising ${creator.getName()}`);
-      return this._db.findCreator(creator.getName(), creator.getMetadata(), true);
+      return this.db.findCreator(creator.getName(), creator.getMetadata(), true);
     }));
   }
 
-  async getLlmInput(userPrompt: string): Promise<LlmInput> {
+  async createLlmInput(userPrompt: string): Promise<LlmInput> {
     const session = await this.getSession();
     console.log("storing user message");
     // must await this so that it's in the message history at next db call
-    await this._db.createUserMessage(session, userPrompt);
-    const messageHistory: Message[] = await this._db.getMessages(session);
+    await this.db.createUserMessage(session, userPrompt);
+    const messageHistory: Message[] = await this.db.getMessages(session);
     const llmInputCreator = this.modes.getLlmInputCreator();
     return llmInputCreator(messageHistory, this._speechSystems.current());
   }
 
+  async createTtsInput(llmResult: Promise<LlmResult>): Promise<SpeechInput> {
+    const ssCreator = await this.db.findCreatorForService(this._speechSystems.current());
+    const mimeType = this._speechSystems.current().speechOutputFormat().mimeType;
+    const audioFile: AudioFile = await this.db.createAudioFile(mimeType, ssCreator.id);
+    const baseAudioFileName = `${audioFile.id}`;
+    return llmResult.then(llmResult => {
+      return {
+        getText: () => llmResult.llmMessage!.content,
+        getBaseFileName: () => baseAudioFileName,
+        getLlmMessageId: () => llmResult.llmMessage!.id
+      } as SpeechInput
+    });
+  }
+
   async getLlmLoqModule(): Promise<LoqModule<LlmInput, LlmResult>> {
-    return new LlmLoqModule(this._llms.current(), this._db, this._workflowEvents, await this.getSession());
+    return new LlmLoqModule(this._llms.current(), this.db, this.workflowEvents, await this.getSession());
   }
 
   getTtsLoqModule(): LoqModule<SpeechInput, SpeechResult> {
-    return new TtsLoqModule(this._speechSystems.current(), this._db, this._workflowEvents);
+    return new TtsLoqModule(this._speechSystems.current(), this.db, this.workflowEvents);
   }
 
   getLipSyncLoqModule(): LoqModule<LipSyncInput, LipSyncResult> {
-    return new LipSyncLoqModule(this._animators.current(), this._db, this._workflowEvents);
+    return new LipSyncLoqModule(this._animators.current(), this.db, this.workflowEvents);
   }
 
   setCurrentLlm(key: string): void {
@@ -110,7 +125,7 @@ class Loquacious {
    * Gets current {@link Session} or creates it if none exists.
    */
   async getSession(): Promise<Session> {
-    return this._db.getOrCreateSession();
+    return this.db.getOrCreateSession();
   }
 
   /** @deprecated transitional interface */
@@ -169,7 +184,7 @@ class Loquacious {
         isFree: true
       },
       runtime: {
-        run: new RunInfo(this._db.getRun())
+        run: new RunInfo(this.db.getRun())
       },
       health: await systemHealth(this.llms.current())
     };

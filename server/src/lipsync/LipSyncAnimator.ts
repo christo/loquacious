@@ -1,9 +1,7 @@
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
-import {EventChannel, EventEmitter, LoqEvent} from "../system/EventEmitter";
 import {LoqModule} from "../system/LoqModule";
 import Db from "../db/Db";
-import {StreamServer} from "../StreamServer";
 import {WorkflowEvents} from "../system/WorkflowEvents";
 
 /**
@@ -27,24 +25,25 @@ type LipSyncInput = {
 }
 
 class LipSyncLoqModule implements LoqModule<LipSyncInput, LipSyncResult> {
-  private _lsa: LipSyncAnimator;
-  private _workflowEvents: WorkflowEvents;
+  private animator: LipSyncAnimator;
+  private workflowEvents: WorkflowEvents;
 
   constructor(lsa: LipSyncAnimator, db: Db, workflowEvents: WorkflowEvents) {
-    this._lsa = lsa;
-    this._workflowEvents = workflowEvents;
+    this.animator = lsa;
+    this.workflowEvents = workflowEvents;
   }
 
   async call(input: Promise<LipSyncInput>): Promise<LipSyncResult> {
     try {
-      // TODO check the sequencing logic of firing these workflow events
-      this._workflowEvents.workflow("lipsync_request");
+      this.workflowEvents.workflow("lipsync_request");
       const lipSyncInput = await input;
-      return this._lsa.animate(lipSyncInput.imageFile, input.then(lsi => lsi.speechFile), lipSyncInput.fileKey).then(x => {
-        this._workflowEvents.workflow("lipsync_response");
-        return x;
-      });
-    } catch(error) {
+      const speechFile = lipSyncInput.speechFile;
+      return this.animator.animate(lipSyncInput.imageFile, Promise.resolve(speechFile), lipSyncInput.fileKey)
+          .then(lr => {
+            this.workflowEvents.workflow("lipsync_response");
+            return lr;
+          });
+    } catch (error) {
       return Promise.reject(error);
     }
   }

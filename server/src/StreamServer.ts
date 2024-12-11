@@ -2,7 +2,7 @@ import {DefaultEventsMap, Server} from "socket.io";
 import {Express} from "express";
 import {createServer} from "http";
 import {WorkflowStep} from "./system/WorkflowStep";
-import {WorkflowEvents} from "./WorkflowEvents";
+import {WorkflowEvents} from "./system/WorkflowEvents";
 
 /**
  * Websocket server implemented with Socket.io
@@ -41,6 +41,7 @@ class StreamServer implements WorkflowEvents {
    * @param workflow
    */
   workflow(workflow: WorkflowStep) {
+    console.log(`StreamServer emitting workflow step ${workflow}`);
     this.io.emit("workflow", workflow);
   }
 

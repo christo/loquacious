@@ -1,4 +1,4 @@
-import type {LlmResult, Llm} from "llm/Llm";
+import type {LlmResult, Llm, PartialLlmResult} from "llm/Llm";
 import OpenAI from "openai";
 import {always} from "../system/config";
 import {LlmLoqModule} from "./LlmLoqModule";
@@ -51,7 +51,7 @@ class LlamaCppLlm implements Llm {
     return j.data;
   }
 
-  async chat(messages: OpenAIMsg[]): Promise<LlmResult> {
+  async chat(messages: OpenAIMsg[]): Promise<PartialLlmResult> {
     const response = await this.openai.chat.completions.create({
       model: "no-idea-is_model-ignored",
       messages: messages
@@ -61,7 +61,7 @@ class LlamaCppLlm implements Llm {
       message: text,
       llm: this.name,
       model: await this.currentModel(),
-    } as LlmResult;
+    } as PartialLlmResult;
   }
 
   getMetadata(): string | undefined {
