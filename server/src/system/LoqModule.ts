@@ -1,5 +1,3 @@
-import {EventChannel, LoqEvent} from "./EventEmitter";
-
 /**
  * Encapsulation of polymorphic generic async function call.
  */
