@@ -90,18 +90,18 @@ class FalSadtalker implements LipSyncAnimator {
   /**
    * Get the fal accessible stored url for the given local filePath, reusing any previous unexpired cached value,
    * skipping the step of uploading the portrait image.
-   * @param filePath
+   * @param imageFilePath
    */
-  async urlFor(filePath: string): Promise<string> {
-    if (!this.urlCache[filePath] || this.expired(filePath)) {
-      await timed(`fal upload ${filePath.split(path.sep).pop()}`, async () => {
-        this.urlCache[filePath] = [
-          await fal.storage.upload(await readBinaryFile(filePath)),
+  async urlFor(imageFilePath: string): Promise<string> {
+    if (!this.urlCache[imageFilePath] || this.expired(imageFilePath)) {
+      await timed(`upload image file to fal.ai ${imageFilePath.split(path.sep).pop()}`, async () => {
+        this.urlCache[imageFilePath] = [
+          await fal.storage.upload(await readBinaryFile(imageFilePath)),
           new Date().toISOString()
         ];
       });
     }
-    return this.urlCache[filePath][0];
+    return this.urlCache[imageFilePath][0];
   }
 
   private expired(filePath: string) {
@@ -111,9 +111,9 @@ class FalSadtalker implements LipSyncAnimator {
   async animate(img: string, speech: Promise<string>, filekey: string): Promise<LipSyncResult> {
     const imgUrl = await this.urlFor(img);
     // don't bother caching speech, reuse is vanishingly rare
-    const speechUrl = await fal.storage.upload(await readBinaryFile(await speech));
-    const result: Result<{ video: SadTalkerResult }> = await timed(
-        "fal run sadtalker",
+    const speechUrl = await timed("upload speech file to fal.ai",
+        async () => fal.storage.upload(await readBinaryFile(await speech)));
+    const result: Result<{ video: SadTalkerResult }> = await timed("fal run sadtalker",
         async () => {
           return await fal.run(FalSadtalker.SADTALKER_ENDPOINT, this.sadtalkerParams(imgUrl, speechUrl))
         }
