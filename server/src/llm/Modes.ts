@@ -5,6 +5,8 @@ import type {SpeechSystem} from "../speech/SpeechSystem";
 import {type PromptPart, SimplePromptPart} from "./PromptPart";
 
 import {BasicLlmInput, LlmInput} from "./LlmInput";
+import Db from "../db/Db";
+import {Loquacious} from "../system/Loquacious";
 
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 const rokosBasiliskSystemPrompt: string = readFileSync("prompts/rokos-basilisk.prompt.txt").toString();
@@ -97,7 +99,7 @@ const inviteModeMessages = (_chatHistory: Message[], ss: SpeechSystem): LlmInput
  * Function for building LLM prompt from chatHistory and relevant config to get a Message properly formatted for
  * the speech system. Each mode implements differently which supplies parameters for a chat completion request.
  */
-type ChatPrepper = (chatHistory: Message[], ss: SpeechSystem) => LlmInput;
+type LlmInputCreator = (chatHistory: Message[], ss: SpeechSystem) => LlmInput;
 
 // Future consideration: abstract an LLM Request Config rather than directly passing SpeechSystem
 // so that tactical instructions about things like putting in pauses are fed to the ChatPrepper
@@ -111,7 +113,7 @@ type ChatPrepper = (chatHistory: Message[], ss: SpeechSystem) => LlmInput;
 
 /** Map mode names to their chat functions. */
 interface ModeMap {
-  [key: string]: ChatPrepper;
+  [key: string]: LlmInputCreator;
 }
 
 function dateTimePrompt() {
@@ -134,8 +136,8 @@ class Modes {
     this.modeMap["admin"] = inviteModeMessages;
   }
 
-  getChatPrepper(): ChatPrepper {
-    return this.modeMap[this.currentMode];
+  getLlmInputCreator(): LlmInputCreator {
+    return this.modeMap[this.currentMode]
   }
 
   current(): string {
@@ -163,7 +165,8 @@ class Modes {
     }
     return this.currentMode;
   }
+
 }
 
 
-export {type ModeMap, Modes, ChatPrepper};
+export {type ModeMap, Modes, LlmInputCreator};

@@ -187,15 +187,14 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const currentLlm = loq.llms.current();
       const currentSpeech = loq.speechSystems.current();
       const currentAnimator = loq.animators.current();
-      let session = await db.getOrCreateSession();
-      console.log("storing user message");
-      await db.createUserMessage(session, cleanPrompt);
-      const messageHistory: Message[] = await db.getMessages(session);
-      const llmInput = loq.modes.getChatPrepper()(messageHistory, currentSpeech);
+      let session = await loq.getSession();
+
+      const llmInput = loq.getLlmInput(cleanPrompt);
       let llmResult = await timed("text generation",
           () => loq.getLlmLoqModule().call(Promise.resolve(llmInput)));
 
       if (llmResult.message !== null) {
+        // TODO this belongs inside LoqModule.call()
         const llmMessage = timed("storing llm response",
             () => db.createCreatorTypeMessage(session, llmResult.message!, currentLlm));
 
@@ -279,9 +278,6 @@ app.get('/audio', async (req: Request, res: Response) => fileStream(req.query.fi
  * Endpoint to stream the given video file.
  */
 app.get('/video', async (req: Request, res: Response) => fileStream(req.query.file!.toString(), res));
-
-
-
 
 // Start the server
 app.listen(port, async () => {

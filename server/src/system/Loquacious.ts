@@ -25,6 +25,8 @@ import {SpeechInput, SpeechResult, SpeechSystemLoqModule} from "../speech/Speech
 import {LipSyncInput, LipSyncLoqModule, LipSyncResult} from "../lipsync/LipSyncAnimator";
 import {WorkflowEvents} from "./WorkflowEvents";
 import {LlmInput} from "../llm/LlmInput";
+import {Session} from "../domain/Session";
+import {Message} from "../domain/Message";
 
 
 /**
@@ -68,9 +70,19 @@ class Loquacious {
     }));
   }
 
+  async getLlmInput(userPrompt: string): Promise<LlmInput> {
+    const session = await this.getSession();
+    console.log("storing user message");
+    // must await this so that it's in the message history at next db call
+    await this._db.createUserMessage(session, userPrompt);
+    const messageHistory: Message[] = await this._db.getMessages(session);
+    const llmInputCreator = this.modes.getLlmInputCreator();
+    return llmInputCreator(messageHistory, this._speechSystems.current());
+  }
+
   getLlmLoqModule(): LoqModule<LlmInput, LlmResult> {
     // TODO rename to getLlm
-    return new LlmLoqModule(this._llms.current(), this._db, this._workflowEvents);
+    return new LlmLoqModule(this._llms.current(), this._db, this._workflowEvents, this);
   }
 
   getTtsLoqModule(): LoqModule<SpeechInput, SpeechResult> {
@@ -94,6 +106,13 @@ class Loquacious {
 
   setCurrentAnimator(key:  string): void {
     this._animators.setCurrent(key);
+  }
+
+  /**
+   * Gets current {@link Session} or creates it if none exists.
+   */
+  async getSession(): Promise<Session> {
+    return this._db.getOrCreateSession();
   }
 
   /** @deprecated transitional interface */
@@ -176,6 +195,7 @@ class Loquacious {
       isFree: this._speechSystems.current().free(),
     }
   }
+
 }
 
 export {Loquacious};
