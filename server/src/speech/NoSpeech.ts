@@ -2,7 +2,7 @@ import {CharacterVoice} from "speech/CharacterVoice";
 import {
   AsyncSpeechResult,
   DisplaySpeechSystem, SpeechInput,
-  type SpeechResult,
+  type CrazySpeechResult,
   type SpeechSystem
 } from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
@@ -12,7 +12,7 @@ import {type MediaFormat, MF_MP3} from "../media";
 import {LoqModule} from "../system/LoqModule";
 import {TtsLoqModule} from "./TtsLoqModule";
 
-const SILENT_SUCCESS: SpeechResult = AsyncSpeechResult.fromValues(undefined, undefined);
+const SILENT_SUCCESS: CrazySpeechResult = AsyncSpeechResult.fromValues(undefined, undefined);
 
 /**
  * Does not make sound or generate audio files.
@@ -42,7 +42,7 @@ class NoSpeech implements SpeechSystem {
     return Promise.resolve();
   }
 
-  speak(_message: string, _filename: string): Promise<SpeechResult> {
+  speak(_message: string, _filename: string): Promise<CrazySpeechResult> {
     return Promise.resolve(SILENT_SUCCESS);
   }
 

@@ -1,9 +1,5 @@
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
-import {LoqModule} from "../system/LoqModule";
-import Db from "../db/Db";
-import {WorkflowEvents} from "../system/WorkflowEvents";
-import {timed} from "../system/performance";
 
 /**
  * Output of calling {@LipSync} to generate a video.
@@ -23,32 +19,9 @@ type LipSyncInput = {
   imageFile: string;
   speechFile: string | undefined
   fileKey: string;
-}
-
-class LipSyncLoqModule implements LoqModule<LipSyncInput, LipSyncResult> {
-  private animator: LipSyncAnimator;
-  private workflowEvents: WorkflowEvents;
-
-  constructor(lsa: LipSyncAnimator, db: Db, workflowEvents: WorkflowEvents) {
-    this.animator = lsa;
-    this.workflowEvents = workflowEvents;
-  }
-
-  async call(input: Promise<LipSyncInput>): Promise<LipSyncResult> {
-    try {
-      this.workflowEvents.workflow("lipsync_request");
-      const lipSyncInput = await input;
-      return timed("lipsync animate", () => this.animator.animate(
-          lipSyncInput.imageFile,
-          Promise.resolve(lipSyncInput.speechFile),
-          lipSyncInput.fileKey).then(lr => {
-            this.workflowEvents.workflow("lipsync_response");
-            return lr;
-          }));
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
+  creatorId: number;
+  ttsId: number;
+  videoId: number;
 }
 
 /**
@@ -78,4 +51,3 @@ interface LipSyncAnimator extends CreatorService {
 }
 
 export type {LipSyncAnimator, LipSyncResult, LipSyncInput};
-export {LipSyncLoqModule};

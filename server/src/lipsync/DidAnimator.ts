@@ -1,9 +1,10 @@
-import {LipSyncAnimator, LipSyncInput, LipSyncLoqModule, LipSyncResult} from "./LipSyncAnimator";
-import {SpeechResult, SpeechSystem} from "../speech/SpeechSystem";
+import {LipSyncAnimator, LipSyncInput, LipSyncResult} from "./LipSyncAnimator";
+import {CrazySpeechResult, SpeechSystem} from "../speech/SpeechSystem";
 import {MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
 
 import {LoqModule} from "../system/LoqModule";
+import {LipSyncLoqModule} from "./LipSyncLoqModule";
 
 
 /**
@@ -71,7 +72,7 @@ class DidAnimator implements LipSyncAnimator {
 
   canRun = hasEnv("DID_AUTH");
 
-  speak(message: string, basename: string): Promise<SpeechResult> {
+  speak(message: string, basename: string): Promise<CrazySpeechResult> {
     console.warn("DidAnimatorWithTts.speak not implemented.");
     return Promise.reject("unimplemented");
   }

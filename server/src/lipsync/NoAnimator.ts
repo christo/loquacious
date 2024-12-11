@@ -1,7 +1,8 @@
-import {LipSyncAnimator, LipSyncInput, LipSyncLoqModule, LipSyncResult} from "./LipSyncAnimator";
+import {LipSyncAnimator, LipSyncInput, LipSyncResult} from "./LipSyncAnimator";
 import {MediaFormat} from "../media";
 
 import {LoqModule} from "../system/LoqModule";
+import {LipSyncLoqModule} from "./LipSyncLoqModule";
 
 /**
  * Animator that doesn't animate.

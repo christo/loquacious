@@ -1,10 +1,10 @@
 import {LoqModule} from "../system/LoqModule";
 import Db from "../db/Db";
 import {WorkflowEvents} from "../system/WorkflowEvents";
-import {AsyncSpeechResult, SpeechInput, SpeechResult, SpeechSystem} from "./SpeechSystem";
+import {AsyncSpeechResult, SpeechInput, CrazySpeechResult, SpeechSystem} from "./SpeechSystem";
 import type {AudioFile} from "../domain/AudioFile";
 
-class TtsLoqModule implements LoqModule<SpeechInput, SpeechResult> {
+class TtsLoqModule implements LoqModule<SpeechInput, CrazySpeechResult> {
   private readonly speechSystem: SpeechSystem;
   private db: Db;
   private workflowEvents: WorkflowEvents;
@@ -15,7 +15,7 @@ class TtsLoqModule implements LoqModule<SpeechInput, SpeechResult> {
     this.workflowEvents = workflowEvents;
   }
 
-  async call(input: Promise<SpeechInput>): Promise<SpeechResult> {
+  async call(input: Promise<SpeechInput>): Promise<CrazySpeechResult> {
     try {
       const ssCreator = await this.db.findCreatorForService(this.speechSystem);
       const mimeType = this.speechSystem.speechOutputFormat().mimeType;

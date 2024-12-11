@@ -7,7 +7,7 @@ import {
   AsyncSpeechResult,
   DisplaySpeechSystem,
   SpeechInput,
-  type SpeechResult,
+  type CrazySpeechResult,
   type SpeechSystem
 } from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
@@ -155,7 +155,7 @@ class ElevenLabsSpeech implements SpeechSystem {
     return Promise.reject(`didn't find voice option ${value}`);
   }
 
-  async speak(message: string, basename: string): Promise<SpeechResult> {
+  async speak(message: string, basename: string): Promise<CrazySpeechResult> {
     const outFilename = `el_tts_${basename}_${VOICES[this.currentVoice].name.replaceAll(/\s\//g, '-')}.mp3`;
     const outFile = path.join(this.dataDir, outFilename);
     try {
@@ -165,7 +165,7 @@ class ElevenLabsSpeech implements SpeechSystem {
             ...(this.getConfig().config)
           } as ElevenLabsClient.GeneratAudioBulk));
       const outStream = fs.createWriteStream(outFile);
-      return new Promise<SpeechResult>((resolve, reject) => {
+      return new Promise<CrazySpeechResult>((resolve, reject) => {
         outStream.on('error', (err) => {
           console.error('Error in writing the file:', err);
           reject();

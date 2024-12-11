@@ -9,7 +9,7 @@ import {
   AsyncSpeechResult,
   DisplaySpeechSystem,
   SpeechInput,
-  type SpeechResult,
+  type CrazySpeechResult,
   type SpeechSystem
 } from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
@@ -94,7 +94,7 @@ class MacOsSpeech implements SpeechSystem {
     return Promise.reject(`${this.name}: No known voice ${value}`);
   }
 
-  async speak(message: string, basename: string): Promise<SpeechResult> {
+  async speak(message: string, basename: string): Promise<CrazySpeechResult> {
     try {
       const voice = VOICES[this.currentIndex];
       const voicePart = voice.name.replaceAll(/[\s\/]/g, '-');

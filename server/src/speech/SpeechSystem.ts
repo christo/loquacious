@@ -21,19 +21,27 @@ class DisplaySpeechSystem {
   }
 }
 
+
+interface CrazySpeechResult {
+  // TODO this crazy
+  filePath(): Promise<string | undefined>;
+  // TODO also crazy
+  tts(): Promise<Tts | undefined>;
+}
+
 /**
  * Type representing the result of a request to generate speech from text.
  */
 interface SpeechResult {
-  filePath(): Promise<string | undefined>;
-  tts(): Promise<Tts | undefined>;
+  filePath(): string;
+  tts(): Tts;
 }
 
 /**
  * TODO kill this
  * @deprecated abomination
  */
-class AsyncSpeechResult implements SpeechResult {
+class AsyncSpeechResult implements CrazySpeechResult {
   tts: () => Promise<Tts | undefined>;
   filePath: () => Promise<string | undefined>;
 
@@ -69,7 +77,7 @@ interface SpeechSystem extends CreatorService {
    * @param message
    * @param basename file base name
    */
-  speak(message: string, basename: string): Promise<SpeechResult>;
+  speak(message: string, basename: string): Promise<CrazySpeechResult>;
 
   /**
    * Unique key for each option.
@@ -106,7 +114,7 @@ interface SpeechSystem extends CreatorService {
 
 export {
   type SpeechSystem,
-  type SpeechResult,
+  type CrazySpeechResult,
   DisplaySpeechSystem,
   AsyncSpeechResult,
   type SpeechInput

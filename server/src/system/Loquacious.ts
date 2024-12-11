@@ -21,14 +21,16 @@ import {LoqModule} from "./LoqModule";
 import type {LlmResult} from "../llm/Llm";
 import {LlmLoqModule} from "../llm/LlmLoqModule";
 import type {CreatorType} from "../domain/CreatorType";
-import {SpeechInput, SpeechResult} from "../speech/SpeechSystem";
-import {LipSyncInput, LipSyncLoqModule, LipSyncResult} from "../lipsync/LipSyncAnimator";
+import {SpeechInput, CrazySpeechResult} from "../speech/SpeechSystem";
+import {LipSyncInput, LipSyncResult} from "../lipsync/LipSyncAnimator";
 import {WorkflowEvents} from "./WorkflowEvents";
 import {LlmInput} from "../llm/LlmInput";
 import {Session} from "../domain/Session";
 import {Message} from "../domain/Message";
 import {TtsLoqModule} from "../speech/TtsLoqModule";
 import type {AudioFile} from "../domain/AudioFile";
+import {LipSyncLoqModule} from "../lipsync/LipSyncLoqModule";
+import {VideoFile} from "../domain/VideoFile";
 
 
 /**
@@ -100,7 +102,7 @@ class Loquacious {
     return new LlmLoqModule(this._llms.current(), this.db, this.workflowEvents, await this.getSession());
   }
 
-  getTtsLoqModule(): LoqModule<SpeechInput, SpeechResult> {
+  getTtsLoqModule(): LoqModule<SpeechInput, CrazySpeechResult> {
     return new TtsLoqModule(this._speechSystems.current(), this.db, this.workflowEvents);
   }
 
@@ -214,6 +216,32 @@ class Loquacious {
     }
   }
 
+  async createLipSyncInput(speechResultPromise: Promise<CrazySpeechResult>, imageFile: string): Promise<LipSyncInput> {
+    const animator = this._animators.current();
+    const lipsyncCreator = await this.db.findCreator(animator.getName(), animator.getMetadata(), true);
+    const mimeType = animator.videoOutputFormat()?.mimeType;
+    if (!mimeType) {
+      // TODO relocate mimeType thingy
+      return Promise.reject(new Error("No mime type found."));
+    } else {
+      const videoFile: VideoFile = await this.db.createVideoFile(mimeType, lipsyncCreator.id);
+      const sr = await speechResultPromise;
+      const speechFilePath = (await sr.filePath())!;
+      const ttsId = (await sr.tts())!;
+      const lsiPromise = speechResultPromise.then(sr => {
+        return {
+          fileKey: `${videoFile.id}`,
+          imageFile: imageFile,
+          speechFile: speechFilePath,
+          creatorId: lipsyncCreator.id,
+          videoId: videoFile.id,
+          ttsId: ttsId!.id
+        } as LipSyncInput;
+      });
+
+      return lsiPromise;
+    }
+  }
 }
 
 export {Loquacious};

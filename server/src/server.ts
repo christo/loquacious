@@ -5,15 +5,13 @@ import express, {Request, Response} from 'express';
 import {promises} from 'fs';
 import {ImageInfo} from "image/ImageInfo";
 import {prescaleImages} from "image/imageOps";
-import type {LipSyncInput, LipSyncResult} from "lipsync/LipSyncAnimator";
 import {supportedImageTypes} from "media";
 import * as path from 'path';
-import {SpeechResult} from "speech/SpeechSystem";
+import {CrazySpeechResult} from "speech/SpeechSystem";
 import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
 import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
-import type {VideoFile} from "./domain/VideoFile";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
 import {Loquacious} from "./system/Loquacious";
@@ -192,50 +190,29 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         async () => loq.getTtsLoqModule().call(loq.createTtsInput(llmResultPromise))
     );
 
-    const speechResult: SpeechResult = await speechResultPromise;
+    const speechResult: CrazySpeechResult = await speechResultPromise;
 
-    await failable("lipsync generation", async () => {
-      const currentAnimator = loq.animators.current();
+    const lsrp = failable("lipsync generation", async () => {
+      const animateModule = loq.getLipSyncLoqModule();
+      const portraitPath = path.join(pathPortrait(), portrait.f).toString();
+      return animateModule.call(loq.createLipSyncInput(speechResultPromise, portraitPath));
+    });
 
-      const lipsyncCreator = await db.findCreator(currentAnimator.getName(), currentAnimator.getMetadata(), true);
-      const mimeType = currentAnimator.videoOutputFormat()?.mimeType;
-      if (!mimeType) {
-        // hack - better to signal NoLipsync lipsync more explicitly
-        return Promise.reject("animator does not declare a Mime Type");
-      } else {
-        const animateModule = loq.getLipSyncLoqModule();
+    const llmResult = await llmResultPromise;
+    const messages = (await db.getMessages(await loq.getSession())).map(async m => {
+      return llmResult.targetTts.removePauseCommands(m);
+    });
 
-        const lipsyncResult: LipSyncResult = await timed("lipsync animate", async () => {
-          const videoFile: VideoFile = await db.createVideoFile(mimeType, lipsyncCreator.id);
-          const lsi = speechResult.filePath().then(sf => ({
-            fileKey: `${videoFile.id}`,
-            imageFile: path.join(pathPortrait(), portrait.f).toString(),
-            speechFile: sf
-          } as LipSyncInput));
-          const animatePromise = animateModule.call(lsi);
-          const somethingTts = await speechResult.tts();
-
-          await db.createLipSync(lipsyncCreator.id, somethingTts!.id, videoFile.id);
-          return await animatePromise;
-        });
-        const llmResult = await llmResultPromise;
-        const messages = (await db.getMessages(await loq.getSession())).map(async m => {
-          return llmResult.targetTts.removePauseCommands(m);
-        });
-        res.json(({
-          response: {
-            portrait: portrait,
-            messages: messages,
-            speech: await speechResult.filePath(),
-            lipsync: lipsyncResult,
-            llm: llmResult.llm,
-            model: llmResult.model,
-          }
-        }));
-        // noinspection ES6MissingAwait
-        currentAnimator.postResponseHook();
+    res.json(({
+      response: {
+        portrait: portrait,
+        messages: messages,
+        speech: await speechResult.filePath(),
+        lipsync: await lsrp,
+        llm: llmResult.llm,
+        model: llmResult.model,
       }
-    })
+    }));
   }
 });
 

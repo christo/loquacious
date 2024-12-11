@@ -1,4 +1,4 @@
-import {DisplaySpeechSystem, SpeechInput, SpeechResult, SpeechSystem} from "./SpeechSystem";
+import {DisplaySpeechSystem, SpeechInput, CrazySpeechResult, SpeechSystem} from "./SpeechSystem";
 import {SpeechSystemOption} from "./SpeechSystems";
 import {Message} from "../domain/Message";
 import {MediaFormat, MF_MP3} from "../media";
@@ -32,7 +32,7 @@ class DidTts implements SpeechSystem {
     return [this.speechSystemOption];
   }
 
-  speak(message: string, basename: string): Promise<SpeechResult> {
+  speak(message: string, basename: string): Promise<CrazySpeechResult> {
     return Promise.reject("implement threading the result to the DiD lipsync part");
   }
 
