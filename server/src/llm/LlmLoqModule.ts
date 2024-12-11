@@ -1,35 +1,53 @@
 import {LoqModule} from "../system/LoqModule";
-import type {LlmResult, Llm} from "./Llm";
+import type {Llm, LlmResult} from "./Llm";
 import Db from "../db/Db";
 import {WorkflowEvents} from "../system/WorkflowEvents";
 import {LlmInput} from "./LlmInput";
-import {Message} from "../domain/Message";
-import {Loquacious} from "../system/Loquacious";
+import {Session} from "../domain/Session";
+import {timed} from "../system/performance";
 
 export class LlmLoqModule implements LoqModule<LlmInput, LlmResult> {
   private readonly llm: Llm;
   private readonly _db: Db;
-  private _workflowEvents: WorkflowEvents;
-  private _loq: Loquacious;
+  private readonly workflowEvents: WorkflowEvents;
+  private readonly session: Session;
 
-  constructor(llm: Llm, db: Db, workflowEvents: WorkflowEvents, loq: Loquacious) {
+  constructor(llm: Llm, db: Db, workflowEvents: WorkflowEvents, session: Session) {
     this._db = db;
     this.llm = llm;
-    this._workflowEvents = workflowEvents;
-    this._loq = loq;
+    this.workflowEvents = workflowEvents;
+    this.session = session;
   }
 
   async call(input: Promise<LlmInput>): Promise<LlmResult> {
     // TODO move db logic from server here
     try {
-      this._workflowEvents.workflow("llm_request");
+      this.workflowEvents.workflow("llm_request");
       // get message history for session
-      return this.llm.chat(await input.then(cr => {
-        this._workflowEvents.workflow("llm_response");
-        return cr.getParams()
-      }));
+      const params = await input.then(llmInput => {
+        return llmInput.getParams()
+      });
+      const result = await this.llm.chat(params);
+      this.workflowEvents.workflow("llm_response");
+      if (result.message) {
+        return await this.createResult(result);
+      } else {
+        console.log("not sure how to tell you this but there was no result message...");
+        return Promise.reject("cattle mutilations are up");
+      }
+
     } catch (error: any) {
       return Promise.reject(error);
     }
+  }
+
+  private async createResult(result: LlmResult) {
+    const llmMessage = timed("storing llm response",
+        () => this._db.createCreatorTypeMessage(this.session, result.message!, this.llm)
+    );
+    return {
+      ...result,
+      llmMessage: await llmMessage
+    } as LlmResult;
   }
 }

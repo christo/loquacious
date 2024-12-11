@@ -187,16 +187,12 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const currentLlm = loq.llms.current();
       const currentSpeech = loq.speechSystems.current();
       const currentAnimator = loq.animators.current();
-      let session = await loq.getSession();
 
       const llmInput = loq.getLlmInput(cleanPrompt);
-      let llmResult = await timed("text generation",
-          () => loq.getLlmLoqModule().call(Promise.resolve(llmInput)));
+      const loqModule = await loq.getLlmLoqModule();
+      let llmResult = timed("text generation", () => loqModule.call(llmInput));
 
-      if (llmResult.message !== null) {
-        // TODO this belongs inside LoqModule.call()
-        const llmMessage = timed("storing llm response",
-            () => db.createCreatorTypeMessage(session, llmResult.message!, currentLlm));
+      try {
 
         const doSpeechSynthesis = async () => {
 
@@ -205,10 +201,10 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           const mimeType = currentSpeech.speechOutputFormat().mimeType;
           const audioFile: AudioFile = await db.createAudioFile(mimeType, ssCreator.id);
 
-          const speechInput = llmMessage.then(m => ({
-            getText: () => m.content,
+          const speechInput = llmResult.then(lr => ({
+            getText: () => lr.llmMessage!.content,
             getBaseFileName: () => `${audioFile.id}`,
-          } as SpeechInput));
+          }) as SpeechInput);
 
           const ttsLoqModule = loq.getTtsLoqModule();
 
@@ -216,7 +212,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           // baby dragon!
           return Promise.resolve(new AsyncSpeechResult(
               () => psr.then(sr => sr.filePath()),
-              () => llmMessage.then(m => db.createTts(ssCreator.id, m.id, audioFile.id))
+              () => llmResult.then(lr => db.createTts(ssCreator.id, lr.llmMessage!.id, audioFile.id))
           ));
         };
 
@@ -250,11 +246,11 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
                   portrait: portrait,
                   // TODO should not use currentSpeech to remove pause commands, the TTS system should be
                   //   attached to the message request as the LLM was instructed at that point
-                  messages: (await db.getMessages(session)).map(m => currentSpeech.removePauseCommands(m)),
+                  messages: (await db.getMessages(await loq.getSession())).map(m => currentSpeech.removePauseCommands(m)),
                   speech: await speechResult.filePath(),
                   lipsync: lipsyncResult,
-                  llm: llmResult.llm,
-                  model: llmResult.model,
+                  llm: (await llmResult).llm,
+                  model: (await llmResult).model,
                 }
               }));
               await currentAnimator.postResponseHook();
@@ -262,8 +258,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           })
 
         });
-      } else {
-        res.status(500).json({error: 'No message in response'});
+      } catch (err: any) {
+        res.status(500).json({error: err});
       }
     });
   }

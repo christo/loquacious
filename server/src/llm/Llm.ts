@@ -1,6 +1,7 @@
 import type {CreatorService} from "../system/CreatorService";
 import {LlmModel} from "./LlmModel";
 import {OpenAIMsg} from "./OpenAIMsg";
+import {Message} from "../domain/Message";
 
 /**
  * Encapsulates a result from calling chat on an Llm.
@@ -9,6 +10,11 @@ interface LlmResult {
   message: string | null;
   llm: string;
   model: LlmModel;
+
+  /**
+   * A database-wired domain instance if creation was successful.
+   */
+  llmMessage: Message | null;
 }
 
 /**
