@@ -18,8 +18,8 @@ import type {VideoFile} from "./domain/VideoFile";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
 import {Loquacious} from "./system/Loquacious";
-import Agent = Undici.Agent;
 import {LlmResult} from "./llm/Llm";
+import Agent = Undici.Agent;
 
 
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
@@ -58,10 +58,12 @@ const loq = new Loquacious(PATH_BASE_DATA, db, streamServer);
 
 app.get("/portraits", async (_req: Request, res: Response) => {
   const exts = supportedImageTypes().flatMap(f => f.extensions).map(f => `.${f}`);
-  const allEntries = await promises.readdir(pathPortrait(), {withFileTypes: true});
-  const goodExt = (f: Dirent) => exts.includes(path.extname(f.name).toLowerCase());
-  const imgFiles = allEntries.filter(f => f.isFile() && goodExt(f));
-  const imageInfos = await Promise.all(imgFiles.map((de: Dirent) => ImageInfo.fromFile(pathPortrait(), de.name)));
+  const portraitPath = pathPortrait();
+  const allEntries = await promises.readdir(portraitPath, {withFileTypes: true});
+  const imageInfos = await Promise.all(allEntries
+      .filter(f => f.isFile() && exts.includes(path.extname(f.name).toLowerCase()))
+      .map(de => ImageInfo.fromFile(portraitPath, de.name))
+  );
   res.json({
     portraitBaseUrl: portraitBaseUrl(),
     dimension: PORTRAIT_DIMS[dimIndex],
@@ -223,7 +225,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           });
           const llmResult = await llmResultPromise;
           const messages = (await db.getMessages(await loq.getSession())).map(async m => {
-            return llmResult.targetTts.removePauseCommands(m);});
+            return llmResult.targetTts.removePauseCommands(m);
+          });
           res.json(({
             response: {
               portrait: portrait,
