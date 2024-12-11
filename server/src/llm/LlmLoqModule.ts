@@ -27,7 +27,7 @@ export class LlmLoqModule implements LoqModule<LlmInput, LlmResult> {
       const params = await input.then(llmInput => {
         return llmInput.getParams()
       });
-      const result = await this.llm.chat(params);
+      const result = await timed("llm text generation", () => this.llm.chat(params));
       this.workflowEvents.workflow("llm_response");
       if (result.message) {
         const text = result.message!;
