@@ -336,10 +336,10 @@ class Db {
 
   /**
    * Stores a message with the given content for the given session by the creator identified by the given
-   * CreatorType implementation.
-   * @param session
-   * @param content
-   * @param creatorType
+   * CreatorType implementation. Ensures the message is hooked up in the database.
+   * @param session current session
+   * @param content message text
+   * @param creatorType who created it
    */
   async createCreatorTypeMessage(session: Session, content: string, creatorType: CreatorType): Promise<Message> {
     const creator = await this.findCreator(creatorType.getName(), creatorType.getMetadata(), true);
