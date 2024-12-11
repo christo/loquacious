@@ -132,8 +132,6 @@ class FalSadtalker implements LipSyncAnimator {
   }
 
   async postResponseHook(): Promise<void> {
-    // TODO cache entries should be invalidated roughly weekly - fal does not keep uploads longer than two weeks
-    //   so cache entries need datestamps
     try {
       return promises.writeFile(this.urlCacheFile, JSON.stringify(this.urlCache), 'utf-8');
     } catch (error: unknown) {
