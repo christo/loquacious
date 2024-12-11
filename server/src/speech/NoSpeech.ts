@@ -3,14 +3,14 @@ import {
   AsyncSpeechResult,
   DisplaySpeechSystem, SpeechInput,
   type SpeechResult,
-  type SpeechSystem,
-  TtsLoqModule
+  type SpeechSystem
 } from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import type {Message} from "../domain/Message";
 import {type MediaFormat, MF_MP3} from "../media";
 
 import {LoqModule} from "../system/LoqModule";
+import {TtsLoqModule} from "./TtsLoqModule";
 
 const SILENT_SUCCESS: SpeechResult = AsyncSpeechResult.fromValues(undefined, undefined);
 

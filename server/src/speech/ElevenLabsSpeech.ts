@@ -8,7 +8,7 @@ import {
   DisplaySpeechSystem,
   SpeechInput,
   type SpeechResult,
-  type SpeechSystem, TtsLoqModule
+  type SpeechSystem
 } from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
@@ -20,6 +20,7 @@ import {mkDirIfMissing} from "../system/filetoy";
 import {Tts} from "../domain/Tts";
 
 import {LoqModule} from "../system/LoqModule";
+import {TtsLoqModule} from "./TtsLoqModule";
 
 const VOICES = [
   new CharacterVoice("Andromeda - warm and lovely", "Andromeda", "Posh English woman, mid tones (5)"),

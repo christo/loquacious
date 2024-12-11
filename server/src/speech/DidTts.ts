@@ -1,8 +1,9 @@
-import {DisplaySpeechSystem, SpeechInput, SpeechResult, SpeechSystem, TtsLoqModule} from "./SpeechSystem";
+import {DisplaySpeechSystem, SpeechInput, SpeechResult, SpeechSystem} from "./SpeechSystem";
 import {SpeechSystemOption} from "./SpeechSystems";
 import {Message} from "../domain/Message";
 import {MediaFormat, MF_MP3} from "../media";
 import {LoqModule} from "../system/LoqModule";
+import {TtsLoqModule} from "./TtsLoqModule";
 
 class DidTts implements SpeechSystem {
   display: DisplaySpeechSystem;

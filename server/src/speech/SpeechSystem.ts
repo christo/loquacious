@@ -4,10 +4,6 @@ import type {Message} from "../domain/Message";
 import {Tts} from "../domain/Tts";
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
-import {EventChannel, EventEmitter, LoqEvent} from "../system/EventEmitter";
-import {LoqModule} from "../system/LoqModule";
-import Db from "../db/Db";
-import {WorkflowEvents} from "../system/WorkflowEvents";
 
 /** UI struct for a speech system with its name and all possible options */
 class DisplaySpeechSystem {
@@ -22,31 +18,6 @@ class DisplaySpeechSystem {
     }
     this.options = options;
     this.isFree = isFree;
-  }
-}
-
-class TtsLoqModule implements LoqModule<SpeechInput, SpeechResult> {
-  private readonly speechSystem: SpeechSystem;
-  private _db: Db;
-  private _workflowEvents: WorkflowEvents;
-
-  constructor(ss: SpeechSystem, db: Db, workflowEvents: WorkflowEvents) {
-    this.speechSystem = ss;
-    this._db = db;
-    this._workflowEvents = workflowEvents;
-  }
-
-  async call(input: Promise<SpeechInput>): Promise<SpeechResult> {
-    try {
-      this._workflowEvents.workflow("tts_request");
-      const speechInput = await input;
-      return this.speechSystem.speak(speechInput.getText(), speechInput.getBaseFileName()).then(x => {
-        this._workflowEvents.workflow("tts_response");
-        return x;
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
   }
 }
 
@@ -133,6 +104,5 @@ export {
   type SpeechResult,
   DisplaySpeechSystem,
   AsyncSpeechResult,
-  type SpeechInput,
-  TtsLoqModule
+  type SpeechInput
 };

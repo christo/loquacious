@@ -10,7 +10,7 @@ import {
   DisplaySpeechSystem,
   SpeechInput,
   type SpeechResult,
-  type SpeechSystem, TtsLoqModule
+  type SpeechSystem
 } from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
@@ -21,6 +21,7 @@ import {isMac} from "../system/config";
 import {escapeFilepart, mkDirIfMissing} from "../system/filetoy";
 
 import {LoqModule} from "../system/LoqModule";
+import {TtsLoqModule} from "./TtsLoqModule";
 
 const execPromise = util.promisify(exec);
 const unlinkPromise = util.promisify(fs.unlink);

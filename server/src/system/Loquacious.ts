@@ -21,12 +21,13 @@ import {LoqModule} from "./LoqModule";
 import type {LlmResult} from "../llm/Llm";
 import {LlmLoqModule} from "../llm/LlmLoqModule";
 import type {CreatorType} from "../domain/CreatorType";
-import {SpeechInput, SpeechResult, TtsLoqModule} from "../speech/SpeechSystem";
+import {SpeechInput, SpeechResult} from "../speech/SpeechSystem";
 import {LipSyncInput, LipSyncLoqModule, LipSyncResult} from "../lipsync/LipSyncAnimator";
 import {WorkflowEvents} from "./WorkflowEvents";
 import {LlmInput} from "../llm/LlmInput";
 import {Session} from "../domain/Session";
 import {Message} from "../domain/Message";
+import {TtsLoqModule} from "../speech/TtsLoqModule";
 
 
 /**
