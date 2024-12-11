@@ -440,6 +440,12 @@ class Db {
     }
   }
 
+  /**
+   * Insert a {@link Tts} domain object in the database with the given attributes.
+   * @param creatorId the id of the {@link Creator} that generated the audio.
+   * @param messageId the id of the {@link Message} that was spoekn
+   * @param audioFileId the id of the {@link AudioFile} on the filesystem.
+   */
   async createTts(creatorId: number, messageId: number, audioFileId: number): Promise<Tts> {
     const query = `insert into tts (creator, input, output)
                        values ($1, $2, $3)
