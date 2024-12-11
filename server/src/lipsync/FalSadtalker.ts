@@ -131,6 +131,9 @@ class FalSadtalker implements LipSyncAnimator {
         });
   }
 
+  /**
+   * Writes cache file to disk.
+   */
   async postResponseHook(): Promise<void> {
     try {
       return promises.writeFile(this.urlCacheFile, JSON.stringify(this.urlCache), 'utf-8');
