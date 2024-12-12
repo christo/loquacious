@@ -166,6 +166,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({error: 'No prompt provided'});
     } else {
       const failable = mkFailable(res);
+
       const llmResultPromise = failable("loquacious chat", async () => {
         const llmInput = loq.createLlmInput(cleanPrompt);
         const loqModule = await loq.getLlmLoqModule();
@@ -175,6 +176,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       const speechResultPromise = failable("speech generation",
           async () => loq.getTtsLoqModule().call(loq.createTtsInput(llmResultPromise))
       );
+
       const lsrp = failable("lipsync generation", async () => {
         const animateModule = loq.getLipSyncLoqModule();
         const lipSyncInput = loq.createLipSyncInput(speechResultPromise, getPortraitPath(portrait));
@@ -182,7 +184,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
       });
 
       const llmResult = await llmResultPromise;
-      const messages = (await db.getMessages(await loq.getSession())).map(async m => {
+      const messages = (await db.getMessages(await loq.getSession())).map(m => {
         return llmResult.targetTts.removePauseCommands(m);
       });
       const speechResult: SpeechResult = await speechResultPromise;
