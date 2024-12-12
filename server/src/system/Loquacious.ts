@@ -177,21 +177,9 @@ class Loquacious {
       llm: await this.getLlmModule(),
       tts: await this.getTtsModule(),
       lipsync: this.getLipsyncModule(),
-      pose: {
-        current: "MediaPipe",
-        all: ["MediaPipe", "MoveNet"],
-        isFree: true
-      },
-      vision: {
-        current: "Claude 3.5 Sonnet (New)",
-        all: ["Claude 3.5 Sonnet (New)", "ChatGPT", "LM-Studio", "llama.cpp", "fal.ai Florence 2 Large"],
-        isFree: false,
-      },
-      stt: {
-        current: "whisper.cpp",
-        all: ["whisper.cpp", "OpenAI Whisper", "fal.ai something"],
-        isFree: true
-      },
+      pose: this.getPose(),
+      vision: this.getVision(),
+      stt: this.getStt(),
       runtime: {
         run: new RunInfo(this.db.getRun())
       },
@@ -218,6 +206,33 @@ class Loquacious {
           } as LipSyncInput)
       );
     }
+  }
+
+  private getStt() {
+    // yet to properly implement
+    return {
+      current: "whisper.cpp",
+      all: ["whisper.cpp", "OpenAI Whisper", "fal.ai something"],
+      isFree: true
+    };
+  }
+
+  private getVision() {
+    // yet to properly implement
+    return {
+      current: "Claude 3.5 Sonnet (New)",
+      all: ["Claude 3.5 Sonnet (New)", "ChatGPT", "LM-Studio", "llama.cpp", "fal.ai Florence 2 Large"],
+      isFree: false,
+    };
+  }
+
+  private getPose() {
+    // yet to properly implement
+    return {
+      current: "MediaPipe",
+      all: ["MediaPipe", "MoveNet"],
+      isFree: true
+    };
   }
 
   private async internalFetchLlm(): Promise<ModuleWithOptions<LlmModel>> {
