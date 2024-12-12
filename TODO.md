@@ -5,7 +5,7 @@
   * [x] move all db updates into the module's call but keep the pure non-db parts in the existing
     CreatorService implementations.
   * [ ] resolve taxonomy and ontology confusion between Module and LoqModule 
-  * [ ] review wip LoqModule - should combine service with db access to do whole domain operation.
+  * [x] review wip LoqModule - should combine service with db access to do whole domain operation.
     not create boring untestability problems.
   * services that do multiple module roles should be made to work as if they are
     separate because input and output are both a `Promise`. DiD tts and lipsync
