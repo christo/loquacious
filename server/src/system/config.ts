@@ -34,6 +34,11 @@ async function getCurrentCommitHash(cwd?: string): Promise<string> {
   }
 }
 
+/**
+ * Indicates the service is available, working and dependencies are met.
+ * TODO: maybe add stuff like requiresInternet, requiresExternalProcess etc. to help specify intermittent failure
+ *    handling, interpretation and fallback
+ */
 type CanRun = {
   canRun: Predicate;
 }
