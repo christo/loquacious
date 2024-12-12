@@ -114,9 +114,25 @@ class Loquacious {
     this._llms.setCurrent(key);
   }
 
+  /**
+   * Sets the model for the LLM.
+   * @param key unique name of the model
+   */
+  async setLlmOption(key: string): Promise<void> {
+    await this._llms.current().setCurrentOption(key);
+  }
+
   setCurrentTts(key: string): Promise<void> {
     // TODO standardise on async or not for these setCurrentFoo methods
     return this._speechSystems.setCurrent(key);
+  }
+
+  /**
+   * Sets the option for TTS (the voice).
+   * @param key unique name of the option
+   */
+  async setTtsOption(key: string): Promise<void> {
+    await this._speechSystems.current().setCurrentOption(key);
   }
 
   setCurrentAnimator(key: string): void {
