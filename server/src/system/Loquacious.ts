@@ -54,11 +54,6 @@ class Loquacious {
     return this._llms;
   }
 
-  /** @deprecated transitional interface */
-  get animators(): AnimatorServices {
-    return this._animators;
-  }
-
   get modes(): Modes {
     return this._modes;
   }
@@ -79,6 +74,10 @@ class Loquacious {
     }));
   }
 
+  /**
+   * Prepare for making an LLM request, constructs the primary input type.
+   * @param userPrompt the text from the user.
+   */
   async createLlmInput(userPrompt: string): Promise<LlmInput> {
     const session = await this.getSession();
     console.log("storing user message");
@@ -166,8 +165,7 @@ class Loquacious {
   }
 
   async getSystem(): Promise<SystemSummary> {
-
-    const system: SystemSummary = {
+    return {
       asAt: new Date(),
       mode: {
         current: this.modes.current(),
@@ -194,9 +192,8 @@ class Loquacious {
       runtime: {
         run: new RunInfo(this.db.getRun())
       },
-      health: await systemHealth(this.llms.current())
+      health: await systemHealth(this._llms.current())
     };
-    return system;
   }
 
   async createLipSyncInput(speechResultPromise: Promise<SpeechResult>, imageFile: string): Promise<LipSyncInput> {
@@ -236,7 +233,7 @@ class Loquacious {
     //   and the failure needs to be handled here transparently on any promise, updating current to a fallback and
     //   feeding some kind of broken message to UI. Negotiation of a fallback requires dynamic logic. TTS fallback
     //   can be MacOS speech, but only on MacOS.
-    const llmp = this.internalFetchLlm().catch((reason) => {
+    return this.internalFetchLlm().catch((reason) => {
       // TODO move this fallback code to this.getLlmModule and friends?
       const failingLlm = this._llms.current().getName();
       const fallbackLlm = this._llms.FALLBACK.getName();
@@ -251,9 +248,6 @@ class Loquacious {
       this.setCurrentLlm(fallbackLlm);
       return this.internalFetchLlm();
     });
-
-
-    return llmp;
   }
 
   private getLipsyncModule(): Module {
