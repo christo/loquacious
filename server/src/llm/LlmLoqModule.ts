@@ -20,7 +20,6 @@ export class LlmLoqModule implements LoqModule<LlmInput, LlmResult> {
   }
 
   async call(input: Promise<LlmInput>): Promise<LlmResult> {
-    // TODO move db logic from server here
     try {
       this.workflowEvents.workflow("llm_request");
       // get message history for session
