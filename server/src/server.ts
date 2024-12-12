@@ -158,6 +158,7 @@ const mkFailable = (res: Response) =>
 const getPortraitPath = (portrait: ImageInfo) => path.join(pathPortrait(), portrait.f).toString();
 
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
+  // noinspection ES6MissingAwait
   timed("post /api/chat", async () => {
     // TODO wrap whole body in await timed(...)
     const {prompt, portrait} = req.body;
