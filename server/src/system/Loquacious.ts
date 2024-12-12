@@ -150,7 +150,6 @@ class Loquacious {
     return this._animators;
   }
 
-  // TODO decide how this should handle mode changes
   get modes(): Modes {
     return this._modes;
   }
@@ -186,7 +185,6 @@ class Loquacious {
       this.setCurrentLlm(fallbackLlm);
       return this.internalFetchLlm();
     });
-
 
 
     return llmp;
@@ -228,9 +226,9 @@ class Loquacious {
 
   private getLipsyncModule(): Module {
     return {
-      all: this.animators.all().map(ls => ls.getName()),
-      current: this.animators.current().getName(),
-      isFree: this.animators.current().free()
+      all: this._animators.all().map(ls => ls.getName()),
+      current: this._animators.current().getName(),
+      isFree: this._animators.current().free()
     } as Module;
   }
 
@@ -253,18 +251,15 @@ class Loquacious {
       return Promise.reject(new Error("No mime type found."));
     } else {
       const videoFile: VideoFile = await this.db.createVideoFile(mimeType, lipsyncCreator.id);
-      const lsiPromise = speechResultPromise.then(sr => {
-        return {
-          fileKey: `${videoFile.id}`,
-          imageFile: imageFile,
-          speechFile: sr.filePath(),
-          creatorId: lipsyncCreator.id,
-          videoId: videoFile.id,
-          ttsId: sr.tts().id
-        } as LipSyncInput;
-      });
-
-      return lsiPromise;
+      return speechResultPromise.then(sr => ({
+            fileKey: `${videoFile.id}`,
+            imageFile: imageFile,
+            speechFile: sr.filePath(),
+            creatorId: lipsyncCreator.id,
+            videoId: videoFile.id,
+            ttsId: sr.tts().id
+          } as LipSyncInput)
+      );
     }
   }
 }
