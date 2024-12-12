@@ -1,5 +1,7 @@
 import path from "path";
 import sharp from 'sharp';
+import {promises} from "fs";
+import {supportedImageTypes} from "../media";
 
 /**
  * Compact convenience class for carrying image metadata.
@@ -49,6 +51,19 @@ class ImageInfo {
     }
 
     throw new Error('Unable to determine image dimensions');
+  }
+
+  /**
+   * Provides all supported images in the given directory.
+   * @param basePath the directory path
+   */
+  static async getImageInfos(basePath: string) {
+    const allEntries = await promises.readdir(basePath, {withFileTypes: true});
+    const exts = supportedImageTypes().flatMap(f => f.extensions).map(f => `.${f}`);
+    return await Promise.all(allEntries
+        .filter(f => f.isFile() && exts.includes(path.extname(f.name).toLowerCase()))
+        .map(de => ImageInfo.fromFile(basePath, de.name))
+    );
   }
 }
 
