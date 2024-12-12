@@ -1,18 +1,8 @@
 import {CharacterVoice} from "speech/CharacterVoice";
-import {
-  AsyncSpeechResult,
-  DisplaySpeechSystem, SpeechInput,
-  type CrazySpeechResult,
-  type SpeechSystem
-} from "speech/SpeechSystem";
+import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import type {Message} from "../domain/Message";
 import {type MediaFormat, MF_MP3} from "../media";
-
-import {LoqModule} from "../system/LoqModule";
-import {TtsLoqModule} from "./TtsLoqModule";
-
-const SILENT_SUCCESS: CrazySpeechResult = AsyncSpeechResult.fromValues(undefined, undefined);
 
 /**
  * Does not make sound or generate audio files.
@@ -42,11 +32,12 @@ class NoSpeech implements SpeechSystem {
     return Promise.resolve();
   }
 
-  speak(_message: string, _filename: string): Promise<CrazySpeechResult> {
-    return Promise.resolve(SILENT_SUCCESS);
+  speak(_message: string, _filename: string): Promise<string> {
+    // TODO this is a bit stinky
+    return Promise.resolve("");
   }
 
-  pauseCommand(msDuration: number): string | null {
+  pauseCommand(_: number): string | null {
     return null;
   }
 
@@ -74,7 +65,7 @@ class NoSpeech implements SpeechSystem {
    * Always succeeds because we don't have metadata.
    * @param metadata ignored.
    */
-  configure(metadata: string): Promise<void> {
+  configure(_: string): Promise<void> {
     return Promise.resolve();
   }
 

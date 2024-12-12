@@ -1,10 +1,10 @@
 import {LoqModule} from "../system/LoqModule";
 import Db from "../db/Db";
 import {WorkflowEvents} from "../system/WorkflowEvents";
-import {AsyncSpeechResult, SpeechInput, CrazySpeechResult, SpeechSystem} from "./SpeechSystem";
+import {SpeechInput, SpeechResult, SpeechSystem} from "./SpeechSystem";
 import type {AudioFile} from "../domain/AudioFile";
 
-class TtsLoqModule implements LoqModule<SpeechInput, CrazySpeechResult> {
+class TtsLoqModule implements LoqModule<SpeechInput, SpeechResult> {
   private readonly speechSystem: SpeechSystem;
   private db: Db;
   private workflowEvents: WorkflowEvents;
@@ -15,19 +15,21 @@ class TtsLoqModule implements LoqModule<SpeechInput, CrazySpeechResult> {
     this.workflowEvents = workflowEvents;
   }
 
-  async call(input: Promise<SpeechInput>): Promise<CrazySpeechResult> {
+  async call(input: Promise<SpeechInput>): Promise<SpeechResult> {
     try {
       const ssCreator = await this.db.findCreatorForService(this.speechSystem);
       const mimeType = this.speechSystem.speechOutputFormat().mimeType;
       const audioFile: AudioFile = await this.db.createAudioFile(mimeType, ssCreator.id);
-      this.workflowEvents.workflow("tts_request");
       const si = await input;
-      const speechResultPromise = this.speechSystem.speak(si.getText(), si.getBaseFileName());
-      const sr = await speechResultPromise;
+      this.workflowEvents.workflow("tts_request");
+      const speechFilePromise = this.speechSystem.speak(si.getText(), si.getBaseFileName());
+      const speechFilename = await speechFilePromise;
       this.workflowEvents.workflow("tts_response");
       const tts = await this.db.createTts(ssCreator.id, si.getLlmMessageId(), audioFile.id);
-      // TODO this is fucked:
-      return AsyncSpeechResult.fromValues(await sr.filePath(), tts);
+      return {
+        filePath: () => speechFilename,
+        tts: () => tts
+      };
     } catch (e) {
       return Promise.reject(e);
     }

@@ -19,8 +19,9 @@ class LipSyncLoqModule implements LoqModule<LipSyncInput, LipSyncResult> {
     try {
       const lsi = await input;
       const animate = () => {
+        const speechFile = Promise.resolve(lsi.speechFile);
         this.workflowEvents.workflow("lipsync_request");
-        return this.animator.animate(lsi.imageFile, Promise.resolve(lsi.speechFile), `${lsi.videoId}`).then(lr => {
+        return this.animator.animate(lsi.imageFile, speechFile, `${lsi.videoId}`).then(lr => {
           this.workflowEvents.workflow("lipsync_response");
           return lr;
         });

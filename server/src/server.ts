@@ -7,7 +7,7 @@ import {ImageInfo} from "image/ImageInfo";
 import {prescaleImages} from "image/imageOps";
 import {supportedImageTypes} from "media";
 import * as path from 'path';
-import {CrazySpeechResult} from "speech/SpeechSystem";
+import {SpeechResult} from "speech/SpeechSystem";
 import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
 import Undici, {setGlobalDispatcher} from "undici";
@@ -173,6 +173,7 @@ const mkFailable = (res: Response) => {
 };
 
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
+  // TODO wrap whole body in await timed(...)
   const {prompt, portrait} = req.body;
   console.log(`chat request for portrait ${portrait.f} with prompt ${prompt}`);
   const cleanPrompt = prompt.trim();
@@ -190,7 +191,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         async () => loq.getTtsLoqModule().call(loq.createTtsInput(llmResultPromise))
     );
 
-    const speechResult: CrazySpeechResult = await speechResultPromise;
+    const speechResult: SpeechResult = await speechResultPromise;
 
     const lsrp = failable("lipsync generation", async () => {
       const animateModule = loq.getLipSyncLoqModule();
@@ -202,20 +203,22 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     const messages = (await db.getMessages(await loq.getSession())).map(async m => {
       return llmResult.targetTts.removePauseCommands(m);
     });
-
+    const lipsyncResult = await lsrp;
+    // at this point all promises should be awaited so any failures are caught in time to write
+    // error to response before happy path gets started.
+    console.log("sending final success response");
     res.json(({
       response: {
         portrait: portrait,
         messages: messages,
-        speech: await speechResult.filePath(),
-        lipsync: await lsrp,
+        speech: speechResult.filePath(),
+        lipsync: lipsyncResult,
         llm: llmResult.llm,
         model: llmResult.model,
       }
     }));
   }
 });
-
 /**
  * Endpoint to stream the given audio file.
  */

@@ -35,6 +35,7 @@ class SpeechSystemOption {
    * Display object represending a speech system and its configured option
    */
   safeObject() {
+    // TODO don't we use this any more?
     return {
       system: this.systemName,
       optionKey: this.optionKey,

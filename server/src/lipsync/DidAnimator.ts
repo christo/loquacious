@@ -1,5 +1,5 @@
 import {LipSyncAnimator, LipSyncInput, LipSyncResult} from "./LipSyncAnimator";
-import {CrazySpeechResult, SpeechSystem} from "../speech/SpeechSystem";
+import {CrazySpeechResult, SpeechResult, SpeechSystem} from "../speech/SpeechSystem";
 import {MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
 
@@ -72,7 +72,8 @@ class DidAnimator implements LipSyncAnimator {
 
   canRun = hasEnv("DID_AUTH");
 
-  speak(message: string, basename: string): Promise<CrazySpeechResult> {
+  speak(message: string, basename: string): Promise<string> {
+    // TODO figure out how to not deal with a promise of string - we don't get intermediate access to an audio file
     console.warn("DidAnimatorWithTts.speak not implemented.");
     return Promise.reject("unimplemented");
   }

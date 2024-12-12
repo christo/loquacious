@@ -14,14 +14,16 @@ class LlmService implements GateWay<Llm> {
 
   private readonly llms: Llm[];
   private llmIndex = 0;
+  private readonly FAKE = new FakeLlm();
+  readonly FALLBACK: Llm =  this.FAKE;
 
   constructor() {
     this.llms = [
-      new OpenAiLlm(),
       new LlamaCppLlm(),
+      new OpenAiLlm(),
       new LmStudioLlm(),
-      new FakeLlm()
-    ].filter(s => s.canRun())
+      this.FAKE
+    ].filter((llm: Llm) => llm.canRun())
   }
 
   current(): Llm {

@@ -16,6 +16,8 @@ class OpenAiLlm implements Llm {
   readonly baseUrl = undefined;
   readonly enableHealth = false;
   private readonly name = "ChatGPT-LLM";
+  // TODO need to give occasionally broken online service a timeout and canRun should only come back after time elapsed
+  //   got cloudflare failure calling any openai method. All online service-based things need a failure timeout
   canRun = hasEnv("OPENAI_API_KEY");
   private openai;
   private modelName: string;

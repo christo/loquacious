@@ -1,12 +1,3 @@
-/*
-TODO extract core logic from server.ts for this
-
-Promise<Audio> -> sttService -> sttResult
-message -> llmService -> llmResult
-llmResult -> ttsService -> speechResult
-(speechResult, portrait) -> animatorService -> animatorResult
- */
-
 import LlmService from "../llm/LlmService";
 import {SpeechSystemOption, SpeechSystems} from "../speech/SpeechSystems";
 import AnimatorServices from "../lipsync/AnimatorServices";
@@ -21,7 +12,7 @@ import {LoqModule} from "./LoqModule";
 import type {LlmResult} from "../llm/Llm";
 import {LlmLoqModule} from "../llm/LlmLoqModule";
 import type {CreatorType} from "../domain/CreatorType";
-import {SpeechInput, CrazySpeechResult} from "../speech/SpeechSystem";
+import {SpeechInput, SpeechResult} from "../speech/SpeechSystem";
 import {LipSyncInput, LipSyncResult} from "../lipsync/LipSyncAnimator";
 import {WorkflowEvents} from "./WorkflowEvents";
 import {LlmInput} from "../llm/LlmInput";
@@ -31,6 +22,7 @@ import {TtsLoqModule} from "../speech/TtsLoqModule";
 import type {AudioFile} from "../domain/AudioFile";
 import {LipSyncLoqModule} from "../lipsync/LipSyncLoqModule";
 import {VideoFile} from "../domain/VideoFile";
+import {timed} from "./performance";
 
 
 /**
@@ -55,8 +47,6 @@ class Loquacious {
     this.workflowEvents = streamServer;
     this.db = db;
   }
-
-  // TODO need to support setting configuration options for some CreatorTypes
 
   /**
    * Makes sure all the current available CreatorTypes have database entities
@@ -102,7 +92,7 @@ class Loquacious {
     return new LlmLoqModule(this._llms.current(), this.db, this.workflowEvents, await this.getSession());
   }
 
-  getTtsLoqModule(): LoqModule<SpeechInput, CrazySpeechResult> {
+  getTtsLoqModule(): LoqModule<SpeechInput, SpeechResult> {
     return new TtsLoqModule(this._speechSystems.current(), this.db, this.workflowEvents);
   }
 
@@ -155,17 +145,45 @@ class Loquacious {
     return this._modes;
   }
 
-  private async getLlmModule(): Promise<ModuleWithOptions<LlmModel>> {
-    return {
+  private async internalFetchLlm(): Promise<ModuleWithOptions<LlmModel>> {
+    return timed("llm module acquisition", async () => ({
       current: this._llms.current().getName(),
       all: this._llms.all().map(llm => llm.getName()),
       options: await this._llms.current().models(),
       currentOption: await this._llms.current().currentModel(),
       isFree: this._llms.current().free()
-    }
+    } as ModuleWithOptions<LlmModel>));
+  }
+
+  private async getLlmModule(): Promise<ModuleWithOptions<LlmModel>> {
+
+    // TODO need a general mechanism like this for any service that can fail intermittently
+    //   and the failure needs to be handled here transparently on any promise, updating current to a fallback and
+    //   feeding some kind of broken message to UI. Negotiation of a fallback requires dynamic logic. TTS fallback
+    //   can be MacOS speech, but only on MacOS.
+    const llmp = this.internalFetchLlm().catch((reason) => {
+      // TODO move this fallback code to this.getLlmModule and friends?
+      const failingLlm = this._llms.current().getName();
+      const fallbackLlm = this._llms.FALLBACK.getName();
+      // TODO report error reason to front-end through streamserver/websocket
+      // TODO robust resaon handling: openai failure due to cloudflare timeout results in html page as reason
+      console.warn(`Unexpected LLM failure for ${failingLlm}, reverting to fallback LLM ${fallbackLlm}`);
+      // openai failure seemed to report a reason which is an http response body with 500 and html page
+      // so maybe a RequiresOnlineService interface should specify a failure interpretation method for implementers
+      // and RequriesExternalProcess (like LmStudioLlm) could have similar and InProcess (like FakeLlm) wouldn't need it
+      console.error("reason dump:");
+      console.dir(reason);
+      this.setCurrentLlm(fallbackLlm);
+      return this.internalFetchLlm();
+    });
+
+
+
+    return llmp;
   }
 
   async getSystem(): Promise<SystemSummary> {
+
     const system: SystemSummary = {
       asAt: new Date(),
       mode: {
@@ -216,7 +234,7 @@ class Loquacious {
     }
   }
 
-  async createLipSyncInput(speechResultPromise: Promise<CrazySpeechResult>, imageFile: string): Promise<LipSyncInput> {
+  async createLipSyncInput(speechResultPromise: Promise<SpeechResult>, imageFile: string): Promise<LipSyncInput> {
     const animator = this._animators.current();
     const lipsyncCreator = await this.db.findCreator(animator.getName(), animator.getMetadata(), true);
     const mimeType = animator.videoOutputFormat()?.mimeType;
@@ -225,17 +243,14 @@ class Loquacious {
       return Promise.reject(new Error("No mime type found."));
     } else {
       const videoFile: VideoFile = await this.db.createVideoFile(mimeType, lipsyncCreator.id);
-      const sr = await speechResultPromise;
-      const speechFilePath = (await sr.filePath())!;
-      const ttsId = (await sr.tts())!;
       const lsiPromise = speechResultPromise.then(sr => {
         return {
           fileKey: `${videoFile.id}`,
           imageFile: imageFile,
-          speechFile: speechFilePath,
+          speechFile: sr.filePath(),
           creatorId: lipsyncCreator.id,
           videoId: videoFile.id,
-          ttsId: ttsId!.id
+          ttsId: sr.tts().id
         } as LipSyncInput;
       });
 

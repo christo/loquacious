@@ -3,15 +3,9 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import {type MediaFormat, MF_MP3} from "media";
 import type {PathLike} from "node:fs";
-import path, {basename} from "path";
+import path from "path";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {
-  AsyncSpeechResult,
-  DisplaySpeechSystem,
-  SpeechInput,
-  type CrazySpeechResult,
-  type SpeechSystem
-} from "speech/SpeechSystem";
+import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import util from "util";
@@ -19,9 +13,6 @@ import {Message} from "../domain/Message";
 import {isMac} from "../system/config";
 
 import {escapeFilepart, mkDirIfMissing} from "../system/filetoy";
-
-import {LoqModule} from "../system/LoqModule";
-import {TtsLoqModule} from "./TtsLoqModule";
 
 const execPromise = util.promisify(exec);
 const unlinkPromise = util.promisify(fs.unlink);
@@ -31,10 +22,10 @@ async function convertAudio(desiredFormat: string, path: string): Promise<string
   // console.log(`using ffmpeg to convert ${path} to ${desiredFormat} in ${finalPath}`);
   await new Promise<void>((resolve, reject) => {
     ffmpeg(path)
-      .toFormat(desiredFormat)
-      .on('error', (err) => reject(err))
-      .on('end', () => resolve())
-      .save(finalPath);
+        .toFormat(desiredFormat)
+        .on('error', (err) => reject(err))
+        .on('end', () => resolve())
+        .save(finalPath);
   });
   return finalPath;
 }
@@ -50,7 +41,7 @@ const VOICES: Array<CharacterVoice> = [
   new CharacterVoice("Moira (Enhanced)", "Moira", "Irish woman"),
   new CharacterVoice("Fiona (Enhanced)", "Fiona", "Scottish woman"),
   new CharacterVoice("Kate (Enhanced)", "Kate", "English woman"),
-]
+];
 
 const wpm = 130; // fast, for debugging
 // const speed = 120; // good fortune-teller speaking speed
@@ -94,7 +85,7 @@ class MacOsSpeech implements SpeechSystem {
     return Promise.reject(`${this.name}: No known voice ${value}`);
   }
 
-  async speak(message: string, basename: string): Promise<CrazySpeechResult> {
+  async speak(message: string, basename: string): Promise<string> {
     try {
       const voice = VOICES[this.currentIndex];
       const voicePart = voice.name.replaceAll(/[\s\/]/g, '-');
@@ -125,7 +116,7 @@ class MacOsSpeech implements SpeechSystem {
         console.error("problem executing say command", e);
         result = Promise.reject(e);
       }
-      return AsyncSpeechResult.fromPromises(result, Promise.resolve(undefined));
+      return result
 
     } catch (error) {
       console.error('An error occurred during speech synthesis:', error);

@@ -1,15 +1,9 @@
 import {ElevenLabsClient} from "elevenlabs";
 import fs from 'fs';
 import type {PathLike} from "node:fs";
-import path, {basename} from "path";
+import path from "path";
 import {CharacterVoice} from "speech/CharacterVoice";
-import {
-  AsyncSpeechResult,
-  DisplaySpeechSystem,
-  SpeechInput,
-  type CrazySpeechResult,
-  type SpeechSystem
-} from "speech/SpeechSystem";
+import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import {timed} from "system/performance";
 import {Message} from "../domain/Message";
@@ -17,10 +11,6 @@ import {type MediaFormat, MF_MP3} from "../media";
 import {hasEnv} from "../system/config";
 
 import {mkDirIfMissing} from "../system/filetoy";
-import {Tts} from "../domain/Tts";
-
-import {LoqModule} from "../system/LoqModule";
-import {TtsLoqModule} from "./TtsLoqModule";
 
 const VOICES = [
   new CharacterVoice("Andromeda - warm and lovely", "Andromeda", "Posh English woman, mid tones (5)"),
@@ -96,37 +86,14 @@ type StreamPartialConfig = {
  */
 class ElevenLabsSpeech implements SpeechSystem {
   private static NAME = `ElevenLabs-TTS`;
-
-  private client: ElevenLabsClient;
-
   readonly display: DisplaySpeechSystem;
-
   /**
    * Requires environment variable ELEVEN_LABS_API_KEY
    */
   canRun = hasEnv("ELEVENLABS_API_KEY");
-  private currentVoice = VOICES.findIndex(v => v.name === "Sigrid") ;
+  private client: ElevenLabsClient;
+  private currentVoice = VOICES.findIndex(v => v.name === "Sigrid");
   private readonly dataDir: string;
-
-  /**
-   * Partial config wraps the bulk or stream api call parameters but excludes the
-   * text because that changes with every invocation.
-   * @private
-   */
-  private partialConfig: () => ElevenLabsPartialConfig = () => ({
-    type: "bulk",
-    config: {
-      voice: VOICES[this.currentVoice].voiceId,
-      output_format: "mp3_44100_128",
-      model_id: "eleven_multilingual_v2",
-      voice_settings: {
-        stability: 0.4,
-        similarity_boost: 0.1,
-        style: 0.8,
-        use_speaker_boost: true
-      }
-    }
-  });
 
   constructor(ttsDataDir: PathLike) {
     this.dataDir = path.join(ttsDataDir.toString(), "el");
@@ -155,17 +122,19 @@ class ElevenLabsSpeech implements SpeechSystem {
     return Promise.reject(`didn't find voice option ${value}`);
   }
 
-  async speak(message: string, basename: string): Promise<CrazySpeechResult> {
+  async speak(message: string, basename: string): Promise<string> {
     const outFilename = `el_tts_${basename}_${VOICES[this.currentVoice].name.replaceAll(/\s\//g, '-')}.mp3`;
-    const outFile = path.join(this.dataDir, outFilename);
+    const filename = path.join(this.dataDir, outFilename);
     try {
       const audio = await timed("elevenlabs generate speech",
           () => this.client.generate({
-            text: message,
-            ...(this.getConfig().config)
-          } as ElevenLabsClient.GeneratAudioBulk));
-      const outStream = fs.createWriteStream(outFile);
-      return new Promise<CrazySpeechResult>((resolve, reject) => {
+                text: message,
+                ...(this.getConfig().config)
+              } as ElevenLabsClient.GeneratAudioBulk
+          )
+      );
+      const outStream = fs.createWriteStream(filename);
+      return new Promise<string>((resolve, reject) => {
         outStream.on('error', (err) => {
           console.error('Error in writing the file:', err);
           reject();
@@ -173,11 +142,11 @@ class ElevenLabsSpeech implements SpeechSystem {
 
         outStream.on('finish', () => {
           console.log('speech file writing completed successfully.');
-          // hack alert - tts has a circular dependency in construction
-          resolve(AsyncSpeechResult.fromValues(outFile, undefined));
+          resolve(filename);
         });
         audio.pipe(outStream);
-      })
+      });
+
 
     } catch (e) {
       console.error("Error while creating voice stream", e);
@@ -185,8 +154,12 @@ class ElevenLabsSpeech implements SpeechSystem {
     }
   }
 
+  /**
+   * ElevenLabs pause instruction.
+   * @param msDuration
+   */
   pauseCommand(msDuration: number): string {
-    const sec = (msDuration / 1000).toFixed(1)
+    const sec = (msDuration / 1000).toFixed(1);
     return `<break time="${sec}s" />`;
   }
 
@@ -227,6 +200,26 @@ class ElevenLabsSpeech implements SpeechSystem {
   speechOutputFormat(): MediaFormat {
     return MF_MP3;
   }
+
+  /**
+   * Partial config wraps the bulk or stream api call parameters but excludes the
+   * text because that changes with every invocation.
+   * @private
+   */
+  private partialConfig: () => ElevenLabsPartialConfig = () => ({
+    type: "bulk",
+    config: {
+      voice: VOICES[this.currentVoice].voiceId,
+      output_format: "mp3_44100_128",
+      model_id: "eleven_multilingual_v2",
+      voice_settings: {
+        stability: 0.4,
+        similarity_boost: 0.1,
+        style: 0.8,
+        use_speaker_boost: true
+      }
+    }
+  });
 
   private getConfig(): ElevenLabsPartialConfig {
     return this.partialConfig();
