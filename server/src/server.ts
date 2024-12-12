@@ -2,10 +2,8 @@ import {fileStream} from "api/mediaStream";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
-import {promises} from 'fs';
 import {ImageInfo} from "image/ImageInfo";
 import {prescaleImages} from "image/imageOps";
-import {supportedImageTypes} from "media";
 import * as path from 'path';
 import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
@@ -14,9 +12,9 @@ import Db from "./db/Db";
 import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
 import {Loquacious} from "./system/Loquacious";
-import Agent = Undici.Agent;
 import {SpeechResult} from "./speech/SpeechResult";
-
+import {LipSyncResult} from "./lipsync/LipSyncAnimator";
+import Agent = Undici.Agent;
 
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
 
@@ -53,17 +51,10 @@ const streamServer = new StreamServer(app, wsPort, "http://localhost:5173");
 const loq = new Loquacious(PATH_BASE_DATA, db, streamServer);
 
 app.get("/portraits", async (_req: Request, res: Response) => {
-  const exts = supportedImageTypes().flatMap(f => f.extensions).map(f => `.${f}`);
-  const portraitPath = pathPortrait();
-  const allEntries = await promises.readdir(portraitPath, {withFileTypes: true});
-  const imageInfos = await Promise.all(allEntries
-      .filter(f => f.isFile() && exts.includes(path.extname(f.name).toLowerCase()))
-      .map(de => ImageInfo.fromFile(portraitPath, de.name))
-  );
   res.json({
     portraitBaseUrl: portraitBaseUrl(),
     dimension: PORTRAIT_DIMS[dimIndex],
-    images: imageInfos
+    images: await ImageInfo.getImageInfos(pathPortrait())
   });
 });
 
@@ -79,10 +70,7 @@ app.get("/portrait/:portraitname", async (req: Request, _res: Response) => {
  */
 app.post("/system/", async (req: Request, res: Response) => {
   await mkFailable(res)("update system settings", async () => {
-    const keys = Object.getOwnPropertyNames(req.body);
-    for (const k of keys) {
-      // TODO confirm this can be trusted to be a string
-      const value = req.body[k];
+    for (const [k, value] of Object.entries<string>(req.body)) {
       switch (k) {
         case "mode":
           loq.modes.setCurrent(value);
@@ -91,21 +79,19 @@ app.post("/system/", async (req: Request, res: Response) => {
           loq.setCurrentLlm(value);
           break;
         case "llm_option":
-          // TODO support setting llm options tastefully through loq
-          await loq.llms.current().setCurrentOption(value);
+          await loq.setLlmOption(value);
           break;
         case "tts":
           await loq.setCurrentTts(value);
           break;
         case "tts_option":
-          // TODO support setting tts options tastefully through loq
-          await loq.speechSystems.current().setCurrentOption(value);
+          await loq.setTtsOption(value);
           break;
         case "lipsync":
           loq.setCurrentAnimator(value);
           break;
         default:
-          console.log(`system setting update for ${k} not implemented`);
+          console.log(`system setting update for ${k} not supported`);
       }
     }
     res.json(await loq.getSystem());
@@ -123,8 +109,8 @@ app.get("/system", async (_req: Request, res: Response) => {
  * Front end request for a new session.
  */
 app.put("/session", async (_req: Request, res: Response) => {
-  await mkFailable(res)("creating new session", () => loq.newSession()
-      .then(s => res.json(s)));
+  await mkFailable(res)("creating new session", () =>
+      loq.newSession().then(s => res.json(s)));
 });
 
 app.get('/session', async (_req: Request, res: Response) => {
@@ -151,73 +137,72 @@ app.get('/api/chat', async (_req: Request, res: Response) => {
  * Curried generic labelled function execution and failure reporting to Response and streamServer.
  * On success, the returned promise of fn is returned.
  * @param res response to use for reporting any failure
- *
+ * @return function as follows:
+ *     param: name label to use for failure reporting
+ *     param: fn the function to call
+ *     return: on success the resolved value from fn, on failure, a rejected promise.
  */
-const mkFailable = (res: Response) => {
-  /**
-   * @param name label to use for failure reporting
-   * @param fn the function to call
-   * @return on success the returned value from fn, on failure, a rejected promise.
-   */
-  return async <T>(name: string, fn: () => Promise<T>) => {
-    try {
-      return await fn();
-    } catch (e) {
-      const msg = `${name} failed`;
-      console.error(msg, e);
-      res.status(500).json({error: msg}).end();
-      streamServer.error(msg);
-      return Promise.reject(e);
-    }
-  }
-};
+const mkFailable = (res: Response) =>
+    async <T>(name: string, fn: () => Promise<T>) => {
+      try {
+        return await fn();
+      } catch (e) {
+        const msg = `${name} failed`;
+        console.error(msg, e);
+        res.status(500).json({error: msg}).end();
+        streamServer.error(msg);
+        return Promise.reject(e);
+      }
+    };
+
+const getPortraitPath = (portrait: ImageInfo) => path.join(pathPortrait(), portrait.f).toString();
 
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
-  // TODO wrap whole body in await timed(...)
-  const {prompt, portrait} = req.body;
-  console.log(`chat request for portrait ${portrait.f} with prompt ${prompt}`);
-  const cleanPrompt = prompt.trim();
-  if (!cleanPrompt || !cleanPrompt.length) {
-    res.status(400).json({error: 'No prompt provided'});
-  } else {
-    const failable = mkFailable(res);
-    const llmResultPromise = failable("loquacious chat", async () => {
-      const llmInput = loq.createLlmInput(cleanPrompt);
-      const loqModule = await loq.getLlmLoqModule();
-      return loqModule.call(llmInput);
-    });
+  timed("post /api/chat", async () => {
+    // TODO wrap whole body in await timed(...)
+    const {prompt, portrait} = req.body;
+    const cleanPrompt = prompt.trim();
+    if (!cleanPrompt || !cleanPrompt.length) {
+      res.status(400).json({error: 'No prompt provided'});
+    } else {
+      const failable = mkFailable(res);
+      const llmResultPromise = failable("loquacious chat", async () => {
+        const llmInput = loq.createLlmInput(cleanPrompt);
+        const loqModule = await loq.getLlmLoqModule();
+        return loqModule.call(llmInput);
+      });
 
-    const speechResultPromise = failable("speech generation",
-        async () => loq.getTtsLoqModule().call(loq.createTtsInput(llmResultPromise))
-    );
+      const speechResultPromise = failable("speech generation",
+          async () => loq.getTtsLoqModule().call(loq.createTtsInput(llmResultPromise))
+      );
+      const lsrp = failable("lipsync generation", async () => {
+        const animateModule = loq.getLipSyncLoqModule();
+        const lipSyncInput = loq.createLipSyncInput(speechResultPromise, getPortraitPath(portrait));
+        return animateModule.call(lipSyncInput);
+      });
 
-    const speechResult: SpeechResult = await speechResultPromise;
+      const llmResult = await llmResultPromise;
+      const messages = (await db.getMessages(await loq.getSession())).map(async m => {
+        return llmResult.targetTts.removePauseCommands(m);
+      });
+      const speechResult: SpeechResult = await speechResultPromise;
+      const lipsyncResult: LipSyncResult = await lsrp;
 
-    const lsrp = failable("lipsync generation", async () => {
-      const animateModule = loq.getLipSyncLoqModule();
-      const portraitPath = path.join(pathPortrait(), portrait.f).toString();
-      return animateModule.call(loq.createLipSyncInput(speechResultPromise, portraitPath));
-    });
-
-    const llmResult = await llmResultPromise;
-    const messages = (await db.getMessages(await loq.getSession())).map(async m => {
-      return llmResult.targetTts.removePauseCommands(m);
-    });
-    const lipsyncResult = await lsrp;
-    // at this point all promises should be awaited so any failures are caught in time to write
-    // error to response before happy path gets started.
-    console.log("sending final success response");
-    res.json(({
-      response: {
-        portrait: portrait,
-        messages: messages,
-        speech: speechResult.filePath(),
-        lipsync: lipsyncResult,
-        llm: llmResult.llm,
-        model: llmResult.model,
-      }
-    }));
-  }
+      // at this point all promises should be awaited so any failures are caught in time to write
+      // error to response before happy path gets started.
+      console.log("sending final success response");
+      res.json(({
+        response: {
+          portrait: portrait,
+          messages: messages,
+          speech: speechResult.filePath(),
+          lipsync: lipsyncResult,
+          llm: llmResult.llm,
+          model: llmResult.model,
+        }
+      }));
+    }
+  })
 });
 /**
  * Endpoint to stream the given audio file.
