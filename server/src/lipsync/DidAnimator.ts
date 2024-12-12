@@ -1,18 +1,11 @@
-import {LipSyncAnimator, LipSyncInput, LipSyncResult} from "./LipSyncAnimator";
-import {CrazySpeechResult, SpeechSystem} from "../speech/SpeechSystem";
+import {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
 import {MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
-
-import {LoqModule} from "../system/LoqModule";
-import {LipSyncLoqModule} from "./LipSyncLoqModule";
-import {SpeechResult} from "../speech/SpeechResult";
-
 
 /**
  * D-iD implementation of {@link LipSyncAnimator} intended to be used together with {@link DidTts}.
  */
 class DidAnimator implements LipSyncAnimator {
-
 
   constructor() {
   }
@@ -51,7 +44,6 @@ class DidAnimator implements LipSyncAnimator {
 
   }
 
-
   postResponseHook(): Promise<void> {
     return Promise.resolve(undefined);
   }
@@ -78,7 +70,6 @@ class DidAnimator implements LipSyncAnimator {
     console.warn("DidAnimatorWithTts.speak not implemented.");
     return Promise.reject("unimplemented");
   }
-
 }
 
 export {DidAnimator};
