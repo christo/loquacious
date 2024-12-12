@@ -94,7 +94,7 @@ app.post("/system/", async (req: Request, res: Response) => {
           console.log(`system setting update for ${k} not supported`);
       }
     }
-    res.json(await loq.getSystem());
+    res.json(await loq.getSystemSummary());
   });
 });
 
@@ -102,7 +102,7 @@ app.post("/system/", async (req: Request, res: Response) => {
  * Get current system settings.
  */
 app.get("/system", async (_req: Request, res: Response) => {
-  res.json(await loq.getSystem());
+  res.json(await loq.getSystemSummary());
 });
 
 /**
@@ -226,7 +226,7 @@ app.listen(port, async () => {
 
   await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
   console.log(`Server is running on port ${port}`);
-  const systemSummary = await loq.getSystem();
+  const systemSummary = await loq.getSystemSummary();
   const llmName = systemSummary.llm.current;
   console.log(`LLM: ${llmName}`);
   console.log(`LLM health check: ${systemSummary.health.message}`);

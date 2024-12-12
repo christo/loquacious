@@ -167,7 +167,7 @@ class Loquacious {
     return this.getSession();
   }
 
-  async getSystem(): Promise<SystemSummary> {
+  async getSystemSummary(): Promise<SystemSummary> {
     return {
       asAt: new Date(),
       mode: {
