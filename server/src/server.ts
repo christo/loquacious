@@ -160,7 +160,6 @@ const getPortraitPath = (portrait: ImageInfo) => path.join(pathPortrait(), portr
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   // noinspection ES6MissingAwait
   timed("post /api/chat", async () => {
-    // TODO wrap whole body in await timed(...)
     const {prompt, portrait} = req.body;
     const cleanPrompt = prompt.trim();
     if (!cleanPrompt || !cleanPrompt.length) {
