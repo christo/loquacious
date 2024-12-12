@@ -1,7 +1,6 @@
 import type {CharacterVoice} from "speech/CharacterVoice";
 import {SpeechSystemOption} from "speech/SpeechSystems";
 import type {Message} from "../domain/Message";
-import {Tts} from "../domain/Tts";
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";
 
@@ -19,56 +18,6 @@ class DisplaySpeechSystem {
     this.options = options;
     this.isFree = isFree;
   }
-}
-
-/**
- * @deprecated
- */
-interface CrazySpeechResult {
-  // TODO this crazy
-  filePath(): Promise<string | undefined>;
-
-  // TODO also crazy
-  tts(): Promise<Tts | undefined>;
-}
-
-/**
- * Type representing the result of a request to generate speech from text.
- */
-interface SpeechResult {
-  filePath(): string;
-
-  tts(): Tts;
-}
-
-/**
- * TODO kill this
- * @deprecated abomination
- */
-class AsyncSpeechResult implements CrazySpeechResult {
-  tts: () => Promise<Tts | undefined>;
-  filePath: () => Promise<string | undefined>;
-
-  constructor(fp: () => Promise<string | undefined>, tts: () => Promise<Tts | undefined>) {
-    this.tts = tts;
-    this.filePath = fp;
-  }
-
-  static fromPromises(fp: Promise<string | undefined>, tts: Promise<Tts | undefined>) {
-    // noinspection JSDeprecatedSymbols
-    return new AsyncSpeechResult(() => fp, () => tts);
-  }
-
-  static fromValues(fp: string | undefined, tts: Tts | undefined) {
-    // noinspection JSDeprecatedSymbols
-    return AsyncSpeechResult.fromPromises(Promise.resolve(fp), Promise.resolve(tts));
-  }
-}
-
-type SpeechInput = {
-  getText(): string;
-  getBaseFileName(): string;
-  getLlmMessageId(): number;
 }
 
 /**
@@ -116,11 +65,4 @@ interface SpeechSystem extends CreatorService {
   speechOutputFormat(): MediaFormat;
 }
 
-export {
-  type SpeechSystem,
-  type CrazySpeechResult,
-  DisplaySpeechSystem,
-  AsyncSpeechResult,
-  type SpeechInput,
-  type SpeechResult,
-};
+export {type SpeechSystem, DisplaySpeechSystem};

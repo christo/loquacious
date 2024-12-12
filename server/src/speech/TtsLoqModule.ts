@@ -1,8 +1,10 @@
 import {LoqModule} from "../system/LoqModule";
 import Db from "../db/Db";
 import {WorkflowEvents} from "../system/WorkflowEvents";
-import {SpeechInput, SpeechResult, SpeechSystem} from "./SpeechSystem";
+import {SpeechSystem} from "./SpeechSystem";
 import type {AudioFile} from "../domain/AudioFile";
+import {SpeechResult} from "./SpeechResult";
+import {SpeechInput} from "./SpeechInput";
 
 class TtsLoqModule implements LoqModule<SpeechInput, SpeechResult> {
   private readonly speechSystem: SpeechSystem;

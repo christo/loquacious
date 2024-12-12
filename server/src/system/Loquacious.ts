@@ -12,7 +12,6 @@ import {LoqModule} from "./LoqModule";
 import type {LlmResult} from "../llm/Llm";
 import {LlmLoqModule} from "../llm/LlmLoqModule";
 import type {CreatorType} from "../domain/CreatorType";
-import {SpeechInput, SpeechResult} from "../speech/SpeechSystem";
 import {LipSyncInput, LipSyncResult} from "../lipsync/LipSyncAnimator";
 import {WorkflowEvents} from "./WorkflowEvents";
 import {LlmInput} from "../llm/LlmInput";
@@ -23,6 +22,8 @@ import type {AudioFile} from "../domain/AudioFile";
 import {LipSyncLoqModule} from "../lipsync/LipSyncLoqModule";
 import {VideoFile} from "../domain/VideoFile";
 import {timed} from "./performance";
+import {SpeechResult} from "../speech/SpeechResult";
+import {SpeechInput} from "../speech/SpeechInput";
 
 
 /**

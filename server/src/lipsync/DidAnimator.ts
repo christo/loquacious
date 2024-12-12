@@ -1,10 +1,11 @@
 import {LipSyncAnimator, LipSyncInput, LipSyncResult} from "./LipSyncAnimator";
-import {CrazySpeechResult, SpeechResult, SpeechSystem} from "../speech/SpeechSystem";
+import {CrazySpeechResult, SpeechSystem} from "../speech/SpeechSystem";
 import {MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
 
 import {LoqModule} from "../system/LoqModule";
 import {LipSyncLoqModule} from "./LipSyncLoqModule";
+import {SpeechResult} from "../speech/SpeechResult";
 
 
 /**

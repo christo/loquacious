@@ -7,7 +7,6 @@ import {ImageInfo} from "image/ImageInfo";
 import {prescaleImages} from "image/imageOps";
 import {supportedImageTypes} from "media";
 import * as path from 'path';
-import {SpeechResult} from "speech/SpeechSystem";
 import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
 import Undici, {setGlobalDispatcher} from "undici";
@@ -16,6 +15,7 @@ import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
 import {Loquacious} from "./system/Loquacious";
 import Agent = Undici.Agent;
+import {SpeechResult} from "./speech/SpeechResult";
 
 
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
