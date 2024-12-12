@@ -89,14 +89,23 @@ class Loquacious {
     });
   }
 
+  /**
+   * LLM
+   */
   async getLlmLoqModule(): Promise<LoqModule<LlmInput, LlmResult>> {
     return new LlmLoqModule(this._llms.current(), this.db, this.workflowEvents, await this.getSession());
   }
 
+  /**
+   * TTS
+   */
   getTtsLoqModule(): LoqModule<SpeechInput, SpeechResult> {
     return new TtsLoqModule(this._speechSystems.current(), this.db, this.workflowEvents);
   }
 
+  /**
+   * LipSync
+   */
   getLipSyncLoqModule(): LoqModule<LipSyncInput, LipSyncResult> {
     return new LipSyncLoqModule(this._animators.current(), this.db, this.workflowEvents);
   }
