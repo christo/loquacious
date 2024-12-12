@@ -24,7 +24,7 @@ interface LlmInput {
    * The speech system for which the Llm is instructed to write text. Necessary for specifying pauses
    * and any other future metadata.
    */
-  // TODO ideally we would enumerate the instruction support functions here and forego the dependency on speechsystem
+  // ideally we would enumerate the instruction support functions here and forego the dependency on speechsystem
   //   but we don't know how many we need right now, at least we also need to be able to remove the pause instructions
   //   so we can also render the llm output as text
   targetTts(): SpeechSystem;
