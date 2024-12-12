@@ -177,18 +177,18 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
           async () => loq.getTtsLoqModule().call(loq.createTtsInput(llmResultPromise))
       );
 
-      const lsrp = failable("lipsync generation", async () => {
-        const animateModule = loq.getLipSyncLoqModule();
+      const lipSyncResult = failable("lipsync generation", async () => {
+        const animateLoqModule = loq.getLipSyncLoqModule();
         const lipSyncInput = loq.createLipSyncInput(speechResultPromise, getPortraitPath(portrait));
-        return animateModule.call(lipSyncInput);
+        return animateLoqModule.call(lipSyncInput);
       });
 
-      const llmResult = await llmResultPromise;
+      const lr = await llmResultPromise;
       const messages = (await db.getMessages(await loq.getSession())).map(m => {
-        return llmResult.targetTts.removePauseCommands(m);
+        return lr.targetTts.removePauseCommands(m);
       });
-      const speechResult: SpeechResult = await speechResultPromise;
-      const lipsyncResult: LipSyncResult = await lsrp;
+      const sr: SpeechResult = await speechResultPromise;
+      const lsr: LipSyncResult = await lipSyncResult;
 
       // at this point all promises should be awaited so any failures are caught in time to write
       // error to response before happy path gets started.
@@ -197,10 +197,10 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
         response: {
           portrait: portrait,
           messages: messages,
-          speech: speechResult.filePath(),
-          lipsync: lipsyncResult,
-          llm: llmResult.llm,
-          model: llmResult.model,
+          speech: sr.filePath(),
+          lipsync: lsr,
+          llm: lr.llm,
+          model: lr.model,
         }
       }));
     }
