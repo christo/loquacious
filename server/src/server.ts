@@ -3,17 +3,15 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express, {Request, Response} from 'express';
 import {ImageInfo} from "image/ImageInfo";
-import {prescaleImages} from "image/imageOps";
-import * as path from 'path';
 import {getCurrentCommitHash} from "system/config";
 import {timed} from "system/performance";
 import Undici, {setGlobalDispatcher} from "undici";
 import Db from "./db/Db";
-import {Dimension} from "./image/Dimension";
 import {StreamServer} from "./StreamServer";
 import {Loquacious} from "./system/Loquacious";
 import {SpeechResult} from "./speech/SpeechResult";
 import {LipSyncResult} from "./lipsync/LipSyncAnimator";
+import {PortraitSystem} from "./image/PortraitSystem";
 import Agent = Undici.Agent;
 
 // we do this because worst-case remote calls are hella slow
@@ -23,16 +21,7 @@ setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
 dotenv.config();
 
 const BASE_WEB_ROOT = "../public";
-/** file path relative to server module root */
-const BASE_PATH_PORTRAIT = `${BASE_WEB_ROOT}/img`;
-const PORTRAIT_DIMS: Dimension[] = [
-  {width: 608, height: 800},
-  {width: 1080, height: 1920}
-];
-let dimIndex = 0;
-const portraitBaseUrl = () => `/img/${PORTRAIT_DIMS[dimIndex].width}x${PORTRAIT_DIMS[dimIndex].height}`;
-const pathPortrait = () => `${BASE_WEB_ROOT}${portraitBaseUrl()}`;
-console.log(`path portrait: ${pathPortrait()}`);
+const portraitSystem = new PortraitSystem(BASE_WEB_ROOT);
 
 if (!process.env.DATA_DIR) {
   console.error("ensure environment variable DATA_DIR is set");
@@ -53,9 +42,9 @@ const loq = new Loquacious(PATH_BASE_DATA, db, streamServer);
 
 app.get("/portraits", async (_req: Request, res: Response) => {
   res.json({
-    portraitBaseUrl: portraitBaseUrl(),
-    dimension: PORTRAIT_DIMS[dimIndex],
-    images: await ImageInfo.getImageInfos(pathPortrait())
+    portraitBaseUrl: portraitSystem.baseUrl(),
+    dimension: portraitSystem.dimension(),
+    images: await ImageInfo.getImageInfos(portraitSystem.path())
   });
 });
 
@@ -156,7 +145,6 @@ const mkFailable = (res: Response) =>
       }
     };
 
-const getPortraitPath = (portrait: ImageInfo) => path.join(pathPortrait(), portrait.f).toString();
 
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   // noinspection ES6MissingAwait
@@ -180,7 +168,8 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
       const lipSyncResult = failable("lipsync generation", async () => {
         const animateLoqModule = loq.getLipSyncLoqModule();
-        const lipSyncInput = loq.createLipSyncInput(speechResultPromise, getPortraitPath(portrait));
+        const portraitPath = portraitSystem.getPortraitPath(portrait);
+        const lipSyncInput = loq.createLipSyncInput(speechResultPromise, portraitPath);
         return animateLoqModule.call(lipSyncInput);
       });
 
@@ -207,6 +196,7 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     }
   })
 });
+
 /**
  * Endpoint to stream the given audio file.
  */
@@ -222,7 +212,7 @@ app.listen(port, async () => {
   const hash = await getCurrentCommitHash(process.cwd());
   await db.boot(process.env.DEPLOYMENT_NAME!, hash);
   await loq.initialiseCreatorTypes();
-  await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
+  await timed("prescaling images", portraitSystem.prescaleImages);
   console.log(`Server is running on port ${port}`);
   const systemSummary = await loq.getSystemSummary();
   console.log(`LLM: ${(systemSummary.llm.current)}`);
