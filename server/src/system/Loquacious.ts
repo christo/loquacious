@@ -159,9 +159,12 @@ class Loquacious {
     return this.db.getOrCreateSession();
   }
 
+  /**
+   * Concludes any current session, creates a new session and returns it.
+   */
   async newSession(): Promise<Session> {
     await this.db.finishCurrentSession();
-    return await this.db.createSession();
+    return this.getSession();
   }
 
   async getSystem(): Promise<SystemSummary> {
