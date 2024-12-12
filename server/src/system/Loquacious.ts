@@ -141,11 +141,6 @@ class Loquacious {
   }
 
   /** @deprecated transitional interface */
-  get speechSystems(): SpeechSystems {
-    return this._speechSystems;
-  }
-
-  /** @deprecated transitional interface */
   get animators(): AnimatorServices {
     return this._animators;
   }
