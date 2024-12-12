@@ -1,8 +1,8 @@
 ## TODO
 
 * [ ] extract core logic out of `server.ts`
-  * [ ] put in Loquacious and its delegates
-  * [ ] move all db updates into the module's call but keep the pure non-db parts in the existing
+  * [x] put in Loquacious and its delegates
+  * [x] move all db updates into the module's call but keep the pure non-db parts in the existing
     CreatorService implementations.
   * [ ] resolve taxonomy and ontology confusion between Module and LoqModule 
   * [ ] review wip LoqModule - should combine service with db access to do whole domain operation.
