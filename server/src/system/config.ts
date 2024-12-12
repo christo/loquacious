@@ -25,6 +25,7 @@ const execAsync = promisify(exec);
  * @returns A promise that resolves to the current commit SHA1 hash as a string.
  */
 async function getCurrentCommitHash(cwd?: string): Promise<string> {
+  // TODO make production implementation that has stored commit hash and uses explicit version metdata
   try {
     const {stdout} = await execAsync('git rev-parse HEAD', {cwd});
     return stdout.trim();

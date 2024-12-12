@@ -16,6 +16,7 @@ import {SpeechResult} from "./speech/SpeechResult";
 import {LipSyncResult} from "./lipsync/LipSyncAnimator";
 import Agent = Undici.Agent;
 
+// we do this because worst-case remote calls are hella slow
 setGlobalDispatcher(new Agent({connect: {timeout: 300_000}}));
 
 // Load environment variables
@@ -218,16 +219,13 @@ app.get('/video', async (req: Request, res: Response) => fileStream(req.query.fi
 
 // Start the server
 app.listen(port, async () => {
-  // TODO make production implementation that has stored commit hash and uses explicit version metdata
   const hash = await getCurrentCommitHash(process.cwd());
   await db.boot(process.env.DEPLOYMENT_NAME!, hash);
   await loq.initialiseCreatorTypes();
-
   await timed("prescaling images", () => prescaleImages(`${BASE_PATH_PORTRAIT}`, PORTRAIT_DIMS));
   console.log(`Server is running on port ${port}`);
   const systemSummary = await loq.getSystemSummary();
-  const llmName = systemSummary.llm.current;
-  console.log(`LLM: ${llmName}`);
+  console.log(`LLM: ${(systemSummary.llm.current)}`);
   console.log(`LLM health check: ${systemSummary.health.message}`);
   console.log(`LLM current model: ${systemSummary.llm.currentOption.id}`);
   const models = systemSummary.llm.options.map(m => m.id);
