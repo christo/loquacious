@@ -15,10 +15,10 @@ const CANNOT_DO_SYSTEM_PROMPT = [
 class OpenAiLlm implements Llm {
   readonly baseUrl = undefined;
   readonly enableHealth = false;
-  private readonly name = "ChatGPT-LLM";
-  // TODO need to give occasionally broken online service a timeout and canRun should only come back after time elapsed
   //   got cloudflare failure calling any openai method. All online service-based things need a failure timeout
   canRun = hasEnv("OPENAI_API_KEY");
+  // TODO need to give occasionally broken online service a timeout and canRun should only come back after time elapsed
+  private readonly name = "ChatGPT-LLM";
   private openai;
   private modelName: string;
 
@@ -36,11 +36,6 @@ class OpenAiLlm implements Llm {
     } else {
       return Promise.reject(`Model ${this.modelName} not found`);
     }
-  }
-
-  private async findByName(modelName: string) {
-    const models = await this.models();
-    return models.find((model) => model.id === modelName);
   }
 
   async setCurrentOption(value: string): Promise<void> {
@@ -91,6 +86,11 @@ class OpenAiLlm implements Llm {
 
   free(): boolean {
     return false;
+  }
+
+  private async findByName(modelName: string) {
+    const models = await this.models();
+    return models.find((model) => model.id === modelName);
   }
 
 }

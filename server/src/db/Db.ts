@@ -62,7 +62,7 @@ class Db {
    */
   async validate(): Promise<boolean> {
     try {
-      const r = await this.fetchRows("select 1", [])
+      const r = await this.fetchRows("select 1", []);
       return r!.length > 0;
     } catch (e) {
       console.error(`error validating database: ${e}`);
@@ -135,9 +135,9 @@ class Db {
         await client.query("BEGIN");
         // get current run
         const res = await client.query(
-          `insert into session (run)
-           values ($1)
-           returning session.*`, [this.run!.id]
+            `insert into session (run)
+             values ($1)
+             returning session.*`, [this.run!.id]
         );
         if (res.rowCount === 1) {
           const session = new Session(res.rows[0].id, res.rows[0].created, this.run!);
@@ -198,7 +198,7 @@ class Db {
             return Promise.reject("Could not insert new Run in db");
           }
         } else {
-          console.error(`deployment rows = ${result.rowCount}`)
+          console.error(`deployment rows = ${result.rowCount}`);
           return Promise.reject(`Unique ${deploymentName} deployment not found in db`);
         }
       } catch (e) {
@@ -300,7 +300,7 @@ class Db {
       if (createIfMissing && result.rowCount === 0) {
         const query = `insert into creator (name, metadata)
                        values ($1, $2)
-                       returning *`
+                       returning *`;
         const createResult = await client.query(query, [name, metadata]);
         if (createResult && createResult.rowCount === 1) {
           await client.query("commit");
@@ -355,7 +355,8 @@ class Db {
                             (select coalesce(max(m.sequence), 0) as max_seq from message m where session = $2)
                    insert
                    into message (content, session, creator, sequence)
-                   values ($1, $2, $3, (select max_seq + 1 from max_sequence)) returning *`;
+                   values ($1, $2, $3, (select max_seq + 1 from max_sequence))
+                   returning *`;
     const client = await this.pool.connect();
     try {
       const result = await client.query(query, [message, session.id, creator.id]);
@@ -406,8 +407,8 @@ class Db {
    */
   async createAudioFile(mimeType: string, creatorId: number, durationMs: number = -1): Promise<AudioFile> {
     const query = `insert into audio (duration_ms, mime_type, creator)
-                       values ($1, $2, $3)
-                       returning *`;
+                   values ($1, $2, $3)
+                   returning *`;
     const client = await this.pool.connect();
     try {
       const result = await client.query(query, [durationMs, mimeType, creatorId]);
@@ -424,8 +425,8 @@ class Db {
 
   async createVideoFile(mimeType: string, creatorId: number, durationMs: number = -1): Promise<VideoFile> {
     const query = `insert into video (duration_ms, mime_type, creator)
-                    values ($1, $2, $3)
-                    returning *`;
+                   values ($1, $2, $3)
+                   returning *`;
     const client = await this.pool.connect();
     try {
       const result = await client.query(query, [durationMs, mimeType, creatorId]);
@@ -448,8 +449,8 @@ class Db {
    */
   async createTts(creatorId: number, messageId: number, audioFileId: number): Promise<Tts> {
     const query = `insert into tts (creator, input, output)
-                       values ($1, $2, $3)
-                       returning *`;
+                   values ($1, $2, $3)
+                   returning *`;
     const client = await this.pool.connect();
     try {
       const result = await client.query(query, [creatorId, messageId, audioFileId]);
@@ -466,8 +467,8 @@ class Db {
 
   async createLipSync(creatorId: number, ttsId: number, videoFileId: number): Promise<LipSync> {
     const query = `insert into lipsync (creator, input, output)
-                       values ($1, $2, $3)
-                       returning *`;
+                   values ($1, $2, $3)
+                   returning *`;
     const client = await this.pool.connect();
     try {
       const result = await client.query(query, [creatorId, ttsId, videoFileId]);

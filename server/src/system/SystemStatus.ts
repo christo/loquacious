@@ -11,7 +11,7 @@ const formatBytes = (bytes: number) => {
   return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
 };
 
-const mkPerfStat = (seconds: number, measure: string)=> {
+const mkPerfStat = (seconds: number, measure: string) => {
   return {
     seconds: seconds,
     measure: measure,

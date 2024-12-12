@@ -1,10 +1,7 @@
-import type {LlmResult, Llm, PartialLlmResult} from "llm/Llm";
+import type {Llm, PartialLlmResult} from "llm/Llm";
 import OpenAI from "openai";
 import {always} from "../system/config";
-import {LlmLoqModule} from "./LlmLoqModule";
-import {LoqModule} from "../system/LoqModule";
 import {LlmModel} from "./LlmModel";
-import {LlmInput} from "./LlmInput";
 
 type OpenAIMsg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -16,8 +13,8 @@ const LLAMA_CPP_BASE_URL_DEFAULT = "http://localhost:8080";
 class LlamaCppLlm implements Llm {
   readonly baseUrl: string | undefined;
   readonly enableHealth = true;
+  canRun = always; // untrue, needs server to be running
   private readonly name = "Llama.cpp-LLM";
-  canRun = always;
   private openai;
 
   /**

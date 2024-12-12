@@ -1,4 +1,4 @@
-import type {LlmResult, Llm, PartialLlmResult} from "llm/Llm";
+import type {Llm, PartialLlmResult} from "llm/Llm";
 import OpenAI from "openai";
 import {always} from "../system/config";
 import {LlmModel} from "./LlmModel";
@@ -37,9 +37,9 @@ function dateTimeMessage() {
  */
 class FakeLlm implements Llm {
   readonly baseUrl = undefined;
-  private readonly name = "FakeLlm";
   readonly enableHealth = false;
   canRun = always;
+  private readonly name = "FakeLlm";
   private currentModelKey = "echo";
   private readonly myModels: { [key: string]: FakeModel; } = {
     static: new FakeModel("static", (_params: OpenAIMsg[]) => "fake chat result"),

@@ -30,20 +30,6 @@ class SpeechSystemOption {
     const desc = this.description ? ` (${this.description})` : "";
     return `${this.systemName}/${this.optionName}${desc}`;
   }
-
-  /**
-   * Display object represending a speech system and its configured option
-   */
-  safeObject() {
-    // TODO don't we use this any more?
-    return {
-      system: this.systemName,
-      optionKey: this.optionKey,
-      optionName: this.optionName,
-      description: this.descriptor(),
-      isFree: this.isFree
-    };
-  }
 }
 
 /**

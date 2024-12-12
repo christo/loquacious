@@ -8,8 +8,8 @@ import {Dimension} from "./Dimension";
 
 export async function prescaleImages(baseDir: string, dimensions: Dimension[]) {
   const extensions: string[] = supportedImageTypes()
-    .flatMap((f: MediaFormat) => f.extensions)
-    .map((e: string) => `.${e}`);
+      .flatMap((f: MediaFormat) => f.extensions)
+      .map((e: string) => `.${e}`);
   for (const dimension of dimensions) {
     const dimDir = `${baseDir}/${dimension.width}x${dimension.height}`;
     console.log(`prescaling images to ${dimDir}`);
@@ -23,8 +23,8 @@ export async function prescaleImages(baseDir: string, dimensions: Dimension[]) {
         promises.access(destFile, promises.constants.R_OK | promises.constants.W_OK).then(null, async () => {
           // resize images to width, preserving aspect ratio
           await sharp(path.join(baseDir, file.name))
-            .resize(dimension.width, null)
-            .toFile(destFile)
+              .resize(dimension.width, null)
+              .toFile(destFile)
         });
       }
     }

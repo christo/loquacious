@@ -1,8 +1,7 @@
 import {SpeechSystemOption} from "../speech/SpeechSystems";
 import {RunInfo} from "./RunInfo";
 import {LlmModel} from "../llm/LlmModel";
-import {ModuleWithOptions} from "./Module";
-import {Module} from "./Module";
+import {Module, ModuleWithOptions} from "./Module";
 
 type HealthError = {
   code: number,

@@ -51,8 +51,8 @@ type UrlCache = { [keyof: string]: [string, string] };
  */
 class FalSadtalker implements LipSyncAnimator {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
-  private readonly name = "FalSadtalker";
   canRun = hasEnv("FAL_API_KEY");
+  private readonly name = "FalSadtalker";
   private readonly dataDir: string;
   private readonly urlCache: UrlCache;
   private sadtalkerConfig: FalSadtalkerInput = {
@@ -102,10 +102,6 @@ class FalSadtalker implements LipSyncAnimator {
       });
     }
     return this.urlCache[imageFilePath][0];
-  }
-
-  private expired(filePath: string) {
-    return Date.parse(this.urlCache[filePath][1]) + CACHE_EXPIRY_MS < Date.now();
   }
 
   async animate(img: string, speech: Promise<string>, filekey: string): Promise<LipSyncResult> {
@@ -162,6 +158,10 @@ class FalSadtalker implements LipSyncAnimator {
 
   videoOutputFormat(): MediaFormat {
     return MF_MP4;
+  }
+
+  private expired(filePath: string) {
+    return Date.parse(this.urlCache[filePath][1]) + CACHE_EXPIRY_MS < Date.now();
   }
 
   private sadtalkerParams(imgUrl: string, speechUrl: string): FalSadtalkerInvocation {

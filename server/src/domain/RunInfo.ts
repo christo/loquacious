@@ -13,7 +13,7 @@ class RunInfo {
     created: string;
     name: string;
     metadata: string;
-  }
+  };
 
   constructor(run: Run) {
     this.id = run.id;

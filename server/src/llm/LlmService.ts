@@ -4,7 +4,6 @@ import type {Llm} from "./Llm";
 import {LmStudioLlm} from "./LmStudioLlm";
 import {OpenAiLlm} from "./OpenAiLlm";
 import {GateWay} from "../system/GateWay";
-import {EventEmitter} from "../system/EventEmitter";
 
 /**
  * Configurable gateway to LLM implementations.
@@ -15,7 +14,7 @@ class LlmService implements GateWay<Llm> {
   private readonly llms: Llm[];
   private llmIndex = 0;
   private readonly FAKE = new FakeLlm();
-  readonly FALLBACK: Llm =  this.FAKE;
+  readonly FALLBACK: Llm = this.FAKE;
 
   constructor() {
     this.llms = [
@@ -36,7 +35,7 @@ class LlmService implements GateWay<Llm> {
 
   setCurrent(value: string) {
     for (let i = 0; i < this.llms.length; i++) {
-      if(this.llms[i].getName() === value) {
+      if (this.llms[i].getName() === value) {
         this.llmIndex = i;
         console.log(`changing LLM system to ${value}`);
       }

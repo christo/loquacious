@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import {always} from "../system/config";
-import type {LlmResult, Llm, PartialLlmResult} from "./Llm";
+import type {Llm, PartialLlmResult} from "./Llm";
 import * as process from "node:process";
 import {LlmModel} from "./LlmModel";
 
@@ -11,8 +11,8 @@ const LM_STUDIO_BASE_URL_DEFAULT = "http://localhost:1234/v1";
 class LmStudioLlm implements Llm {
   readonly baseUrl: string | undefined;
   readonly enableHealth = false;
-  private readonly name = "LM-Studio-LLM";
   canRun = always;
+  private readonly name = "LM-Studio-LLM";
   private openai;
   private currentModelId: string | null = null;
 
@@ -51,11 +51,6 @@ class LmStudioLlm implements Llm {
     } else {
       return Promise.reject(`Model ${value} not currently loaded for ${this.name}`);
     }
-  }
-
-  private async fetchCurrentModel(value: string) {
-    const currentModels = await this.models();
-    return currentModels.find(m => m.id === value);
   }
 
   async models(): Promise<Array<LlmModel>> {
@@ -98,6 +93,11 @@ class LmStudioLlm implements Llm {
 
   free(): boolean {
     return true;
+  }
+
+  private async fetchCurrentModel(value: string) {
+    const currentModels = await this.models();
+    return currentModels.find(m => m.id === value);
   }
 }
 

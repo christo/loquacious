@@ -1,4 +1,3 @@
-
 type EventChannel = "error" | "begin" | "end";
 
 type LoqEvent = {
@@ -16,7 +15,7 @@ class EventEmitter {
    * Handler registry keyed by {@link EventChannel}.
    * @private
    */
-  private readonly handlers: { [keyof: string]: Array<(e: LoqEvent) => void>};
+  private readonly handlers: { [keyof: string]: Array<(e: LoqEvent) => void> };
   private readonly name: string;
 
   constructor(name: string) {

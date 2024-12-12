@@ -49,6 +49,20 @@ class Loquacious {
     this.db = db;
   }
 
+  /** @deprecated transitional interface */
+  get llms(): LlmService {
+    return this._llms;
+  }
+
+  /** @deprecated transitional interface */
+  get animators(): AnimatorServices {
+    return this._animators;
+  }
+
+  get modes(): Modes {
+    return this._modes;
+  }
+
   /**
    * Makes sure all the current available CreatorTypes have database entities
    */
@@ -151,18 +165,59 @@ class Loquacious {
     return await this.db.createSession();
   }
 
-  /** @deprecated transitional interface */
-  get llms(): LlmService {
-    return this._llms;
+  async getSystem(): Promise<SystemSummary> {
+
+    const system: SystemSummary = {
+      asAt: new Date(),
+      mode: {
+        current: this.modes.current(),
+        all: this.modes.allModes()
+      },
+      llm: await this.getLlmModule(),
+      tts: await this.getTtsModule(),
+      lipsync: this.getLipsyncModule(),
+      pose: {
+        current: "MediaPipe",
+        all: ["MediaPipe", "MoveNet"],
+        isFree: true
+      },
+      vision: {
+        current: "Claude 3.5 Sonnet (New)",
+        all: ["Claude 3.5 Sonnet (New)", "ChatGPT", "LM-Studio", "llama.cpp", "fal.ai Florence 2 Large"],
+        isFree: false,
+      },
+      stt: {
+        current: "whisper.cpp",
+        all: ["whisper.cpp", "OpenAI Whisper", "fal.ai something"],
+        isFree: true
+      },
+      runtime: {
+        run: new RunInfo(this.db.getRun())
+      },
+      health: await systemHealth(this.llms.current())
+    };
+    return system;
   }
 
-  /** @deprecated transitional interface */
-  get animators(): AnimatorServices {
-    return this._animators;
-  }
-
-  get modes(): Modes {
-    return this._modes;
+  async createLipSyncInput(speechResultPromise: Promise<SpeechResult>, imageFile: string): Promise<LipSyncInput> {
+    const animator = this._animators.current();
+    const lipsyncCreator = await this.db.findCreator(animator.getName(), animator.getMetadata(), true);
+    const mimeType = animator.videoOutputFormat()?.mimeType;
+    if (!mimeType) {
+      // TODO relocate mimeType thingy
+      return Promise.reject(new Error("No mime type found."));
+    } else {
+      const videoFile: VideoFile = await this.db.createVideoFile(mimeType, lipsyncCreator.id);
+      return speechResultPromise.then(sr => ({
+            fileKey: `${videoFile.id}`,
+            imageFile: imageFile,
+            speechFile: sr.filePath(),
+            creatorId: lipsyncCreator.id,
+            videoId: videoFile.id,
+            ttsId: sr.tts().id
+          } as LipSyncInput)
+      );
+    }
   }
 
   private async internalFetchLlm(): Promise<ModuleWithOptions<LlmModel>> {
@@ -201,40 +256,6 @@ class Loquacious {
     return llmp;
   }
 
-  async getSystem(): Promise<SystemSummary> {
-
-    const system: SystemSummary = {
-      asAt: new Date(),
-      mode: {
-        current: this.modes.current(),
-        all: this.modes.allModes()
-      },
-      llm: await this.getLlmModule(),
-      tts: await this.getTtsModule(),
-      lipsync: this.getLipsyncModule(),
-      pose: {
-        current: "MediaPipe",
-        all: ["MediaPipe", "MoveNet"],
-        isFree: true
-      },
-      vision: {
-        current: "Claude 3.5 Sonnet (New)",
-        all: ["Claude 3.5 Sonnet (New)", "ChatGPT", "LM-Studio", "llama.cpp", "fal.ai Florence 2 Large"],
-        isFree: false,
-      },
-      stt: {
-        current: "whisper.cpp",
-        all: ["whisper.cpp", "OpenAI Whisper", "fal.ai something"],
-        isFree: true
-      },
-      runtime: {
-        run: new RunInfo(this.db.getRun())
-      },
-      health: await systemHealth(this.llms.current())
-    };
-    return system;
-  }
-
   private getLipsyncModule(): Module {
     return {
       all: this._animators.all().map(ls => ls.getName()),
@@ -250,27 +271,6 @@ class Loquacious {
       currentOption: this._speechSystems.current().currentOption(),
       options: this._speechSystems.current().options(),
       isFree: this._speechSystems.current().free(),
-    }
-  }
-
-  async createLipSyncInput(speechResultPromise: Promise<SpeechResult>, imageFile: string): Promise<LipSyncInput> {
-    const animator = this._animators.current();
-    const lipsyncCreator = await this.db.findCreator(animator.getName(), animator.getMetadata(), true);
-    const mimeType = animator.videoOutputFormat()?.mimeType;
-    if (!mimeType) {
-      // TODO relocate mimeType thingy
-      return Promise.reject(new Error("No mime type found."));
-    } else {
-      const videoFile: VideoFile = await this.db.createVideoFile(mimeType, lipsyncCreator.id);
-      return speechResultPromise.then(sr => ({
-            fileKey: `${videoFile.id}`,
-            imageFile: imageFile,
-            speechFile: sr.filePath(),
-            creatorId: lipsyncCreator.id,
-            videoId: videoFile.id,
-            ttsId: sr.tts().id
-          } as LipSyncInput)
-      );
     }
   }
 }

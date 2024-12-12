@@ -7,6 +7,8 @@ import {hasEnv} from "../system/config";
  */
 class DidAnimator implements LipSyncAnimator {
 
+  canRun = hasEnv("DID_AUTH");
+
   constructor() {
   }
 
@@ -62,8 +64,6 @@ class DidAnimator implements LipSyncAnimator {
     console.warn("DidAnimatorWithTts.configure unsupported.");
     return Promise.resolve();
   }
-
-  canRun = hasEnv("DID_AUTH");
 
   speak(message: string, basename: string): Promise<string> {
     // TODO figure out how to not deal with a promise of string - we don't get intermediate access to an audio file

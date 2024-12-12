@@ -3,11 +3,8 @@ import type {Dirent} from "node:fs";
 import path from "path";
 import {hasVideoExt, type MediaFormat, MF_MP4} from "../media";
 import {always} from "../system/config";
-import {LipSyncAnimator, LipSyncInput, LipSyncResult} from "./LipSyncAnimator";
+import {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
-
-import {LoqModule} from "../system/LoqModule";
-import {LipSyncLoqModule} from "./LipSyncLoqModule";
 
 
 /**

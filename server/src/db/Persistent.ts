@@ -1,4 +1,3 @@
-
 export type Persistent<T> = {
   id: number;
   /**
