@@ -1,12 +1,8 @@
 ## TODO
 
 * [ ] extract core logic out of `server.ts`
-  * [x] put in Loquacious and its delegates
-  * [x] move all db updates into the module's call but keep the pure non-db parts in the existing
     CreatorService implementations.
   * [ ] resolve taxonomy and ontology confusion between Module and LoqModule 
-  * [x] review wip LoqModule - should combine service with db access to do whole domain operation.
-    not create boring untestability problems.
   * services that do multiple module roles should be made to work as if they are
     separate because input and output are both a `Promise`. DiD tts and lipsync
     are done in one remote call so the tts part merely collects input and does no
@@ -14,7 +10,7 @@
     the DiD implementation may not work if given to another lipsync animator and this
     configuration should ideally be prohibited in the front end.
 * [ ] test DiD service
-* [x] maybe bug: review workflow sigils timing - refactoring and promisification with `EventEmitter`
+* [ ] maybe bug: review workflow sigils timing - refactoring and promisification with `EventEmitter`
   seems to have made these transitions happen at the wrong time?
 * [ ] rename all LipSyncBlah to AnimateBlah
 * [ ] plan 1.0 release scope
@@ -23,8 +19,6 @@
 * [ ] vision system
   * [ ] spike seamless audio/video streaming to server, simultaneous to client-side pose est.
   * pose estimation on client - assumes stable camera (can we detect camera motion?)
-  * [x] use MediaStream / MediaPipe so pose estimation can use camera stream to first detect user
-    approach
   * [ ] person object identity persistence (distinguish same vs new person present)
     * see comment in `VideoCamera.tsx`
   * [ ] detect when a person approaches, describe what they look like etc.
@@ -55,8 +49,6 @@
   * [ ] fill out feature idea for runtime system prompt design
 * [ ] spike speech to text using whisper.cpp
   * [ ] streaming command line transcription listening to microphone
-  * [x] understand how server works - not streaming
-  * [x] can server be used from loquacious app? - No.
   * [ ] check [smart-whisper](https://www.npmjs.com/package/smart-whisper)
   * [ ] run from dev server using local audio capture
   * [ ] plan stream from browser microphone
