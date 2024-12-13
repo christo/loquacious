@@ -24,6 +24,9 @@ import {VideoFile} from "../domain/VideoFile";
 import {timed} from "./performance";
 import {SpeechResult} from "../speech/SpeechResult";
 import {SpeechInput} from "../speech/SpeechInput";
+import {PortraitSystem} from "../image/PortraitSystem";
+import {ImageInfo} from "../image/ImageInfo";
+import {NamedInvoker} from "./fp";
 
 
 /**
@@ -39,14 +42,16 @@ class Loquacious {
   private readonly _modes: Modes;
   private readonly db: Db;
   private readonly workflowEvents: WorkflowEvents;
+  private readonly portraitSystem: PortraitSystem;
 
-  constructor(PATH_BASE_DATA: string, db: Db, streamServer: WorkflowEvents) {
+  constructor(PATH_BASE_DATA: string, db: Db, workflowEvents: WorkflowEvents, portraitSystem: PortraitSystem) {
     this._llms = new LlmService();
     this._speechSystems = new SpeechSystems(PATH_BASE_DATA);
     this._animators = new AnimatorServices(PATH_BASE_DATA);
     this._modes = new Modes();
-    this.workflowEvents = streamServer;
     this.db = db;
+    this.workflowEvents = workflowEvents;
+    this.portraitSystem = portraitSystem;
   }
 
   /** @deprecated transitional interface */
@@ -285,6 +290,57 @@ class Loquacious {
       isFree: this._speechSystems.current().free(),
     }
   }
+
+  /**
+   * Multi-stage orchestrated chat based on current configuration for the given user prompt and portrait, using the
+   * given invoker to call each part.
+   *
+   * @param prompt for which we orchestrate a response.
+   * @param portrait image of the AI respondent.
+   * @param invoker used to wrap significant component calls with labels.
+   * @return the aggregate response
+   */
+  async chat(prompt: string, portrait: ImageInfo, invoker: NamedInvoker): Promise<ChatResponse> {
+    const llmResultPromise = invoker("loquacious chat", async () => {
+      const llmInput = this.createLlmInput(prompt);
+      const loqModule = await this.getLlmLoqModule();
+      return loqModule.call(llmInput);
+    });
+
+    const speechResultPromise = invoker("speech generation",
+        async () => this.getTtsLoqModule().call(this.createTtsInput(llmResultPromise))
+    );
+
+    const lipSyncResult = invoker("lipsync generation", async () => {
+      const animateLoqModule = this.getLipSyncLoqModule();
+      const portraitPath = this.portraitSystem.getPath(portrait);
+      const lipSyncInput = this.createLipSyncInput(speechResultPromise, portraitPath);
+      return animateLoqModule.call(lipSyncInput);
+    });
+
+    const lr = await llmResultPromise;
+    const messages = (await this.db.getMessages(await this.getSession())).map(m => {
+      return lr.targetTts.removePauseCommands(m);
+    });
+    const sr: SpeechResult = await speechResultPromise;
+    return {
+      portrait: portrait,
+      messages: messages,
+      speech: sr.filePath(),
+      lipsync: await lipSyncResult,
+      llm: lr.llm,
+      model: lr.model,
+    };
+  }
 }
 
-export {Loquacious};
+interface ChatResponse {
+  portrait: ImageInfo,
+  messages: Message[],
+  speech: string,
+  lipsync: LipSyncResult,
+  llm: string,
+  model: LlmModel,
+}
+
+export {Loquacious, type ChatResponse};
