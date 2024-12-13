@@ -3,14 +3,14 @@ import type {Dirent} from "node:fs";
 import path from "path";
 import {hasVideoExt, type MediaFormat, MF_MP4} from "../media";
 import {always} from "../system/config";
-import {Animator, LipSyncResult} from "./Animator";
+import {Animator, AnimatorResult} from "./Animator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
 
 
 /**
  * Hacky implementation of LipSync that reuses pre-generated video.
  */
-class FakeLipSync implements Animator {
+class FakeAnimator implements Animator {
   canRun = always;
   private readonly lipSyncDataDir: string;
 
@@ -33,7 +33,7 @@ class FakeLipSync implements Animator {
    * @param _speechFile ignored
    * @param _fileKey ignored
    */
-  async animate(_imageFile: string, _speechFile: Promise<string>, _fileKey: string): Promise<LipSyncResult> {
+  async animate(_imageFile: string, _speechFile: Promise<string>, _fileKey: string): Promise<AnimatorResult> {
     const files = await promises.readdir(this.lipSyncDataDir, {withFileTypes: true, recursive: true});
     const aFile: Dirent | undefined = files.find(f => f.isFile() && hasVideoExt(f.name));
     if (!aFile) {
@@ -72,4 +72,4 @@ class FakeLipSync implements Animator {
   }
 }
 
-export {FakeLipSync};
+export {FakeAnimator};

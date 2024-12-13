@@ -1,6 +1,6 @@
 import {fal, type Result} from "@fal-ai/client";
 import {promises, readFileSync} from "fs";
-import {Animator, LipSyncResult} from "lipsync/Animator";
+import {Animator, AnimatorResult} from "lipsync/Animator";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
 import path from "path";
@@ -104,7 +104,7 @@ class FalSadtalker implements Animator {
     return this.urlCache[imageFilePath][0];
   }
 
-  async animate(img: string, speech: Promise<string>, filekey: string): Promise<LipSyncResult> {
+  async animate(img: string, speech: Promise<string>, filekey: string): Promise<AnimatorResult> {
     const imgUrl = await this.urlFor(img);
     // don't bother caching speech, reuse is vanishingly rare
     const speechUrl = await timed("upload speech file to fal.ai",

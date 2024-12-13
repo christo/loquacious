@@ -2,9 +2,9 @@ import {LoqModule} from "../system/LoqModule";
 import {WorkflowEvents} from "../system/WorkflowEvents";
 import Db from "../db/Db";
 import {timed} from "../system/performance";
-import {Animator, LipSyncInput, LipSyncResult} from "./Animator";
+import {Animator, AnimatorInput, AnimatorResult} from "./Animator";
 
-class LipSyncLoqModule implements LoqModule<LipSyncInput, LipSyncResult> {
+class AnimatorLoqModule implements LoqModule<AnimatorInput, AnimatorResult> {
   private animator: Animator;
   private workflowEvents: WorkflowEvents;
   private db: Db;
@@ -15,7 +15,7 @@ class LipSyncLoqModule implements LoqModule<LipSyncInput, LipSyncResult> {
     this.workflowEvents = workflowEvents;
   }
 
-  async call(input: Promise<LipSyncInput>): Promise<LipSyncResult> {
+  async call(input: Promise<AnimatorInput>): Promise<AnimatorResult> {
     try {
       const lsi = await input;
       const animate = () => {
@@ -41,4 +41,4 @@ class LipSyncLoqModule implements LoqModule<LipSyncInput, LipSyncResult> {
   }
 }
 
-export {LipSyncLoqModule};
+export {AnimatorLoqModule};

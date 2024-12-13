@@ -1,5 +1,5 @@
 import path from "path";
-import {FakeLipSync} from "./FakeLipSync";
+import {FakeAnimator} from "./FakeAnimator";
 import {FalSadtalker} from "./FalSadtalker";
 import type {Animator} from "./Animator";
 import {NoAnimator} from "./NoAnimator";
@@ -13,7 +13,7 @@ class AnimatorGateway implements Gateway<Animator> {
     const basedirLipsync = path.join(basedir, "lipsync");
     this.animators = [
       new FalSadtalker(basedirLipsync),
-      new FakeLipSync(basedirLipsync),
+      new FakeAnimator(basedirLipsync),
       new NoAnimator()
     ].filter(s => s.canRun())
   }

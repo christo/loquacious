@@ -12,14 +12,14 @@ import {LoqModule} from "./LoqModule";
 import type {LlmResult} from "../llm/Llm";
 import {LlmLoqModule} from "../llm/LlmLoqModule";
 import type {CreatorType} from "../domain/CreatorType";
-import {LipSyncInput, LipSyncResult} from "../lipsync/Animator";
+import {AnimatorInput, AnimatorResult} from "../lipsync/Animator";
 import {WorkflowEvents} from "./WorkflowEvents";
 import {LlmInput} from "../llm/LlmInput";
 import {Session} from "../domain/Session";
 import {Message} from "../domain/Message";
 import {TtsLoqModule} from "../speech/TtsLoqModule";
 import type {AudioFile} from "../domain/AudioFile";
-import {LipSyncLoqModule} from "../lipsync/LipSyncLoqModule";
+import {AnimatorLoqModule} from "../lipsync/AnimatorLoqModule";
 import {VideoFile} from "../domain/VideoFile";
 import {timed} from "./performance";
 import {SpeechResult} from "../speech/SpeechResult";
@@ -124,8 +124,8 @@ class Loquacious {
   /**
    * LipSync
    */
-  getLipSyncLoqModule(): LoqModule<LipSyncInput, LipSyncResult> {
-    return new LipSyncLoqModule(this._animators.current(), this.db, this.workflowEvents);
+  getLipSyncLoqModule(): LoqModule<AnimatorInput, AnimatorResult> {
+    return new AnimatorLoqModule(this._animators.current(), this.db, this.workflowEvents);
   }
 
   setCurrentLlm(key: string): void {
@@ -192,7 +192,7 @@ class Loquacious {
     };
   }
 
-  async createLipSyncInput(speechResultPromise: Promise<SpeechResult>, imageFile: string): Promise<LipSyncInput> {
+  async createLipSyncInput(speechResultPromise: Promise<SpeechResult>, imageFile: string): Promise<AnimatorInput> {
     const animator = this._animators.current();
     const lipsyncCreator = await this.db.findCreator(animator.getName(), animator.getMetadata(), true);
     const mimeType = animator.videoOutputFormat()?.mimeType;
@@ -208,7 +208,7 @@ class Loquacious {
             creatorId: lipsyncCreator.id,
             videoId: videoFile.id,
             ttsId: sr.tts().id
-          } as LipSyncInput)
+          } as AnimatorInput)
       );
     }
   }
@@ -338,7 +338,7 @@ interface ChatResponse {
   portrait: ImageInfo,
   messages: Message[],
   speech: string,
-  lipsync: LipSyncResult,
+  lipsync: AnimatorResult,
   llm: string,
   model: LlmModel,
 }

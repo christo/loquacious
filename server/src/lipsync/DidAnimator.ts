@@ -1,4 +1,4 @@
-import {Animator, LipSyncResult} from "./Animator";
+import {Animator, AnimatorResult} from "./Animator";
 import {MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
 
@@ -12,7 +12,7 @@ class DidAnimator implements Animator {
   constructor() {
   }
 
-  animate(imageFile: string, speechFile: Promise<string | undefined>, fileKey: string): Promise<LipSyncResult> {
+  animate(imageFile: string, speechFile: Promise<string | undefined>, fileKey: string): Promise<AnimatorResult> {
 
     /* example code from https://docs.d-id.com/reference/createtalk
 

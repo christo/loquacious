@@ -4,7 +4,7 @@ import type {CreatorService} from "../system/CreatorService";
 /**
  * Output of calling {@LipSync} to generate a video.
  */
-type LipSyncResult = {
+type AnimatorResult = {
   /** Mime-Type of generated video */
   getContentType(): string;
   /** File name of generated video */
@@ -15,7 +15,7 @@ type LipSyncResult = {
   getVideoPath(): string;
 }
 
-type LipSyncInput = {
+type AnimatorInput = {
   imageFile: string;
   speechFile: string | undefined
   fileKey: string;
@@ -36,7 +36,7 @@ interface Animator extends CreatorService {
    * @param speechFile
    * @param fileKey unique database id to use as unique key in filename
    */
-  animate(imageFile: string, speechFile: Promise<string | undefined>, fileKey: string): Promise<LipSyncResult>;
+  animate(imageFile: string, speechFile: Promise<string | undefined>, fileKey: string): Promise<AnimatorResult>;
 
   /**
    * Give implementations an opportunity to do non-critical-path work that will not delay user response.
@@ -50,4 +50,4 @@ interface Animator extends CreatorService {
 
 }
 
-export type {Animator, LipSyncResult, LipSyncInput};
+export type {Animator, AnimatorResult, AnimatorInput};

@@ -1,4 +1,4 @@
-import {Animator, LipSyncResult} from "./Animator";
+import {Animator, AnimatorResult} from "./Animator";
 import {MediaFormat} from "../media";
 
 /**
@@ -17,7 +17,7 @@ class NoAnimator implements Animator {
     return undefined;
   }
 
-  animate(_imageFile: string, _speechFile: Promise<string>, _fileKey: string): Promise<LipSyncResult> {
+  animate(_imageFile: string, _speechFile: Promise<string>, _fileKey: string): Promise<AnimatorResult> {
     return Promise.reject();
   }
 
