@@ -1,9 +1,16 @@
-export async function timed<T>(mesg: string, thunk: () => Promise<T>): Promise<T> {
+import {NamedInvoker} from "./fp";
+
+/**
+ * Asynchronous invocation that collects and logs duration.
+ * @param label identifier
+ * @param thunk function to call
+ */
+export const timed: NamedInvoker = async <T>(label: string, thunk: () => Promise<T>): Promise<T> => {
   let start = new Date().getTime();
-  console.log(`starting ${mesg}`);
+  console.log(`starting ${label}`);
   try {
     return await thunk();
   } finally {
-    console.log(`finished ${mesg} : ${new Date().getTime() - start} ms`);
+    console.log(`finished ${label} : ${new Date().getTime() - start} ms`);
   }
-}
+};
