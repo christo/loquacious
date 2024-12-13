@@ -1,4 +1,4 @@
-import {SpeechSystemOption} from "../speech/SpeechSystems";
+import {SpeechSystemOption} from "../speech/TtsGateway";
 import {RunInfo} from "./RunInfo";
 import {LlmModel} from "../llm/LlmModel";
 import {Module, ModuleWithOptions} from "./Module";

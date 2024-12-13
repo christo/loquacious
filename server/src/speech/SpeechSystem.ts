@@ -1,5 +1,5 @@
 import type {CharacterVoice} from "speech/CharacterVoice";
-import {SpeechSystemOption} from "speech/SpeechSystems";
+import {SpeechSystemOption} from "speech/TtsGateway";
 import type {Message} from "../domain/Message";
 import type {MediaFormat} from "../media";
 import type {CreatorService} from "../system/CreatorService";

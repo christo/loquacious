@@ -3,8 +3,9 @@ import {FakeLipSync} from "./FakeLipSync";
 import {FalSadtalker} from "./FalSadtalker";
 import type {LipSyncAnimator} from "./LipSyncAnimator";
 import {NoAnimator} from "./NoAnimator";
+import {Gateway} from "../system/Gateway";
 
-class AnimatorServices {
+class AnimatorGateway implements Gateway<LipSyncAnimator> {
   private readonly animators: LipSyncAnimator[];
   private lipsyncIndex = 0;
 
@@ -34,4 +35,4 @@ class AnimatorServices {
   }
 }
 
-export default AnimatorServices;
+export default AnimatorGateway;

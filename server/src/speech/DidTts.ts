@@ -1,5 +1,5 @@
 import {DisplaySpeechSystem, SpeechSystem} from "./SpeechSystem";
-import {SpeechSystemOption} from "./SpeechSystems";
+import {SpeechSystemOption} from "./TtsGateway";
 import {Message} from "../domain/Message";
 import {MediaFormat, MF_MP3} from "../media";
 

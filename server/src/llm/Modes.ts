@@ -5,6 +5,7 @@ import type {SpeechSystem} from "../speech/SpeechSystem";
 import {type PromptPart, SimplePromptPart} from "./PromptPart";
 
 import {BasicLlmInput, LlmInput} from "./LlmInput";
+import {Gateway} from "../system/Gateway";
 
 const chatModeSystemPrompt: string = readFileSync("prompts/fortune-system-prompt.txt").toString();
 const rokosBasiliskSystemPrompt: string = readFileSync("prompts/rokos-basilisk.prompt.txt").toString();

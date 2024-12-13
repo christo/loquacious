@@ -6,7 +6,7 @@ import type {PathLike} from "node:fs";
 import path from "path";
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
-import {SpeechSystemOption} from "speech/SpeechSystems";
+import {SpeechSystemOption} from "speech/TtsGateway";
 import {timed} from "system/performance";
 import util from "util";
 import {Message} from "../domain/Message";

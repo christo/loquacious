@@ -3,13 +3,13 @@ import {LlamaCppLlm} from "./LlamaCppLlm";
 import type {Llm} from "./Llm";
 import {LmStudioLlm} from "./LmStudioLlm";
 import {OpenAiLlm} from "./OpenAiLlm";
-import {GateWay} from "../system/GateWay";
+import {Gateway} from "../system/Gateway";
 
 /**
  * Configurable gateway to LLM implementations.
  * Holds currently configured LLM.
  */
-class LlmService implements GateWay<Llm> {
+class LlmGateway implements Gateway<Llm> {
 
   private readonly llms: Llm[];
   private llmIndex = 0;
@@ -18,8 +18,8 @@ class LlmService implements GateWay<Llm> {
 
   constructor() {
     this.llms = [
-      new LlamaCppLlm(),
       new OpenAiLlm(),
+      new LlamaCppLlm(),
       new LmStudioLlm(),
       this.FAKE
     ].filter((llm: Llm) => llm.canRun())
@@ -43,4 +43,4 @@ class LlmService implements GateWay<Llm> {
   }
 }
 
-export default LlmService;
+export default LlmGateway;

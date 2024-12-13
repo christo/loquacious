@@ -4,6 +4,7 @@ import {MacOsSpeech} from "speech/MacOsSpeech";
 import {NoSpeech} from "speech/NoSpeech";
 import {type SpeechSystem} from "speech/SpeechSystem";
 import path from "path";
+import {Gateway} from "../system/Gateway";
 
 /**
  * Represents a choosable option within a specific speech system. Options are represented by unique strings that
@@ -35,7 +36,7 @@ class SpeechSystemOption {
 /**
  * Aggregates every {@link SpeechSystem}.
  */
-class SpeechSystems {
+class TtsGateway implements Gateway<SpeechSystem> {
 
   readonly systems: Array<SpeechSystem>;
   private currentSystemIndex = 0;
@@ -73,6 +74,10 @@ class SpeechSystems {
       }
     }
   }
+
+  all(): SpeechSystem[] {
+    return this.systems;
+  }
 }
 
-export {SpeechSystemOption, SpeechSystems}
+export {SpeechSystemOption, TtsGateway}

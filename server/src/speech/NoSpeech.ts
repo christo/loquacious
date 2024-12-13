@@ -1,6 +1,6 @@
 import {CharacterVoice} from "speech/CharacterVoice";
 import {DisplaySpeechSystem, type SpeechSystem} from "speech/SpeechSystem";
-import {SpeechSystemOption} from "speech/SpeechSystems";
+import {SpeechSystemOption} from "speech/TtsGateway";
 import type {Message} from "../domain/Message";
 import {type MediaFormat, MF_MP3} from "../media";
 

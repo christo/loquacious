@@ -1,6 +1,6 @@
-import LlmService from "../llm/LlmService";
-import {SpeechSystemOption, SpeechSystems} from "../speech/SpeechSystems";
-import AnimatorServices from "../lipsync/AnimatorServices";
+import LlmGateway from "../llm/LlmGateway";
+import {SpeechSystemOption, TtsGateway} from "../speech/TtsGateway";
+import AnimatorGateway from "../lipsync/AnimatorGateway";
 import {Modes} from "../llm/Modes";
 import Db from "../db/Db";
 import {SystemSummary} from "../domain/SystemSummary";
@@ -36,18 +36,18 @@ import {NamedInvoker} from "./fp";
  *
  */
 class Loquacious {
-  private readonly _llms: LlmService;
-  private readonly _speechSystems: SpeechSystems;
-  private readonly _animators: AnimatorServices;
+  private readonly _llms: LlmGateway;
+  private readonly _speechSystems: TtsGateway;
+  private readonly _animators: AnimatorGateway;
   private readonly _modes: Modes;
   private readonly db: Db;
   private readonly workflowEvents: WorkflowEvents;
   private readonly portraitSystem: PortraitSystem;
 
   constructor(PATH_BASE_DATA: string, db: Db, workflowEvents: WorkflowEvents, portraitSystem: PortraitSystem) {
-    this._llms = new LlmService();
-    this._speechSystems = new SpeechSystems(PATH_BASE_DATA);
-    this._animators = new AnimatorServices(PATH_BASE_DATA);
+    this._llms = new LlmGateway();
+    this._speechSystems = new TtsGateway(PATH_BASE_DATA);
+    this._animators = new AnimatorGateway(PATH_BASE_DATA);
     this._modes = new Modes();
     this.db = db;
     this.workflowEvents = workflowEvents;
@@ -55,7 +55,7 @@ class Loquacious {
   }
 
   /** @deprecated transitional interface */
-  get llms(): LlmService {
+  get llms(): LlmGateway {
     return this._llms;
   }
 
