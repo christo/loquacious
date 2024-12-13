@@ -1,0 +1,1 @@
+export type NamedInvoker = <T>(name: string, fn: () => Promise<T>) => Promise<T>
