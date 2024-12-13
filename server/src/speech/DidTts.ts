@@ -2,7 +2,11 @@ import {DisplaySpeechSystem, SpeechSystem} from "./SpeechSystem";
 import {SpeechSystemOption} from "./TtsGateway";
 import {Message} from "../domain/Message";
 import {MediaFormat, MF_MP3} from "../media";
+import {pauseCommand, removePauseCommands} from "./ElevenLabsSpeech";
 
+/**
+ * Just collect inputs to pass on to DidAnimator for using ElevenLabs from there.
+ */
 class DidTts implements SpeechSystem {
   display: DisplaySpeechSystem;
   private readonly speechSystemOption: SpeechSystemOption;
@@ -10,17 +14,20 @@ class DidTts implements SpeechSystem {
 
   constructor() {
     this.display = new DisplaySpeechSystem(this.getName(), [], this.free());
-
     this.speechSystemOption = new SpeechSystemOption(this, "default", "default");
   }
 
-  pauseCommand(msDuration: number): string | null {
-    return null;
-  }
+  /**
+   * Delegates to ElevenLabs
+   * @param msDuration
+   */
+  pauseCommand = pauseCommand;
 
-  removePauseCommands(m: Message): Message {
-    return m;
-  }
+  /**
+   * Delegates to ElevenLabs
+   * @param m
+   */
+  removePauseCommands = removePauseCommands;
 
   currentOption() {
     return this.speechSystemOption;

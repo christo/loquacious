@@ -82,9 +82,34 @@ type StreamPartialConfig = {
 };
 
 /**
+ * ElevenLabs pause instruction.
+ * @param msDuration
+ */
+function pauseCommand(msDuration: number): string {
+  const sec = (msDuration / 1000).toFixed(1);
+  return `<break time="${sec}s" />`;
+}
+
+/**
+ * Removes ElevenLabs pause instructions from the message.
+ * @param m the message.
+ */
+function removePauseCommands(m: Message): Message {
+  if (m.isFromUser) {
+    return m;
+  } else {
+    // attempt to remove any llm-generated pause commands from the message
+    const strpped = m.content.replaceAll(/<break\s+time="\d+s"\d*\/>/g, '');
+    return new Message(m.id, m.created, strpped, m.creatorId, false);
+  }
+}
+
+/**
  * Implementation that calls elevenlabs.ai - requires an API key env var.
  */
 class ElevenLabsSpeech implements SpeechSystem {
+
+
   private static NAME = `ElevenLabs-TTS`;
   readonly display: DisplaySpeechSystem;
   /**
@@ -154,24 +179,9 @@ class ElevenLabsSpeech implements SpeechSystem {
     }
   }
 
-  /**
-   * ElevenLabs pause instruction.
-   * @param msDuration
-   */
-  pauseCommand(msDuration: number): string {
-    const sec = (msDuration / 1000).toFixed(1);
-    return `<break time="${sec}s" />`;
-  }
+  pauseCommand = pauseCommand;
 
-  removePauseCommands(m: Message): Message {
-    if (m.isFromUser) {
-      return m;
-    } else {
-      // attempt to remove any llm-generated pause commands from the message
-      const strpped = m.content.replaceAll(/<break\s+time="\d+s"\d*\/>/g, '');
-      return new Message(m.id, m.created, strpped, m.creatorId, false);
-    }
-  }
+  removePauseCommands = removePauseCommands;
 
   getMetadata(): string | undefined {
     // API call can be bulk or stream, so we store that this way:
@@ -226,4 +236,4 @@ class ElevenLabsSpeech implements SpeechSystem {
   }
 }
 
-export {ElevenLabsSpeech};
+export {ElevenLabsSpeech, pauseCommand, removePauseCommands};
