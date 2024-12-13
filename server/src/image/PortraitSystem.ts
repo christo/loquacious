@@ -3,6 +3,10 @@ import {ImageInfo} from "./ImageInfo";
 import {prescaleImages} from "./imageOps";
 import path from "path";
 
+/**
+ * Manages a directory of portraits that are to be served from a URL,
+ * will rescale original images to configured dimensions.
+ */
 export class PortraitSystem {
   private readonly baseWebRoot: string;
   private readonly basePortraitPath: string;
@@ -14,25 +18,41 @@ export class PortraitSystem {
     {width: 1080, height: 1920}
   ];
 
-  constructor(baseWebRoot: string) {
-    this.baseWebRoot = baseWebRoot;
-    this.basePortraitPath = `${baseWebRoot}/img`;
-    console.log(`path portrait: ${this.path()}`);
+  /**
+   * Construct PortraitSystem at the given dir.
+   * @param dir where the image files are.
+   */
+  constructor(dir: string) {
+    this.baseWebRoot = dir;
+    this.basePortraitPath = `${dir}/img`;
   }
 
+  /**
+   * The url for the images at the configured scale.
+   */
   baseUrl = () => {
     const dim = this.dimension();
     return `/img/${dim.width}x${dim.height}`;
   };
 
   /** file path relative to server module root */
-  path = () => `${this.baseWebRoot}${this.baseUrl()}`;
+  basePath = () => `${this.baseWebRoot}${this.baseUrl()}`;
 
+  /**
+   * Supplies the currently configured {@link Dimension}.
+   */
   dimension = () =>this.PORTRAIT_DIMS[this.dimIndex];
 
-  getPortraitPath = (portrait: ImageInfo) => path.join(this.path(), portrait.f).toString();
+  /**
+   * Gets the path for a given portrait
+   * @param portrait the ImageInfo of a portrait
+   */
+  getPath = (portrait: ImageInfo) => path.join(this.basePath(), portrait.f).toString();
 
+  /**
+   * Create scaled versions for each image file in the configured directory
+   */
   async prescaleImages() {
-    await prescaleImages(this.path(), this.PORTRAIT_DIMS)
+    await prescaleImages(this.basePath(), this.PORTRAIT_DIMS)
   }
 }
