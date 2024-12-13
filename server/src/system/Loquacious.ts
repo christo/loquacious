@@ -12,7 +12,7 @@ import {LoqModule} from "./LoqModule";
 import type {LlmResult} from "../llm/Llm";
 import {LlmLoqModule} from "../llm/LlmLoqModule";
 import type {CreatorType} from "../domain/CreatorType";
-import {LipSyncInput, LipSyncResult} from "../lipsync/LipSyncAnimator";
+import {LipSyncInput, LipSyncResult} from "../lipsync/Animator";
 import {WorkflowEvents} from "./WorkflowEvents";
 import {LlmInput} from "../llm/LlmInput";
 import {Session} from "../domain/Session";

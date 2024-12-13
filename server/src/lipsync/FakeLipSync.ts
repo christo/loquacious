@@ -3,14 +3,14 @@ import type {Dirent} from "node:fs";
 import path from "path";
 import {hasVideoExt, type MediaFormat, MF_MP4} from "../media";
 import {always} from "../system/config";
-import {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
+import {Animator, LipSyncResult} from "./Animator";
 import {LocalLipSyncResult} from "./LocalLipSyncResult";
 
 
 /**
  * Hacky implementation of LipSync that reuses pre-generated video.
  */
-class FakeLipSync implements LipSyncAnimator {
+class FakeLipSync implements Animator {
   canRun = always;
   private readonly lipSyncDataDir: string;
 

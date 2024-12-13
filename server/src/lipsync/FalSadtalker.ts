@@ -1,6 +1,6 @@
 import {fal, type Result} from "@fal-ai/client";
 import {promises, readFileSync} from "fs";
-import {LipSyncAnimator, LipSyncResult} from "lipsync/LipSyncAnimator";
+import {Animator, LipSyncResult} from "lipsync/Animator";
 import {SadTalkerResult} from "lipsync/SadTalkerResult";
 import {type PathLike, writeFileSync} from "node:fs";
 import path from "path";
@@ -49,7 +49,7 @@ type UrlCache = { [keyof: string]: [string, string] };
 /**
  * Implementation that calls fal.ai service, requires valid FAL_API_KEY in env.
  */
-class FalSadtalker implements LipSyncAnimator {
+class FalSadtalker implements Animator {
   private static SADTALKER_ENDPOINT: string = "fal-ai/sadtalker";
   canRun = hasEnv("FAL_API_KEY");
   private readonly name = "FalSadtalker";

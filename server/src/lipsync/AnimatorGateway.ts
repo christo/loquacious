@@ -1,12 +1,12 @@
 import path from "path";
 import {FakeLipSync} from "./FakeLipSync";
 import {FalSadtalker} from "./FalSadtalker";
-import type {LipSyncAnimator} from "./LipSyncAnimator";
+import type {Animator} from "./Animator";
 import {NoAnimator} from "./NoAnimator";
 import {Gateway} from "../system/Gateway";
 
-class AnimatorGateway implements Gateway<LipSyncAnimator> {
-  private readonly animators: LipSyncAnimator[];
+class AnimatorGateway implements Gateway<Animator> {
+  private readonly animators: Animator[];
   private lipsyncIndex = 0;
 
   constructor(basedir: string) {
@@ -18,11 +18,11 @@ class AnimatorGateway implements Gateway<LipSyncAnimator> {
     ].filter(s => s.canRun())
   }
 
-  current(): LipSyncAnimator {
+  current(): Animator {
     return this.animators[this.lipsyncIndex];
   }
 
-  all(): LipSyncAnimator[] {
+  all(): Animator[] {
     return [...this.animators];
   }
 

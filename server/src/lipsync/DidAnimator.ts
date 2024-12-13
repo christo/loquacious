@@ -1,11 +1,11 @@
-import {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
+import {Animator, LipSyncResult} from "./Animator";
 import {MediaFormat, MF_MP4} from "../media";
 import {hasEnv} from "../system/config";
 
 /**
- * D-iD implementation of {@link LipSyncAnimator} intended to be used together with {@link DidTts}.
+ * D-iD implementation of {@link Animator} intended to be used together with {@link DidTts}.
  */
-class DidAnimator implements LipSyncAnimator {
+class DidAnimator implements Animator {
 
   canRun = hasEnv("DID_AUTH");
 

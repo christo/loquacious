@@ -1,10 +1,10 @@
-import {LipSyncAnimator, LipSyncResult} from "./LipSyncAnimator";
+import {Animator, LipSyncResult} from "./Animator";
 import {MediaFormat} from "../media";
 
 /**
  * Animator that doesn't animate.
  */
-class NoAnimator implements LipSyncAnimator {
+class NoAnimator implements Animator {
   canRun(): boolean {
     return true;
   }

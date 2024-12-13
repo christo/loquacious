@@ -27,7 +27,7 @@ type LipSyncInput = {
 /**
  * Service that can create animation video from portrait image and speech audio.
  */
-interface LipSyncAnimator extends CreatorService {
+interface Animator extends CreatorService {
 
   /**
    * Generate a video animating the given portrait image to speak the given spoken audio.
@@ -50,4 +50,4 @@ interface LipSyncAnimator extends CreatorService {
 
 }
 
-export type {LipSyncAnimator, LipSyncResult, LipSyncInput};
+export type {Animator, LipSyncResult, LipSyncInput};

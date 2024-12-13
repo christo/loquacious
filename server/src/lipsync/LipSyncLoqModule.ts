@@ -2,14 +2,14 @@ import {LoqModule} from "../system/LoqModule";
 import {WorkflowEvents} from "../system/WorkflowEvents";
 import Db from "../db/Db";
 import {timed} from "../system/performance";
-import {LipSyncAnimator, LipSyncInput, LipSyncResult} from "./LipSyncAnimator";
+import {Animator, LipSyncInput, LipSyncResult} from "./Animator";
 
 class LipSyncLoqModule implements LoqModule<LipSyncInput, LipSyncResult> {
-  private animator: LipSyncAnimator;
+  private animator: Animator;
   private workflowEvents: WorkflowEvents;
   private db: Db;
 
-  constructor(lsa: LipSyncAnimator, db: Db, workflowEvents: WorkflowEvents) {
+  constructor(lsa: Animator, db: Db, workflowEvents: WorkflowEvents) {
     this.db = db;
     this.animator = lsa;
     this.workflowEvents = workflowEvents;
