@@ -13,7 +13,7 @@
     "nodeversion": "ts-node --showConfig -vv"
   },
   "keywords": [],
-  "author": "",
+  "author": "Chris Mountford",
   "license": "ISC",
   "description": "Server component that can connect to various model services",
   "dependencies": {
