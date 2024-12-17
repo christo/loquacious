@@ -14,6 +14,7 @@
   },
   "keywords": [],
   "author": "Chris Mountford",
+  "private": true,
   "description": "Server component that can connect to various model services",
   "dependencies": {
     "@fal-ai/client": "^1.1.1",
