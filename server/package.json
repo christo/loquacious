@@ -15,7 +15,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Server component that can connect to OpenAI or local llama.cpp server",
+  "description": "Server component that can connect to various model services",
   "dependencies": {
     "@fal-ai/client": "^1.1.1",
     "cors": "^2.8.5",
