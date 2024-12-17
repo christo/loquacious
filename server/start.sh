@@ -2,4 +2,4 @@
 
 source "$HOME/.nvm/nvm.sh"
 nvm install
-pnpm run start
+bun run start
