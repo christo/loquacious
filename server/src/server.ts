@@ -115,7 +115,7 @@ app.get('/api/chat', async (_req: Request, res: Response) => {
     res.json({
       response: {
         session: session.id,
-        messages: await db.getMessages(session)
+        messages: await db.getLinkedMessages(session)
       }
     });
   });
