@@ -57,7 +57,7 @@ interface SpeechSystem extends CreatorService {
    * from the user, return the message unchanged.
    * @param m the message
    */
-  removePauseCommands(m: Message): Message;
+  removePauseCommands<T extends Message>(m: T): T;
 
   /**
    * Provide the {@link MediaFormat} of the created audio.

@@ -10,6 +10,7 @@ import {Session} from "../domain/Session";
 import {Tts} from "../domain/Tts";
 import {VideoFile} from "../domain/VideoFile";
 import {CreatorService} from "../system/CreatorService";
+import {LinkedMessage} from "../domain/LinkedMessage";
 
 
 export const CREATOR_USER_NAME = 'user';
@@ -379,7 +380,6 @@ class Db {
     if (!this.booted) {
       throw new Error("db is not booted");
     }
-    // TODO join db ids of video, or if absent, speech and provide replay button for speech bubble ui
     const query = `select m.id,
                           m.created,
                           m.content,
@@ -392,8 +392,38 @@ class Db {
       const result = await client.query(query, [session.id]);
       // may be empty
       return result.rows.map((r: any) => {
-        return new Message(r.id, r.created, r.content, r.creator, r.creator === this.getUserCreator().id);
+        return new Message(r.id, r.created, r.content, r.creator, r.creator === this.userCreator!.id);
       });
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Fetch messages linked with tts and lipsync ids in sequence for the given session
+   * @param session
+   */
+  async getLinkedMessages(session: Session): Promise<LinkedMessage[]> {
+    if (!this.booted) {
+      throw new Error("db is not booted");
+    }
+    const query = `select m.id,
+                          m.created,
+                          m.content,
+                          m.creator,
+                          t.id as ttsId,
+                          l.id as lipsyncId
+                   from message m
+                            left join tts t on m.id = t.input
+                            left join lipsync l on t.id = l.input
+                   where m.session = $1
+                   order by m.sequence`;
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(query, [session.id]);
+      return result.rows.map((r: any) => new LinkedMessage(
+          r.id, r.created, r.content, r.creator, r.creator === this.userCreator!.id, r.ttsId, r.lipsyncId)
+      );
     } finally {
       client.release();
     }

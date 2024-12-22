@@ -319,7 +319,7 @@ class Loquacious {
     });
 
     const lr = await llmResultPromise;
-    const messages = (await this.db.getMessages(await this.getSession())).map(m => {
+    const messages = (await this.db.getLinkedMessages(await this.getSession())).map(m => {
       return lr.targetTts.removePauseCommands(m);
     });
     const sr: SpeechResult = await speechResultPromise;
