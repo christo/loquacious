@@ -420,12 +420,13 @@ class Db {
     if (!this.booted) {
       throw new Error("db is not booted");
     }
+    console.log("getting linked messages");
     const query = `select m.id,
                           m.created,
                           m.content,
                           m.creator,
-                          t.id as ttsId,
-                          l.id as lipsyncId
+                          t.id as tts,
+                          l.id as lipsync
                    from message m
                             left join tts t on m.id = t.input
                             left join lipsync l on t.id = l.input
@@ -434,8 +435,13 @@ class Db {
     const client = await this.pool.connect();
     try {
       const result = await client.query(query, [session.id]);
-      return result.rows.map((r: any) => new LinkedMessage(
-          r.id, r.created, r.content, r.creator, r.creator === this.userCreator!.id, r.ttsId, r.lipsyncId)
+      console.log("dumping linkedMessages result");
+      console.dir(result);
+      return result.rows.map((r: any) => {
+        console.log(`ttsId: ${r.ttsId} lipsyncId: ${r.lipsyncId}`);
+            return new LinkedMessage(
+                r.id, r.created, r.content, r.creator, r.creator === this.userCreator!.id, r.tts, r.lipsync);
+          }
       );
     } finally {
       client.release();

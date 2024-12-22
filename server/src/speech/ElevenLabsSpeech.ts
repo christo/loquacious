@@ -94,13 +94,14 @@ function pauseCommand(msDuration: number): string {
  * Removes ElevenLabs pause instructions from the message.
  * @param m the message.
  */
-function removePauseCommands(m: Message): Message {
+function removePauseCommands<T extends Message>(m: T): T {
   if (m.isFromUser) {
     return m;
   } else {
     // attempt to remove any llm-generated pause commands from the message
     const strpped = m.content.replaceAll(/<break\s+time="\d+s"\d*\/>/g, '');
-    return new Message(m.id, m.created, strpped, m.creatorId, false);
+    m.content = strpped;
+    return m;
   }
 }
 

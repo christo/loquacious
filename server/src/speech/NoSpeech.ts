@@ -41,7 +41,7 @@ class NoSpeech implements SpeechSystem {
     return null;
   }
 
-  removePauseCommands(m: Message): Message {
+  removePauseCommands<T extends Message>(m: T): T {
     return m;
   }
 

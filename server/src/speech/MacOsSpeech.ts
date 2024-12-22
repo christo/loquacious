@@ -134,13 +134,14 @@ class MacOsSpeech implements SpeechSystem {
     return `[[slnc ${msDuration}]]`;
   }
 
-  removePauseCommands(m: Message): Message {
+  removePauseCommands<T extends Message>(m: T): T {
     if (m.isFromUser) {
       return m;
     } else {
       // attempt to remove any llm-generated pause commands from the message
       const strpped = m.content.replaceAll(/\[\[slnc \d+\]\]/g, '');
-      return new Message(m.id, m.created, strpped, m.creatorId, false);
+      m.content = strpped;
+      return m;
     }
   }
 

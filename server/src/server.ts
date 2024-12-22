@@ -118,10 +118,13 @@ app.get('/api/chat', async (req: Request, res: Response) => {
         : await loq.getSession();
 
     if (session) {
+      console.log(`returning session: ${session.id} messages`);
+      const messages = await db.getLinkedMessages(session);
+      console.log(`messages: ${JSON.stringify(messages)}`);
       res.json({
         response: {
           session: session.id,
-          messages: await db.getLinkedMessages(session)
+          messages: messages
         }
       });
     } else {
