@@ -10,8 +10,7 @@
     the DiD implementation may not work if given to another lipsync animator and this
     configuration should ideally be prohibited in the front end.
 * [ ] test DiD service
-* [ ] maybe bug: review workflow sigils timing - refactoring and promisification with `EventEmitter`
-  seems to have made these transitions happen at the wrong time?
+* [ ] bug: user message missing in chat ui
 * [ ] rename all LipSyncBlah to AnimateBlah
 * [ ] plan 1.0 release scope
 * [ ] shoot project status screencast
