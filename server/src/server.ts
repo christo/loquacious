@@ -122,7 +122,7 @@ app.get('/api/chat', async (_req: Request, res: Response) => {
 });
 
 /**
- * Curried generic labelled function execution and failure reporting to Response and streamServer.
+ * Curried generic labelled function execution that reports failure to the given Response and configured streamServer.
  * On success, the returned promise of fn is returned.
  * @param res response to use for reporting any failure
  * @return a {@link NamedInvoker} that reports failure over res
