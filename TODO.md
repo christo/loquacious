@@ -107,6 +107,8 @@
       banter
 * [ ] test reference data filetree (better for version control not to require
   database so it can be version controlled)
+* [ ] implement available voice detection for MacOsSpeech somehow. The say command lists voices not
+      yet installed and calling say with a missing voice produces no audio (IIRC)
 * [ ] check out multimodal models like LLaVA 1.5 and LLaVA 1.6
   * may work to do both text and vision with the same model?
 * usable cached generated output

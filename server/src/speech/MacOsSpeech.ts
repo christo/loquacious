@@ -154,8 +154,6 @@ class MacOsSpeech implements SpeechSystem {
   }
 
   configure(metadata: string): Promise<void> {
-    // TODO implement available voice detection somehow. the say command lists voices not yet installed and calling say
-    //      with a missing voice produces no audio (IIRC)
     let found = false;
     for (let i = 0; i < VOICES.length; i++) {
       if (VOICES[i].voiceId === metadata) {
