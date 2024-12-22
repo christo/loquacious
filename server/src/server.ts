@@ -109,15 +109,24 @@ app.get('/session', async (_req: Request, res: Response) => {
   }
 });
 
-app.get('/api/chat', async (_req: Request, res: Response) => {
+app.get('/api/chat', async (req: Request, res: Response) => {
+
   await failableInvoker(res)("get chat", async () => {
-    const session = await loq.getSession();
-    res.json({
-      response: {
-        session: session.id,
-        messages: await db.getLinkedMessages(session)
-      }
-    });
+    const sessionParam = req.query.session;
+    const session = sessionParam
+        ? await db.getSession(parseInt(sessionParam as string)).catch(() => undefined)
+        : await loq.getSession();
+
+    if (session) {
+      res.json({
+        response: {
+          session: session.id,
+          messages: await db.getLinkedMessages(session)
+        }
+      });
+    } else {
+      res.status(404).json({error: 'Session not found'});
+    }
   });
 });
 
@@ -143,17 +152,15 @@ const failableInvoker = (res: Response): NamedInvoker =>
 
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
   // noinspection ES6MissingAwait
-  timed("post /api/chat", async () => {
+  await timed("post /api/chat", async () => {
     const {prompt, portrait} = req.body;
     if (!prompt) {
       res.status(400).json({error: 'No prompt provided'});
     } else {
-      loq.chat(prompt.trim(), portrait, failableInvoker(res)).then(cr => {
-        res.json({response: cr});
-      });
-
+      const cr = await loq.chat(prompt.trim(), portrait, failableInvoker(res));
+      res.json({response: cr});
     }
-  })
+  });
 });
 
 /**

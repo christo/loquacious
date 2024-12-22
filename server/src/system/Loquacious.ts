@@ -27,6 +27,7 @@ import {SpeechInput} from "../speech/SpeechInput";
 import {PortraitSystem} from "../image/PortraitSystem";
 import {ImageInfo} from "../image/ImageInfo";
 import {NamedInvoker} from "./fp";
+import {LinkedMessage} from "../domain/LinkedMessage";
 
 
 /**
@@ -336,7 +337,7 @@ class Loquacious {
 
 interface ChatResponse {
   portrait: ImageInfo,
-  messages: Message[],
+  messages: Message | LinkedMessage [], // TODO is this necessary?
   speech: string,
   lipsync: AnimatorResult,
   llm: string,

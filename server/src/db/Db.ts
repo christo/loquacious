@@ -211,6 +211,19 @@ class Db {
   }
 
   /**
+   * Gets the session with the given id, if it doesn't exist rejects the promise.
+   * @param id session db id
+   */
+  async getSession(id: number): Promise<Session> {
+    const query = `select *
+                   from session
+                   where id = $1`;
+    const run = this.getRun();
+    const row = await this.fetchOne<number[], any>(query, [id]);
+    return Promise.resolve(new Session(row.id, row.created, run));
+  }
+
+  /**
    * For now, just fetches the most recently created open session for the current run.
    */
   async currentSession(): Promise<Session> {
