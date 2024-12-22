@@ -2,14 +2,13 @@ import {ReactNode, useEffect, useRef} from "react";
 import {Message} from "../server/src/domain/Message.ts";
 import {Box, Typography} from "@mui/material";
 import {marked} from "marked";
-import OpenAI from "openai";
-import Model = OpenAI.Model;
+import {LlmModel} from "../server/src/llm/LlmModel.ts";
 
 export type ChatResponse = {
   messages: Message[];
   speech: string | undefined;
   llm: string | undefined;
-  model: Model | undefined;
+  model: LlmModel | undefined;
   lipsync: {
     content_type: string;
     file_name: "string";
