@@ -1,6 +1,5 @@
 import {DisplaySpeechSystem, SpeechSystem} from "./SpeechSystem";
 import {SpeechSystemOption} from "./TtsGateway";
-import {Message} from "../domain/Message";
 import {MediaFormat, MF_MP3} from "../media";
 import {pauseCommand, removePauseCommands} from "./ElevenLabsSpeech";
 
@@ -10,7 +9,6 @@ import {pauseCommand, removePauseCommands} from "./ElevenLabsSpeech";
 class DidTts implements SpeechSystem {
   display: DisplaySpeechSystem;
   private readonly speechSystemOption: SpeechSystemOption;
-
 
   constructor() {
     this.display = new DisplaySpeechSystem(this.getName(), [], this.free());
@@ -29,15 +27,12 @@ class DidTts implements SpeechSystem {
    */
   removePauseCommands = removePauseCommands;
 
-  currentOption() {
-    return this.speechSystemOption;
-  }
+  currentOption = () => this.speechSystemOption;
 
-  options(): SpeechSystemOption[] {
-    return [this.speechSystemOption];
-  }
+  options = (): SpeechSystemOption[] => [this.speechSystemOption];
 
   speak(message: string, basename: string): Promise<string> {
+    // TODO figure out how to not deal with a promise of string - we don't get intermediate access to an audio file
     return Promise.reject("implement threading the result to the DiD lipsync part");
   }
 
@@ -47,17 +42,13 @@ class DidTts implements SpeechSystem {
     return MF_MP3;
   }
 
-  free(): boolean {
-    return false;
-  }
+  free = (): boolean => false;
 
   getMetadata(): string | undefined {
     return undefined;
   }
 
-  getName(): string {
-    return "DiD Tts";
-  }
+  getName = (): string => "DiD Tts";
 
   canRun(): boolean {
     return true;
