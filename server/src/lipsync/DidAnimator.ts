@@ -64,12 +64,6 @@ class DidAnimator implements Animator {
     console.warn("DidAnimatorWithTts.configure unsupported.");
     return Promise.resolve();
   }
-
-  speak(message: string, basename: string): Promise<string> {
-    // TODO figure out how to not deal with a promise of string - we don't get intermediate access to an audio file
-    console.warn("DidAnimatorWithTts.speak not implemented.");
-    return Promise.reject("unimplemented");
-  }
 }
 
 export {DidAnimator};
