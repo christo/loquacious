@@ -25,15 +25,18 @@ AI face-to-face fortune teller chat experiment.
   * (WIP) analyse self-portrait for lipsync suitability i.e. dimensions, framing
 * Postgres database for storing and tracing all interactions and intermediate
   media assets.
-_ Video capture is __in progress__
+* Video capture is __in progress__
   * client-side object detection and pose estimation is used to detect
     approaching users
   * Fortune teller self-portrait is mapped for facial landmarks to enable
     scaling and reframing portraits to be better suited for lipync video
     generation. These portraits will be uploadable or integrated with gen-ai
-    at some point.
+    at some point so it's important that any anticipated problems with a portrait
+    such as face framing can be reported to the user, even potentially fixed automatically
+    with a suitable image model.
 * Audio input streaming is not currently implemented, nor is Speech To Text
-  (STT), vision via image-to-text.
+  (STT), vision via image-to-text. This is considered a basic engineering exercise with
+  few non-trivial problems.
 * The user can currently type text into a chat-like text box and the
   conversation history is shown in the UI.
 * Basic system admin panel is revealed by clicking a subtle sprocket icon near
@@ -41,12 +44,13 @@ _ Video capture is __in progress__
 * Desktop Chrome is the only browser currently used in testing. Mobile browsers
   are kept in mind and might even mostly work.
 
-[TODO list](TODO.md)
+See the separate [TODO list](TODO.md) for fine-grained planning.
 
 At this _proof-of-concept_ stage, the project is a feasibility study to see how
-a face-to-face video chat can be assembled using various AI models. Components
-can be swapped for alternatives which is especially useful for quality and
-performance testing.
+a face-to-face video chat can be assembled using various AI models. It is
+architected so that components can be swapped for alternatives which is especially
+useful for comparison evaluation as well as integration-isolation for focused
+quality and performance testing.
 
 This application is proving to be a usable tech demo but equally likely may
 be abandoned if heavy engineering or custom model training is required to make
@@ -55,23 +59,27 @@ it fun to use.
 The prototype scenario is a fortune teller character, envisioned to be a
 physical interactive installation, decorated like a fortune teller's booth or
 tent. The key hardware is focused on a computer with a webcam or potentially any
-device capable of doing a video call.
+device capable of doing a video call. 
+
+Adjacent variations on the fortune teller theme are equally likely: tarot reader,
+philosopher, clairvoyant, astrologer, raconteur, even a kind of concierge for the
+specific event it is set up for.
 
 The idea is that punters come to interact with the fortune teller in a natural
-conversation workflow, typical of a fortune-teller. Depending on the details
-this could include any such services: clairvoyant, astrologer, tarot reader etc.
+conversation workflow.
 
 The fortune teller character is entirely automatic, built from components
-relying on available machine learning models and online services. A
+relying on available machine learning models and/or online services. A
 fully-offline option is a stretch goal although it seems likely to require
 unjustified additional engineering and an unfortunate quality compromise.
+This is mostly because of the GPU compute demands of the models.
 
 While there are several design choices that are tuned for something like the
-fortune teller character, systems and configuration are expected to work the
+fortune teller character, systems and configuration are intended to work the
 same for a very different character scenario. Most product engineering engaged
-with this feature set is focused on customer service use cases and pumping out
-endless explainer videos. I'm not that guy. At the moment animals or cartoon
-characters are out of scope since lipsync video models currently under
+with this feature set seems focused on customer service use cases or pumping
+out explainer videos. I'm not that guy. At the moment animals or cartoon
+characters are out of scope since the lipsync video models currently under
 consideration were not trained on these faces and the result is a blurry mess. A
 simpler, traditional animation framework may be more suitable for animating
 these. Semi-realistic painterly human portraits do work OK.
@@ -84,7 +92,7 @@ The documents here are a bit disorganised and quite verbose. See also:
 
 ## Design Principles
 
-It is hoped that this system can operate without a traditional human-operated
+It is hoped that this system can work without a traditional human-operated
 media production toolchain or pipeline. No video shooting or editing. So far all
 media assets are driven by code and AI prompts. Adding video production,
 illustration or any other kind of media editing may offer quality benefits or
@@ -93,23 +101,23 @@ human development-time input to text from a keyboard makes for an interesting
 exploration and at the moment is adopted as a defining feature of this research
 project.
 
-Non-verbal portrait animation is apparently achievable by using reference video.
-This would violate the above design constraint. Maybe this video could be
-captured from user input - maybe even system-operator user input? Given that
-user video capture is intended for core functionality, it may be interesting to
-provide gesture demonstration input as a runtime feature. Character design
-could be more independent of system code.
+Non-verbal portrait animation (such as when listening or thinking) is apparently
+achievable by using reference video. This may violate the above design constraint.
+Maybe this video could be captured from user input - maybe even system-operator
+user input? Given that user video capture is intended for core functionality, it
+may be interesting to provide gesture demonstration input as a runtime feature.
+Character design could be more independent of system code.
 
 ## Character Portrait
 
-The first thing a user sees when interacting with the system is a portrait of a fortune teller.
-Various text-to-image generative systems have been used to create these characters before the system
-boots although this could easily be generated, uploaded or captured from a camera. In a full
-realisation of such a system, the character may be gently animated in a suitable waiting state like
-a meditative trance.
+The first thing a user sees when interacting with the system is a still portrait of
+the fortune teller. It's also feasible to generate subtle pose animation to portray
+a contemplative, waiting animation. Various text-to-image generative systems have
+been used to create these characters before the system boots although this could
+easily be generated, uploaded or captured from a camera.
 
 Various design alternatives include making the installation like a portal or
-magic mirror through which the character could be summoned akin to a kind of
+magic mirror through which the character could be summoned, akin to a kind of
 cosmic zoom call.
 
 Suitable character portraits seem to have the following features:
@@ -117,46 +125,49 @@ Suitable character portraits seem to have the following features:
 * Portrait aspect ratio is the focus of testing and design but landscape should
   probably work just fine.
 * Proportion of the frame that is occupied by the head is between 10% and 30% of
-  the shortest edge of the image.
-* Background of head is relatively uniform. Any detail here may be subject to
-  warping or tearing.
-* No foreground objects or obstructions should be near the head or face.
-  Otherwise they will be warped.
+  the shortest edge of the image. This includes headware and hair.
+* Background of head region is relatively uniform. Any detail here may be subject
+  to warping or tearing.
+* No foreground objects or obstructions should be near the head or face square,
+  otherwise they will be warped.
 * Body position ideally should look natural if held still indefinitely. Having
   the character's hands on a crystal ball or be hidden somehow makes the
-  absence of hand gestures less conspicuous.
+  absence of hand gestures less conspicuous. Hand gestures add significant
+  compute demand as many animation models focus exclusively on face and head.
 * Face lighting and colour should be most like the training data. Face paint,
   extreme wrinkles, exaggerated features, excessive shadows or extreme postures
   all seem to result in pathalogically bad lip sync results.
 * Long hair is sometimes problematic because the head and face are animated
   exclusively inside an inset rectangle which will tear at the edge rather than
-  produce natural movement in long hair, jewellery or headware that extends
-  beyond the animated inset frame. Hair motion is not properly simulated so
+  simulate the physics of natural movement in long hair. Jewellery or headware 
+  that extends beyond the animated inset frame cause similar problems. Compact
   hairstyles rigidly fixed to the head will work best.
 * Image resolution has a dramatic effect on lipsync latency and final quality
-  but more experimentation is required to determine sweet spots.
+  but more experimentation is required to determine sweet spots. Source images
+  for portraits can be any size as they are dynamically resized by the system.
 
-Within the system it is feasible to use face detection and image-to-image models
-to evaluate and modify user-provided portraits although only basic downscaling
-is currently implemented.
+Face detection and image-to-image models have been evaluated to modify
+user-provided portraits and this is deemed feasible.
 
 ## Speech to Text
 
 (STT) Listens to audio and transcribes audible speech to text that is fed to the
-LLM.
+LLM. Currently available models are anecdotally very good, depending on audio
+quality.
 
 Interesting problems:
 
 * Voice isolation
 * Distinguishing ambient speech from conversational address. A good mic and
   careful speaker placement would go a long way here. A second microphone could
-  be used to add the ability to react to realistic ethical eavesdropping.
+  be used to add the ability to react to realistic (ethical) eavesdropping.
 * Interruption and speaking over.
-* Collaborative handling of transcription errors.
+* Collaborative handling of transcription errors within the conversation just
+  like people do when they mishear or misunderstand.
 * Accent tuning.
-* Round-trip pronunciation metadata. The LLM can't hear the speech, only the
-  transcription. This may make some interactions terrible unless there is some
-  metadata that the STT and TTS can share around pronunciation. Worst case
+* Round-trip pronunciation metadata. The LLM can't hear the speech, only read
+  the transcription. This may make some interactions terrible unless there is
+  some metadata that the STT and TTS can share around pronunciation. Worst case
   scenarios are expected to be ridiculous.
 
 ## Large Language Model (LLM)
@@ -260,10 +271,11 @@ on user input.
 
 # System Design
 
-Currently only operated in devmode on MacOS. It should work on any operating system but
-`MacOsSpeech` will only show up on MacOS. Native subsystem implementations should detect missing
-system requirements at boot and show up disabled. Likewise, if a component implementation is missing
-a required API key set in the `.env` file, this component will not be registered at boot time.
+Currently only operated in devmode on MacOS. It should work on any operating system
+but `MacOsSpeech` will only show up on MacOS. Native subsystem implementations
+should detect missing system requirements at boot and show up disabled. Likewise,
+if a component implementation is missing a required API key set in the `.env` file,
+this component will not be registered at boot time.
 
 Database is postgres. `node-pg-migrate` scripts defined in `server/package.json`
 to create tables etc. Production deployment process is yet to be defined.
@@ -292,7 +304,9 @@ both local and as online API services.
   SadTalker repo are terse and insufficient as a small custom patch to one of
   the Python package's source code was required after some googling.
 * Whisper.cpp is currently being evaluated for user voice transcription.
-  The plan is to stream all audio from the front-end to the server and pipe that into whisper. 
+  The plan is to stream all audio from the front-end to the server and pipe that
+  into whisper. This enables use of the largest model with predicable performance
+  and results in highest-accuracy transcription.
 
 ## Features
 
