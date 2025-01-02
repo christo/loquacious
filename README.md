@@ -411,8 +411,7 @@ Mostly nonexistent, basic scaffold:
 
 ## Character Definition Workflow
 
-The following data structure needs to be seeded, expanded, augmented and merged
-in various ways.
+The following data structure needs to be expanded.
 
 * reference portrait
 * reference pose video graph
