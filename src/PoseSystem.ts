@@ -158,7 +158,6 @@ class PoseSystem {
     return canvas;
   }
 
-
   private overlayCanvas(image: HTMLImageElement, zIndex: number) {
     this.canvas = document.createElement("canvas") as HTMLCanvasElement;
     this.canvas.setAttribute("class", "canvas");
