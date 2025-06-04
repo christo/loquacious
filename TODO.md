@@ -9,6 +9,7 @@
     actual evaluation until the lipsync call. The trick is that the SpeechResult from
     the DiD implementation may not work if given to another lipsync animator and this
     configuration should ideally be prohibited in the front end.
+* [ ] check out [deepgram](https://deepgram.com/) for voice
 * [ ] test DiD service
 * [ ] bug: user message missing in chat ui
 * [ ] rename all LipSyncBlah to AnimateBlah
